@@ -9,6 +9,8 @@ The original ChatGPT Site remains intact. This repository is the source of truth
 | Study area | Source count | Modes |
 | --- | ---: | --- |
 | Greek I | 55 cards | Symbol → Name; Name → Symbol |
+| Greek Lesson 3 Vocabulary | 11 cards | Greek → English; English → Greek |
+| Greek Lesson 3 Grammar | 11 forms | Prompt → Form; Form → Identify |
 | Dickinson Latin Core | 997 entries | Latin → English; English → Latin; staged 100 then 25 |
 | Henle Part I Forms | 2,062 unique cards; 331 rules | Prompt → Form; Form → Identify |
 | Henle Whole Charts | 248 multi-form rule groups | Reconstruct complete chart |
@@ -25,6 +27,8 @@ The Henle JSON is generated from the exact supplied `Henle_Part1_Forms_Full_App.
 
 The app remains usable without Supabase: all built-in decks and guest progress work locally. The production deployment is connected to the owner's **Latin Greek** Supabase project for accounts, cloud progress, administrator-created decks, saved readings, and private audio storage.
 
+The initial application shell deliberately does not bundle the Supabase SDK. Authentication restores asynchronously behind a separate chunk so the public shell can become interactive sooner. `scripts/check-bundle-size.mjs` keeps the main JavaScript bundle under 100 KB gzip to prevent a future refactor from silently undoing that split.
+
 ## Project map
 
 ```text
@@ -38,12 +42,16 @@ src/
     reading/               passages, timing model, audio storage, TTS provider interface
     study/                 timer, adaptive scheduler, progress, Back/Skip, shared UI
   pages/                   route-level screens
+  lib/supabase-config.ts   lightweight public configuration used before SDK load
+  lib/supabase.ts          lazily loaded Supabase client
 public/data/               versioned built-in source data
 public/privacy/, terms/    crawlable privacy and terms pages
 supabase/migrations/       complete schema and RLS policies
 supabase/functions/tts/    optional secret-bearing TTS proxy
 tests/                     invariant and behavior tests
 ```
+
+For implementation-sensitive maintenance, read `AGENTS.md` and `docs/MAINTENANCE.md` before changing behavior or persistence.
 
 ## Local development
 
@@ -83,11 +91,13 @@ If `reverse_prompt` is blank, a normal imported deck uses Back as the reverse qu
 
 New ordinary decks automatically inherit:
 
-- forward and optional reverse modes
-- smooth 3D card flip and reverse return motion
-- hundredths-of-a-second front timer
-- hidden-tab/window-blur timing pause
-- Reveal, Right/Wrong, Easy/Medium/Hard, Save & Next
+- forward and optional reverse modes with separate learning histories
+- smooth 3D card flipping by clicking the visible card or pressing Enter after reveal
+- hundredths-of-a-second front timer behind an explicit Start gate
+- focus/visibility protection that returns an unrevealed card to the Start gate rather than charging hidden time
+- Reveal and Right/Wrong grading
+- optional Easy/Medium/Hard difficulty; unanswered difficulty is stored as Medium
+- Save & Next after correctness is chosen
 - Back with true grade rollback, and ungraded Skip
 - adaptive or sequential ordering
 - top-five prompt-only priority review
@@ -99,17 +109,27 @@ One deck has a progress envelope containing independent `modes`, keyed by `study
 
 ### Timer
 
-The timer starts when a question is presented, updates every 10 ms, and formats with `toFixed(2)` as, for example, `3.47 s`. Reveal captures and freezes the elapsed front-side time. `visibilitychange`, window `blur`, and window `focus` pause/resume accumulation so time spent elsewhere is not charged. Reduced-motion settings suppress card animations but do not alter timing.
+The timer displays hundredths of a second and measures only active time spent viewing the unrevealed question side. It begins only after the Start gate is dismissed, stops when the answer is revealed, and never charges hidden or unfocused time. If the tab/window loses focus while an unrevealed card is active, the user must pass through the Start gate again on return; timing does not silently auto-resume.
 
-### Adaptive review
+Reveal captures and freezes the response time. After reveal, flipping between question and answer by click or Enter does not restart or add time. Moving normally to the next card in an already active, focused session does not require another Start gate.
 
-Scheduling is intentionally transparent rather than a black box. Correctness has the strongest effect; difficulty selects the starting interval and growth factor; current strength and streak expand successful intervals; Wrong creates a lapse and short interval. Slow response applies a logarithmic interval penalty after four seconds and adds review priority. Priority also includes whether a card is new, mastered once, due/overdue, inconsistent, recently wrong, hard, and recently shown.
+### Grading and adaptive review
+
+Correctness and difficulty remain separate recorded inputs, but difficulty is optional at grading time. Selecting Right or Wrong is enough to save; if Easy/Medium/Hard is not explicitly chosen, the stored difficulty is Medium. A deliberate Easy or Hard choice overrides the default. Response time is always stored independently, so speed continues to contribute to adaptive priority and scheduling even when the user accepts the automatic Medium rating.
+
+Scheduling is intentionally transparent rather than a black box. Correctness has the strongest effect; difficulty influences interval and growth; current strength and streak expand successful intervals; Wrong creates a lapse and short interval. Slow response applies an interval penalty and adds review priority. Priority also includes whether a card is new, mastered once, due/overdue, inconsistent, recently wrong, hard, and recently shown.
 
 Cards never disappear after one success. Initial mastery controls staged introduction; all mastered cards continue returning according to due dates and adaptive priority.
 
 ### Back and Skip
 
-Every saved review keeps a transaction containing the exact pre-review mode snapshot. Back restores that snapshot, deletes the cloud review event, and reopens the card for correction. The corrected grade reuses the same review UUID, so the mistaken and corrected ratings can never count as two reviews. Skip presents another card without changing review, accuracy, or difficulty counts.
+Every saved review keeps a transaction containing the exact pre-review mode snapshot. Back restores that snapshot, removes/replaces the review event as appropriate, and reopens the card for correction. The corrected grade reuses the same review UUID, so the mistaken and corrected ratings can never count as two reviews. It also preserves the originally captured response time and session/warm-up classification. Skip presents another card without changing review, accuracy, or difficulty counts.
+
+## Sessions and long-term progress
+
+A study session is a performance window layered on top of continuous long-term mastery. Starting or resuming a session never resets mastery, intervals, due dates, response-time memory, adaptive priorities, or Dickinson unlock state. Greek and Latin default to the most recently reviewed resumable explicit session unless the user deliberately starts another one.
+
+Deleting a session removes its session identity from Stats and resumable session menus while preserving the learning evidence already incorporated into adaptive memory. The implementation uses persistent deletion/exclusion markers so stale local or cloud state cannot resurrect a deleted session. Do not rewrite this behavior as a naive history purge/rebuild during maintenance.
 
 ## Supabase setup
 
@@ -155,7 +175,7 @@ Only a row in `admin_users` grants access. The administrator area can:
 
 CSV requires `Front` and `Back`. Optional columns are `Category`, `Rank`, `Source`, `Notes`, and `Reverse Prompt`. See `public/sample-deck.csv`. JSON accepts an array or `{ "cards": [...] }`; case-insensitive equivalents of the same field names are recognized. XLSX uses its first sheet and first row as headers.
 
-Published cloud decks appear in the Deck Library and run through the same `StudySession` component as the built-in decks. Specialized formats should adapt source data into `StudyCard` and supply custom front/back renderers, as `HenlePage` does; they should not fork timer, grading, sync, or scheduling logic.
+Published custom decks remain addressable through `/decks/:slug` and use the same shared `StudySession` engine. The primary public navigation intentionally remains Home, Greek, Latin, Stats, and Reading; do not reintroduce a separate Decks library into that navigation unless explicitly requested. Specialized formats should adapt source data into `StudyCard` and supply custom front/back renderers rather than forking timer, grading, sync, or scheduling logic.
 
 ## Reading & Audio
 
@@ -172,9 +192,11 @@ When uploaded audio has no timings, the app deliberately does not fake karaoke s
 
 The Edge Function remains inactive until an owner-approved provider is selected. Then deploy it and set server-only `TTS_API_URL`, `TTS_API_KEY`, `TTS_PROVIDER_LABEL`, and `TTS_PRONUNCIATION_LABEL` secrets. Provider request/response mapping may need a small adapter because vendor APIs differ.
 
-## Deployment
+## Deployment and performance checks
 
 The `pages.yml` workflow runs tests and a production build for every pull request. A push to `main` additionally uploads `dist` and deploys GitHub Pages. During GitHub Actions, Vite derives the correct `/greeklatinstudy/` base path from `GITHUB_REPOSITORY`; the post-build script creates `404.html` so direct client routes work on Pages.
+
+The bundle-size check protects both the initial JavaScript shell and total CSS. Heavy service SDKs, admin-only code, route pages, and large study data should remain outside the initial shell whenever practical. Do not raise a bundle budget merely to make a refactor pass; first determine why the bundle grew.
 
 The repository originally used legacy branch publishing. Until the owner changes **Settings → Pages → Build and deployment → Source** to **GitHub Actions**, the compiled deploy job waits for that legacy job to finish and then replaces its output. Branch-specific concurrency labels keep pull-request checks from cancelling the live `main` deployment. Once the source is set to GitHub Actions, the same workflow continues normally and the legacy wait exits immediately.
 
