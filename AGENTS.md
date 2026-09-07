@@ -35,8 +35,10 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - Lesson 1 contains Alphabet and Punctuation. Alphabet expands to independent Uppercase and Lowercase choices. Alphabet and punctuation are Grammar, not vocabulary.
 - Lesson 2 contains Accent Marks. Accent marks are Grammar, not vocabulary.
 - The only current Greek vocabulary source is Lesson 3 Vocabulary.
-- Greek Lesson 3 contains separate Vocabulary and Grammar headings. Lesson 3 Grammar currently contains Present Active Indicative, Present Active Infinitive, and Present Active Imperative from the παιδεύω paradigm.
-- Keep Lesson 3 vocabulary progress separate from paradigm/form progress even when both are mixed in one session.
+- Greek Lesson 3 contains separate Vocabulary and Grammar headings. Lesson 3 Grammar currently contains exactly three whole-paradigm chart cards: Present Active Indicative, Present Active Infinitive, and Present Active Imperative from the παιδεύω paradigm.
+- Each Lesson 3 grammar filter corresponds to one whole chart card, not a collection of individual person/number form cards. Do not reintroduce the retired 11 isolated Lesson 3 grammar questions unless explicitly requested.
+- Forward study asks for the named whole paradigm and reveals its chart. Reverse study shows the complete chart and asks the user to identify the paradigm; Reverse must not decompose the chart back into isolated form-identification cards.
+- Keep Lesson 3 vocabulary progress separate from Lesson 3 chart progress even when both are mixed in one session.
 - Every Greek vocabulary card must show a Classical-Greek pronunciation guide on the answer side in both Forward and Reverse study. Future Greek vocabulary imports must use the shared pronunciation helper rather than requiring a hand-maintained pronunciation list.
 - Greek card types remain multi-select. Lesson material, vocabulary, grammar, punctuation, accents, and future lesson categories may be combined in one adaptive session without merging their stored histories.
 
@@ -55,8 +57,9 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 
 ## Built-in deck invariants
 
-- Built-in source counts are Greek Lessons 1–2: 55 cards; Greek Lesson 3 Vocabulary: 11 cards; Greek Lesson 3 Grammar: 11 form cards; Dickinson Latin: 997; Henle: 2,062 unique cards across 331 rules; Henle Whole Charts: 248 groups.
+- Built-in source counts are Greek Lessons 1–2: 55 cards; Greek Lesson 3 Vocabulary: 11 cards; Greek Lesson 3 Grammar: 3 whole-paradigm chart cards; Dickinson Latin: 997; Henle: 2,062 unique cards across 331 rules; Henle Whole Charts: 248 groups.
 - Greek Lesson 3 grammar categories are Present Active Indicative, Present Active Infinitive, and Present Active Imperative unless the course source is deliberately expanded.
+- The three active Lesson 3 grammar card IDs are `lesson3-chart-present-active-indicative`, `lesson3-chart-present-active-infinitive`, and `lesson3-chart-present-active-imperative`. The retired `lesson3-g-*` individual-form IDs may remain only in historical progress storage; they must never re-enter the active study pool, warmups, Highest-Priority Review, or new session statistics.
 - Any deck-data change must update and pass the source-count tests deliberately.
 - Preserve spelling, accents, breathing marks, macrons, principal parts, gender, and other source forms unless the task explicitly corrects source data.
 - Existing source decks remain independently persisted even when Greek or Latin UI sessions interleave cards from multiple sources.
