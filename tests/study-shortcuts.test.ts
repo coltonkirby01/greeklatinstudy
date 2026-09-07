@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { studyShortcut } from "../src/features/study/study-shortcuts";
+import { studyEnterShortcut, studyShortcut } from "../src/features/study/study-shortcuts";
 
 const context = { startGateOpen: false, revealed: false, result: null, difficulty: null, typingTarget: false, controlsTarget: false } as const;
 
@@ -35,9 +35,16 @@ describe("study keyboard shortcuts", () => {
     expect(studyShortcut({ ...context, key: "3", revealed: true })).toEqual({ type: "difficulty", value: "hard" });
   });
 
-  it("uses Enter to flip after reveal without saving", () => {
-    expect(studyShortcut({ ...context, key: "Enter", revealed: true })).toEqual({ type: "flip" });
-    expect(studyShortcut({ ...context, key: "Enter", revealed: true, result: "right", difficulty: "medium" })).toEqual({ type: "flip" });
+  it("uses Enter to toggle correctness and Shift+Enter to flip after reveal", () => {
+    expect(studyShortcut({ ...context, key: "Enter", revealed: true })).toBeNull();
+    expect(studyEnterShortcut({ key: "Enter", shiftKey: false, revealed: true, result: "right", typingTarget: false })).toEqual({ type: "result", value: "wrong" });
+    expect(studyEnterShortcut({ key: "Enter", shiftKey: false, revealed: true, result: "wrong", typingTarget: false })).toEqual({ type: "result", value: "right" });
+    expect(studyEnterShortcut({ key: "Enter", shiftKey: true, revealed: true, result: "right", typingTarget: false })).toEqual({ type: "flip" });
+  });
+
+  it("does not hijack Enter inside normal controls", () => {
+    expect(studyEnterShortcut({ key: "Enter", shiftKey: false, revealed: true, result: "right", typingTarget: true })).toBeNull();
+    expect(studyEnterShortcut({ key: "Enter", shiftKey: true, revealed: true, result: "right", typingTarget: false, controlsTarget: true })).toBeNull();
   });
 
   it("saves with Space after the automatically supplied grade or manual overrides", () => {
