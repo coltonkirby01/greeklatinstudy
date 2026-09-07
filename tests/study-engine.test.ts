@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createEnvelope, createModeState, directionalCopy, formatResponseTime, getCardProgress, maybeUnlockNextBatch, pickNextCard, presentCard, priorityScore, recordReview, reviewAndAdvance, skipAndAdvance } from "../src/features/study/engine";
+import { createEnvelope, createModeState, directionalCopy, formatResponseTime, getCardProgress, highestPriorityCards, maybeUnlockNextBatch, pickNextCard, presentCard, priorityScore, recordReview, reviewAndAdvance, skipAndAdvance } from "../src/features/study/engine";
 import { mergeProgressEnvelopes } from "../src/features/study/progress-repository";
 import { blankTimerLedger, pauseTimer, readTimer, resumeTimer } from "../src/features/study/timer-ledger";
 import type { StudyCard } from "../src/features/study/types";
@@ -54,6 +54,16 @@ describe("unified study engine", () => {
     const slow = recordReview(base, cards[0], { id: "slow", result: "right", difficulty: "easy", responseTimeMs: 32_000, reviewedAt: 10_000 });
     expect(getCardProgress(slow, "one").intervalMs).toBeLessThan(getCardProgress(fast, "one").intervalMs);
     expect(priorityScore(cards[0], slow, { ignoreRecency: true, now: 10_001 })).toBeGreaterThan(priorityScore(cards[0], fast, { ignoreRecency: true, now: 10_001 }));
+  });
+
+  it("restricts Highest-Priority Review to the selected cards supplied by the active filter", () => {
+    const unselected: StudyCard = { id: "unselected", deckId: "test", front: "outside filter", back: "answer", rank: 3 };
+    let state = createModeState("test", "forward", 3, undefined, 1);
+    state = presentCard(state, unselected, 2);
+    state = recordReview(state, unselected, { id: "hardest", result: "wrong", difficulty: "hard", responseTimeMs: 60_000, reviewedAt: 3 });
+    const priority = highestPriorityCards(cards, state, undefined, 5);
+    expect(priority.map((item) => item.card.id).sort()).toEqual(["one", "two"]);
+    expect(priority.some((item) => item.card.id === "unselected")).toBe(false);
   });
 
   it("does not ping-pong among the most recently presented adaptive cards when alternatives exist", () => {
