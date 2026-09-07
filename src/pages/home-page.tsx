@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { homeCourses, type CourseId } from "../config/site";
 import { useAuth } from "../features/auth/auth-context";
+import { preloadRoute } from "../route-preload";
 import "./home-page.css";
 
 const courseVisuals: Record<CourseId, ReactNode> = {
@@ -17,14 +18,13 @@ const interactiveStyle: CSSProperties = { position: "relative", zIndex: 3 };
 const visualLinkStyle: CSSProperties = { ...interactiveStyle, width: "fit-content", display: "inline-flex", color: "inherit", textDecoration: "none" };
 const titleLinkStyle: CSSProperties = { color: "inherit", textDecoration: "none" };
 
-function preloadCourse(id: CourseId) {
+function preloadCourse(id: CourseId, href: string) {
+  preloadRoute(href);
   if (id === "greek") {
-    void import("./greek-page").catch(() => undefined);
     void import("../data/builtin-decks").then(({ loadGreekDeck, loadGreekLesson3GrammarDeck, loadGreekLesson3VocabularyDeck }) => Promise.all([loadGreekDeck(), loadGreekLesson3VocabularyDeck(), loadGreekLesson3GrammarDeck()])).catch(() => undefined);
     return;
   }
   if (id === "latin") {
-    void import("./latin-page").catch(() => undefined);
     void import("../data/builtin-decks").then(({ loadLatinDeck }) => loadLatinDeck()).catch(() => undefined);
     // Henle is much larger than Dickinson, so prefetch it only when the user's
     // persisted Latin selection says grammar will be needed on arrival.
@@ -33,9 +33,7 @@ function preloadCourse(id: CourseId) {
       if (!materials.has("grammar-forms") && !materials.has("grammar-charts")) return undefined;
       return import("../features/henle/henle-data").then(({ loadHenle }) => loadHenle());
     }).catch(() => undefined);
-    return;
   }
-  void import("./reading-page").catch(() => undefined);
 }
 
 export function HomePage() {
@@ -58,7 +56,7 @@ export function HomePage() {
 
 function Course({ id, visual, count, eyebrow, title, description, sourceLinks, href, linkLabel }: { id: CourseId; visual: ReactNode; count: string; eyebrow: string; title: string; description: string; sourceLinks: readonly { label: string; href: string }[]; href: string; linkLabel: string }) {
   const flashcardCourse = id === "greek" || id === "latin";
-  const preload = () => preloadCourse(id);
+  const preload = () => preloadCourse(id, href);
   return <article className="course-card" onPointerEnter={preload} onPointerDown={preload} onFocusCapture={preload}>
     <Link to={href} aria-hidden="true" tabIndex={-1} style={overlayLinkStyle} />
     <div className="course-card-top">
