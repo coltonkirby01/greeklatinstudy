@@ -63,15 +63,13 @@ export function loadGreekLesson3GrammarDeck() {
       deckId: "alpha-omega-lesson3-grammar",
       front: card.prompt,
       back: card.category,
-      reverseFront: card.category,
-      reverseBack: card.prompt,
       category: card.category,
       rank: index + 1,
       source: "From Alpha to Omega, Lesson 3",
       notes: "Whole-paradigm chart · model verb παιδεύω",
       metadata: { lesson: 3, studySource: "grammar-chart", grammarGroup: card.category, chartColumns: card.columns, chartRows: card.rows },
     }));
-    return { id: "alpha-omega-lesson3-grammar", slug: "greek", title: "Greek Lesson 3 Grammar", eyebrow: "Present active paradigms", description: "Three whole-paradigm chart cards for the present active indicative, infinitive, and imperative, with independent forward and reverse progress.", language: "greek", cards, supportsReverse: true, sourceNote: "From Alpha to Omega, Lesson 3; model verb παιδεύω." } satisfies DeckDefinition;
+    return { id: "alpha-omega-lesson3-grammar", slug: "greek", title: "Greek Lesson 3 Grammar", eyebrow: "Present active paradigms", description: "Three whole-paradigm chart cards. Each card asks for the named paradigm and reveals the complete chart.", language: "greek", cards, supportsReverse: false, sourceNote: "From Alpha to Omega, Lesson 3; model verb παιδεύω." } satisfies DeckDefinition;
   });
   return greekLesson3GrammarPromise;
 }
