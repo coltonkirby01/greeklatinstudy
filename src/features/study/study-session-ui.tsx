@@ -1,6 +1,8 @@
 import { Gauge, RotateCcw } from "lucide-react";
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { directionalCopy, formatResponseTime, priorityReason } from "./engine";
+import { studyEnterShortcut } from "./study-shortcuts";
 import type { CardProgress, DirectionalCardCopy, ReviewDifficulty, ReviewResult, StudyCard, StudyDirection, StudyStats } from "./types";
 
 type Priority = Array<{ card: StudyCard; progress: CardProgress; score: number }>;
@@ -50,12 +52,34 @@ export function StudyRatingControls({ revealed, result, difficulty, editing, onR
   onDifficulty: (value: ReviewDifficulty) => void;
   onSave: () => void;
 }) {
+  useEffect(() => {
+    if (!revealed) return;
+    function keydown(event: KeyboardEvent) {
+      const target = event.target as HTMLElement | null;
+      const shortcut = studyEnterShortcut({
+        key: event.key,
+        shiftKey: event.shiftKey,
+        revealed,
+        result,
+        typingTarget: Boolean(target?.closest("input, textarea, select, [contenteditable='true'], [role='textbox'], [role='listbox']")),
+        controlsTarget: Boolean(target?.closest("button, .session-toolbar, .study-start-card")),
+      });
+      if (!shortcut) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (shortcut.type === "flip") onFlip();
+      else if (shortcut.type === "result") onResult(shortcut.value);
+    }
+    window.addEventListener("keydown", keydown, true);
+    return () => window.removeEventListener("keydown", keydown, true);
+  }, [onFlip, onResult, result, revealed]);
+
   const difficultyKeys: Record<ReviewDifficulty, string> = { easy: "1", medium: "2", hard: "3" };
   return <div className="study-controls">
     {!revealed ? <button className="primary-button study-primary" type="button" onClick={onReveal}>Reveal Answer <kbd>Space</kbd></button> : <>
-      <button className="small-outline-button" type="button" onClick={onFlip}>Flip question / answer <kbd>Enter</kbd></button>
+      <button className="small-outline-button" type="button" onClick={onFlip}>Flip question / answer <kbd>Shift+Enter</kbd></button>
       <div className="rating-grid" style={{ gridTemplateColumns: "1fr" }}>
-        <fieldset className="rating-box"><legend>Did you get it right? Suggested from recall time; change if needed.</legend><div className="choice-row two-choices"><button type="button" className="rating-choice right-choice" aria-pressed={result === "right"} onClick={() => onResult("right")}>Right <kbd>R</kbd></button><button type="button" className="rating-choice wrong-choice" aria-pressed={result === "wrong"} onClick={() => onResult("wrong")}>Wrong <kbd>W</kbd></button></div></fieldset>
+        <fieldset className="rating-box"><legend>Correctness starts as Right automatically. Press Enter or choose manually to change it.</legend><div className="choice-row two-choices"><button type="button" className="rating-choice right-choice" aria-pressed={result === "right"} onClick={() => onResult("right")}>Right <kbd>R</kbd></button><button type="button" className="rating-choice wrong-choice" aria-pressed={result === "wrong"} onClick={() => onResult("wrong")}>Wrong <kbd>W</kbd></button></div></fieldset>
         <fieldset className="rating-box"><legend>Difficulty is suggested by time: under 3 s Easy, 3 to under 10 s Medium, 10+ s Hard.</legend><div className="choice-row three-choices">{(["easy", "medium", "hard"] as ReviewDifficulty[]).map((value) => <button key={value} type="button" className="rating-choice" aria-pressed={difficulty === value} onClick={() => onDifficulty(value)}>{value[0].toUpperCase() + value.slice(1)} <kbd>{difficultyKeys[value]}</kbd></button>)}</div></fieldset>
       </div>
       <button className="primary-button study-primary" type="button" disabled={!result || !difficulty} onClick={onSave}>{editing ? "Save Corrected Grade" : "Save & Next"} <kbd>Space</kbd></button>
@@ -83,7 +107,7 @@ export function StudySidebar({ copy, direction, stats, initialReviewed, initialT
     <section className="panel-surface priority-panel">
       <div className="sidebar-heading"><div><p className="eyebrow">Prompts only</p><h2>Highest-Priority Review</h2></div><RotateCcw /></div>
       <div className="priority-list">{priority.map(({ card, progress, score }) => { const itemCopy = cardCopy ? cardCopy(card, direction) : directionalCopy(card, direction); return <div className="priority-row" key={`${card.deckId}:${card.id}`}><span className="priority-meta">{card.rank ? `#${card.rank}` : card.category ?? "Card"}</span><span className="priority-prompt">{priorityPrompt ? priorityPrompt(card, itemCopy) : itemCopy.prompt}<small>{priorityReason(progress)}</small></span><span className="priority-score">{Math.max(0, Math.round(score))}</span></div>; })}</div>
-      <p className="source-note">Answers remain hidden. Correctness, difficulty, recall time, recency, strength, and due dates all affect priority.</p>
+      <p className="source-note">Answers remain hidden. Only the currently selected cards can appear here; their correctness, difficulty, recall time, recency, strength, and due dates affect priority.</p>
     </section>
   </aside>;
 }
