@@ -19,6 +19,26 @@ type ShortcutContext = {
   controlsTarget?: boolean;
 };
 
+type EnterShortcutContext = {
+  key: string;
+  shiftKey: boolean;
+  revealed: boolean;
+  result: ReviewResult | null;
+  typingTarget: boolean;
+  controlsTarget?: boolean;
+};
+
+/**
+ * Enter is intentionally handled by the shared rating controls so the same
+ * behavior applies to every study controller without duplicating key logic.
+ * Plain Enter toggles Right/Wrong; Shift+Enter flips the revealed card face.
+ */
+export function studyEnterShortcut({ key, shiftKey, revealed, result, typingTarget, controlsTarget = false }: EnterShortcutContext): StudyShortcut {
+  if (key !== "Enter" || !revealed || typingTarget || controlsTarget) return null;
+  if (shiftKey) return { type: "flip" };
+  return { type: "result", value: result === "wrong" ? "right" : "wrong" };
+}
+
 export function studyShortcut({ key, startGateOpen, revealed, result, typingTarget, controlsTarget = false }: ShortcutContext): StudyShortcut {
   // Toolbar/select controls keep their normal keyboard behavior while the timer gate is open.
   if (typingTarget || controlsTarget) return null;
@@ -33,7 +53,7 @@ export function studyShortcut({ key, startGateOpen, revealed, result, typingTarg
   if (key === "1") return { type: "difficulty", value: "easy" };
   if (key === "2") return { type: "difficulty", value: "medium" };
   if (key === "3") return { type: "difficulty", value: "hard" };
-  if (key === "Enter") return { type: "flip" };
+  // Enter/Shift+Enter are handled by studyEnterShortcut in StudyRatingControls.
   if (key === " " && result) return { type: "save" };
   return null;
 }
