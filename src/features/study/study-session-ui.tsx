@@ -8,6 +8,10 @@ type Priority = Array<{ card: StudyCard; progress: CardProgress; score: number }
 
 function percent(value: number | null) { return value === null ? "—" : `${(value * 100).toFixed(value >= 0.995 ? 0 : 1)}%`; }
 
+export function defaultDifficultyAfterResult(current: ReviewDifficulty | null): ReviewDifficulty {
+  return current ?? "medium";
+}
+
 export function StudyStartGate({ onStart, onWarmup }: { onStart: () => void; onWarmup?: () => void }) {
   return <div className="study-start-gate" role="region" aria-label="Start flashcard timing">
     <div className="study-start-card">
@@ -19,6 +23,23 @@ export function StudyStartGate({ onStart, onWarmup }: { onStart: () => void; onW
         {onWarmup && <button type="button" className="small-outline-button study-warmup-button" onClick={onWarmup}>Personalized warm-up · 5 cards</button>}
       </div>
       <span>or press any key outside the study controls to begin</span>
+    </div>
+  </div>;
+}
+
+export function StudyCardFaces({ revealed, showingAnswer, backtracking, onReveal, onFlip, front, back }: {
+  revealed: boolean;
+  showingAnswer: boolean;
+  backtracking: boolean;
+  onReveal: () => void;
+  onFlip: () => void;
+  front: ReactNode;
+  back: ReactNode;
+}) {
+  return <div className={`flashcard-scene ${showingAnswer ? "is-flipped" : ""} ${backtracking ? "is-backtracking" : ""}`}>
+    <div className="flashcard-inner">
+      <button type="button" className="flashcard-face flashcard-front-face" onClick={() => revealed ? onFlip() : onReveal()} aria-label={revealed ? "Return to answer" : "Reveal answer"} aria-hidden={showingAnswer} tabIndex={showingAnswer ? -1 : 0}>{front}</button>
+      <button type="button" className="flashcard-face flashcard-back-face" onClick={onFlip} aria-label="Return to question" aria-hidden={!showingAnswer} tabIndex={showingAnswer ? 0 : -1}>{back}</button>
     </div>
   </div>;
 }
@@ -38,11 +59,11 @@ export function StudyRatingControls({ revealed, result, difficulty, editing, onR
   return <div className="study-controls">
     {!revealed ? <button className="primary-button study-primary" type="button" onClick={onReveal}>Reveal Answer <kbd>Space</kbd></button> : <>
       <button className="small-outline-button" type="button" onClick={onFlip}>Flip question / answer <kbd>Enter</kbd></button>
-      <div className="rating-grid">
+      <div className="rating-grid" style={{ gridTemplateColumns: "1fr" }}>
         <fieldset className="rating-box"><legend>Did you get it right?</legend><div className="choice-row two-choices"><button type="button" className="rating-choice right-choice" aria-pressed={result === "right"} onClick={() => onResult("right")}>Right <kbd>R</kbd></button><button type="button" className="rating-choice wrong-choice" aria-pressed={result === "wrong"} onClick={() => onResult("wrong")}>Wrong <kbd>W</kbd></button></div></fieldset>
-        <fieldset className="rating-box"><legend>How difficult was it?</legend><div className="choice-row three-choices">{(["easy", "medium", "hard"] as ReviewDifficulty[]).map((value) => <button key={value} type="button" className="rating-choice" aria-pressed={difficulty === value} onClick={() => onDifficulty(value)}>{value[0].toUpperCase() + value.slice(1)} <kbd>{difficultyKeys[value]}</kbd></button>)}</div></fieldset>
+        <fieldset className="rating-box"><legend>How difficult was it? Medium is automatic unless changed.</legend><div className="choice-row three-choices">{(["easy", "medium", "hard"] as ReviewDifficulty[]).map((value) => <button key={value} type="button" className="rating-choice" aria-pressed={difficulty === value} onClick={() => onDifficulty(value)}>{value[0].toUpperCase() + value.slice(1)} <kbd>{difficultyKeys[value]}</kbd></button>)}</div></fieldset>
       </div>
-      <button className="primary-button study-primary" type="button" disabled={!result || !difficulty} onClick={onSave}>{editing ? "Save Corrected Grade" : "Save & Next"} <kbd>Space</kbd></button>
+      <button className="primary-button study-primary" type="button" disabled={!result} onClick={onSave}>{editing ? "Save Corrected Grade" : "Save & Next"} <kbd>Space</kbd></button>
     </>}
   </div>;
 }
