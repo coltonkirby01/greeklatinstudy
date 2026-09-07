@@ -40,7 +40,7 @@ src/
     decks/                 cloud deck service and CSV/XLSX/JSON importer
     henle/                 authoritative data adapter and chart renderer
     reading/               passages, timing model, audio storage, TTS provider interface
-    study/                 timer, adaptive scheduler, progress, Back/Skip, shared UI
+    study/                 timer, adaptive scheduler, session progress, Back/Skip, shared UI
   pages/                   route-level screens
   lib/supabase-config.ts   lightweight public configuration used before SDK load
   lib/supabase.ts          lazily loaded Supabase client
@@ -95,12 +95,13 @@ New ordinary decks automatically inherit:
 - smooth 3D card flipping by clicking the visible card or pressing Enter after reveal
 - hundredths-of-a-second front timer behind an explicit Start gate
 - focus/visibility protection that returns an unrevealed card to the Start gate rather than charging hidden time
-- Reveal and Right/Wrong grading
-- optional Easy/Medium/Hard difficulty; unanswered difficulty is stored as Medium
-- Save & Next after correctness is chosen
+- time-based default grading on reveal: under 3 s = Right/Easy, 3 to under 10 s = Wrong/Medium, 10+ s = Wrong/Hard
+- manual Right/Wrong and Easy/Medium/Hard overrides before saving
+- Save & Next after the suggested or manually adjusted grade is ready
 - Back with true grade rollback, and ungraded Skip
 - adaptive or sequential ordering
-- top-five prompt-only priority review
+- current-session progress statistics plus an initial-review coverage bar for the selected/available cards
+- top-five prompt-only priority review based on continuous adaptive history
 - per-direction statistics and cloud-ready progress
 
 ### Separate directions
@@ -111,11 +112,13 @@ One deck has a progress envelope containing independent `modes`, keyed by `study
 
 The timer displays hundredths of a second and measures only active time spent viewing the unrevealed question side. It begins only after the Start gate is dismissed, stops when the answer is revealed, and never charges hidden or unfocused time. If the tab/window loses focus while an unrevealed card is active, the user must pass through the Start gate again on return; timing does not silently auto-resume.
 
-Reveal captures and freezes the response time. After reveal, flipping between question and answer by click or Enter does not restart or add time. Moving normally to the next card in an already active, focused session does not require another Start gate.
+Reveal captures and freezes the response time. That captured active time selects the initial correctness and difficulty defaults. After reveal, flipping between question and answer by click or Enter does not restart or add time. Moving normally to the next card in an already active, focused session does not require another Start gate.
 
 ### Grading and adaptive review
 
-Correctness and difficulty remain separate recorded inputs, but difficulty is optional at grading time. Selecting Right or Wrong is enough to save; if Easy/Medium/Hard is not explicitly chosen, the stored difficulty is Medium. A deliberate Easy or Hard choice overrides the default. Response time is always stored independently, so speed continues to contribute to adaptive priority and scheduling even when the user accepts the automatic Medium rating.
+Correctness and difficulty remain separate recorded inputs. On reveal, the app preselects both from active recall time: under 3.00 seconds defaults to Right + Easy; 3.00 seconds through under 10.00 seconds defaults to Wrong + Medium; and 10.00 seconds or more defaults to Wrong + Hard. These are suggestions, not irreversible grades. The user can change correctness and difficulty independently before Save & Next.
+
+Response time is stored independently of those selections, so speed continues to contribute directly to adaptive priority and scheduling. Back restores the original recorded response time and grade for correction rather than silently rerunning the timing rule.
 
 Scheduling is intentionally transparent rather than a black box. Correctness has the strongest effect; difficulty influences interval and growth; current strength and streak expand successful intervals; Wrong creates a lapse and short interval. Slow response applies an interval penalty and adds review priority. Priority also includes whether a card is new, mastered once, due/overdue, inconsistent, recently wrong, hard, and recently shown.
 
@@ -128,6 +131,8 @@ Every saved review keeps a transaction containing the exact pre-review mode snap
 ## Sessions and long-term progress
 
 A study session is a performance window layered on top of continuous long-term mastery. Starting or resuming a session never resets mastery, intervals, due dates, response-time memory, adaptive priorities, or Dickinson unlock state. Greek and Latin default to the most recently reviewed resumable explicit session unless the user deliberately starts another one.
+
+The Progress panel beside the active flashcard is session-specific: reviewed-card count, accuracy, wrong/hard counts, average time, right-once count, and streak come only from ranked reviews in the active session. Its Initial review bar tracks the distinct currently selected/available cards reviewed at least once in that session. Warm-ups do not inflate those ranked-session figures. Highest-Priority Review remains long-term and adaptive rather than being restricted to the current session.
 
 Deleting a session removes its session identity from Stats and resumable session menus while preserving the learning evidence already incorporated into adaptive memory. The implementation uses persistent deletion/exclusion markers so stale local or cloud state cannot resurrect a deleted session. Do not rewrite this behavior as a naive history purge/rebuild during maintenance.
 
@@ -198,7 +203,7 @@ The `pages.yml` workflow runs tests and a production build for every pull reques
 
 The bundle-size check protects both the initial JavaScript shell and total CSS. Heavy service SDKs, admin-only code, route pages, and large study data should remain outside the initial shell whenever practical. Do not raise a bundle budget merely to make a refactor pass; first determine why the bundle grew.
 
-The repository originally used legacy branch publishing. Until the owner changes **Settings → Pages → Build and deployment → Source** to **GitHub Actions**, the compiled deploy job waits for that legacy job to finish and then replaces its output. Branch-specific concurrency labels keep pull-request checks from cancelling the live `main` deployment. Once the source is set to GitHub Actions, the same workflow continues normally and the legacy wait exits immediately.
+The repository originally used legacy branch publishing. Until the owner changes **Settings → Pages → Build and deployment → Source** to **GitHub Actions**, the compiled deploy job waits for the matching legacy job to finish and then replaces its output. That ordering is intentional: it prevents the legacy publisher from overwriting the tested Vite artifact after the custom deployment. Once the source is set to GitHub Actions, the same workflow continues normally and the legacy wait exits immediately.
 
 Recommended branch practice:
 
