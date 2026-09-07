@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { defaultDifficultyAfterResult } from "../src/features/study/study-session-ui";
 import { studyShortcut } from "../src/features/study/study-shortcuts";
 
 const context = { startGateOpen: false, revealed: false, result: null, difficulty: null, typingTarget: false, controlsTarget: false } as const;
@@ -19,13 +20,13 @@ describe("study keyboard shortcuts", () => {
     expect(studyShortcut({ ...context, key: " ", typingTarget: true })).toBeNull();
   });
 
-  it("uses Space to reveal on the front and not to save before grading is complete", () => {
+  it("uses Space to reveal on the front and waits for a correctness grade before saving", () => {
     expect(studyShortcut({ ...context, key: " " })).toEqual({ type: "reveal" });
     expect(studyShortcut({ ...context, key: " ", revealed: true })).toBeNull();
-    expect(studyShortcut({ ...context, key: " ", revealed: true, result: "right" })).toBeNull();
+    expect(studyShortcut({ ...context, key: " ", revealed: true, result: "right" })).toEqual({ type: "save" });
   });
 
-  it("maps R/W to correctness and 1/2/3 to difficulty only after reveal", () => {
+  it("maps R/W to correctness and 1/2/3 to optional difficulty overrides only after reveal", () => {
     expect(studyShortcut({ ...context, key: "r" })).toBeNull();
     expect(studyShortcut({ ...context, key: "r", revealed: true })).toEqual({ type: "result", value: "right" });
     expect(studyShortcut({ ...context, key: "R", revealed: true })).toEqual({ type: "result", value: "right" });
@@ -40,8 +41,20 @@ describe("study keyboard shortcuts", () => {
     expect(studyShortcut({ ...context, key: "Enter", revealed: true, result: "right", difficulty: "medium" })).toEqual({ type: "flip" });
   });
 
-  it("saves with Space only when both grading inputs are complete", () => {
+  it("saves with Space after correctness alone or after a difficulty override", () => {
+    expect(studyShortcut({ ...context, key: " ", revealed: true, result: "right" })).toEqual({ type: "save" });
     expect(studyShortcut({ ...context, key: " ", revealed: true, result: "right", difficulty: "medium" })).toEqual({ type: "save" });
     expect(studyShortcut({ ...context, key: " ", revealed: true, result: "wrong", difficulty: "hard" })).toEqual({ type: "save" });
+  });
+});
+
+describe("default review difficulty", () => {
+  it("uses Medium automatically when correctness is graded without a difficulty choice", () => {
+    expect(defaultDifficultyAfterResult(null)).toBe("medium");
+  });
+
+  it("preserves an explicit Easy or Hard override", () => {
+    expect(defaultDifficultyAfterResult("easy")).toBe("easy");
+    expect(defaultDifficultyAfterResult("hard")).toBe("hard");
   });
 });
