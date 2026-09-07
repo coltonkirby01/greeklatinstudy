@@ -1,16 +1,27 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { SiteLayout } from "./components/site-layout";
+import {
+  loadAccountPage,
+  loadAdminPage,
+  loadDynamicDeckPage,
+  loadGreekPage,
+  loadHomePage,
+  loadLatinPage,
+  loadNotFoundPage,
+  loadReadingPage,
+  loadStatsPage,
+} from "./route-preload";
 
-const HomePage = lazy(async () => ({ default: (await import("./pages/home-page")).HomePage }));
-const GreekPage = lazy(async () => ({ default: (await import("./pages/greek-page")).GreekPage }));
-const LatinPage = lazy(async () => ({ default: (await import("./pages/latin-page")).LatinPage }));
-const StatsPage = lazy(async () => ({ default: (await import("./pages/stats-page")).StatsPage }));
-const DynamicDeckPage = lazy(async () => ({ default: (await import("./pages/dynamic-deck-page")).DynamicDeckPage }));
-const ReadingPage = lazy(async () => ({ default: (await import("./pages/reading-page")).ReadingPage }));
-const AccountPage = lazy(async () => ({ default: (await import("./pages/account-page")).AccountPage }));
-const AdminPage = lazy(async () => ({ default: (await import("./pages/admin-page")).AdminPage }));
-const NotFoundPage = lazy(async () => ({ default: (await import("./pages/not-found-page")).NotFoundPage }));
+const HomePage = lazy(async () => ({ default: (await loadHomePage()).HomePage }));
+const GreekPage = lazy(async () => ({ default: (await loadGreekPage()).GreekPage }));
+const LatinPage = lazy(async () => ({ default: (await loadLatinPage()).LatinPage }));
+const StatsPage = lazy(async () => ({ default: (await loadStatsPage()).StatsPage }));
+const DynamicDeckPage = lazy(async () => ({ default: (await loadDynamicDeckPage()).DynamicDeckPage }));
+const ReadingPage = lazy(async () => ({ default: (await loadReadingPage()).ReadingPage }));
+const AccountPage = lazy(async () => ({ default: (await loadAccountPage()).AccountPage }));
+const AdminPage = lazy(async () => ({ default: (await loadAdminPage()).AdminPage }));
+const NotFoundPage = lazy(async () => ({ default: (await loadNotFoundPage()).NotFoundPage }));
 
 function RouteLoading() {
   return <main className="page-shell"><div className="study-loading panel-surface" role="status"><span className="loading-mark">Α</span><p>Opening your study materials…</p></div></main>;
