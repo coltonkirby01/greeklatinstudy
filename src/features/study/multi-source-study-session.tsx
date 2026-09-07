@@ -8,7 +8,7 @@ import { deleteReviewEvent, loadLocalEnvelope, loadProgressEnvelope, mergeProgre
 import { intrinsicCardDifficulty } from "./scoring";
 import { collectManagedSessions, displayManagedSessionName, sessionDeckIdsForLanguage, type ManagedSession } from "./session-management";
 import "./study-gate.css";
-import { StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
+import { defaultDifficultyAfterResult, StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
 import { studyShortcut } from "./study-shortcuts";
 import type { DeckDefinition, DeckProgressEnvelope, DirectionalCardCopy, ReviewDifficulty, ReviewResult, ReviewTransaction, SelectionMode, StudyActivityKind, StudyCard, StudyDirection, StudyModeState, StudyStats } from "./types";
 import { useResponseTimer } from "./use-response-timer";
@@ -130,6 +130,10 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   const [session, setSession] = useState<SessionMeta>(() => resumeSession ?? makeSession());
   const [warmup, setWarmup] = useState<WarmupMeta | null>(null);
   const sessionChoiceInitialized = useRef(Boolean(resumeSession));
+
+  useEffect(() => {
+    if (result && !difficulty) setDifficulty(defaultDifficultyAfterResult(difficulty));
+  }, [difficulty, result]);
 
   const sessionLanguage: "Greek" | "Latin" = deck.language === "greek" ? "Greek" : "Latin";
   const sessionDeckIds = useMemo(() => sessionDeckIdsForLanguage(sessionLanguage), [sessionLanguage]);
@@ -363,15 +367,16 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     setNotice("Previous grade undone. Choose the corrected result and save it.");
   }
   function saveNext() {
-    if (!current || !result || !difficulty) return;
+    if (!current || !result) return;
+    const reviewDifficulty = defaultDifficultyAfterResult(difficulty);
     const source = current.source, state = modeFor(source), reviewedAt = Date.now(), reviewId = editingTransaction?.reviewId ?? crypto.randomUUID(), responseTimeMs = capturedTimeMs ?? timer.capture();
     const beforeState = editingTransaction?.beforeState ?? structuredClone(state);
     const activityKind: StudyActivityKind = editingTransaction?.activityKind ?? (warmup ? "warmup" : "study");
     const activeMeta = activityKind === "warmup" && warmup ? warmup : session;
     const sessionId = editingTransaction?.sessionId ?? activeMeta.id, sessionStartedAt = editingTransaction?.sessionStartedAt ?? activeMeta.startedAt, sessionName = editingTransaction?.sessionName ?? activeMeta.name;
-    let next = recordReview(state, current.card, { id: reviewId, result, difficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, sessionName, activityKind });
+    let next = recordReview(state, current.card, { id: reviewId, result, difficulty: reviewDifficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, sessionName, activityKind });
     next = maybeUnlockNextBatch(next, source.deck.cards, source.deck.staged, reviewedAt);
-    const transaction: MixedReviewTransaction = { reviewId, cardId: current.card.id, result, difficulty, responseTimeMs, beforeState, sourceId: source.id, deckId: source.deck.id, studyKey: source.studyKey, sessionId, sessionStartedAt, sessionName, activityKind };
+    const transaction: MixedReviewTransaction = { reviewId, cardId: current.card.id, result, difficulty: reviewDifficulty, responseTimeMs, beforeState, sourceId: source.id, deckId: source.deck.id, studyKey: source.studyKey, sessionId, sessionStartedAt, sessionName, activityKind };
     const corrected = Boolean(editingTransaction), unlocked = next.lastUnlock?.at === reviewedAt ? next.lastUnlock : null;
     saveMode(source, next, { review: transaction }); setLastTransaction(transaction); resetUi();
 
@@ -429,6 +434,8 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   const gated = startGateOpen && !revealed && !editingTransaction;
   const sessionControlValue = "__current__";
   const selectableSessions = sessionCatalog.filter((item) => item.id !== session.id);
+  const front = <><span className="card-side">Question</span>{renderFront ? renderFront(current.card, copy, current.source) : <span className="study-prompt">{copy.prompt}</span>}</>;
+  const backFace = <><span className="card-side">Answer</span>{renderBack ? renderBack(current.card, copy, current.source) : <span className="answer-block"><strong className="study-answer">{copy.answer}</strong>{current.card.notes && <span className="answer-notes">{current.card.notes}</span>}</span>}</>;
 
   return <div className="study-grid" data-testid="study-session" data-study-key={current.source.studyKey}>
     <section className={`study-panel panel-surface ${gated ? "is-gated" : ""}`} aria-label={`${deck.title} study card`}>
@@ -445,12 +452,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
       </div>
       {notice && <button className="inline-notice" type="button" onClick={() => setNotice(null)}>{notice}</button>}
       <div className="flashcard-meta"><div className="card-meta-details"><span className="stage-chip">{warmup ? "Warm-up" : current.source.label}</span>{current.card.category && <span>{current.card.category}</span>}{currentMeta && <span>{currentMeta}</span>}<span className="front-timer" aria-label={`Front-card response time ${formatResponseTime(capturedTimeMs ?? timer.elapsedMs)}`}><Timer aria-hidden="true" /> {formatResponseTime(capturedTimeMs ?? timer.elapsedMs)}</span>{editingTransaction && <span className="editing-chip">Correcting previous grade</span>}</div><div className="card-nav-actions"><button type="button" className="small-outline-button" disabled={!lastTransaction} onClick={back}><ArrowLeft /> Back</button><button type="button" className="small-outline-button" disabled={Boolean(editingTransaction)} onClick={skip}>Skip <SkipForward /></button></div></div>
-      <div className={`flashcard-scene ${showingAnswer ? "is-flipped" : ""} ${backtracking ? "is-backtracking" : ""}`}>
-        <div className="flashcard-inner">
-          <button type="button" className="flashcard-face flashcard-front-face" onClick={() => revealed ? setReviewFront(false) : reveal()} aria-label={revealed ? "Return to answer" : "Reveal answer"} aria-hidden={showingAnswer} tabIndex={showingAnswer ? -1 : 0}><span className="card-side">Question</span>{renderFront ? renderFront(current.card, copy, current.source) : <span className="study-prompt">{copy.prompt}</span>}</button>
-          <div className="flashcard-face flashcard-back-face" aria-hidden={!showingAnswer}><span className="card-side">Answer</span>{renderBack ? renderBack(current.card, copy, current.source) : <span className="answer-block"><strong className="study-answer">{copy.answer}</strong>{current.card.notes && <span className="answer-notes">{current.card.notes}</span>}</span>}</div>
-        </div>
-      </div>
+      <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} />
       <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
     </section>
     <StudySidebar deck={deck} cards={visibleCandidates.map((candidate) => candidate.card)} copy={copy} direction={direction} stats={stats} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
