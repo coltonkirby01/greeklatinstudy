@@ -7,10 +7,11 @@ import { createEnvelope, createModeState, directionalCopy, formatResponseTime, g
 import { deleteReviewEvent, loadLocalEnvelope, loadProgressEnvelope, mergeProgressEnvelopes, saveProgressEnvelope, upsertReviewEvent } from "./progress-repository";
 import { intrinsicCardDifficulty } from "./scoring";
 import { collectManagedSessions, displayManagedSessionName, sessionDeckIdsForLanguage, type ManagedSession } from "./session-management";
+import { autoReviewDefaults, sessionProgressSummary } from "./session-review";
 import "./study-gate.css";
-import { defaultDifficultyAfterResult, StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
+import { StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
 import { studyShortcut } from "./study-shortcuts";
-import type { DeckDefinition, DeckProgressEnvelope, DirectionalCardCopy, ReviewDifficulty, ReviewResult, ReviewTransaction, SelectionMode, StudyActivityKind, StudyCard, StudyDirection, StudyModeState, StudyStats } from "./types";
+import type { DeckDefinition, DeckProgressEnvelope, DirectionalCardCopy, ReviewDifficulty, ReviewResult, ReviewTransaction, SelectionMode, StudyActivityKind, StudyCard, StudyDirection, StudyModeState } from "./types";
 import { useResponseTimer } from "./use-response-timer";
 
 export type StudySourceDefinition = {
@@ -80,25 +81,6 @@ function availableCards(source: StudySourceDefinition, state: StudyModeState) {
   return source.cards.filter((card) => unlocked.has(card.id));
 }
 
-function aggregateStats(candidates: Candidate[], states: Map<string, StudyModeState>): StudyStats {
-  let reviewed = 0, everWrong = 0, markedHard = 0, mastered = 0, totalReviews = 0, rightReviews = 0, responseTotal = 0, responseCount = 0, bestStreak = 0;
-  for (const { source, card } of candidates) {
-    const state = states.get(source.id);
-    if (!state) continue;
-    const item = getCardProgress(state, card.id);
-    if (item.reviews) reviewed += 1;
-    if (item.wrong) everWrong += 1;
-    if (item.hard) markedHard += 1;
-    if (item.initialMastered) mastered += 1;
-    totalReviews += item.reviews;
-    rightReviews += item.right;
-    responseTotal += item.responseTimeTotalMs;
-    responseCount += item.responseTimeCount;
-    bestStreak = Math.max(bestStreak, item.bestStreak);
-  }
-  return { available: candidates.length, reviewed, accuracy: totalReviews ? rightReviews / totalReviews : null, everWrong, markedHard, averageResponseTimeMs: responseCount ? responseTotal / responseCount : 0, mastered, totalReviews, bestStreak };
-}
-
 function avoidRecentlyPresentedCandidates(candidates: Candidate[], modeFor: (source: StudySourceDefinition) => StudyModeState) {
   if (candidates.length <= 3) return candidates;
   const recentLimit = Math.min(4, candidates.length - 3);
@@ -130,10 +112,6 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   const [session, setSession] = useState<SessionMeta>(() => resumeSession ?? makeSession());
   const [warmup, setWarmup] = useState<WarmupMeta | null>(null);
   const sessionChoiceInitialized = useRef(Boolean(resumeSession));
-
-  useEffect(() => {
-    if (result && !difficulty) setDifficulty(defaultDifficultyAfterResult(difficulty));
-  }, [difficulty, result]);
 
   const sessionLanguage: "Greek" | "Latin" = deck.language === "greek" ? "Greek" : "Latin";
   const sessionDeckIds = useMemo(() => sessionDeckIdsForLanguage(sessionLanguage), [sessionLanguage]);
@@ -316,11 +294,18 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     return map;
   }, [envelopes, sources]);
   const visibleCandidates = useMemo(() => sources.flatMap((source) => { const state = states.get(source.id); return state ? availableCards(source, state).map((card) => ({ source, card })) : []; }), [sources, states]);
-  const stats = useMemo(() => aggregateStats(visibleCandidates, states), [states, visibleCandidates]);
+  const sessionProgress = useMemo(() => sessionProgressSummary(visibleCandidates.map(({ source, card }) => ({ progress: getCardProgress(states.get(source.id) ?? modeFor(source), card.id) })), session.id), [modeFor, session.id, states, visibleCandidates]);
+  const stats = sessionProgress.stats;
   const priority = useMemo(() => visibleCandidates.map(({ source, card }) => ({ card, progress: getCardProgress(states.get(source.id) ?? modeFor(source), card.id), score: priorityScore(card, states.get(source.id) ?? modeFor(source), { ignoreRecency: true }) })).sort((a, b) => b.score - a.score).slice(0, 5), [modeFor, states, visibleCandidates]);
   const sourceByCard = useMemo(() => new Map(sources.flatMap((source) => source.cards.map((card) => [`${card.deckId}:${card.id}`, source] as const))), [sources]);
 
-  function reveal() { if (!current || revealed || editingTransaction || startGateOpen) return; setBacktracking(false); setReviewFront(false); setCapturedTimeMs(timer.capture()); setRevealed(true); }
+  function reveal() {
+    if (!current || revealed || editingTransaction || startGateOpen) return;
+    setBacktracking(false); setReviewFront(false);
+    const responseTimeMs = timer.capture();
+    const suggested = autoReviewDefaults(responseTimeMs);
+    setCapturedTimeMs(responseTimeMs); setResult(suggested.result); setDifficulty(suggested.difficulty); setRevealed(true);
+  }
   function toggleReviewFace() { if (revealed) setReviewFront((value) => !value); }
   function changeOrder(next: SelectionMode) { setSelectionMode(next); if (!current) return; resetUi(); setStartGateOpen(true); const selected = chooseNext(current, next, Boolean(warmup)); if (selected) present(selected); }
   function skip() { if (!current || editingTransaction) return; const previous = current; resetUi(); const selected = chooseNext(previous, selectionMode, Boolean(warmup)); if (selected) present(selected); }
@@ -367,16 +352,15 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     setNotice("Previous grade undone. Choose the corrected result and save it.");
   }
   function saveNext() {
-    if (!current || !result) return;
-    const reviewDifficulty = defaultDifficultyAfterResult(difficulty);
+    if (!current || !result || !difficulty) return;
     const source = current.source, state = modeFor(source), reviewedAt = Date.now(), reviewId = editingTransaction?.reviewId ?? crypto.randomUUID(), responseTimeMs = capturedTimeMs ?? timer.capture();
     const beforeState = editingTransaction?.beforeState ?? structuredClone(state);
     const activityKind: StudyActivityKind = editingTransaction?.activityKind ?? (warmup ? "warmup" : "study");
     const activeMeta = activityKind === "warmup" && warmup ? warmup : session;
     const sessionId = editingTransaction?.sessionId ?? activeMeta.id, sessionStartedAt = editingTransaction?.sessionStartedAt ?? activeMeta.startedAt, sessionName = editingTransaction?.sessionName ?? activeMeta.name;
-    let next = recordReview(state, current.card, { id: reviewId, result, difficulty: reviewDifficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, sessionName, activityKind });
+    let next = recordReview(state, current.card, { id: reviewId, result, difficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, sessionName, activityKind });
     next = maybeUnlockNextBatch(next, source.deck.cards, source.deck.staged, reviewedAt);
-    const transaction: MixedReviewTransaction = { reviewId, cardId: current.card.id, result, difficulty: reviewDifficulty, responseTimeMs, beforeState, sourceId: source.id, deckId: source.deck.id, studyKey: source.studyKey, sessionId, sessionStartedAt, sessionName, activityKind };
+    const transaction: MixedReviewTransaction = { reviewId, cardId: current.card.id, result, difficulty, responseTimeMs, beforeState, sourceId: source.id, deckId: source.deck.id, studyKey: source.studyKey, sessionId, sessionStartedAt, sessionName, activityKind };
     const corrected = Boolean(editingTransaction), unlocked = next.lastUnlock?.at === reviewedAt ? next.lastUnlock : null;
     saveMode(source, next, { review: transaction }); setLastTransaction(transaction); resetUi();
 
@@ -455,6 +439,6 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
       <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} />
       <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
     </section>
-    <StudySidebar deck={deck} cards={visibleCandidates.map((candidate) => candidate.card)} copy={copy} direction={direction} stats={stats} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
+    <StudySidebar deck={deck} cards={visibleCandidates.map((candidate) => candidate.card)} copy={copy} direction={direction} stats={stats} initialReviewed={sessionProgress.initialReviewed} initialTotal={sessionProgress.initialTotal} initialPercent={sessionProgress.initialPercent} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
   </div>;
 }
