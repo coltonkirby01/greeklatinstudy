@@ -3,7 +3,8 @@ import { classicalGreekPronunciation } from "../features/greek/greek-pronunciati
 
 type GreekSourceCard = { id: string; category: string; front: string; back_title: string; back: string };
 type GreekLesson3VocabularySourceCard = { id: string; greek: string; meaning: string; part_of_speech: string; lesson: number };
-type GreekLesson3GrammarSourceCard = { id: string; category: string; form: string; prompt: string; identification: string; ending: string };
+type GreekLesson3GrammarChartRow = { label: string; cells: string[] };
+type GreekLesson3GrammarSourceCard = { id: string; category: string; prompt: string; columns: string[]; rows: GreekLesson3GrammarChartRow[] };
 type LatinSourceCard = { id: string; headword: string; definition: string; partOfSpeech: string; semanticGroup: string; frequencyRank: number; deckPosition: number };
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
 async function fetchText(path: string) { const response = await fetch(assetUrl(path), { cache: "force-cache" }); if (!response.ok) throw new Error(`Could not load ${path}.`); return response.text(); }
@@ -61,16 +62,16 @@ export function loadGreekLesson3GrammarDeck() {
       id: card.id,
       deckId: "alpha-omega-lesson3-grammar",
       front: card.prompt,
-      back: card.form,
-      reverseFront: card.form,
-      reverseBack: card.identification,
+      back: card.category,
+      reverseFront: card.category,
+      reverseBack: card.prompt,
       category: card.category,
       rank: index + 1,
       source: "From Alpha to Omega, Lesson 3",
-      notes: `${card.identification} · ending ${card.ending}`,
-      metadata: { lesson: 3, studySource: "grammar-form", grammarGroup: card.category, ending: card.ending, identification: card.identification },
+      notes: "Whole-paradigm chart · model verb παιδεύω",
+      metadata: { lesson: 3, studySource: "grammar-chart", grammarGroup: card.category, chartColumns: card.columns, chartRows: card.rows },
     }));
-    return { id: "alpha-omega-lesson3-grammar", slug: "greek", title: "Greek Lesson 3 Grammar", eyebrow: "Present active forms", description: "Lesson 3 forms for the present active indicative, infinitive, and imperative, with independent forward and reverse progress.", language: "greek", cards, supportsReverse: true, sourceNote: "From Alpha to Omega, Lesson 3; model verb παιδεύω." } satisfies DeckDefinition;
+    return { id: "alpha-omega-lesson3-grammar", slug: "greek", title: "Greek Lesson 3 Grammar", eyebrow: "Present active paradigms", description: "Three whole-paradigm chart cards for the present active indicative, infinitive, and imperative, with independent forward and reverse progress.", language: "greek", cards, supportsReverse: true, sourceNote: "From Alpha to Omega, Lesson 3; model verb παιδεύω." } satisfies DeckDefinition;
   });
   return greekLesson3GrammarPromise;
 }
