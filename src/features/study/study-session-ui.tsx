@@ -1,7 +1,7 @@
 import { Gauge, RotateCcw } from "lucide-react";
 import type { ReactNode } from "react";
 import { directionalCopy, formatResponseTime, priorityReason } from "./engine";
-import type { CardProgress, DeckDefinition, DirectionalCardCopy, ReviewDifficulty, ReviewResult, StudyCard, StudyDirection, StudyStats } from "./types";
+import type { CardProgress, DirectionalCardCopy, ReviewDifficulty, ReviewResult, StudyCard, StudyDirection, StudyStats } from "./types";
 
 type Priority = Array<{ card: StudyCard; progress: CardProgress; score: number }>;
 
@@ -56,16 +56,14 @@ export function StudyRatingControls({ revealed, result, difficulty, editing, onR
       <button className="small-outline-button" type="button" onClick={onFlip}>Flip question / answer <kbd>Enter</kbd></button>
       <div className="rating-grid" style={{ gridTemplateColumns: "1fr" }}>
         <fieldset className="rating-box"><legend>Did you get it right? Suggested from recall time; change if needed.</legend><div className="choice-row two-choices"><button type="button" className="rating-choice right-choice" aria-pressed={result === "right"} onClick={() => onResult("right")}>Right <kbd>R</kbd></button><button type="button" className="rating-choice wrong-choice" aria-pressed={result === "wrong"} onClick={() => onResult("wrong")}>Wrong <kbd>W</kbd></button></div></fieldset>
-        <fieldset className="rating-box"><legend>Difficulty is suggested by time: under 3 s Easy, 3–10 s Medium, 10+ s Hard.</legend><div className="choice-row three-choices">{(["easy", "medium", "hard"] as ReviewDifficulty[]).map((value) => <button key={value} type="button" className="rating-choice" aria-pressed={difficulty === value} onClick={() => onDifficulty(value)}>{value[0].toUpperCase() + value.slice(1)} <kbd>{difficultyKeys[value]}</kbd></button>)}</div></fieldset>
+        <fieldset className="rating-box"><legend>Difficulty is suggested by time: under 3 s Easy, 3 to under 10 s Medium, 10+ s Hard.</legend><div className="choice-row three-choices">{(["easy", "medium", "hard"] as ReviewDifficulty[]).map((value) => <button key={value} type="button" className="rating-choice" aria-pressed={difficulty === value} onClick={() => onDifficulty(value)}>{value[0].toUpperCase() + value.slice(1)} <kbd>{difficultyKeys[value]}</kbd></button>)}</div></fieldset>
       </div>
       <button className="primary-button study-primary" type="button" disabled={!result || !difficulty} onClick={onSave}>{editing ? "Save Corrected Grade" : "Save & Next"} <kbd>Space</kbd></button>
     </>}
   </div>;
 }
 
-export function StudySidebar({ deck, cards, copy, direction, stats, initialReviewed, initialTotal, initialPercent, priority, priorityPrompt, cardCopy }: {
-  deck: DeckDefinition;
-  cards: StudyCard[];
+export function StudySidebar({ copy, direction, stats, initialReviewed, initialTotal, initialPercent, priority, priorityPrompt, cardCopy }: {
   copy: DirectionalCardCopy;
   direction: StudyDirection;
   stats: StudyStats;
