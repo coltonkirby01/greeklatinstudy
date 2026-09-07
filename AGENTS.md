@@ -73,7 +73,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - The Progress panel beside the active flashcard is session-specific. Its reviewed count, accuracy, wrong/hard counts, average time, right-once count, and streak are derived only from ranked reviews belonging to the active session, not from the user's full long-term history.
 - Warm-up reviews and Stats-excluded reviews do not contribute to that active-session Progress panel.
 - The Progress panel includes an Initial review bar showing how many distinct cards in the currently selected/available study pool have been reviewed at least once in the active ranked session. Filtering changes the current denominator but never deletes historical learning state.
-- Highest-Priority Review remains long-term/adaptive and may use the user's continuous learning history; do not make that list session-only merely because the Progress panel is session-only.
+- Highest-Priority Review remains long-term/adaptive and may use the user's continuous learning history for scoring, but its candidate list MUST be limited to the currently selected/available card pool. If only Lesson 3 is selected, only Lesson 3 cards may appear there. Do not make the list session-only, and do not allow deselected cards into it.
 
 ## Sessions and warm-ups
 
@@ -97,25 +97,25 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 
 ## Review and mastery behavior
 
-- Correctness and difficulty remain separate recorded inputs, but both receive time-based defaults immediately when the answer is revealed.
-- The automatic defaults use only the captured active front-side recall time: under 3.00 seconds = `Right` + `Easy`; 3.00 seconds through under 10.00 seconds = `Wrong` + `Medium`; 10.00 seconds or more = `Wrong` + `Hard`.
-- These are suggestions/default selections, not an irreversible automatic grade. The user may change correctness and difficulty independently before Save & Next.
+- Correctness and difficulty remain separate recorded inputs. When an answer is revealed, correctness defaults to `Right` for every card, while difficulty is selected automatically from the captured active front-side recall time.
+- Automatic difficulty thresholds are: under 3.00 seconds = `Easy`; 3.00 seconds through under 10.00 seconds = `Medium`; 10.00 seconds or more = `Hard`.
+- These are defaults, not irreversible grades. The user may change correctness and difficulty independently before Save & Next.
 - Never overwrite a user's manual Right/Wrong or Easy/Medium/Hard change after the default has been shown.
 - Response time is recorded independently and remains part of adaptive priority/scheduling in addition to the selected correctness and difficulty.
 - Review scheduling continues to consider correctness, difficulty, response time, recency, strength, and due state as implemented by the study engine.
 - Staged decks preserve their configured unlocking behavior. Do not expose locked cards early.
 - Mastered cards continue to recur according to the scheduling system; mastery must not remove them permanently from review.
-- Priority lists show prompts only. Never reveal answers in Highest-Priority Review.
+- Priority lists show prompts only and only from the currently selected/available card pool. Never reveal answers in Highest-Priority Review and never show a deselected card there.
 - Back restores the pre-review snapshot and reuses the review event ID; it must never count both the original grade and the corrected grade.
 - Back preserves the original response time and the review's session/warm-up classification unless explicitly changed.
-- Back/correction restores the saved grade for editing; it must not silently recalculate a new time-based default from the old response time.
+- Back/correction restores the saved grade for editing; it must not silently recalculate a new automatic default from the old response time.
 - Skip must not be treated as a correct answer or mastery event unless explicitly requested.
 
 ## Flashcard timing
 
 - The front timer displays hundredths of a second.
 - The timer measures only active time spent viewing the unrevealed front of the current card.
-- The timer stops when the answer is revealed; that captured value is the value used to choose the initial Right/Wrong and Easy/Medium/Hard defaults.
+- The timer stops when the answer is revealed; that captured value is used to choose the initial Easy/Medium/Hard difficulty. Correctness starts as Right regardless of elapsed time.
 - Time while the browser tab/window is hidden or unfocused must never count.
 - A study session begins behind an explicit Start gate. The timer remains at rest until the user presses Start or a non-control key.
 - The Start gate also has an explicit Pause/Start-gate path available without leaving the browser tab.
@@ -128,14 +128,15 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 
 ## Keyboard and interaction behavior
 
-- Space reveals an unrevealed card after the Start gate has been dismissed; reveal also fills the time-based correctness and difficulty defaults.
-- After reveal, R = Right and W = Wrong and may override the automatic correctness selection.
+- Space reveals an unrevealed card after the Start gate has been dismissed; reveal also fills `Right` plus the time-based difficulty default.
+- After reveal, Enter toggles correctness between Right and Wrong without saving.
+- After reveal, Shift+Enter flips between question and answer without saving and without adding response time.
+- After reveal, R = Right and W = Wrong and may override or confirm the automatic correctness selection.
 - After reveal, 1 = Easy, 2 = Medium, and 3 = Hard and may override the automatic difficulty selection.
-- After reveal, Enter flips between question and answer without saving and without adding response time.
 - Clicking an unrevealed question card reveals the answer. After reveal, clicking whichever card face is visible flips to the opposite face, including clicking the answer side to return to the question.
 - Because reveal supplies both defaults, Space after reveal = Save & Next unless the grade state is deliberately cleared by future UI behavior.
 - The difficulty controls remain visible beneath the Right/Wrong controls so the user can override the suggested value before saving.
-- Do not let global study shortcuts interfere with typing in inputs, textareas, selects, editable regions, listboxes, toolbar controls, or Start-gate controls.
+- Do not let global study shortcuts interfere with typing in inputs, textareas, selects, editable regions, listboxes, toolbar controls, Start-gate controls, or native activation of ordinary buttons. A focused flashcard face is the exception: Enter/Shift+Enter retain the study shortcuts rather than triggering an unintended face-button click.
 - When adding overlays or dialogs, preserve keyboard accessibility and prevent the activating/dismissing key from leaking through to underlying controls.
 
 ## Continuous memory and synchronization
