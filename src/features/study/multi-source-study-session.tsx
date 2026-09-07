@@ -439,6 +439,6 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
       <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} />
       <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
     </section>
-    <StudySidebar deck={deck} cards={visibleCandidates.map((candidate) => candidate.card)} copy={copy} direction={direction} stats={stats} initialReviewed={sessionProgress.initialReviewed} initialTotal={sessionProgress.initialTotal} initialPercent={sessionProgress.initialPercent} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
+    <StudySidebar copy={copy} direction={direction} stats={stats} initialReviewed={sessionProgress.initialReviewed} initialTotal={sessionProgress.initialTotal} initialPercent={sessionProgress.initialPercent} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
   </div>;
 }
