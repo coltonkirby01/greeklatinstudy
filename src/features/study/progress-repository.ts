@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../../lib/supabase";
+import { LESSON3_GRAMMAR_DECK_ID, purgeRetiredLesson3GrammarProgress, RETIRED_LESSON3_GRAMMAR_CARD_IDS } from "./progress-migrations";
 import type { DeckProgressEnvelope, ReviewDifficulty, ReviewResult } from "./types";
 
 const localKey = (deckId: string) => `greek-latin-study:deck:${deckId}:v2`;
@@ -52,6 +53,7 @@ export function excludeDeletedSessionHistory(envelope: DeckProgressEnvelope, rev
 }
 
 function preparedEnvelope(envelope: DeckProgressEnvelope, extraDeletedIds: readonly string[] = [], keepPending = true): DeckProgressEnvelope {
+  envelope = purgeRetiredLesson3GrammarProgress(envelope);
   const pendingDeletedReviewIds = uniqueReviewIds(envelope.pendingDeletedReviewIds);
   const deletedReviewIds = uniqueReviewIds(envelope.deletedReviewIds, pendingDeletedReviewIds, extraDeletedIds);
   const sessionDeletedReviewIds = uniqueReviewIds(envelope.sessionDeletedReviewIds);
@@ -73,9 +75,18 @@ function sameReviewIds(left: readonly string[] | undefined, right: readonly stri
   return a.size === b.size && [...a].every((id) => b.has(id));
 }
 
+async function purgeRetiredLesson3GrammarReviewEvents(user: User | null, deckId: string) {
+  if (!supabase || !user || deckId !== LESSON3_GRAMMAR_DECK_ID) return null;
+  const { error } = await supabase.from("review_events").delete().eq("user_id", user.id).eq("deck_id", deckId).in("card_id", [...RETIRED_LESSON3_GRAMMAR_CARD_IDS]);
+  return error?.message ?? null;
+}
+
 export function loadLocalEnvelope(deckId: string) {
   const local = rawLocalEnvelope(deckId);
-  return local ? preparedEnvelope(local) : null;
+  if (!local) return null;
+  const prepared = preparedEnvelope(local);
+  if (JSON.stringify(prepared) !== JSON.stringify(local)) localStorage.setItem(localKey(deckId), JSON.stringify(prepared));
+  return prepared;
 }
 
 export function saveLocalEnvelope(envelope: DeckProgressEnvelope) {
@@ -115,10 +126,12 @@ export async function loadProgressEnvelope(deckId: string, user: User | null) {
       || !sameReviewIds(winner.deletedReviewIds, remote.deletedReviewIds)
       || !sameReviewIds(winner.sessionDeletedReviewIds, remote.sessionDeletedReviewIds)
       || !sameReviewIds(winner.deletedSessionIds, remote.deletedSessionIds)
+      || !sameReviewIds(winner.retiredCardIds, remote.retiredCardIds)
       || Boolean(winner.pendingDeletedReviewIds?.length);
     if (needsPush) await saveProgressEnvelope(winner, user);
   }
-  return { envelope: winner ?? null, source: remote ? "cloud" as const : "local" as const, syncError: null };
+  const retiredCleanupError = await purgeRetiredLesson3GrammarReviewEvents(user, deckId);
+  return { envelope: winner ?? null, source: remote ? "cloud" as const : "local" as const, syncError: retiredCleanupError };
 }
 
 export async function saveProgressEnvelope(envelope: DeckProgressEnvelope, user: User | null) {
@@ -144,6 +157,8 @@ export async function saveProgressEnvelope(envelope: DeckProgressEnvelope, user:
       localStorage.setItem(localKey(cleaned.deckId), JSON.stringify(cleaned));
     }
   }
+  const retiredCleanupError = await purgeRetiredLesson3GrammarReviewEvents(user, envelope.deckId);
+  if (retiredCleanupError) throw new Error(retiredCleanupError);
   return { cloud: true };
 }
 
