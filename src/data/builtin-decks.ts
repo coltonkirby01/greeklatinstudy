@@ -33,19 +33,22 @@ export function loadGreekDeck() {
 export function loadGreekLesson3VocabularyDeck() {
   greekLesson3VocabularyPromise ??= fetchText("data/greek-lesson3-vocab.json").then((text) => {
     const source = JSON.parse(text) as GreekLesson3VocabularySourceCard[];
-    const cards: StudyCard[] = source.map((card, index) => ({
-      id: card.id,
-      deckId: "alpha-omega-lesson3-vocab",
-      front: card.greek,
-      back: card.meaning,
-      reverseFront: card.meaning,
-      reverseBack: card.greek,
-      category: "Lesson 3 Vocabulary",
-      rank: index + 1,
-      source: "From Alpha to Omega, Lesson 3",
-      notes: `${card.part_of_speech} · Pronunciation: ${classicalGreekPronunciation(card.greek)}`,
-      metadata: { lesson: card.lesson, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation: classicalGreekPronunciation(card.greek) },
-    }));
+    const cards: StudyCard[] = source.map((card, index) => {
+      const pronunciation = classicalGreekPronunciation(card.greek);
+      return {
+        id: card.id,
+        deckId: "alpha-omega-lesson3-vocab",
+        front: card.greek,
+        back: card.meaning,
+        reverseFront: card.meaning,
+        reverseBack: card.greek,
+        category: "Lesson 3 Vocabulary",
+        rank: index + 1,
+        source: "From Alpha to Omega, Lesson 3",
+        notes: `${card.part_of_speech} · Pronunciation: ${pronunciation}`,
+        metadata: { lesson: card.lesson, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation },
+      };
+    });
     return { id: "alpha-omega-lesson3-vocab", slug: "greek", title: "Greek Lesson 3 Vocabulary", eyebrow: "Lesson 3 vocabulary", description: "Eleven vocabulary entries supplied for Lesson 3, tracked separately from grammar forms.", language: "greek", cards, supportsReverse: true, sourceNote: "From Alpha to Omega, Lesson 3 vocabulary." } satisfies DeckDefinition;
   });
   return greekLesson3VocabularyPromise;
