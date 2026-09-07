@@ -3,11 +3,12 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/auth-context";
-import { cardsAvailableToState, createEnvelope, createModeState, directionalCopy, ensureCurrentCard, formatResponseTime, highestPriorityCards, maybeUnlockNextBatch, pickNextCard, presentCard, priorityScore, recordReview, reviewAndAdvance, skipAndAdvance, studyStats } from "./engine";
+import { cardsAvailableToState, createEnvelope, createModeState, directionalCopy, ensureCurrentCard, formatResponseTime, getCardProgress, highestPriorityCards, maybeUnlockNextBatch, pickNextCard, presentCard, priorityScore, recordReview, reviewAndAdvance, skipAndAdvance } from "./engine";
 import { deleteReviewEvent, loadProgressEnvelope, saveProgressEnvelope, upsertReviewEvent } from "./progress-repository";
 import { intrinsicCardDifficulty } from "./scoring";
+import { autoReviewDefaults, sessionProgressSummary } from "./session-review";
 import "./study-gate.css";
-import { defaultDifficultyAfterResult, StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
+import { StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
 import { studyShortcut } from "./study-shortcuts";
 import type { DeckDefinition, DeckProgressEnvelope, DirectionalCardCopy, ReviewDifficulty, ReviewResult, ReviewTransaction, SelectionMode, StudyActivityKind, StudyCard, StudyDirection, StudyModeState } from "./types";
 import { useResponseTimer } from "./use-response-timer";
@@ -31,10 +32,6 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
   const [backtracking, setBacktracking] = useState(false), [startGateOpen, setStartGateOpen] = useState(true);
   const [session, setSession] = useState<SessionMeta>(makeSession), [warmup, setWarmup] = useState<WarmupMeta | null>(null);
   const lastStudyKey = useRef(studyKey);
-
-  useEffect(() => {
-    if (result && !difficulty) setDifficulty(defaultDifficultyAfterResult(difficulty));
-  }, [difficulty, result]);
 
   const saveMode = useCallback((nextMode: StudyModeState, options?: { review?: ReviewTransaction; deleteReviewId?: string }) => {
     const currentEnvelope = envelopeRef.current;
@@ -78,12 +75,20 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
 
   const modeState = envelope?.modes[studyKey] ?? null, current = modeState ? cards.find((card) => card.id === modeState.currentCardId) ?? null : null;
   const timer = useResponseTimer(current && modeState ? `${studyKey}:${current.id}:${modeState.cards[current.id]?.lastPresentedAt ?? 0}` : null, Boolean(current && modeState && !revealed && !editingTransaction && !startGateOpen));
-  const stats = useMemo(() => modeState ? studyStats(cards, modeState) : null, [cards, modeState]);
+  const availableCards = useMemo(() => modeState ? cardsAvailableToState(cards, modeState) : [], [cards, modeState]);
+  const sessionProgress = useMemo(() => modeState ? sessionProgressSummary(availableCards.map((card) => ({ progress: getCardProgress(modeState, card.id) })), session.id) : null, [availableCards, modeState, session.id]);
+  const stats = sessionProgress?.stats ?? null;
   const priority = useMemo(() => modeState ? highestPriorityCards(cards, modeState, deck.staged, 5) : [], [cards, deck.staged, modeState]);
   const copy = current ? directionalCopy(current, direction) : null;
 
   function resetUi() { setRevealed(false); setReviewFront(false); setBacktracking(false); setResult(null); setDifficulty(null); setCapturedTimeMs(null); setEditingTransaction(null); }
-  function reveal() { if (!current || revealed || editingTransaction || startGateOpen) return; setBacktracking(false); setReviewFront(false); setCapturedTimeMs(timer.capture()); setRevealed(true); }
+  function reveal() {
+    if (!current || revealed || editingTransaction || startGateOpen) return;
+    setBacktracking(false); setReviewFront(false);
+    const responseTimeMs = timer.capture();
+    const suggested = autoReviewDefaults(responseTimeMs);
+    setCapturedTimeMs(responseTimeMs); setResult(suggested.result); setDifficulty(suggested.difficulty); setRevealed(true);
+  }
   function toggleReviewFace() { if (revealed) setReviewFront((value) => !value); }
   function changeOrder(next: SelectionMode) { setSelectionMode(next); if (!modeState || !current) return; const selected = warmup ? pickWarmupCard(modeState, current.id) : pickNextCard(cards, modeState, next, { excludeCardId: current.id, staged: deck.staged }); if (selected) { resetUi(); setStartGateOpen(true); saveMode(presentCard(modeState, selected)); } }
   function skip() { if (!modeState || editingTransaction) return; resetUi(); const next = warmup ? pickWarmupCard(modeState, current?.id) : null; if (next) saveMode(presentCard(modeState, next)); else saveMode(skipAndAdvance(modeState, cards, selectionMode, deck.staged)); }
@@ -111,17 +116,16 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
   }
   function back() { if (!lastTransaction || !modeState) return; const transaction = lastTransaction; setLastTransaction(null); setEditingTransaction(transaction); setResult(transaction.result); setDifficulty(transaction.difficulty); setCapturedTimeMs(transaction.responseTimeMs); setBacktracking(true); setRevealed(false); setReviewFront(false); saveMode(transaction.beforeState, { deleteReviewId: transaction.reviewId }); requestAnimationFrame(() => requestAnimationFrame(() => setRevealed(true))); setNotice("Previous grade undone. Choose the corrected result and save it."); }
   function saveNext() {
-    if (!modeState || !current || !result) return;
-    const reviewDifficulty = defaultDifficultyAfterResult(difficulty);
+    if (!modeState || !current || !result || !difficulty) return;
     const reviewedAt = Date.now(), reviewId = editingTransaction?.reviewId ?? crypto.randomUUID(), source = editingTransaction?.beforeState ?? modeState, responseTimeMs = capturedTimeMs ?? timer.capture();
     const activityKind: StudyActivityKind = editingTransaction?.activityKind ?? (warmup ? "warmup" : "study"), activeMeta = activityKind === "warmup" && warmup ? warmup : session;
     const sessionId = editingTransaction?.sessionId ?? activeMeta.id, sessionStartedAt = editingTransaction?.sessionStartedAt ?? activeMeta.startedAt;
 
     if (warmup && !editingTransaction) {
       const beforeState = structuredClone(source);
-      let next = recordReview(source, current, { id: reviewId, result, difficulty: reviewDifficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, activityKind: "warmup" });
+      let next = recordReview(source, current, { id: reviewId, result, difficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, activityKind: "warmup" });
       next = maybeUnlockNextBatch(next, cards, deck.staged, reviewedAt);
-      const transaction: ReviewTransaction = { reviewId, cardId: current.id, result, difficulty: reviewDifficulty, responseTimeMs, beforeState, sessionId, sessionStartedAt, activityKind: "warmup" };
+      const transaction: ReviewTransaction = { reviewId, cardId: current.id, result, difficulty, responseTimeMs, beforeState, sessionId, sessionStartedAt, activityKind: "warmup" };
       setLastTransaction(transaction); resetUi();
 
       if (warmup.remaining <= 1) {
@@ -141,7 +145,7 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
       return;
     }
 
-    const applied = reviewAndAdvance(source, cards, selectionMode, { id: reviewId, result, difficulty: reviewDifficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, activityKind }, deck.staged);
+    const applied = reviewAndAdvance(source, cards, selectionMode, { id: reviewId, result, difficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, activityKind }, deck.staged);
     let next = applied.state;
     if (editingTransaction?.activityKind === "warmup" && warmup) {
       const selected = pickWarmupCard(next, current.id);
@@ -173,7 +177,7 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
     window.addEventListener("keydown", keydown); return () => window.removeEventListener("keydown", keydown);
   });
 
-  if (!modeState || !current || !copy || !stats) return <div className="study-loading panel-surface" role="status"><span className="loading-mark">{deck.language === "greek" ? "α" : "A"}</span><p>{cards.length ? "Preparing this study mode…" : "No cards match these filters."}</p></div>;
+  if (!modeState || !current || !copy || !stats || !sessionProgress) return <div className="study-loading panel-surface" role="status"><span className="loading-mark">{deck.language === "greek" ? "α" : "A"}</span><p>{cards.length ? "Preparing this study mode…" : "No cards match these filters."}</p></div>;
   const currentMeta = cardMeta?.(current), showingAnswer = revealed && !reviewFront, gated = startGateOpen && !revealed && !editingTransaction;
   const front = <><span className="card-side">Question</span>{renderFront ? renderFront(current, copy) : <span className={`study-prompt ${deck.language === "greek" ? "greek-script" : ""}`}>{copy.prompt}</span>}</>;
   const backFace = <><span className="card-side">Answer</span>{renderBack ? renderBack(current, copy) : <span className="answer-block"><strong className={deck.language === "greek" ? "greek-answer-title" : "study-answer"}>{copy.answer}</strong>{current.notes && <span className="answer-notes">{current.notes}</span>}</span>}</>;
@@ -197,6 +201,6 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
       <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} />
       <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
     </section>
-    <StudySidebar deck={deck} cards={cards} copy={copy} direction={direction} stats={stats} priority={priority} priorityPrompt={priorityPrompt} />
+    <StudySidebar deck={deck} cards={cards} copy={copy} direction={direction} stats={stats} initialReviewed={sessionProgress.initialReviewed} initialTotal={sessionProgress.initialTotal} initialPercent={sessionProgress.initialPercent} priority={priority} priorityPrompt={priorityPrompt} />
   </div>;
 }
