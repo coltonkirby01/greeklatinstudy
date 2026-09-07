@@ -4,9 +4,13 @@ The canonical GitHub repository is `coltonkirby01/greeklatinstudy`; its GitHub P
 
 Treat the repository root as authoritative. Do not edit the retired `greek-latin-study-github/` implementation if it appears in old commits.
 
+For the practical file map, safe-change procedure, and performance-maintenance rules, also read [`docs/MAINTENANCE.md`](docs/MAINTENANCE.md) before nontrivial work.
+
 ## Core rule
 
 Preserve existing study behavior unless the requested change explicitly modifies it. New features must not silently break, merge, reset, or reinterpret existing decks, statistics, mastery, review history, authentication, synchronization, timing, filtering, or session behavior.
+
+Cleanup, refactoring, performance optimization, dependency work, and file reorganization are not permission to redesign the interface or alter/delete existing user progress. Preserve the visible interface and durable learning state unless the user explicitly requests a change.
 
 ## App structure and filtering
 
@@ -19,6 +23,7 @@ Preserve existing study behavior unless the requested change explicitly modifies
 - Expanding/opening a dropdown is independent from selecting its parent. Users must be able to open an unchecked parent and select one or several child boxes without first selecting the entire parent.
 - Selecting a child beneath an unchecked parent activates only the necessary child path, not every sibling in that parent.
 - Filters narrow the current study pool only. Deselecting a source or child must never erase or reset stored mastery, history, scheduling, timing, or statistics for those cards.
+- Greek and Latin filter selections persist when the user leaves and returns to the flashcard app. Do not reset filters merely because the route unmounted or the user navigated elsewhere.
 - When filters change, keep the user on the same current card whenever that card still belongs to the newly selected pool. Choose a replacement card only if the current card was actually excluded by the new filter selection.
 - Changing a study filter or direction returns the active study surface to the Start gate before timing resumes.
 
@@ -44,7 +49,9 @@ Preserve existing study behavior unless the requested change explicitly modifies
 - Opening a Henle dropdown may load Henle source data, but opening alone must not select the source.
 - Latin grammar filters are hierarchical and composable. Broad sections can be narrowed by verb family, voice, and form/mood (for example Verbs + Active Voice + Indicative).
 - Henle Part I grammatical sections are Nouns, Adjectives, Adverbs, Numerals, Pronouns, and Verbs. Do not reduce the Henle selector to verbs only.
-- Henle Whole Chart answers must explicitly identify stems as `Stem:` and endings/personal signs as `Ending:` whenever the source metadata identifies them as such. Do not present a bare stem or ending as though it were an unlabeled full form.
+- Henle Individual Forms and Whole Charts show the authoritative Henle Rule number on the answer side when source data supplies it.
+- Henle Whole Chart answers must explicitly identify stems as `Stem:` and endings/personal signs as `Ending:` whenever the source metadata identifies them as such. Ordinary finite forms may show a defensible `Stem / base + Ending → Complete form` breakdown when the source supports it. Do not invent a morphological split where the data is ambiguous.
+- Do not reintroduce a separate "How to read this answer" instructional block on Henle cards unless the user explicitly asks for it.
 
 ## Built-in deck invariants
 
@@ -69,8 +76,10 @@ Preserve existing study behavior unless the requested change explicitly modifies
 - A new study session is a performance window layered on top of continuous long-term mastery. Starting a new session must never reset mastery, due dates, intervals, response-time history, or adaptive priorities.
 - Reviews belonging to a normal session carry a stable session ID/start time so sessions can be compared in Stats.
 - Normal sessions may also carry a persistent custom session name. Renaming a session changes only its display identity; it must not change its session ID, review membership, mastery, scheduling, ranking data, or long-term memory. Everywhere a custom name exists, show only that custom name; do not append the old automatic/timestamped name.
-- Sessions without custom names receive useful automatic names based on language, source/focus, and date/time rather than opaque IDs or purely generic labels.
+- The currently active Greek/Latin session selector shows a stable current-session name with no appended timestamp. If there is a custom name, use it; otherwise use a source-based default such as `Latin · Dickinson Vocabulary`.
+- Historical sessions without custom names may retain useful automatic names based on language, source/focus, and date/time so multiple sessions remain distinguishable.
 - Users can deliberately continue a past ranked session. Continuing reuses that session's original ID, start time, and custom name when present, while card selection still uses the user's current long-term mastery, due state, speed, accuracy, and adaptive priorities.
+- When the user enters the Greek or Latin flashcard app without explicitly selecting/creating another session, default to the most recently reviewed resumable explicit session. Starting a fresh session must be a deliberate user action through Start new session (or an explicitly defined equivalent).
 - Both Greek and Latin study toolbars expose one compact Session dropdown in the control position previously used by the standalone New session button. That menu lets the user keep the current session, start a new session, or select a resumable past session.
 - Toolbar select controls (including Adaptive/Sequential and Session) use a clean, fully visible dropdown indicator with enough right-side padding; never let the arrow crowd or clip against the rounded edge.
 - Do not reintroduce a separate New session button beside the Session dropdown unless explicitly requested; starting a new session belongs in that menu.
@@ -80,11 +89,14 @@ Preserve existing study behavior unless the requested change explicitly modifies
 - Warm-up selection is adaptive/personalized and should favor due, slow, difficult, recently missed, or otherwise high-priority cards from the currently selected material.
 - Warm-up reviews DO update the continuous long-term memory bank and scheduling because they are real recall practice.
 - Warm-up reviews are tagged separately and MUST NOT inflate or distort ranked main-session scores.
-- After the warm-up completes, return to the Start gate and create a fresh ranked session window.
+- After the warm-up completes, return to the Start gate and create a fresh ranked session window where the active controller explicitly requires that behavior; do not reset long-term learning memory.
 
 ## Review and mastery behavior
 
-- Correctness and difficulty are separate inputs and must remain separately recorded.
+- Correctness and difficulty are separate recorded inputs even though difficulty is optional at grading time.
+- Right/Wrong alone is sufficient to save a review. If the user does not explicitly choose Easy/Medium/Hard, store `medium` automatically.
+- Easy/Medium/Hard remains available as an explicit override. Never erase a deliberate Easy or Hard choice by applying the automatic Medium default afterward.
+- Response time is recorded independently and remains part of adaptive priority/scheduling, so correctness-only grading still preserves the time-based difficulty signal.
 - Review scheduling continues to consider correctness, difficulty, response time, recency, strength, and due state as implemented by the study engine.
 - Staged decks preserve their configured unlocking behavior. Do not expose locked cards early.
 - Mastered cards continue to recur according to the scheduling system; mastery must not remove them permanently from review.
@@ -112,9 +124,11 @@ Preserve existing study behavior unless the requested change explicitly modifies
 
 - Space reveals an unrevealed card after the Start gate has been dismissed.
 - After reveal, R = Right and W = Wrong.
-- After reveal, 1 = Easy, 2 = Medium, and 3 = Hard.
+- After reveal, 1 = Easy, 2 = Medium, and 3 = Hard as optional difficulty overrides.
 - After reveal, Enter flips between question and answer without saving and without adding response time.
-- After both correctness and difficulty are selected, Space = Save & Next.
+- Clicking an unrevealed question card reveals the answer. After reveal, clicking whichever card face is visible flips to the opposite face, including clicking the answer side to return to the question.
+- After correctness is selected, Space = Save & Next. Difficulty does not have to be selected first because missing difficulty defaults to Medium.
+- The difficulty controls remain visible beneath the Right/Wrong controls so the user can override Medium before saving.
 - Do not let global study shortcuts interfere with typing in inputs, textareas, selects, editable regions, listboxes, toolbar controls, or Start-gate controls.
 - When adding overlays or dialogs, preserve keyboard accessibility and prevent the activating/dismissing key from leaking through to underlying controls.
 
@@ -138,8 +152,9 @@ Preserve existing study behavior unless the requested change explicitly modifies
 - The Stats page provides a multi-select session scope. Users can view all sessions, one session, or any selected combination; the proficiency summaries, card analysis, recent reviews, and trend views must follow the selected scope.
 - Session management belongs directly inside Stats > Choose sessions; do not add a separate session-management card/panel. Double-click an explicit session name there for Finder/Explorer-style inline renaming, and keep Delete in the same row.
 - Legacy/inferred session buckets created from pre-session-ID review history must also be renameable and deletable from Stats > Choose sessions. Their storage origin (local or cloud) must not make them unmanageable.
-- Deleting a session is permanent for session/history data: remove its stored review-history records, remove its cloud `review_events` rows when signed in, and remove it from Stats and all resumable Session menus. Deletion must still preserve the already-accumulated card-learning state used by the study engine: mastery, correctness/difficulty aggregates, strength, intervals, due dates, adaptive-priority inputs, response-time aggregates, review sequence, and Dickinson unlock progress must not be recalculated or rolled back. Stats/proficiency are recomputed only from the sessions that remain.
-- Session deletion must require a final confirmation explaining both sides of that behavior: what historical/session data will be permanently removed and what long-term adaptive learning state will remain unchanged.
+- Deleting a session is permanent for session identity and Stats visibility: the session must disappear from Stats and all resumable Session menus and stale local/cloud state must not resurrect it. Reviews that supplied adaptive learning evidence are de-sessionized/marked Stats-excluded rather than used to rebuild or roll back card-learning state. Preserve mastery, correctness/difficulty aggregates, strength, intervals, due dates, adaptive-priority inputs, response-time aggregates, review sequence, and Dickinson unlock progress. Stats/proficiency are recomputed only from non-excluded sessions/reviews.
+- Session deletion markers/tombstones must remain persistent enough that an already-open flashcard app or stale cloud/local merge cannot restore a deleted session. If an open app was using a deleted session, fall back to the newest remaining resumable session or a new session if none remains.
+- Session deletion must require a final confirmation explaining both sides of that behavior: what session/Stats/menu history will disappear and what long-term adaptive learning state will remain unchanged.
 - Explicit resumable sessions retain Continue actions in the session rankings. Custom session names persist with review history and survive reload/login synchronization.
 - Stats include lightweight trend graphs for session score and active recall time over time. Avoid large charting dependencies when simple native/SVG rendering is sufficient.
 - Recent Reviews is a combined Greek + Latin activity feed, visually separated from both language-specific Stats sections.
