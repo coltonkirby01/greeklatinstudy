@@ -4,17 +4,44 @@ import { latinRowsToCards, parseCsv } from "../src/data/builtin-decks";
 import { jsonToCards, rowsToCards } from "../src/features/decks/import-parser";
 import { buildHenleCharts } from "../src/features/henle/henle-data";
 
+type GreekGrammarChart = { id: string; category: string; prompt: string; columns: string[]; rows: Array<{ label: string; cells: string[] }> };
+
 describe("authoritative source migration", () => {
-  it("preserves all existing source deck counts", () => {
+  it("preserves source counts while using three whole-paradigm Lesson 3 grammar cards", () => {
     const greek = JSON.parse(fs.readFileSync("public/data/greek-cards.json", "utf8"));
     const greekLesson3Vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson3-vocab.json", "utf8"));
-    const greekLesson3Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8"));
+    const greekLesson3Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as GreekGrammarChart[];
     const latin = latinRowsToCards(parseCsv(fs.readFileSync("public/data/dickinson-latin-core.csv", "utf8")));
     const henle = JSON.parse(fs.readFileSync("public/data/henle-part1-forms.json", "utf8"));
     expect(greek).toHaveLength(55);
     expect(greekLesson3Vocabulary).toHaveLength(11);
-    expect(greekLesson3Grammar).toHaveLength(11);
-    expect(new Set(greekLesson3Grammar.map((card: { category: string }) => card.category))).toEqual(new Set(["Present Active Indicative", "Present Active Infinitive", "Present Active Imperative"]));
+    expect(greekLesson3Grammar).toHaveLength(3);
+    expect(new Set(greekLesson3Grammar.map((card) => card.category))).toEqual(new Set(["Present Active Indicative", "Present Active Infinitive", "Present Active Imperative"]));
+    expect(greekLesson3Grammar.map((card) => card.id).sort()).toEqual([
+      "lesson3-chart-present-active-imperative",
+      "lesson3-chart-present-active-indicative",
+      "lesson3-chart-present-active-infinitive",
+    ]);
+    expect(greekLesson3Grammar.some((card) => card.id.startsWith("lesson3-g-"))).toBe(false);
+
+    const indicative = greekLesson3Grammar.find((card) => card.category === "Present Active Indicative");
+    expect(indicative?.columns).toEqual(["Singular", "Plural"]);
+    expect(indicative?.rows).toEqual([
+      { label: "1st person", cells: ["παιδεύω", "παιδεύομεν"] },
+      { label: "2nd person", cells: ["παιδεύεις", "παιδεύετε"] },
+      { label: "3rd person", cells: ["παιδεύει", "παιδεύουσι(ν)"] },
+    ]);
+
+    const infinitive = greekLesson3Grammar.find((card) => card.category === "Present Active Infinitive");
+    expect(infinitive?.rows).toEqual([{ label: "Present Active Infinitive", cells: ["παιδεύειν"] }]);
+
+    const imperative = greekLesson3Grammar.find((card) => card.category === "Present Active Imperative");
+    expect(imperative?.columns).toEqual(["Singular", "Plural"]);
+    expect(imperative?.rows).toEqual([
+      { label: "2nd person", cells: ["παίδευε", "παιδεύετε"] },
+      { label: "3rd person", cells: ["παιδευέτω", "παιδευόντων"] },
+    ]);
+
     expect(latin).toHaveLength(997);
     expect(henle.cards).toHaveLength(2_062);
     expect(new Set(henle.cards.map((card: { id: string }) => card.id)).size).toBe(2_062);
