@@ -7,14 +7,15 @@ export const HARD_RECALL_START_MS = 10_000;
 export type AutoReviewDefaults = { result: ReviewResult; difficulty: ReviewDifficulty };
 
 /**
- * Suggested grade from active front-side recall time. These are defaults only;
- * the user can override either correctness or difficulty before saving.
+ * Suggested grade from active front-side recall time. Correctness starts Right
+ * for every revealed card; recall time only chooses the default difficulty.
+ * The user can override either correctness or difficulty before saving.
  */
 export function autoReviewDefaults(responseTimeMs: number): AutoReviewDefaults {
   const elapsed = normalizeResponseTime(responseTimeMs);
   if (elapsed < EASY_RECALL_LIMIT_MS) return { result: "right", difficulty: "easy" };
-  if (elapsed < HARD_RECALL_START_MS) return { result: "wrong", difficulty: "medium" };
-  return { result: "wrong", difficulty: "hard" };
+  if (elapsed < HARD_RECALL_START_MS) return { result: "right", difficulty: "medium" };
+  return { result: "right", difficulty: "hard" };
 }
 
 export type SessionProgressItem = { progress: CardProgress };
