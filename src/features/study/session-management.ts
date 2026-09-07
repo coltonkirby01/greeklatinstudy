@@ -75,16 +75,17 @@ function summarizeManagedSession(id: string, language: "Greek" | "Latin", entrie
 }
 
 export function collectManagedSessions(envelopes: Record<string, DeckProgressEnvelope | null>) {
-  const allReviews: SessionReview[] = [];
+  const reviewsByLanguage: Record<"Greek" | "Latin", SessionReview[]> = { Greek: [], Latin: [] };
   for (const [deckId, envelope] of Object.entries(envelopes)) {
     if (!envelope) continue;
     const language = deckLanguage(deckId);
+    const target = reviewsByLanguage[language];
     for (const [studyKey, mode] of Object.entries(envelope.modes)) {
       const source = sourceLabel(deckId, studyKey);
       for (const progress of Object.values(mode.cards)) {
         for (const review of progress.history) {
           if (review.activityKind === "warmup" || review.statsExcluded) continue;
-          allReviews.push({ language, source, review });
+          target.push({ language, source, review });
         }
       }
     }
@@ -92,12 +93,18 @@ export function collectManagedSessions(envelopes: Record<string, DeckProgressEnv
 
   const sessions: ManagedSession[] = [];
   for (const language of ["Greek", "Latin"] as const) {
-    const languageReviews = allReviews.filter((entry) => entry.language === language).sort((a, b) => a.review.reviewedAt - b.review.reviewedAt);
+    const languageReviews = reviewsByLanguage[language].sort((a, b) => a.review.reviewedAt - b.review.reviewedAt);
     const explicit = new Map<string, SessionReview[]>();
     const legacy: SessionReview[] = [];
     for (const entry of languageReviews) {
-      if (entry.review.sessionId) explicit.set(entry.review.sessionId, [...(explicit.get(entry.review.sessionId) ?? []), entry]);
-      else legacy.push(entry);
+      const sessionId = entry.review.sessionId;
+      if (!sessionId) {
+        legacy.push(entry);
+        continue;
+      }
+      const entries = explicit.get(sessionId);
+      if (entries) entries.push(entry);
+      else explicit.set(sessionId, [entry]);
     }
 
     for (const [id, entries] of explicit) sessions.push(summarizeManagedSession(id, language, entries, false));
