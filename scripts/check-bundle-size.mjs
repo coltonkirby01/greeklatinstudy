@@ -1,6 +1,5 @@
 import { gzipSync } from "node:zlib";
 import { readdir, readFile, stat } from "node:fs/promises";
-import { join } from "node:path";
 
 const assetsDir = new URL("../dist/assets/", import.meta.url);
 const entries = await readdir(assetsDir);
@@ -22,7 +21,10 @@ let cssGzipKb = 0;
 for (const file of cssFiles) cssGzipKb += await gzipKb(file);
 
 const budgets = {
-  mainJsGzipKb: 160,
+  // The production shell is about 80 KB gzip after moving Supabase behind an
+  // async boundary. Keep enough headroom for normal changes without allowing
+  // a future refactor to silently put the service SDK back in the initial app.
+  mainJsGzipKb: 100,
   cssGzipKb: 12,
 };
 
