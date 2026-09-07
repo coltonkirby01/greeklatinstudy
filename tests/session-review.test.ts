@@ -12,11 +12,11 @@ function review(id: string, reviewedAt: number, result: "right" | "wrong", diffi
 }
 
 describe("automatic review defaults", () => {
-  it("uses the requested time thresholds", () => {
+  it("defaults every revealed card to right while using time only for difficulty", () => {
     expect(autoReviewDefaults(2_999)).toEqual({ result: "right", difficulty: "easy" });
-    expect(autoReviewDefaults(3_000)).toEqual({ result: "wrong", difficulty: "medium" });
-    expect(autoReviewDefaults(9_999)).toEqual({ result: "wrong", difficulty: "medium" });
-    expect(autoReviewDefaults(10_000)).toEqual({ result: "wrong", difficulty: "hard" });
+    expect(autoReviewDefaults(3_000)).toEqual({ result: "right", difficulty: "medium" });
+    expect(autoReviewDefaults(9_999)).toEqual({ result: "right", difficulty: "medium" });
+    expect(autoReviewDefaults(10_000)).toEqual({ result: "right", difficulty: "hard" });
   });
 });
 
