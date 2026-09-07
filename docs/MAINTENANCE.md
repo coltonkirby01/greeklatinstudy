@@ -78,16 +78,19 @@ Current grading rules:
 - Recall time is still stored and remains part of adaptive priority/scheduling.
 - The difficulty controls appear below the Right/Wrong controls.
 
-### Persistence and synchronization
+### Persistence, authentication, and synchronization
 
 - `src/features/study/progress-repository.ts` — local/cloud envelope load, save, merge, review-event persistence, and deletion tombstones.
 - `src/features/study/session-management.ts` — canonical session catalog, explicit sessions, legacy inferred sessions, naming, rename/delete support.
 - `src/pages/stats-page.tsx` — Stats calculations and session-management UI.
-- `src/lib/supabase.ts` — Supabase client configuration.
-- `src/features/auth/auth-context.tsx` — auth session/admin context.
+- `src/lib/supabase-config.ts` — lightweight public Supabase URL/key/config helpers. This file intentionally has no SDK import and is safe in the initial shell.
+- `src/lib/supabase.ts` — actual Supabase client. Keep the `@supabase/supabase-js` dependency behind the asynchronous boundary.
+- `src/features/auth/auth-context.tsx` — auth session/admin context. It intentionally dynamically imports `src/lib/supabase.ts` so the service SDK does not return to the initial JavaScript bundle.
 - `supabase/migrations/` — authoritative database schema and RLS history.
 
 Do not optimize `progress-repository.ts` by discarding history fields or recomputing state from remaining Stats history. Long-term learning state intentionally survives session deletion.
+
+Do not replace the auth-context dynamic client load with a static `supabase` import merely because the static version is shorter source code. The async split is a measured performance optimization and the bundle-size gate is intended to catch regressions here.
 
 ### Session deletion semantics
 
@@ -126,6 +129,7 @@ Optimize measured bottlenecks, not source-code aesthetics.
 Safe defaults:
 
 - Keep route pages lazy-loaded.
+- Keep the Supabase SDK out of the initial shell. The lightweight configuration and actual client are deliberately split between `supabase-config.ts` and `supabase.ts`.
 - Keep large source data in `public/data` and fetch/cache it on demand.
 - Do not eagerly load Henle source data just because the Latin page exists; opening/using Henle may load it.
 - Home study cards may prefetch their route/data on hover, focus, or pointer-down so navigation feels immediate without making every source part of the first paint.
@@ -133,7 +137,9 @@ Safe defaults:
 - Avoid adding large charting, UI, state-management, or animation libraries when native React/CSS/SVG is already sufficient.
 - Preserve the existing bundle-size gate rather than raising the limit to make a cleanup pass.
 
-Current CI bundle budgets are enforced by `scripts/check-bundle-size.mjs`. A performance change is not successful merely because the source looks shorter; compare production gzip output before and after.
+Current CI bundle budgets are enforced by `scripts/check-bundle-size.mjs`. After the async Supabase split the production main shell is about 80 KB gzip, and the main-shell budget is 100 KB gzip. The previous static-Supabase shell was about 138 KB gzip. If a cleanup unexpectedly approaches or exceeds 100 KB, investigate what entered the initial dependency graph instead of raising the budget. Total CSS remains guarded separately.
+
+A performance change is not successful merely because the source looks shorter; compare production gzip output before and after.
 
 ## Safe change procedure
 
