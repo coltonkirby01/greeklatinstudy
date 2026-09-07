@@ -1,6 +1,9 @@
 import { normalizeResponseTime } from "./engine";
 import type { CardProgress, ReviewDifficulty, ReviewResult, StudyStats } from "./types";
 
+export const EASY_RECALL_LIMIT_MS = 3_000;
+export const HARD_RECALL_START_MS = 10_000;
+
 export type AutoReviewDefaults = { result: ReviewResult; difficulty: ReviewDifficulty };
 
 /**
@@ -9,8 +12,8 @@ export type AutoReviewDefaults = { result: ReviewResult; difficulty: ReviewDiffi
  */
 export function autoReviewDefaults(responseTimeMs: number): AutoReviewDefaults {
   const elapsed = normalizeResponseTime(responseTimeMs);
-  if (elapsed < 3_000) return { result: "right", difficulty: "easy" };
-  if (elapsed < 10_000) return { result: "wrong", difficulty: "medium" };
+  if (elapsed < EASY_RECALL_LIMIT_MS) return { result: "right", difficulty: "easy" };
+  if (elapsed < HARD_RECALL_START_MS) return { result: "wrong", difficulty: "medium" };
   return { result: "wrong", difficulty: "hard" };
 }
 
@@ -38,23 +41,32 @@ export function sessionProgressSummary(items: readonly SessionProgressItem[], se
   const chronological: Array<{ reviewedAt: number; result: ReviewResult }> = [];
 
   for (const { progress } of items) {
-    const reviews = progress.history.filter((review) =>
-      review.sessionId === sessionId
-      && (review.activityKind ?? "study") === "study"
-      && !review.statsExcluded,
-    );
-    if (!reviews.length) continue;
-    reviewed += 1;
-    if (reviews.some((review) => review.result === "wrong")) everWrong += 1;
-    if (reviews.some((review) => review.difficulty === "hard")) markedHard += 1;
-    if (reviews.some((review) => review.result === "right")) rightOnce += 1;
-    for (const review of reviews) {
+    let cardReviewed = false;
+    let cardWrong = false;
+    let cardHard = false;
+    let cardRight = false;
+
+    for (const review of progress.history) {
+      if (review.sessionId !== sessionId || (review.activityKind ?? "study") !== "study" || review.statsExcluded) continue;
+      cardReviewed = true;
+      if (review.result === "right") {
+        cardRight = true;
+        rightReviews += 1;
+      } else {
+        cardWrong = true;
+      }
+      if (review.difficulty === "hard") cardHard = true;
       totalReviews += 1;
-      if (review.result === "right") rightReviews += 1;
       responseTotal += review.responseTimeMs;
       responseCount += 1;
       chronological.push({ reviewedAt: review.reviewedAt, result: review.result });
     }
+
+    if (!cardReviewed) continue;
+    reviewed += 1;
+    if (cardWrong) everWrong += 1;
+    if (cardHard) markedHard += 1;
+    if (cardRight) rightOnce += 1;
   }
 
   chronological.sort((a, b) => a.reviewedAt - b.reviewedAt);
