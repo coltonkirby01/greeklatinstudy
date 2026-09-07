@@ -5,7 +5,7 @@ import { useAuth } from "../features/auth/auth-context";
 import { loadGreekFilterSelection, saveGreekFilterSelection } from "../features/study/filter-preferences";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
 import { FilterCheckbox, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
-import type { DeckDefinition, StudyDirection } from "../features/study/types";
+import type { DeckDefinition, StudyCard, StudyDirection } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
 
 const categories = {
@@ -41,6 +41,8 @@ const grammarCategoryByKey = new Map<string, string>([
   [keys.presentActiveImperative, "Present Active Imperative"],
 ]);
 
+type GreekChartRow = { label: string; cells: string[] };
+
 function updateSet(current: Set<string>, values: readonly string[], checked: boolean) {
   const next = new Set(current);
   for (const value of values) checked ? next.add(value) : next.delete(value);
@@ -50,6 +52,32 @@ function updateSet(current: Set<string>, values: readonly string[], checked: boo
 function groupState(selected: Set<string>, values: readonly string[]) {
   const selectedCount = values.filter((value) => selected.has(value)).length;
   return { checked: selectedCount === values.length, mixed: selectedCount > 0 && selectedCount < values.length, selectedCount };
+}
+
+function chartColumns(card: StudyCard) {
+  const columns = card.metadata?.chartColumns;
+  return Array.isArray(columns) ? columns.filter((value): value is string => typeof value === "string") : [];
+}
+
+function chartRows(card: StudyCard): GreekChartRow[] {
+  const rows = card.metadata?.chartRows;
+  if (!Array.isArray(rows)) return [];
+  return rows.flatMap((row) => {
+    if (!row || typeof row !== "object") return [];
+    const value = row as { label?: unknown; cells?: unknown };
+    if (typeof value.label !== "string" || !Array.isArray(value.cells) || !value.cells.every((cell) => typeof cell === "string")) return [];
+    return [{ label: value.label, cells: value.cells as string[] }];
+  });
+}
+
+function GreekLesson3Paradigm({ card }: { card: StudyCard }) {
+  const columns = chartColumns(card), rows = chartRows(card);
+  return <div className="chart-scroll">
+    <table className="henle-chart">
+      <thead><tr><th scope="col">{columns.length === 1 ? "Form" : "Person"}</th>{columns.map((column) => <th scope="col" key={column}>{column}</th>)}</tr></thead>
+      <tbody>{rows.map((row) => <tr key={row.label}><th scope="row">{row.label}</th>{row.cells.map((cell, index) => <td key={`${row.label}-${columns[index] ?? index}`}><strong className="greek-front compact-greek">{cell}</strong></td>)}</tr>)}</tbody>
+    </table>
+  </div>;
 }
 
 export function GreekPage() {
@@ -155,7 +183,7 @@ export function GreekPage() {
         </FilterDisclosure>
 
         <FilterDisclosure title="Grammar" summary={`${lesson3GrammarState.selectedCount} of ${lesson3GrammarKeys.length} paradigms selected`} count={decks.lesson3Grammar.cards.length} nested checked={lesson3GrammarState.checked} mixed={lesson3GrammarState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson3GrammarKeys, checked))}>
-          <FilterSection title="Lesson 3 grammar" description="Present active forms from the Lesson 3 paradigm of παιδεύω.">
+          <FilterSection title="Lesson 3 grammar" description="Three whole-paradigm charts from the Lesson 3 model verb παιδεύω.">
             <FilterCheckbox label="Present Active Indicative" count={countGrammar("Present Active Indicative")} checked={selected.has(keys.presentActiveIndicative)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveIndicative], checked))} />
             <FilterCheckbox label="Present Active Infinitive" count={countGrammar("Present Active Infinitive")} checked={selected.has(keys.presentActiveInfinitive)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveInfinitive], checked))} />
             <FilterCheckbox label="Present Active Imperative" count={countGrammar("Present Active Imperative")} checked={selected.has(keys.presentActiveImperative)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveImperative], checked))} />
@@ -172,9 +200,12 @@ export function GreekPage() {
       onDirectionChange={setDirection}
       directionLabels={{ forward: "Forward", reverse: "Reverse" }}
       resumeSession={resumeSession}
-      cardMeta={(card, source) => source.id === "lessons-1-2" ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.id === "lesson3-vocabulary" ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : `Lesson 3 grammar · ${card.category ?? ""}`}
+      cardMeta={(card, source) => source.id === "lessons-1-2" ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.id === "lesson3-vocabulary" ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : `Lesson 3 grammar · ${card.category ?? ""} · whole paradigm`}
       renderFront={(card, copy, source) => {
-        if (source.id === "lesson3-grammar") return source.direction === "forward" ? <span className="study-prompt reverse-text-prompt">{copy.prompt}</span> : <span className="greek-front">{copy.prompt}</span>;
+        if (source.id === "lesson3-grammar") {
+          if (source.direction === "reverse") return <div className="answer-block"><span className="study-prompt reverse-text-prompt">Identify this Lesson 3 paradigm</span><GreekLesson3Paradigm card={card} /></div>;
+          return <span className="study-prompt reverse-text-prompt">{copy.prompt}</span>;
+        }
         return <span className={source.direction === "forward" ? "greek-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
       }}
       renderBack={(card, copy, source) => {
@@ -182,7 +213,10 @@ export function GreekPage() {
           const details = source.direction === "forward" ? card.back.split("\n").slice(1).join("\n") : card.reverseBack?.split("\n").slice(1).join("\n");
           return <span className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "greek-answer-title"}>{source.direction === "reverse" ? card.front : String(card.metadata?.backTitle ?? "Answer")}</strong><span className="answer-notes">{details}</span></span>;
         }
-        if (source.id === "lesson3-grammar") return <span className="answer-block"><strong className={source.direction === "forward" ? "greek-front compact-greek" : "study-answer"}>{copy.answer}</strong><span className="answer-notes">{String(card.metadata?.identification ?? "")} · ending {String(card.metadata?.ending ?? "")}</span></span>;
+        if (source.id === "lesson3-grammar") {
+          if (source.direction === "forward") return <div className="answer-block"><GreekLesson3Paradigm card={card} /></div>;
+          return <span className="answer-block"><strong className="study-answer">{card.category}</strong><span className="answer-notes">Model verb παιδεύω</span></span>;
+        }
         return <span className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>;
       }}
     /> : <div className="study-loading panel-surface"><span className="loading-mark">α</span><p>Preparing Greek…</p></div>}
