@@ -56,21 +56,33 @@ export function sessionCustomNameFromReviews(reviews: Array<Pick<ReviewRecord, "
   return latest?.name;
 }
 
-function summarizeManagedSession(id: string, language: "Greek" | "Latin", entries: SessionReview[], inferred: boolean): ManagedSession {
-  const chronological = [...entries].sort((a, b) => a.review.reviewedAt - b.review.reviewedAt);
+function summarizeChronologicalSession(id: string, language: "Greek" | "Latin", entries: SessionReview[], inferred: boolean): ManagedSession {
   const sources: string[] = [];
-  for (const entry of chronological) if (!sources.includes(entry.source)) sources.push(entry.source);
-  const reviews = chronological.map((entry) => entry.review);
+  const reviewIds: string[] = [];
+  let startedAt = Number.POSITIVE_INFINITY;
+  let lastReviewedAt = 0;
+  let latestName: { name: string; reviewedAt: number } | null = null;
+
+  for (const entry of entries) {
+    if (!sources.includes(entry.source)) sources.push(entry.source);
+    const review = entry.review;
+    reviewIds.push(review.id);
+    startedAt = Math.min(startedAt, review.sessionStartedAt ?? review.reviewedAt);
+    lastReviewedAt = Math.max(lastReviewedAt, review.reviewedAt);
+    const name = review.sessionName?.trim();
+    if (name && (!latestName || review.reviewedAt >= latestName.reviewedAt)) latestName = { name, reviewedAt: review.reviewedAt };
+  }
+
   return {
     id,
     language,
     sources,
-    startedAt: Math.min(...reviews.map((review) => review.sessionStartedAt ?? review.reviewedAt)),
-    lastReviewedAt: Math.max(...reviews.map((review) => review.reviewedAt)),
-    reviews: reviews.length,
-    name: sessionCustomNameFromReviews(reviews),
+    startedAt,
+    lastReviewedAt,
+    reviews: entries.length,
+    name: latestName?.name,
     inferred,
-    reviewIds: reviews.map((review) => review.id),
+    reviewIds,
   };
 }
 
@@ -107,13 +119,13 @@ export function collectManagedSessions(envelopes: Record<string, DeckProgressEnv
       else explicit.set(sessionId, [entry]);
     }
 
-    for (const [id, entries] of explicit) sessions.push(summarizeManagedSession(id, language, entries, false));
+    for (const [id, entries] of explicit) sessions.push(summarizeChronologicalSession(id, language, entries, false));
 
     let inferredIndex = 0;
     let bucket: SessionReview[] = [];
     const closeBucket = () => {
       if (!bucket.length) return;
-      sessions.push(summarizeManagedSession(`legacy-${language}-${inferredIndex++}`, language, bucket, true));
+      sessions.push(summarizeChronologicalSession(`legacy-${language}-${inferredIndex++}`, language, bucket, true));
       bucket = [];
     };
     for (const entry of legacy) {
