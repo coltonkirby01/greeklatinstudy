@@ -17,6 +17,20 @@ const interactiveStyle: CSSProperties = { position: "relative", zIndex: 3 };
 const visualLinkStyle: CSSProperties = { ...interactiveStyle, width: "fit-content", display: "inline-flex", color: "inherit", textDecoration: "none" };
 const titleLinkStyle: CSSProperties = { color: "inherit", textDecoration: "none" };
 
+function preloadCourse(id: CourseId) {
+  if (id === "greek") {
+    void import("./greek-page").catch(() => undefined);
+    void import("../data/builtin-decks").then(({ loadGreekDeck, loadGreekLesson3GrammarDeck, loadGreekLesson3VocabularyDeck }) => Promise.all([loadGreekDeck(), loadGreekLesson3VocabularyDeck(), loadGreekLesson3GrammarDeck()])).catch(() => undefined);
+    return;
+  }
+  if (id === "latin") {
+    void import("./latin-page").catch(() => undefined);
+    void import("../data/builtin-decks").then(({ loadLatinDeck }) => loadLatinDeck()).catch(() => undefined);
+    return;
+  }
+  void import("./reading-page").catch(() => undefined);
+}
+
 export function HomePage() {
   const { user } = useAuth();
   return <main className="page-shell home-page">
@@ -37,7 +51,8 @@ export function HomePage() {
 
 function Course({ id, visual, count, eyebrow, title, description, sourceLinks, href, linkLabel }: { id: CourseId; visual: ReactNode; count: string; eyebrow: string; title: string; description: string; sourceLinks: readonly { label: string; href: string }[]; href: string; linkLabel: string }) {
   const flashcardCourse = id === "greek" || id === "latin";
-  return <article className="course-card">
+  const preload = () => preloadCourse(id);
+  return <article className="course-card" onPointerEnter={preload} onPointerDown={preload} onFocusCapture={preload}>
     <Link to={href} aria-hidden="true" tabIndex={-1} style={overlayLinkStyle} />
     <div className="course-card-top">
       {flashcardCourse ? <Link to={href} aria-label={`Open ${eyebrow} flashcards`} style={visualLinkStyle}>{visual}</Link> : visual}
