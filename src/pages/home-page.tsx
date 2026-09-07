@@ -26,6 +26,13 @@ function preloadCourse(id: CourseId) {
   if (id === "latin") {
     void import("./latin-page").catch(() => undefined);
     void import("../data/builtin-decks").then(({ loadLatinDeck }) => loadLatinDeck()).catch(() => undefined);
+    // Henle is much larger than Dickinson, so prefetch it only when the user's
+    // persisted Latin selection says grammar will be needed on arrival.
+    void import("../features/study/filter-preferences").then(({ loadLatinFilterPreferences }) => {
+      const materials = loadLatinFilterPreferences().materials;
+      if (!materials.has("grammar-forms") && !materials.has("grammar-charts")) return undefined;
+      return import("../features/henle/henle-data").then(({ loadHenle }) => loadHenle());
+    }).catch(() => undefined);
     return;
   }
   void import("./reading-page").catch(() => undefined);
