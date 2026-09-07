@@ -7,7 +7,7 @@ import { cardsAvailableToState, createEnvelope, createModeState, directionalCopy
 import { deleteReviewEvent, loadProgressEnvelope, saveProgressEnvelope, upsertReviewEvent } from "./progress-repository";
 import { intrinsicCardDifficulty } from "./scoring";
 import "./study-gate.css";
-import { StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
+import { defaultDifficultyAfterResult, StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
 import { studyShortcut } from "./study-shortcuts";
 import type { DeckDefinition, DeckProgressEnvelope, DirectionalCardCopy, ReviewDifficulty, ReviewResult, ReviewTransaction, SelectionMode, StudyActivityKind, StudyCard, StudyDirection, StudyModeState } from "./types";
 import { useResponseTimer } from "./use-response-timer";
@@ -31,6 +31,10 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
   const [backtracking, setBacktracking] = useState(false), [startGateOpen, setStartGateOpen] = useState(true);
   const [session, setSession] = useState<SessionMeta>(makeSession), [warmup, setWarmup] = useState<WarmupMeta | null>(null);
   const lastStudyKey = useRef(studyKey);
+
+  useEffect(() => {
+    if (result && !difficulty) setDifficulty(defaultDifficultyAfterResult(difficulty));
+  }, [difficulty, result]);
 
   const saveMode = useCallback((nextMode: StudyModeState, options?: { review?: ReviewTransaction; deleteReviewId?: string }) => {
     const currentEnvelope = envelopeRef.current;
@@ -107,16 +111,17 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
   }
   function back() { if (!lastTransaction || !modeState) return; const transaction = lastTransaction; setLastTransaction(null); setEditingTransaction(transaction); setResult(transaction.result); setDifficulty(transaction.difficulty); setCapturedTimeMs(transaction.responseTimeMs); setBacktracking(true); setRevealed(false); setReviewFront(false); saveMode(transaction.beforeState, { deleteReviewId: transaction.reviewId }); requestAnimationFrame(() => requestAnimationFrame(() => setRevealed(true))); setNotice("Previous grade undone. Choose the corrected result and save it."); }
   function saveNext() {
-    if (!modeState || !current || !result || !difficulty) return;
+    if (!modeState || !current || !result) return;
+    const reviewDifficulty = defaultDifficultyAfterResult(difficulty);
     const reviewedAt = Date.now(), reviewId = editingTransaction?.reviewId ?? crypto.randomUUID(), source = editingTransaction?.beforeState ?? modeState, responseTimeMs = capturedTimeMs ?? timer.capture();
     const activityKind: StudyActivityKind = editingTransaction?.activityKind ?? (warmup ? "warmup" : "study"), activeMeta = activityKind === "warmup" && warmup ? warmup : session;
     const sessionId = editingTransaction?.sessionId ?? activeMeta.id, sessionStartedAt = editingTransaction?.sessionStartedAt ?? activeMeta.startedAt;
 
     if (warmup && !editingTransaction) {
       const beforeState = structuredClone(source);
-      let next = recordReview(source, current, { id: reviewId, result, difficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, activityKind: "warmup" });
+      let next = recordReview(source, current, { id: reviewId, result, difficulty: reviewDifficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, activityKind: "warmup" });
       next = maybeUnlockNextBatch(next, cards, deck.staged, reviewedAt);
-      const transaction: ReviewTransaction = { reviewId, cardId: current.id, result, difficulty, responseTimeMs, beforeState, sessionId, sessionStartedAt, activityKind: "warmup" };
+      const transaction: ReviewTransaction = { reviewId, cardId: current.id, result, difficulty: reviewDifficulty, responseTimeMs, beforeState, sessionId, sessionStartedAt, activityKind: "warmup" };
       setLastTransaction(transaction); resetUi();
 
       if (warmup.remaining <= 1) {
@@ -136,7 +141,7 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
       return;
     }
 
-    const applied = reviewAndAdvance(source, cards, selectionMode, { id: reviewId, result, difficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, activityKind }, deck.staged);
+    const applied = reviewAndAdvance(source, cards, selectionMode, { id: reviewId, result, difficulty: reviewDifficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, activityKind }, deck.staged);
     let next = applied.state;
     if (editingTransaction?.activityKind === "warmup" && warmup) {
       const selected = pickWarmupCard(next, current.id);
@@ -170,6 +175,8 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
 
   if (!modeState || !current || !copy || !stats) return <div className="study-loading panel-surface" role="status"><span className="loading-mark">{deck.language === "greek" ? "α" : "A"}</span><p>{cards.length ? "Preparing this study mode…" : "No cards match these filters."}</p></div>;
   const currentMeta = cardMeta?.(current), showingAnswer = revealed && !reviewFront, gated = startGateOpen && !revealed && !editingTransaction;
+  const front = <><span className="card-side">Question</span>{renderFront ? renderFront(current, copy) : <span className={`study-prompt ${deck.language === "greek" ? "greek-script" : ""}`}>{copy.prompt}</span>}</>;
+  const backFace = <><span className="card-side">Answer</span>{renderBack ? renderBack(current, copy) : <span className="answer-block"><strong className={deck.language === "greek" ? "greek-answer-title" : "study-answer"}>{copy.answer}</strong>{current.notes && <span className="answer-notes">{current.notes}</span>}</span>}</>;
 
   return <div className="study-grid" data-testid="study-session" data-study-key={studyKey}>
     <section className={`study-panel panel-surface ${gated ? "is-gated" : ""}`} aria-label={`${deck.title} study card`}>
@@ -187,7 +194,7 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
       </div>
       {notice && <button className="inline-notice" type="button" onClick={() => setNotice(null)}>{notice}</button>}
       <div className="flashcard-meta"><div className="card-meta-details"><span className="stage-chip">{warmup ? "Warm-up" : copy.sideLabel}</span>{current.category && <span>{current.category}</span>}{currentMeta && <span>{currentMeta}</span>}<span className="front-timer" aria-label={`Front-card response time ${formatResponseTime(capturedTimeMs ?? timer.elapsedMs)}`}><Timer aria-hidden="true" /> {formatResponseTime(capturedTimeMs ?? timer.elapsedMs)}</span>{editingTransaction && <span className="editing-chip">Correcting previous grade</span>}</div><div className="card-nav-actions"><button type="button" className="small-outline-button" disabled={!lastTransaction} onClick={back}><ArrowLeft /> Back</button><button type="button" className="small-outline-button" disabled={Boolean(editingTransaction)} onClick={skip}>Skip <SkipForward /></button></div></div>
-      <div className={`flashcard-scene ${showingAnswer ? "is-flipped" : ""} ${backtracking ? "is-backtracking" : ""}`}><div className="flashcard-inner"><button type="button" className="flashcard-face flashcard-front-face" onClick={() => revealed ? setReviewFront(false) : reveal()} aria-label={revealed ? "Return to answer" : "Reveal answer"} aria-hidden={showingAnswer} tabIndex={showingAnswer ? -1 : 0}><span className="card-side">Question</span>{renderFront ? renderFront(current, copy) : <span className={`study-prompt ${deck.language === "greek" ? "greek-script" : ""}`}>{copy.prompt}</span>}</button><div className="flashcard-face flashcard-back-face" aria-hidden={!showingAnswer}><span className="card-side">Answer</span>{renderBack ? renderBack(current, copy) : <span className="answer-block"><strong className={deck.language === "greek" ? "greek-answer-title" : "study-answer"}>{copy.answer}</strong>{current.notes && <span className="answer-notes">{current.notes}</span>}</span>}</div></div></div>
+      <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} />
       <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
     </section>
     <StudySidebar deck={deck} cards={cards} copy={copy} direction={direction} stats={stats} priority={priority} priorityPrompt={priorityPrompt} />
