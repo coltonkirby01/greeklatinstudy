@@ -127,7 +127,7 @@ export function GreekPage() {
     const next: StudySourceDefinition[] = [];
     if (foundationCards.length) next.push({ id: "lessons-1-2", label: "Lessons 1–2 grammar", deck: decks.foundation, cards: foundationCards, studyKey: direction, direction });
     if (lesson3VocabularyCards.length) next.push({ id: "lesson3-vocabulary", label: "Lesson 3 vocabulary", deck: decks.lesson3Vocabulary, cards: lesson3VocabularyCards, studyKey: direction, direction });
-    if (lesson3GrammarCards.length) next.push({ id: "lesson3-grammar", label: "Lesson 3 grammar", deck: decks.lesson3Grammar, cards: lesson3GrammarCards, studyKey: direction, direction });
+    if (lesson3GrammarCards.length) next.push({ id: "lesson3-grammar", label: "Lesson 3 grammar charts", deck: decks.lesson3Grammar, cards: lesson3GrammarCards, studyKey: "forward", direction: "forward" });
     return next;
   }, [decks, direction, foundationCards, lesson3GrammarCards, lesson3VocabularyCards]);
 
@@ -202,10 +202,7 @@ export function GreekPage() {
       resumeSession={resumeSession}
       cardMeta={(card, source) => source.id === "lessons-1-2" ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.id === "lesson3-vocabulary" ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : `Lesson 3 grammar · ${card.category ?? ""} · whole paradigm`}
       renderFront={(card, copy, source) => {
-        if (source.id === "lesson3-grammar") {
-          if (source.direction === "reverse") return <div className="answer-block"><span className="study-prompt reverse-text-prompt">Identify this Lesson 3 paradigm</span><GreekLesson3Paradigm card={card} /></div>;
-          return <span className="study-prompt reverse-text-prompt">{copy.prompt}</span>;
-        }
+        if (source.id === "lesson3-grammar") return <span className="study-prompt reverse-text-prompt">{card.front}</span>;
         return <span className={source.direction === "forward" ? "greek-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
       }}
       renderBack={(card, copy, source) => {
@@ -213,10 +210,7 @@ export function GreekPage() {
           const details = source.direction === "forward" ? card.back.split("\n").slice(1).join("\n") : card.reverseBack?.split("\n").slice(1).join("\n");
           return <span className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "greek-answer-title"}>{source.direction === "reverse" ? card.front : String(card.metadata?.backTitle ?? "Answer")}</strong><span className="answer-notes">{details}</span></span>;
         }
-        if (source.id === "lesson3-grammar") {
-          if (source.direction === "forward") return <div className="answer-block"><GreekLesson3Paradigm card={card} /></div>;
-          return <span className="answer-block"><strong className="study-answer">{card.category}</strong><span className="answer-notes">Model verb παιδεύω</span></span>;
-        }
+        if (source.id === "lesson3-grammar") return <div className="answer-block"><GreekLesson3Paradigm card={card} /></div>;
         return <span className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>;
       }}
     /> : <div className="study-loading panel-surface"><span className="loading-mark">α</span><p>Preparing Greek…</p></div>}
