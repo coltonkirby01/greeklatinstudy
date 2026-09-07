@@ -19,7 +19,7 @@ type ShortcutContext = {
   controlsTarget?: boolean;
 };
 
-export function studyShortcut({ key, startGateOpen, revealed, result, difficulty, typingTarget, controlsTarget = false }: ShortcutContext): StudyShortcut {
+export function studyShortcut({ key, startGateOpen, revealed, result, typingTarget, controlsTarget = false }: ShortcutContext): StudyShortcut {
   // Toolbar/select controls keep their normal keyboard behavior while the timer gate is open.
   if (typingTarget || controlsTarget) return null;
   // Outside those controls, the gate owns the first keypress. It must never leak through.
@@ -34,6 +34,6 @@ export function studyShortcut({ key, startGateOpen, revealed, result, difficulty
   if (key === "2") return { type: "difficulty", value: "medium" };
   if (key === "3") return { type: "difficulty", value: "hard" };
   if (key === "Enter") return { type: "flip" };
-  if (key === " " && result && difficulty) return { type: "save" };
+  if (key === " " && result) return { type: "save" };
   return null;
 }
