@@ -40,6 +40,7 @@ Do not change local-storage keys, `DeckProgressEnvelope`, review-event semantics
 
 - `src/main.tsx` — React root, router base path, global auth provider.
 - `src/app.tsx` — route-level lazy loading. Keep route pages lazy unless there is a measured reason not to.
+- `src/route-preload.ts` — shared lazy route-loader map and intent preloading.
 - `src/components/site-layout.tsx` — primary navigation and shared layout.
 - `src/config/site.ts` — home-card and navigation metadata.
 
@@ -56,6 +57,7 @@ Do not change local-storage keys, `DeckProgressEnvelope`, review-event semantics
 - `src/features/study/multi-source-study-session.tsx` — the primary Greek/Latin mixed-source session controller.
 - `src/features/study/study-session.tsx` — ordinary/imported single-deck session controller.
 - `src/features/study/study-session-ui.tsx` — shared card faces, grading controls, Start gate, and sidebar.
+- `src/features/study/session-review.ts` — time-based default grades and active-session Progress-panel calculations. Keep this helper shared by mixed and single-deck study.
 - `src/features/study/study-shortcuts.ts` — keyboard semantics.
 - `src/features/study/use-response-timer.ts` — active recall timer and focus/visibility handling.
 - `src/features/study/engine.ts` — adaptive scheduling, review recording, staged unlocking, Back/Skip state transitions, and card priority.
@@ -72,11 +74,29 @@ Current card interaction rules:
 
 Current grading rules:
 
-- Right/Wrong is sufficient to save a review.
-- If no explicit difficulty is selected, the review is stored as `medium`.
-- Easy/Medium/Hard remains available as an optional override and is recorded independently from correctness.
-- Recall time is still stored and remains part of adaptive priority/scheduling.
-- The difficulty controls appear below the Right/Wrong controls.
+- Reveal captures active front-side recall time and immediately preselects both correctness and difficulty.
+- Under 3.00 seconds defaults to `Right` + `Easy`.
+- 3.00 seconds through under 10.00 seconds defaults to `Wrong` + `Medium`.
+- 10.00 seconds or more defaults to `Wrong` + `Hard`.
+- These are defaults only. Users can change Right/Wrong and Easy/Medium/Hard independently before saving.
+- Do not reapply a default after the user manually changes a grade.
+- Back/correction restores the prior saved grade and response time rather than silently recalculating a new default.
+- Recall time is stored independently and remains part of adaptive priority/scheduling.
+- Difficulty controls appear below the Right/Wrong controls.
+
+### Active-session Progress panel
+
+The Progress panel beside a flashcard is intentionally not a lifetime/user-history panel.
+
+- Its statistics use ranked review records whose `sessionId` matches the active session.
+- Warm-up reviews and `statsExcluded` reviews do not contribute.
+- `Reviewed` is the number of distinct currently selected/available cards reviewed in that session.
+- Accuracy, wrong/hard counts, average time, right-once count, and best streak are session scoped.
+- The Initial review bar is distinct-card coverage of the currently selected/available pool in the active session.
+- Changing filters can change the current denominator; it must never remove underlying progress or review history.
+- Highest-Priority Review remains based on continuous adaptive learning history and is not session-only.
+
+If this behavior changes, update `session-review.ts`, both session controllers, `study-session-ui.tsx`, and `tests/session-review.test.ts` together.
 
 ### Persistence, authentication, and synchronization
 
@@ -132,14 +152,20 @@ Safe defaults:
 - Keep the Supabase SDK out of the initial shell. The lightweight configuration and actual client are deliberately split between `supabase-config.ts` and `supabase.ts`.
 - Keep large source data in `public/data` and fetch/cache it on demand.
 - Do not eagerly load Henle source data just because the Latin page exists; opening/using Henle may load it.
-- Home study cards may prefetch their route/data on hover, focus, or pointer-down so navigation feels immediate without making every source part of the first paint.
-- Reuse the shared study components instead of shipping separate copies of the timer, card face, grading, and scheduler logic.
+- Home study cards and primary navigation may prefetch their route/data on hover, focus, or pointer intent so navigation feels immediate without making every source part of the first paint.
+- Reuse the shared study components instead of shipping separate copies of the timer, card face, grading, session-progress, and scheduler logic.
 - Avoid adding large charting, UI, state-management, or animation libraries when native React/CSS/SVG is already sufficient.
 - Preserve the existing bundle-size gate rather than raising the limit to make a cleanup pass.
 
-Current CI bundle budgets are enforced by `scripts/check-bundle-size.mjs`. After the async Supabase split the production main shell is about 80 KB gzip, and the main-shell budget is 100 KB gzip. The previous static-Supabase shell was about 138 KB gzip. If a cleanup unexpectedly approaches or exceeds 100 KB, investigate what entered the initial dependency graph instead of raising the budget. Total CSS remains guarded separately.
+Current CI bundle budgets are enforced by `scripts/check-bundle-size.mjs`. After the async Supabase split the production main shell is about 78–80 KB gzip, and the main-shell budget is 100 KB gzip. The previous static-Supabase shell was about 138 KB gzip. If a cleanup unexpectedly approaches or exceeds 100 KB, investigate what entered the initial dependency graph instead of raising the budget. Total CSS remains guarded separately at 12 KB gzip and is currently very close to that limit.
 
 A performance change is not successful merely because the source looks shorter; compare production gzip output before and after.
+
+## Deployment safety
+
+The repository still has a legacy GitHub Pages publishing workflow in addition to the custom tested deployment. The custom `.github/workflows/pages.yml` deployment deliberately waits for the legacy Pages run for the same commit to finish before publishing the tested artifact. This prevents the legacy job from overwriting the correct Vite build afterward.
+
+Do not remove or shorten that ordering protection unless the repository's Pages source has definitively been changed so the legacy publisher no longer runs. A successful test/build is not enough; confirm the final custom `deploy` job succeeds before reporting a change as live.
 
 ## Safe change procedure
 
@@ -151,10 +177,11 @@ For any nontrivial change:
 4. Add or update a regression test when behavior changes.
 5. Run the complete test suite.
 6. Run the production GitHub Pages build and bundle-size check.
-7. Do not deploy a failed build merely because unit tests passed.
-8. For persistence changes, verify backward compatibility with existing envelopes before deployment.
-9. For source-data changes, verify protected counts and IDs deliberately.
-10. For visible CSS/markup changes, verify both desktop and mobile behavior and light/dark readability.
+7. Confirm the final Pages deploy job succeeds; do not equate a green build with a completed live deployment.
+8. Do not deploy a failed build merely because some unit tests passed.
+9. For persistence changes, verify backward compatibility with existing envelopes before deployment.
+10. For source-data changes, verify protected counts and IDs deliberately.
+11. For visible CSS/markup changes, verify both desktop and mobile behavior and light/dark readability.
 
 The normal commands are:
 
@@ -173,7 +200,11 @@ Work primarily in the language page plus the shared filter utilities. Preserve s
 
 ### Change card grading or shortcuts
 
-Update shared behavior in `study-session-ui.tsx` / `study-shortcuts.ts` and make both `study-session.tsx` and `multi-source-study-session.tsx` use the same semantics. Never implement Greek and Latin grading separately.
+Keep the time thresholds/default mapping in `session-review.ts`, shared display/controls in `study-session-ui.tsx`, keyboard behavior in `study-shortcuts.ts`, and both `study-session.tsx` and `multi-source-study-session.tsx` on the same semantics. Never implement Greek and Latin grading separately. Update `tests/session-review.test.ts` for threshold changes.
+
+### Change active-session progress
+
+Keep `session-review.ts` as the shared calculation layer and both study controllers as thin callers. Preserve warm-up exclusion, `statsExcluded` exclusion, current selected-pool coverage, and continuous long-term Highest-Priority Review behavior.
 
 ### Change adaptive scheduling
 
@@ -181,7 +212,7 @@ Work in `engine.ts`. Preserve Back rollback, Skip, staged unlocking, response-ti
 
 ### Change sessions
 
-Keep `session-management.ts`, `multi-source-study-session.tsx`, `stats-page.tsx`, and `progress-repository.ts` consistent. Explicit sessions and inferred legacy sessions have different resumability rules. Test deletion tombstones so stale tabs/cloud state cannot restore deleted sessions.
+Keep `session-management.ts`, `multi-source-study-session.tsx`, `stats-page.tsx`, `progress-repository.ts`, and session-progress calculations consistent. Explicit sessions and inferred legacy sessions have different resumability rules. Test deletion tombstones so stale tabs/cloud state cannot restore deleted sessions.
 
 ### Change Henle
 
@@ -189,7 +220,7 @@ Do not rewrite source data. Keep Rule numbers from the authoritative `rule` fiel
 
 ### Add a new deck
 
-Use the existing `DeckDefinition` / `StudyCard` model and shared `StudySession`. Do not create another timer, grader, scheduler, or progress system. Imported/custom decks should inherit the same core study behavior automatically.
+Use the existing `DeckDefinition` / `StudyCard` model and shared `StudySession`. Do not create another timer, grader, scheduler, session-progress calculator, or progress system. Imported/custom decks should inherit the same core study behavior automatically.
 
 ## Documentation hierarchy
 
