@@ -71,3 +71,11 @@
 }
 
 .flashcard-face { justify-content: safe center; }
+
+/* Greek Lesson 3 chart cells must remain table-sized. The general Greek
+   flashcard typography is intentionally much larger and otherwise causes the
+   paradigm to overflow so severely that only the first header can be visible. */
+.henle-chart .greek-front.compact-greek {
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  line-height: 1.2;
+}
