@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
-import { latinRowsToCards, parseCsv } from "../src/data/builtin-decks";
+import { formatGreekLesson3ParadigmCell, latinRowsToCards, parseCsv } from "../src/data/builtin-decks";
 import { jsonToCards, rowsToCards } from "../src/features/decks/import-parser";
 import { buildHenleCharts } from "../src/features/henle/henle-data";
 
@@ -48,6 +48,33 @@ describe("authoritative source migration", () => {
     expect(new Set(henle.cards.map((card: { rule: number }) => card.rule)).size).toBe(331);
     expect(henle.cards.every((card: { reverse_front?: string; reverse_back?: string }) => card.reverse_front && card.reverse_back)).toBe(true);
     expect(buildHenleCharts(henle.cards)).toHaveLength(248);
+  });
+
+  it("adds the stem-ending dash to undashed Lesson 3 forms for all three paradigms", () => {
+    expect([
+      "παιδεύω",
+      "παιδεύομεν",
+      "παιδεύεις",
+      "παιδεύετε",
+      "παιδεύει",
+      "παιδεύουσι(ν)",
+      "παιδεύειν",
+      "παίδευε",
+      "παιδευέτω",
+      "παιδευόντων",
+    ].map(formatGreekLesson3ParadigmCell)).toEqual([
+      "παιδεύ-ω",
+      "παιδεύ-ομεν",
+      "παιδεύ-εις",
+      "παιδεύ-ετε",
+      "παιδεύ-ει",
+      "παιδεύ-ουσι(ν)",
+      "παιδεύ-ειν",
+      "παίδευ-ε",
+      "παιδευ-έτω",
+      "παιδευ-όντων",
+    ]);
+    expect(formatGreekLesson3ParadigmCell("παιδεύ-ετε")).toBe("παιδεύ-ετε");
   });
 });
 
