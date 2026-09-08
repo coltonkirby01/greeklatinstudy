@@ -27,19 +27,19 @@ describe("authoritative source migration", () => {
     const indicative = greekLesson3Grammar.find((card) => card.category === "Present Active Indicative");
     expect(indicative?.columns).toEqual(["Singular", "Plural"]);
     expect(indicative?.rows).toEqual([
-      { label: "1st person", cells: ["παιδεύω", "παιδεύομεν"] },
-      { label: "2nd person", cells: ["παιδεύεις", "παιδεύετε"] },
-      { label: "3rd person", cells: ["παιδεύει", "παιδεύουσι(ν)"] },
+      { label: "1st person", cells: ["παιδεύ-ω", "παιδεύ-ομεν"] },
+      { label: "2nd person", cells: ["παιδεύ-εις", "παιδεύ-ετε"] },
+      { label: "3rd person", cells: ["παιδεύ-ει", "παιδεύ-ουσι(ν)"] },
     ]);
 
     const infinitive = greekLesson3Grammar.find((card) => card.category === "Present Active Infinitive");
-    expect(infinitive?.rows).toEqual([{ label: "Present Active Infinitive", cells: ["παιδεύειν"] }]);
+    expect(infinitive?.rows).toEqual([{ label: "Present Active Infinitive", cells: ["παιδεύ-ειν"] }]);
 
     const imperative = greekLesson3Grammar.find((card) => card.category === "Present Active Imperative");
     expect(imperative?.columns).toEqual(["Singular", "Plural"]);
     expect(imperative?.rows).toEqual([
-      { label: "2nd person", cells: ["παίδευε", "παιδεύετε"] },
-      { label: "3rd person", cells: ["παιδευέτω", "παιδευόντων"] },
+      { label: "2nd person", cells: ["παίδευ-ε", "παιδεύ-ετε"] },
+      { label: "3rd person", cells: ["παιδευ-έτω", "παιδευ-όντων"] },
     ]);
 
     expect(latin).toHaveLength(997);
