@@ -7,7 +7,17 @@ type GreekLesson3GrammarChartRow = { label: string; cells: string[] };
 type GreekLesson3GrammarSourceCard = { id: string; category: string; prompt: string; columns: string[]; rows: GreekLesson3GrammarChartRow[] };
 type LatinSourceCard = { id: string; headword: string; definition: string; partOfSpeech: string; semanticGroup: string; frequencyRank: number; deckPosition: number };
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
-async function fetchText(path: string) { const response = await fetch(assetUrl(path), { cache: "force-cache" }); if (!response.ok) throw new Error(`Could not load ${path}.`); return response.text(); }
+async function fetchText(path: string, cache: RequestCache = "force-cache") { const response = await fetch(assetUrl(path), { cache }); if (!response.ok) throw new Error(`Could not load ${path}.`); return response.text(); }
+
+const greekLesson3Endings = ["ουσι(ν)", "ομεν", "όντων", "ετε", "εις", "ειν", "έτω", "ω", "ει", "ε"] as const;
+
+export function formatGreekLesson3ParadigmCell(value: string) {
+  if (value.includes("-")) return value;
+  for (const ending of greekLesson3Endings) {
+    if (value.endsWith(ending) && value.length > ending.length) return `${value.slice(0, -ending.length)}-${ending}`;
+  }
+  return value;
+}
 
 export function parseCsv(text: string) {
   const rows: string[][] = []; let row: string[] = [], field = "", quoted = false;
@@ -56,7 +66,7 @@ export function loadGreekLesson3VocabularyDeck() {
 }
 
 export function loadGreekLesson3GrammarDeck() {
-  greekLesson3GrammarPromise ??= fetchText("data/greek-lesson3-grammar.json").then((text) => {
+  greekLesson3GrammarPromise ??= fetchText("data/greek-lesson3-grammar.json", "no-store").then((text) => {
     const source = JSON.parse(text) as GreekLesson3GrammarSourceCard[];
     const cards: StudyCard[] = source.map((card, index) => ({
       id: card.id,
@@ -67,7 +77,13 @@ export function loadGreekLesson3GrammarDeck() {
       rank: index + 1,
       source: "From Alpha to Omega, Lesson 3",
       notes: "Whole-paradigm chart · model verb παιδεύω",
-      metadata: { lesson: 3, studySource: "grammar-chart", grammarGroup: card.category, chartColumns: card.columns, chartRows: card.rows },
+      metadata: {
+        lesson: 3,
+        studySource: "grammar-chart",
+        grammarGroup: card.category,
+        chartColumns: card.columns,
+        chartRows: card.rows.map((row) => ({ ...row, cells: row.cells.map(formatGreekLesson3ParadigmCell) })),
+      },
     }));
     return { id: "alpha-omega-lesson3-grammar", slug: "greek", title: "Greek Lesson 3 Grammar", eyebrow: "Present active paradigms", description: "Three whole-paradigm chart cards. Each card asks for the named paradigm and reveals the complete chart.", language: "greek", cards, supportsReverse: false, sourceNote: "From Alpha to Omega, Lesson 3; model verb παιδεύω." } satisfies DeckDefinition;
   });
