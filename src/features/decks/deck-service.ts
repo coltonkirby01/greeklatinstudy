@@ -4,7 +4,7 @@ import type { DeckDefinition, StudyCard } from "../study/types";
 
 export type CloudDeck = { id: string; slug: string; title: string; description: string; subject: string; language: "greek" | "latin" | "other"; supports_reverse: boolean; published: boolean; staged_config: { enabled?: boolean; initialCount?: number; batchSize?: number } | null; created_at: string; updated_at: string };
 export type CloudCard = { id: string; deck_id: string; stable_key: string; front: string; back: string; category: string | null; rank: number | null; source: string | null; notes: string | null; reverse_prompt: string | null; position: number; metadata: Json | null };
-export type ImportCard = { front: string; back: string; category: string; rank: number | null; source: string; notes: string; reversePrompt: string; metadata?: Json };
+export type ImportCard = { front: string; back: string; category: string; rank: number | null; source: string; notes: string; reversePrompt: string; metadata?: Record<string, unknown> };
 function client() { if (!supabase) throw new Error("Connect Supabase before using cloud decks."); return supabase; }
 export async function listPublishedDecks() { const { data, error } = await client().from("decks").select("*").eq("published", true).order("title"); if (error) throw error; return (data ?? []) as CloudDeck[]; }
 export async function listAdminDecks() { const { data, error } = await client().from("decks").select("*").order("updated_at", { ascending: false }); if (error) throw error; return (data ?? []) as CloudDeck[]; }
@@ -22,7 +22,7 @@ export async function loadPublishedDeck(slug: string) {
 export async function importCards(deckId: string, cards: ImportCard[], replace: boolean) {
   if (replace) { const { error } = await client().from("cards").delete().eq("deck_id", deckId); if (error) throw error; }
   const existing = replace ? 0 : (await loadCards(deckId)).length;
-  const rows = cards.map((card, index) => ({ deck_id: deckId, stable_key: `${existing + index + 1}-${slugify(card.front).slice(0, 48) || "card"}`, front: card.front, back: card.back, category: card.category || null, rank: card.rank, source: card.source || null, notes: card.notes || null, reverse_prompt: card.reversePrompt || null, metadata: card.metadata ?? null, position: existing + index + 1 }));
+  const rows = cards.map((card, index) => ({ deck_id: deckId, stable_key: `${existing + index + 1}-${slugify(card.front).slice(0, 48) || "card"}`, front: card.front, back: card.back, category: card.category || null, rank: card.rank, source: card.source || null, notes: card.notes || null, reverse_prompt: card.reversePrompt || null, metadata: (card.metadata ?? null) as Json, position: existing + index + 1 }));
   for (let index = 0; index < rows.length; index += 400) { const { error } = await client().from("cards").insert(rows.slice(index, index + 400)); if (error) throw error; }
   return loadCards(deckId);
 }
