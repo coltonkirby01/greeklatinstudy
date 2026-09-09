@@ -18,6 +18,32 @@ function json(body: unknown, status = 200) {
   });
 }
 
+function parseNamedKeys(raw: string | undefined) {
+  if (!raw) return {} as Record<string, string>;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    return Object.fromEntries(
+      Object.entries(parsed).filter((entry): entry is [string, string] => typeof entry[1] === "string"),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function isAllowedPublicCaller(request: Request) {
+  const suppliedKey = request.headers.get("apikey")?.trim();
+  if (!suppliedKey) return false;
+  const publishableKeys = Object.values(parseNamedKeys(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS")));
+  const legacyAnonKey = Deno.env.get("SUPABASE_ANON_KEY")?.trim();
+  return publishableKeys.includes(suppliedKey) || Boolean(legacyAnonKey && suppliedKey === legacyAnonKey);
+}
+
+function adminApiKey() {
+  const secretKeys = parseNamedKeys(Deno.env.get("SUPABASE_SECRET_KEYS"));
+  return secretKeys.default?.trim() || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")?.trim() || "";
+}
+
 function bytesToBase64(bytes: Uint8Array) {
   let binary = "";
   const chunkSize = 0x8000;
@@ -35,20 +61,19 @@ async function sha256(bytes: Uint8Array) {
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (!isAllowedPublicCaller(request)) return json({ error: "Invalid project API key." }, 401);
 
   const apiKey = Deno.env.get("ELEVENLABS_API_KEY")?.trim();
   const voiceId = Deno.env.get("ELEVENLABS_CLASSICAL_GREEK_VOICE_ID")?.trim() || DEFAULT_ELEVENLABS_VOICE_ID;
   const supabaseUrl = Deno.env.get("SUPABASE_URL")?.trim();
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")?.trim();
+  const serviceKey = adminApiKey();
 
   if (!apiKey) return json({ error: "ELEVENLABS_API_KEY is not configured." }, 503);
-  if (!supabaseUrl || !serviceRoleKey) return json({ error: "Supabase service credentials are unavailable." }, 500);
+  if (!supabaseUrl || !serviceKey) return json({ error: "Supabase service credentials are unavailable." }, 500);
 
-  const serviceHeaders = {
-    apikey: serviceRoleKey,
-    Authorization: `Bearer ${serviceRoleKey}`,
-  };
-
+  // New Supabase secret keys are API keys rather than JWTs. The Data API only
+  // needs the apikey header for this server-side service-role request.
+  const serviceHeaders = { apikey: serviceKey };
   const results: Array<{ id: string; status: "existing" | "generated"; bytes?: number }> = [];
 
   for (const asset of lesson3CourseAudioAssets) {
@@ -74,10 +99,7 @@ Deno.serve(async (request) => {
           "Content-Type": "application/json",
           Accept: "audio/mpeg",
         },
-        body: JSON.stringify({
-          text: asset.ttsText,
-          model_id: LESSON3_AUDIO_MODEL,
-        }),
+        body: JSON.stringify({ text: asset.ttsText, model_id: LESSON3_AUDIO_MODEL }),
       },
     );
 
