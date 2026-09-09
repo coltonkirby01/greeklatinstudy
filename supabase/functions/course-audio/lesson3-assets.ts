@@ -17,14 +17,15 @@ export type Lesson3CourseAudioAsset = {
  * pronunciation profile used for this course.
  *
  * Paradigms are spoken vertically by number: all singular forms first, then
- * all plural forms. This follows the way a learner reads down each chart column.
+ * all plural forms. Parenthetical/optional letters are omitted from the default
+ * recording, so παιδεύουσι(ν) is spoken without final nu.
  */
 export const lesson3CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
   {
     id: "lesson3-chart-present-active-indicative",
     label: "Present Active Indicative",
     ttsText:
-      "/pai̯ˈdeu̯.ɔː/, /pai̯ˈdeu̯.eːs/, /pai̯ˈdeu̯.eː/, /pai̯ˈdeu̯.o.men/, /pai̯ˈdeu̯.e.te/, /pai̯ˈdeu̯.uː.sin/",
+      "/pai̯ˈdeu̯.ɔː/, /pai̯ˈdeu̯.eːs/, /pai̯ˈdeu̯.eː/, /pai̯ˈdeu̯.o.men/, /pai̯ˈdeu̯.e.te/, /pai̯ˈdeu̯.uː.si/",
   },
   {
     id: "lesson3-chart-present-active-infinitive",
