@@ -1,6 +1,24 @@
+/**
+ * Reconstructed Classical Attic pronunciation for course audio.
+ *
+ * Policy: Josolon's MIT-licensed Ancient Greek Dictionary phonology module,
+ * which follows W. Sidney Allen's Vox Graeca, is the dominant implementation
+ * reference. The resulting choices are cross-checked against Smyth's account
+ * of pitch accent, the Open University's fifth-century Athenian reconstruction,
+ * and the University of Victoria open textbook. From Alpha to Omega remains the
+ * course-level pronunciation guide where it makes an explicit pedagogical choice.
+ *
+ * We keep two outputs separate:
+ * - canonical IPA preserves the reconstructed pitch-accent information;
+ * - ElevenLabs IPA uses stress only as a synthesis approximation because the
+ *   provider does not expose deterministic Ancient-Greek pitch-accent control.
+ */
+export const CLASSICAL_GREEK_PRONUNCIATION_SYSTEM =
+  "Classical Attic c. 400 BCE — Josolon/Vox Graeca-led; cross-checked with Smyth, Open University, University of Victoria, and aligned with From Alpha to Omega; ElevenLabs approximates pitch accent";
+
 const greekLetter = /[\u0370-\u03ff\u1f00-\u1fff]/u;
 const combining = /[\u0300-\u036f]/u;
-const roughBreathing = "\u0314";
+const rough = "\u0314";
 const acute = "\u0301";
 const grave = "\u0300";
 const circumflex = "\u0342";
@@ -8,118 +26,176 @@ const macron = "\u0304";
 const diaeresis = "\u0308";
 const iotaSubscript = "\u0345";
 
-const vowels = new Set(["α", "ε", "η", "ι", "ο", "υ", "ω", "Α", "Ε", "Η", "Ι", "Ο", "Υ", "Ω"]);
+const vowels = new Set(["α", "ε", "η", "ι", "ο", "υ", "ω"]);
 const diphthongs: Record<string, string> = {
-  αι: "ai̯", αυ: "au̯", ει: "eː", ευ: "eu̯", ηυ: "ɛːu̯", οι: "oi̯", ου: "uː", υι: "yi̯",
-  ΑΙ: "ai̯", ΑΥ: "au̯", ΕΙ: "eː", ΕΥ: "eu̯", ΗΥ: "ɛːu̯", ΟΙ: "oi̯", ΟΥ: "uː", ΥΙ: "yi̯",
+  αι: "ai̯",
+  αυ: "au̯",
+  ει: "eː",
+  ευ: "eu̯",
+  ηυ: "ɛːu̯",
+  οι: "œi̯",
+  ου: "uː",
+  υι: "yi̯",
+  ωυ: "ɔːu̯",
 };
+const hiatusLengthened = new Set(["αι", "αυ", "ευ", "οι", "υι"]);
 
 const consonants: Record<string, string> = {
-  β: "b", γ: "g", δ: "d", ζ: "z", θ: "tʰ", κ: "k", λ: "l", μ: "m", ν: "n", ξ: "ks",
+  β: "b", γ: "ɡ", δ: "d", ζ: "zd", θ: "tʰ", κ: "k", λ: "l", μ: "m", ν: "n", ξ: "ks",
   π: "p", ρ: "r", σ: "s", ς: "s", τ: "t", φ: "pʰ", χ: "kʰ", ψ: "ps",
-  Β: "b", Γ: "g", Δ: "d", Ζ: "z", Θ: "tʰ", Κ: "k", Λ: "l", Μ: "m", Ν: "n", Ξ: "ks",
-  Π: "p", Ρ: "r", Σ: "s", Τ: "t", Φ: "pʰ", Χ: "kʰ", Ψ: "ps",
 };
 
-type Cluster = { base: string; marks: string[] };
+const gammaNasalizers = new Set(["γ", "κ", "χ", "ξ", "μ"]);
+const sigmaVoicers = new Set(["β", "γ", "δ", "μ"]);
 
-function clusters(word: string) {
-  const normalized = word.normalize("NFD");
-  const out: Cluster[] = [];
-  for (let index = 0; index < normalized.length;) {
-    const base = normalized[index];
-    if (!greekLetter.test(base)) { index += 1; continue; }
-    const marks: string[] = [];
-    let cursor = index + 1;
-    while (cursor < normalized.length && combining.test(normalized[cursor])) { marks.push(normalized[cursor]); cursor += 1; }
-    out.push({ base, marks });
-    index = cursor;
+type Unit = { base: string; marks: Set<string> };
+type AccentMode = "canonical" | "tts";
+
+function units(word: string): Unit[] {
+  const out: Unit[] = [];
+  for (const char of word.normalize("NFD")) {
+    if (combining.test(char) && out.length) {
+      out[out.length - 1].marks.add(char);
+      continue;
+    }
+    if (!greekLetter.test(char)) continue;
+    out.push({ base: char.toLowerCase(), marks: new Set<string>() });
   }
   return out;
 }
 
-function accentPrefix(marks: string[]) {
-  // The textbook describes these as pitch accents. Eleven v3 does not expose
-  // deterministic Ancient-Greek pitch control, so prominence approximates an
-  // accented syllable in polysyllables. Monosyllables need no stress marker.
-  return marks.includes(acute) || marks.includes(circumflex) ? "ˈ" : marks.includes(grave) ? "" : "";
+function unionMarks(first: Set<string>, second?: Set<string>) {
+  return new Set(second ? [...first, ...second] : first);
 }
 
-function vowelSound(cluster: Cluster) {
-  const lower = cluster.base.toLowerCase();
-  const long = cluster.marks.includes(macron) || cluster.marks.includes(circumflex);
-  if (cluster.marks.includes(iotaSubscript)) {
-    if (lower === "α") return "aːi̯";
-    if (lower === "η") return "ɛːi̯";
-    if (lower === "ω") return "ɔːi̯";
+function vowelValue(unit: Unit) {
+  const long = unit.marks.has(macron) || unit.marks.has(circumflex);
+  if (unit.marks.has(iotaSubscript)) {
+    if (unit.base === "α") return "aːi̯";
+    if (unit.base === "η") return "ɛːi̯";
+    if (unit.base === "ω") return "ɔːi̯";
   }
-  if (lower === "α") return long ? "aː" : "a";
-  if (lower === "ε") return "e";
-  if (lower === "η") return "ɛː";
-  if (lower === "ι") return long ? "iː" : "i";
-  if (lower === "ο") return "o";
-  if (lower === "υ") return long ? "yː" : "y";
-  if (lower === "ω") return "ɔː";
+  if (unit.base === "α") return long ? "aː" : "a";
+  if (unit.base === "ε") return "e";
+  if (unit.base === "η") return "ɛː";
+  if (unit.base === "ι") return long ? "iː" : "i";
+  if (unit.base === "ο") return "o";
+  if (unit.base === "υ") return long ? "yː" : "y";
+  if (unit.base === "ω") return "ɔː";
   return "";
 }
 
-function syllableCount(units: Cluster[]) {
+function splitMorae(nucleus: string): [string, string] | null {
+  for (const glide of ["i̯", "u̯"]) {
+    const index = nucleus.indexOf(glide);
+    if (index > 0) return [nucleus.slice(0, index), nucleus.slice(index)];
+  }
+  if (nucleus.endsWith("ː") && nucleus.length > 1) return [nucleus.slice(0, -1), "ː"];
+  return null;
+}
+
+function markFirstSegment(value: string, mark: string) {
+  return value ? `${value[0]}${mark}${value.slice(1)}` : value;
+}
+
+function accentNucleus(nucleus: string, marks: Set<string>, mode: AccentMode, syllables: number) {
+  const accented = marks.has(acute) || marks.has(circumflex);
+  if (!accented) return nucleus; // grave is contextually suppressed in the default reading
+  if (mode === "tts") return syllables > 1 ? `ˈ${nucleus}` : nucleus;
+
+  const morae = splitMorae(nucleus);
+  if (!morae) return markFirstSegment(nucleus, acute);
+  const [first, second] = morae;
+  if (marks.has(circumflex)) return `${markFirstSegment(first, acute)}${markFirstSegment(second, grave)}`;
+  return `${first}${markFirstSegment(second, acute)}`;
+}
+
+function countSyllables(input: Unit[]) {
   let count = 0;
-  for (let index = 0; index < units.length; index += 1) {
-    const current = units[index];
+  for (let index = 0; index < input.length; index += 1) {
+    const current = input[index];
     if (!vowels.has(current.base)) continue;
     count += 1;
-    const next = units[index + 1];
-    if (!next || !vowels.has(next.base) || next.marks.includes(diaeresis) || current.marks.includes(iotaSubscript)) continue;
-    const pair = `${current.base.toLowerCase()}${next.base.toLowerCase()}`;
-    if (diphthongs[pair]) index += 1;
+    const next = input[index + 1];
+    if (!next || !vowels.has(next.base) || next.marks.has(diaeresis) || current.marks.has(iotaSubscript)) continue;
+    if (diphthongs[`${current.base}${next.base}`]) index += 1;
   }
   return count;
 }
 
-export function stripUnpronouncedGreekNotation(text: string) {
-  // Parenthetical letters are optional written forms and are omitted from the
-  // default recording. Stem-ending dashes are visual morphology only.
-  return text.replace(/\([^)]*\)/g, "").replace(/-/g, "").replace(/\s+/g, " ").trim();
+function lengthenOffglide(value: string) {
+  return value.endsWith("i̯") || value.endsWith("u̯") ? `${value}ː` : value;
 }
 
-export function greekToClassicalIpa(text: string) {
-  const cleaned = stripUnpronouncedGreekNotation(text);
-  const words = cleaned.match(/[\u0370-\u03ff\u1f00-\u1fff\u0300-\u036f]+/gu) ?? [];
-  return words.map((word) => {
-    const units = clusters(word);
-    let result = "";
-    for (let index = 0; index < units.length; index += 1) {
-      const current = units[index];
-      const lower = current.base.toLowerCase();
-      const next = units[index + 1];
-      const nextLower = next?.base.toLowerCase();
-      const initialRough = index === 0 && (current.marks.includes(roughBreathing) || Boolean(next?.marks.includes(roughBreathing) && vowels.has(current.base)));
-      if (initialRough && lower !== "ρ") result += "h";
+function transcribeWord(word: string, mode: AccentMode) {
+  const input = units(word);
+  const syllables = countSyllables(input);
+  let output = "";
 
-      if (vowels.has(current.base)) {
-        if (next && vowels.has(next.base) && !next.marks.includes(diaeresis) && !current.marks.includes(iotaSubscript)) {
-          const pair = `${lower}${nextLower}`;
-          const sound = diphthongs[pair];
-          if (sound) {
-            result += `${accentPrefix([...current.marks, ...next.marks])}${sound}`;
-            index += 1;
-            continue;
-          }
-        }
-        result += `${accentPrefix(current.marks)}${vowelSound(current)}`;
+  for (let index = 0; index < input.length; index += 1) {
+    const current = input[index];
+    const next = input[index + 1];
+    const previous = input[index - 1];
+    const wordStart = index === 0;
+
+    if (vowels.has(current.base)) {
+      if (current.marks.has(iotaSubscript)) {
+        if (wordStart && current.marks.has(rough)) output += "h";
+        output += accentNucleus(vowelValue(current), current.marks, mode, syllables);
         continue;
       }
 
-      let sound = consonants[current.base] ?? "";
-      if (lower === "ρ" && current.marks.includes(roughBreathing)) sound = "r̥";
-      if (lower === "γ" && nextLower && ["γ", "κ", "ξ", "χ"].includes(nextLower)) sound = "ŋ";
-      if (lower === "σ" && nextLower && ["β", "γ", "δ", "μ"].includes(nextLower)) sound = "z";
-      result += sound;
+      const pair = next && vowels.has(next.base) && !next.marks.has(diaeresis)
+        ? `${current.base}${next.base}`
+        : "";
+      if (pair && diphthongs[pair]) {
+        const pairMarks = unionMarks(current.marks, next?.marks);
+        if (wordStart && pairMarks.has(rough)) output += "h";
+        const after = input[index + 2];
+        const hiatus = Boolean(after && vowels.has(after.base));
+        let nucleus = diphthongs[pair];
+        if (pair === "ει" && hiatus) nucleus = "ei̯ː";
+        else if (hiatus && hiatusLengthened.has(pair)) nucleus = lengthenOffglide(nucleus);
+        output += accentNucleus(nucleus, pairMarks, mode, syllables);
+        index += 1;
+        continue;
+      }
+
+      if (wordStart && current.marks.has(rough)) output += "h";
+      output += accentNucleus(vowelValue(current), current.marks, mode, syllables);
+      continue;
     }
-    if (syllableCount(units) <= 1) result = result.replace(/ˈ/g, "");
-    return result;
-  }).filter(Boolean).map((word) => `/${word}/`).join(", ");
+
+    if (!consonants[current.base]) continue;
+    if (current.base === "γ" && next && gammaNasalizers.has(next.base)) output += "ŋ";
+    else if ((current.base === "σ" || current.base === "ς") && next && sigmaVoicers.has(next.base)) output += "z";
+    else if (current.base === "ρ" && (wordStart || previous?.base === "ρ" || current.marks.has(rough))) output += "r̥";
+    else output += consonants[current.base];
+  }
+
+  return output;
+}
+
+function transcribeText(text: string, mode: AccentMode) {
+  const cleaned = stripUnpronouncedGreekNotation(text);
+  const words = cleaned.match(/[\u0370-\u03ff\u1f00-\u1fff\u0300-\u036f]+/gu) ?? [];
+  return words.map((word) => transcribeWord(word, mode)).filter(Boolean).map((word) => `/${word}/`).join(", ");
+}
+
+export function stripUnpronouncedGreekNotation(text: string) {
+  // Parenthetical material in a paradigm is optional and is not pronounced by
+  // default. Hyphens marking stem/ending boundaries are visual morphology only.
+  return text.replace(/\([^)]*\)/g, "").replace(/-/g, "").replace(/\s+/g, " ").trim();
+}
+
+/** Canonical reconstructed-Attic IPA with pitch-accent information preserved. */
+export function greekToClassicalIpa(text: string) {
+  return transcribeText(text, "canonical");
+}
+
+/** ElevenLabs-oriented IPA; segmental phonology is canonical, pitch is approximated by stress. */
+export function greekToElevenLabsIpa(text: string) {
+  return transcribeText(text, "tts");
 }
 
 export function containsGreek(text: string) {
