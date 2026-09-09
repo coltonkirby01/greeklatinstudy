@@ -107,12 +107,33 @@ describe("administrator importer", () => {
     });
   });
 
-  it("accepts JSON card arrays and paradigm metadata", () => {
+  it("imports optional reviewed Greek pronunciation fields", () => {
+    const rows = parseCsv('Front,Back,Pronunciation Text,Canonical IPA,ElevenLabs IPA,Pronunciation System\n"θῡ́ω","I sacrifice","θῡ́ω","/tʰyː́ɔː/","/ˈtʰyːɔː/","Reviewed Classical Attic"\n');
+    expect(rowsToCards(rows)[0].metadata).toEqual({
+      pronunciationText: "θῡ́ω",
+      canonicalIpa: "/tʰyː́ɔː/",
+      elevenLabsIpa: "/ˈtʰyːɔː/",
+      pronunciationSystem: "Reviewed Classical Attic",
+    });
+  });
+
+  it("accepts JSON card arrays, paradigms, and reviewed pronunciation metadata", () => {
     expect(jsonToCards([{ Front: "λόγος", Back: "word", Category: "Noun" }])[0]).toMatchObject({ front: "λόγος", back: "word", category: "Noun" });
     expect(jsonToCards([{ prompt: "Present", back: "chart", columns: ["Singular"], rows: [{ label: "1st", cells: ["λύω"] }] }])[0].metadata).toMatchObject({
       studySource: "grammar-chart",
       chartColumns: ["Singular"],
       chartRows: [{ label: "1st", cells: ["λύω"] }],
+    });
+    expect(jsonToCards([{
+      front: "ἀνήρ",
+      back: "man",
+      canonicalIpa: "/anɛː́r/",
+      ttsIpa: "/aˈnɛːr/",
+      pronunciationSystem: "Reviewed Classical Attic",
+    }])[0].metadata).toMatchObject({
+      canonicalIpa: "/anɛː́r/",
+      elevenLabsIpa: "/aˈnɛːr/",
+      pronunciationSystem: "Reviewed Classical Attic",
     });
   });
 });
