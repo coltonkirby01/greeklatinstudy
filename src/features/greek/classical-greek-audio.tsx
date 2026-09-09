@@ -26,7 +26,6 @@ async function fetchCourseAudioAsset(assetId: string) {
   const response = await fetch(url, {
     headers: {
       apikey: supabaseAnonKey,
-      Authorization: `Bearer ${supabaseAnonKey}`,
       Accept: "application/json",
     },
   });
@@ -43,7 +42,6 @@ async function generateLesson3CourseAudio() {
       method: "POST",
       headers: {
         apikey: supabaseAnonKey,
-        Authorization: `Bearer ${supabaseAnonKey}`,
         "Content-Type": "application/json",
       },
       body: "{}",
