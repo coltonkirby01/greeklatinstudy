@@ -47,15 +47,6 @@ function adminApiKey() {
   return secretKeys.default?.trim() || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")?.trim() || "";
 }
 
-function bytesToBase64(bytes: Uint8Array) {
-  let binary = "";
-  const chunkSize = 0x8000;
-  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
-  }
-  return btoa(binary);
-}
-
 function base64ToBytes(value: string) {
   const binary = atob(value);
   const bytes = new Uint8Array(binary.length);
@@ -68,12 +59,14 @@ async function sha256(bytes: Uint8Array) {
   return Array.from(digest, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-function storageHeaders(serviceKey: string) {
-  return { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
+function serviceHeaders(serviceKey: string) {
+  // New sb_secret_* keys are API keys, not JWTs. Passing them as Bearer tokens
+  // can cause Invalid JWT errors, so backend Supabase calls use apikey only.
+  return { apikey: serviceKey };
 }
 
 async function ensureAudioBucket(supabaseUrl: string, serviceKey: string) {
-  const headers = storageHeaders(serviceKey);
+  const headers = serviceHeaders(serviceKey);
   const existing = await fetch(`${supabaseUrl}/storage/v1/bucket/${AUDIO_BUCKET}`, { headers });
   if (existing.ok) return;
   const created = await fetch(`${supabaseUrl}/storage/v1/bucket`, {
@@ -95,7 +88,7 @@ async function uploadAudio(supabaseUrl: string, serviceKey: string, assetId: str
   const response = await fetch(`${supabaseUrl}/storage/v1/object/${AUDIO_BUCKET}/${encodedPath}`, {
     method: "POST",
     headers: {
-      ...storageHeaders(serviceKey),
+      ...serviceHeaders(serviceKey),
       "Content-Type": mimeType,
       "cache-control": "public, max-age=31536000, immutable",
       "x-upsert": "true",
@@ -109,7 +102,6 @@ async function uploadAudio(supabaseUrl: string, serviceKey: string, assetId: str
 type ExistingAudio = {
   id: string;
   mime_type: string;
-  audio_base64: string;
   storage_path: string | null;
   source_note: string | null;
   sha256: string | null;
@@ -134,6 +126,8 @@ function chartSpeechText(metadata: Record<string, unknown>) {
   });
   const width = parsed.reduce((max, cells) => Math.max(max, cells.length), 0);
   const ordered: string[] = [];
+  // Paradigms are pronounced vertically: every singular form first, then every
+  // plural form, matching the visual chart columns.
   for (let column = 0; column < width; column += 1) {
     for (const cells of parsed) if (cells[column]) ordered.push(stripUnpronouncedGreekNotation(cells[column]));
   }
@@ -159,7 +153,7 @@ async function resolveCloudGreekAsset(supabaseUrl: string, serviceKey: string, c
   url.searchParams.set("id", `eq.${cloudCardId}`);
   url.searchParams.set("select", "id,front,back,reverse_prompt,metadata,decks!inner(title,language,published)");
   url.searchParams.set("limit", "1");
-  const response = await fetch(url, { headers: { apikey: serviceKey } });
+  const response = await fetch(url, { headers: serviceHeaders(serviceKey) });
   if (!response.ok) throw new Error(`Could not inspect uploaded Greek card: ${await response.text()}`);
   const card = ((await response.json()) as CloudCardRow[])[0];
   if (!card) return null;
@@ -173,18 +167,29 @@ async function resolveCloudGreekAsset(supabaseUrl: string, serviceKey: string, c
 async function inspectAudio(supabaseUrl: string, serviceKey: string, assetId: string) {
   const url = new URL(`${supabaseUrl}/rest/v1/course_audio_assets`);
   url.searchParams.set("id", `eq.${assetId}`);
-  url.searchParams.set("select", "id,mime_type,audio_base64,storage_path,source_note,sha256");
+  url.searchParams.set("select", "id,mime_type,storage_path,source_note,sha256");
   url.searchParams.set("limit", "1");
-  const response = await fetch(url, { headers: { apikey: serviceKey } });
+  const response = await fetch(url, { headers: serviceHeaders(serviceKey) });
   if (!response.ok) throw new Error(`Could not inspect ${assetId}: ${await response.text()}`);
   return ((await response.json()) as ExistingAudio[])[0] ?? null;
+}
+
+async function legacyAudioBase64(supabaseUrl: string, serviceKey: string, assetId: string) {
+  const url = new URL(`${supabaseUrl}/rest/v1/course_audio_assets`);
+  url.searchParams.set("id", `eq.${assetId}`);
+  url.searchParams.set("select", "audio_base64");
+  url.searchParams.set("limit", "1");
+  const response = await fetch(url, { headers: serviceHeaders(serviceKey) });
+  if (!response.ok) return "";
+  const row = ((await response.json()) as Array<{ audio_base64?: string }>)[0];
+  return row?.audio_base64 ?? "";
 }
 
 async function saveAudioRow(supabaseUrl: string, serviceKey: string, payload: Record<string, unknown>) {
   const response = await fetch(`${supabaseUrl}/rest/v1/course_audio_assets?on_conflict=id`, {
     method: "POST",
     headers: {
-      apikey: serviceKey,
+      ...serviceHeaders(serviceKey),
       "Content-Type": "application/json",
       Prefer: "resolution=merge-duplicates,return=minimal",
     },
@@ -195,15 +200,23 @@ async function saveAudioRow(supabaseUrl: string, serviceKey: string, payload: Re
 
 async function ensureAsset(asset: GreekCourseAudioAsset, context: { apiKey: string; voiceId: string; supabaseUrl: string; serviceKey: string }) {
   const { apiKey, voiceId, supabaseUrl, serviceKey } = context;
-  const sourceNote = `${asset.label}. IPA sent to ElevenLabs: ${asset.ttsText}`;
+  const pronunciationSystem = asset.pronunciationSystem ?? LESSON3_PRONUNCIATION_SYSTEM;
+  const sourceNote = `${asset.label}. ${pronunciationSystem}. TTS input: ${asset.ttsText}`;
   const existing = await inspectAudio(supabaseUrl, serviceKey, asset.id);
 
   if (existing && existing.source_note === sourceNote) {
     if (existing.storage_path) return { id: asset.id, status: "existing" as const, storagePath: existing.storage_path };
-    if (existing.audio_base64) {
-      const bytes = base64ToBytes(existing.audio_base64);
+    const legacy = await legacyAudioBase64(supabaseUrl, serviceKey, asset.id);
+    if (legacy) {
+      const bytes = base64ToBytes(legacy);
       const uploaded = await uploadAudio(supabaseUrl, serviceKey, asset.id, bytes, existing.mime_type || "audio/mpeg");
-      await saveAudioRow(supabaseUrl, serviceKey, { id: asset.id, storage_path: uploaded.path, sha256: uploaded.digest, updated_at: new Date().toISOString() });
+      await saveAudioRow(supabaseUrl, serviceKey, {
+        id: asset.id,
+        audio_base64: "",
+        storage_path: uploaded.path,
+        sha256: uploaded.digest,
+        updated_at: new Date().toISOString(),
+      });
       return { id: asset.id, status: "migrated" as const, storagePath: uploaded.path };
     }
   }
@@ -231,9 +244,11 @@ async function ensureAsset(asset: GreekCourseAudioAsset, context: { apiKey: stri
   await saveAudioRow(supabaseUrl, serviceKey, {
     id: asset.id,
     mime_type: mimeType,
-    audio_base64: bytesToBase64(bytes),
+    // Storage is the playback source. Keeping base64 empty avoids bloating the
+    // database and makes metadata reads much faster.
+    audio_base64: "",
     storage_path: uploaded.path,
-    pronunciation_system: LESSON3_PRONUNCIATION_SYSTEM,
+    pronunciation_system: pronunciationSystem,
     engine: `ElevenLabs ${LESSON3_AUDIO_MODEL} · voice ${voiceId}`,
     source_note: sourceNote,
     sha256: uploaded.digest,
@@ -254,7 +269,7 @@ Deno.serve(async (request) => {
   if (!apiKey) return json({ error: "ELEVENLABS_API_KEY is not configured." }, 503);
   if (!supabaseUrl || !serviceKey) return json({ error: "Supabase service credentials are unavailable." }, 500);
 
-  let body: { assetId?: string; cloudCardId?: string } = {};
+  let body: { assetId?: string; assetIds?: string[]; cloudCardId?: string } = {};
   try { body = await request.json(); } catch { /* old clients sent an empty body */ }
 
   try {
@@ -262,6 +277,11 @@ Deno.serve(async (request) => {
     if (body.cloudCardId) {
       const cloudAsset = await resolveCloudGreekAsset(supabaseUrl, serviceKey, body.cloudCardId);
       if (cloudAsset) assets.push(cloudAsset);
+    } else if (Array.isArray(body.assetIds) && body.assetIds.length) {
+      for (const id of [...new Set(body.assetIds)].slice(0, 8)) {
+        const builtin = resolveBuiltinGreekAsset(id);
+        if (builtin) assets.push(builtin);
+      }
     } else if (body.assetId) {
       const builtin = resolveBuiltinGreekAsset(body.assetId);
       if (builtin) assets.push(builtin);
@@ -269,7 +289,7 @@ Deno.serve(async (request) => {
       // Backward compatibility for the first Lesson 3 client.
       assets.push(...lesson3CourseAudioAssets);
     }
-    if (!assets.length) return json({ error: "No pronounceable Classical Greek audio is defined for this card." }, 404);
+    if (!assets.length) return json({ error: "No pronounceable or instructional Greek audio is defined for this card." }, 404);
 
     const results = [];
     for (const asset of assets) results.push(await ensureAsset(asset, { apiKey, voiceId, supabaseUrl, serviceKey }));
