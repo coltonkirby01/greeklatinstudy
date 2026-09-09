@@ -99,6 +99,5 @@ export function ClassicalGreekAudio({ assetId, label }: { assetId: string; label
     >
       Your browser does not support HTML audio.
     </audio>
-    <span className="answer-notes">{asset.pronunciation_system} · {asset.engine}</span>
   </div>;
 }
