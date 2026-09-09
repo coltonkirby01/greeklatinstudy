@@ -7,6 +7,7 @@
  * of pitch accent, the Open University's fifth-century Athenian reconstruction,
  * and the University of Victoria open textbook. From Alpha to Omega remains the
  * course-level pronunciation guide where it makes an explicit pedagogical choice.
+ * See docs/THIRD-PARTY-NOTICES.md for the upstream attribution and license notice.
  *
  * We keep two outputs separate:
  * - canonical IPA preserves the reconstructed pitch-accent information;
@@ -100,7 +101,7 @@ function markFirstSegment(value: string, mark: string) {
 
 function accentNucleus(nucleus: string, marks: Set<string>, mode: AccentMode, syllables: number) {
   const accented = marks.has(acute) || marks.has(circumflex);
-  if (!accented) return nucleus; // grave is contextually suppressed in the default reading
+  if (!accented) return nucleus;
   if (mode === "tts") return syllables > 1 ? `ˈ${nucleus}` : nucleus;
 
   const morae = splitMorae(nucleus);
@@ -183,17 +184,13 @@ function transcribeText(text: string, mode: AccentMode) {
 }
 
 export function stripUnpronouncedGreekNotation(text: string) {
-  // Parenthetical material in a paradigm is optional and is not pronounced by
-  // default. Hyphens marking stem/ending boundaries are visual morphology only.
   return text.replace(/\([^)]*\)/g, "").replace(/-/g, "").replace(/\s+/g, " ").trim();
 }
 
-/** Canonical reconstructed-Attic IPA with pitch-accent information preserved. */
 export function greekToClassicalIpa(text: string) {
   return transcribeText(text, "canonical");
 }
 
-/** ElevenLabs-oriented IPA; segmental phonology is canonical, pitch is approximated by stress. */
 export function greekToElevenLabsIpa(text: string) {
   return transcribeText(text, "tts");
 }
