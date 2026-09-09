@@ -28,7 +28,7 @@ jobs:
           echo "Prewarming ${#ids[@]} Greek audio assets"
           for id in "${ids[@]}"; do
             success=0
-            for attempt in 1 2 3; do
+            for attempt in 1 2 3 4 5; do
               status=$(curl --silent --show-error --output /tmp/course-audio-response.json --write-out '%{http_code}' \
                 --request POST "$SUPABASE_URL/functions/v1/course-audio" \
                 --header "apikey: $SUPABASE_PUBLISHABLE_KEY" \
@@ -45,7 +45,7 @@ jobs:
               sleep $((attempt * 2))
             done
             if [[ "$success" != "1" ]]; then
-              echo "Failed to prewarm $id after 3 attempts" >&2
+              echo "Failed to prewarm $id after 5 attempts" >&2
               exit 1
             fi
           done
