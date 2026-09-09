@@ -82,6 +82,10 @@ function GreekLesson3Paradigm({ card }: { card: StudyCard }) {
   </div>;
 }
 
+function GreekCardAudio({ card }: { card: StudyCard }) {
+  return <ClassicalGreekAudio assetId={card.id} label={card.front} />;
+}
+
 export function GreekPage() {
   const { value: decks, error } = useAsync(async () => {
     const [foundation, lesson3Vocabulary, lesson3Grammar] = await Promise.all([
@@ -210,10 +214,10 @@ export function GreekPage() {
       renderBack={(card, copy, source) => {
         if (source.id === "lessons-1-2") {
           const details = source.direction === "forward" ? card.back.split("\n").slice(1).join("\n") : card.reverseBack?.split("\n").slice(1).join("\n");
-          return <span className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "greek-answer-title"}>{source.direction === "reverse" ? card.front : String(card.metadata?.backTitle ?? "Answer")}</strong><span className="answer-notes">{details}</span></span>;
+          return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "greek-answer-title"}>{source.direction === "reverse" ? card.front : String(card.metadata?.backTitle ?? "Answer")}</strong><span className="answer-notes">{details}</span><GreekCardAudio card={card} /></div>;
         }
         if (source.id === "lesson3-grammar") return <div className="answer-block"><GreekLesson3Paradigm card={card} /></div>;
-        return <span className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>;
+        return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}<GreekCardAudio card={card} /></div>;
       }}
     /> : <div className="study-loading panel-surface"><span className="loading-mark">α</span><p>Preparing Greek…</p></div>}
   </main>;
