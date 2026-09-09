@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { retainSelectedCandidate, type StudySourceDefinition } from "../src/features/study/multi-source-study-session";
+import { retainSelectedCandidate, sourceIdsNeedingCoverage, type StudySourceDefinition } from "../src/features/study/multi-source-study-session";
 import type { DeckDefinition, StudyCard } from "../src/features/study/types";
 
 const one: StudyCard = { id: "one", deckId: "test", front: "one", back: "1" };
@@ -17,5 +17,17 @@ describe("study filter retention", () => {
   it("drops the current card only when the new filter excludes it", () => {
     const current = { source: source([one, two]), card: one };
     expect(retainSelectedCandidate(current, [source([two])])).toBeNull();
+  });
+
+  it("brings a newly selected grammar source into a mixed vocabulary session", () => {
+    expect(sourceIdsNeedingCoverage(
+      ["lesson3-vocabulary", "lesson3-grammar"],
+      ["lesson3-vocabulary"],
+    )).toEqual(["lesson3-grammar"]);
+
+    expect(sourceIdsNeedingCoverage(
+      ["lesson3-vocabulary", "lesson3-grammar"],
+      ["lesson3-vocabulary", "lesson3-grammar"],
+    )).toEqual(["lesson3-vocabulary", "lesson3-grammar"]);
   });
 });
