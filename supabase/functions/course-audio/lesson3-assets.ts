@@ -1,41 +1,49 @@
-export const LESSON3_PRONUNCIATION_SYSTEM =
-  "From Alpha to Omega — Classical Greek (segmental reconstruction; accent approximated)";
+import {
+  CLASSICAL_GREEK_PRONUNCIATION_SYSTEM,
+  greekToClassicalIpa,
+  greekToElevenLabsIpa,
+} from "./greek-ipa.ts";
 
+export const LESSON3_PRONUNCIATION_SYSTEM = CLASSICAL_GREEK_PRONUNCIATION_SYSTEM;
 export const LESSON3_AUDIO_MODEL = "eleven_v3";
-export const DEFAULT_ELEVENLABS_VOICE_ID = "JBFqnCBsd6RMkjVDRZzb"; // George, ElevenLabs quickstart voice.
+export const DEFAULT_ELEVENLABS_VOICE_ID = "JBFqnCBsd6RMkjVDRZzb";
 
 export type Lesson3CourseAudioAsset = {
   id: string;
   label: string;
+  canonicalIpa?: string;
   ttsText: string;
 };
 
+function paradigm(id: string, label: string, forms: readonly string[]): Lesson3CourseAudioAsset {
+  const text = forms.join(", ");
+  return {
+    id,
+    label,
+    canonicalIpa: greekToClassicalIpa(text),
+    ttsText: greekToElevenLabsIpa(text),
+  };
+}
+
 /**
- * Eleven v3 accepts IPA enclosed in forward slashes. The accent marks here use
- * stress as a practical TTS approximation of the textbook's Classical accent;
- * vowel quality, vowel length, diphthongs, and consonants follow the Classical
- * pronunciation profile used for this course.
- *
- * Paradigms are spoken vertically by number: all singular forms first, then
- * all plural forms. Parenthetical/optional letters are omitted from the default
- * recording, so παιδεύουσι(ν) is spoken without final nu.
+ * Paradigms are spoken vertically: all singular forms first, then all plural
+ * forms. Parenthetical/optional letters are stripped by the shared phonology
+ * engine, so παιδεύουσι(ν) is spoken without final nu.
  */
 export const lesson3CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
-  {
-    id: "lesson3-chart-present-active-indicative",
-    label: "Present Active Indicative",
-    ttsText:
-      "/pai̯ˈdeu̯.ɔː/, /pai̯ˈdeu̯.eːs/, /pai̯ˈdeu̯.eː/, /pai̯ˈdeu̯.o.men/, /pai̯ˈdeu̯.e.te/, /pai̯ˈdeu̯.uː.si/",
-  },
-  {
-    id: "lesson3-chart-present-active-infinitive",
-    label: "Present Active Infinitive",
-    ttsText: "/pai̯ˈdeu̯.eːn/",
-  },
-  {
-    id: "lesson3-chart-present-active-imperative",
-    label: "Present Active Imperative",
-    ttsText:
-      "/ˈpai̯.deu̯.e/, /pai̯.deu̯ˈe.tɔː/, /pai̯ˈdeu̯.e.te/, /pai̯.deu̯ˈon.tɔːn/",
-  },
+  paradigm("lesson3-chart-present-active-indicative", "Present Active Indicative", [
+    "παιδεύ-ω",
+    "παιδεύ-εις",
+    "παιδεύ-ει",
+    "παιδεύ-ομεν",
+    "παιδεύ-ετε",
+    "παιδεύ-ουσι(ν)",
+  ]),
+  paradigm("lesson3-chart-present-active-infinitive", "Present Active Infinitive", ["παιδεύ-ειν"]),
+  paradigm("lesson3-chart-present-active-imperative", "Present Active Imperative", [
+    "παίδευ-ε",
+    "παιδευ-έτω",
+    "παιδεύ-ετε",
+    "παιδευ-όντων",
+  ]),
 ] as const;
