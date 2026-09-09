@@ -1,4 +1,4 @@
-import { greekToClassicalIpa } from "./greek-ipa.ts";
+import { greekToClassicalIpa, greekToElevenLabsIpa } from "./greek-ipa.ts";
 import { lesson3CourseAudioAssets, type Lesson3CourseAudioAsset } from "./lesson3-assets.ts";
 
 export type GreekCourseAudioAsset = Lesson3CourseAudioAsset & { pronunciationSystem?: string };
@@ -17,15 +17,16 @@ const lesson3Vocabulary: Record<string, { label: string; greek: string }> = {
   "lesson3-v11": { label: "καὶ … καί", greek: "καὶ … καί" },
 };
 
-// Sound demonstrations for alphabet cards. These follow the pronunciation
-// choices printed in From Alpha to Omega rather than Modern Greek values.
+// Isolated sound demonstrations use the same segmental choices as the course's
+// Classical Attic engine. Josolon/Vox Graeca is dominant where open references
+// differ; notably ζ is /zd/ here (UVic presents /dz/ as an alternative reconstruction).
 const alphabetSounds: Record<string, { label: string; ipa: string }> = {
   alpha: { label: "Alpha sound", ipa: "/a/" },
   beta: { label: "Beta sound", ipa: "/b/" },
-  gamma: { label: "Gamma sound", ipa: "/g/" },
+  gamma: { label: "Gamma sound", ipa: "/ɡ/" },
   delta: { label: "Delta sound", ipa: "/d/" },
   epsilon: { label: "Epsilon sound", ipa: "/e/" },
-  zeta: { label: "Zeta sound", ipa: "/z/" },
+  zeta: { label: "Zeta sound", ipa: "/zd/" },
   eta: { label: "Eta sound", ipa: "/ɛː/" },
   theta: { label: "Theta sound", ipa: "/tʰ/" },
   iota: { label: "Iota sound", ipa: "/i/" },
@@ -46,9 +47,6 @@ const alphabetSounds: Record<string, { label: string; ipa: string }> = {
   omega: { label: "Omega sound", ipa: "/ɔː/" },
 };
 
-// Punctuation and accent cards do not encode a pronounceable Greek segment.
-// They still receive audio so every Greek study card has a player; the audio
-// names the textbook symbol instead of pretending the mark itself has a sound.
 const symbolLabels: Record<string, { label: string; text: string }> = {
   "punct-1": { label: "Comma", text: "Comma" },
   "punct-2": { label: "Period", text: "Period" },
@@ -65,13 +63,14 @@ export function resolveBuiltinGreekAsset(assetId: string): GreekCourseAudioAsset
 
   const vocabulary = lesson3Vocabulary[assetId];
   if (vocabulary) {
-    const ttsText = greekToClassicalIpa(vocabulary.greek);
-    return ttsText ? { id: assetId, label: vocabulary.label, ttsText } : null;
+    const canonicalIpa = greekToClassicalIpa(vocabulary.greek);
+    const ttsText = greekToElevenLabsIpa(vocabulary.greek);
+    return ttsText ? { id: assetId, label: vocabulary.label, canonicalIpa, ttsText } : null;
   }
 
   const alphabetMatch = /^(?:cap|low)-(.+)$/u.exec(assetId);
   const alphabet = alphabetMatch ? alphabetSounds[alphabetMatch[1]] : null;
-  if (alphabet) return { id: assetId, label: alphabet.label, ttsText: alphabet.ipa };
+  if (alphabet) return { id: assetId, label: alphabet.label, canonicalIpa: alphabet.ipa, ttsText: alphabet.ipa };
 
   const symbol = symbolLabels[assetId];
   return symbol ? {
