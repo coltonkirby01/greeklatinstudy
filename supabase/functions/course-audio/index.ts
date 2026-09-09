@@ -6,6 +6,7 @@ import {
   LESSON3_PRONUNCIATION_SYSTEM,
   lesson3CourseAudioAssets,
 } from "./lesson3-assets.ts";
+import { pronunciationOverridesFromMetadata } from "./pronunciation-overrides.ts";
 
 const AUDIO_BUCKET = "course-audio";
 const corsHeaders = {
@@ -130,12 +131,9 @@ function chartSpeechText(metadata: Record<string, unknown>) {
   return ordered.filter(Boolean).join(", ");
 }
 
-function greekTextFromCloudCard(card: CloudCardRow) {
+function greekTextFromCloudCard(card: CloudCardRow, pronunciationText?: string) {
+  if (pronunciationText && containsGreek(pronunciationText)) return stripUnpronouncedGreekNotation(pronunciationText);
   const metadata = card.metadata ?? {};
-  for (const key of ["pronunciationText", "audioText", "greekAudioText"] as const) {
-    const value = metadata[key];
-    if (typeof value === "string" && containsGreek(value)) return stripUnpronouncedGreekNotation(value);
-  }
   const chart = chartSpeechText(metadata);
   if (chart) return chart;
   for (const value of [card.front, card.back, card.reverse_prompt ?? ""]) {
@@ -155,10 +153,18 @@ async function resolveCloudGreekAsset(supabaseUrl: string, serviceKey: string, c
   if (!card) return null;
   const deck = Array.isArray(card.decks) ? card.decks[0] : card.decks;
   if (!deck || deck.language !== "greek" || !deck.published) return null;
-  const greekText = greekTextFromCloudCard(card);
-  const canonicalIpa = greekToClassicalIpa(greekText);
-  const ttsText = greekToElevenLabsIpa(greekText);
-  return ttsText ? { id: `cloud-card-${card.id}`, label: `${deck.title} Greek card`, canonicalIpa, ttsText } : null;
+
+  const overrides = pronunciationOverridesFromMetadata(card.metadata);
+  const greekText = greekTextFromCloudCard(card, overrides.pronunciationText);
+  const canonicalIpa = overrides.canonicalIpa ?? greekToClassicalIpa(greekText);
+  const ttsText = overrides.ttsIpa ?? greekToElevenLabsIpa(greekText);
+  return ttsText ? {
+    id: `cloud-card-${card.id}`,
+    label: `${deck.title} Greek card`,
+    canonicalIpa,
+    ttsText,
+    pronunciationSystem: overrides.pronunciationSystem,
+  } : null;
 }
 
 async function inspectAudio(supabaseUrl: string, serviceKey: string, assetId: string) {
