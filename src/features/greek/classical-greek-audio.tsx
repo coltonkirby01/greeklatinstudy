@@ -11,9 +11,45 @@ type CourseAudioAsset = {
 };
 
 const assetCache = new Map<string, Promise<CourseAudioAsset | null>>();
+let generationRequest: Promise<boolean> | null = null;
 
 export function courseAudioDataUrl(asset: Pick<CourseAudioAsset, "mime_type" | "audio_base64">) {
   return `data:${asset.mime_type};base64,${asset.audio_base64}`;
+}
+
+async function fetchCourseAudioAsset(assetId: string) {
+  if (!isSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) return null;
+  const url = new URL(`${supabaseUrl}/rest/v1/course_audio_assets`);
+  url.searchParams.set("id", `eq.${assetId}`);
+  url.searchParams.set("select", "id,mime_type,audio_base64,pronunciation_system,engine,source_note");
+  url.searchParams.set("limit", "1");
+  const response = await fetch(url, {
+    headers: {
+      apikey: supabaseAnonKey,
+      Authorization: `Bearer ${supabaseAnonKey}`,
+      Accept: "application/json",
+    },
+  });
+  if (!response.ok) return null;
+  const rows = (await response.json()) as CourseAudioAsset[];
+  const asset = rows[0];
+  return asset?.audio_base64 ? asset : null;
+}
+
+async function generateLesson3CourseAudio() {
+  if (!isSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) return false;
+  if (!generationRequest) {
+    generationRequest = fetch(`${supabaseUrl}/functions/v1/course-audio`, {
+      method: "POST",
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        "Content-Type": "application/json",
+      },
+      body: "{}",
+    }).then((response) => response.ok).catch(() => false);
+  }
+  return generationRequest;
 }
 
 export function loadCourseAudioAsset(assetId: string) {
@@ -21,22 +57,12 @@ export function loadCourseAudioAsset(assetId: string) {
   if (cached) return cached;
 
   const request = (async () => {
-    if (!isSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) return null;
-    const url = new URL(`${supabaseUrl}/rest/v1/course_audio_assets`);
-    url.searchParams.set("id", `eq.${assetId}`);
-    url.searchParams.set("select", "id,mime_type,audio_base64,pronunciation_system,engine,source_note");
-    url.searchParams.set("limit", "1");
-    const response = await fetch(url, {
-      headers: {
-        apikey: supabaseAnonKey,
-        Authorization: `Bearer ${supabaseAnonKey}`,
-        Accept: "application/json",
-      },
-    });
-    if (!response.ok) return null;
-    const rows = (await response.json()) as CourseAudioAsset[];
-    const asset = rows[0];
-    return asset?.audio_base64 ? asset : null;
+    const existing = await fetchCourseAudioAsset(assetId);
+    if (existing) return existing;
+
+    const generated = await generateLesson3CourseAudio();
+    if (!generated) return null;
+    return fetchCourseAudioAsset(assetId);
   })().catch(() => null);
 
   assetCache.set(assetId, request);
