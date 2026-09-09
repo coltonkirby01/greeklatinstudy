@@ -56,10 +56,12 @@ describe("Classical Greek course audio", () => {
     ]);
   });
 
-  it("uses the course Classical values for ει/ευ and never pronounces parenthetical letters", () => {
+  it("uses the course Classical values, stable monosyllables, and never pronounces parenthetical letters", () => {
     expect(stripUnpronouncedGreekNotation("παιδεύ-ουσι(ν)")).toBe("παιδεύουσι");
     expect(greekToClassicalIpa("παιδεύει")).toContain("eː");
     expect(greekToClassicalIpa("παιδεύω")).toContain("eu̯");
     expect(greekToClassicalIpa("παιδεύουσι(ν)")).not.toContain("sin");
+    expect(greekToClassicalIpa("μή")).toBe("/mɛː/");
+    expect(greekToClassicalIpa("καί")).toBe("/kai̯/");
   });
 });
