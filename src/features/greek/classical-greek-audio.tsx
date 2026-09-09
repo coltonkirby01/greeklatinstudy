@@ -9,9 +9,11 @@ type CourseAudioAsset = {
 };
 
 type AudioRequest = { assetId: string; cloudCardId?: string };
+type RememberedPath = { path: string; checkedAt: number };
 const assetCache = new Map<string, Promise<CourseAudioAsset | null>>();
 const generationRequests = new Map<string, Promise<boolean>>();
-const storageCacheVersion = "classical-greek-audio-v2";
+const storageCacheVersion = "classical-greek-audio-v3";
+const persistentPathMaxAgeMs = 5 * 60 * 1_000;
 
 function cacheKey(request: AudioRequest) {
   return request.cloudCardId ? `cloud:${request.cloudCardId}` : `builtin:${request.assetId}`;
@@ -21,13 +23,19 @@ function persistentCacheKey(assetId: string) {
   return `${storageCacheVersion}:${assetId}`;
 }
 
-function readPersistentPath(assetId: string) {
-  try { return window.localStorage.getItem(persistentCacheKey(assetId)); }
-  catch { return null; }
+function readPersistentPath(assetId: string): RememberedPath | null {
+  try {
+    const raw = window.localStorage.getItem(persistentCacheKey(assetId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<RememberedPath>;
+    if (typeof parsed.path !== "string" || typeof parsed.checkedAt !== "number") return null;
+    if (Date.now() - parsed.checkedAt > persistentPathMaxAgeMs) return null;
+    return { path: parsed.path, checkedAt: parsed.checkedAt };
+  } catch { return null; }
 }
 
 function writePersistentPath(assetId: string, path: string) {
-  try { window.localStorage.setItem(persistentCacheKey(assetId), path); }
+  try { window.localStorage.setItem(persistentCacheKey(assetId), JSON.stringify({ path, checkedAt: Date.now() } satisfies RememberedPath)); }
   catch { /* storage may be disabled; in-memory caching still works */ }
 }
 
@@ -37,10 +45,12 @@ export function courseAudioPublicUrl(asset: Pick<CourseAudioAsset, "storage_path
   return `${supabaseUrl}/storage/v1/object/public/course-audio/${encodedPath}`;
 }
 
-async function fetchCourseAudioAsset(assetId: string) {
+async function fetchCourseAudioAsset(assetId: string, bypassPersistentCache = false) {
   if (!isSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) return null;
-  const remembered = readPersistentPath(assetId);
-  if (remembered) return { id: assetId, mime_type: "audio/mpeg", storage_path: remembered };
+  if (!bypassPersistentCache) {
+    const remembered = readPersistentPath(assetId);
+    if (remembered) return { id: assetId, mime_type: "audio/mpeg", storage_path: remembered.path };
+  }
 
   const url = new URL(`${supabaseUrl}/rest/v1/course_audio_assets`);
   url.searchParams.set("id", `eq.${assetId}`);
@@ -76,10 +86,22 @@ export function loadCourseAudioAsset(request: AudioRequest) {
   if (cached) return cached;
 
   const pending = (async () => {
-    const existing = await fetchCourseAudioAsset(request.assetId);
+    const remembered = readPersistentPath(request.assetId);
+    if (remembered) return { id: request.assetId, mime_type: "audio/mpeg", storage_path: remembered.path };
+
+    if (request.cloudCardId) {
+      // Uploaded Greek cards can be edited after audio was first generated. On
+      // a cache miss/expiry, ask the Edge Function to validate source_note
+      // before reading the path. If the pronunciation metadata changed, it
+      // regenerates once; if not, this is a cheap metadata check with no TTS cost.
+      if (!await generateCourseAudio(request)) return fetchCourseAudioAsset(request.assetId, true);
+      return fetchCourseAudioAsset(request.assetId, true);
+    }
+
+    const existing = await fetchCourseAudioAsset(request.assetId, true);
     if (existing) return existing;
     if (!await generateCourseAudio(request)) return null;
-    return fetchCourseAudioAsset(request.assetId);
+    return fetchCourseAudioAsset(request.assetId, true);
   })().catch(() => null).then((asset) => {
     if (!asset) assetCache.delete(key);
     return asset;
