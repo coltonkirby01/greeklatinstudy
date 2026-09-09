@@ -26,14 +26,14 @@ describe("Lesson 3 Classical Greek course audio", () => {
     }
   });
 
-  it("reads paradigms vertically: singulars first, then plurals", () => {
+  it("reads paradigms vertically: singulars first, then plurals, omitting parenthetical nu", () => {
     expect(lesson3CourseAudioAssets[0].ttsText.split(", ")).toEqual([
       "/pai̯ˈdeu̯.ɔː/",
       "/pai̯ˈdeu̯.eːs/",
       "/pai̯ˈdeu̯.eː/",
       "/pai̯ˈdeu̯.o.men/",
       "/pai̯ˈdeu̯.e.te/",
-      "/pai̯ˈdeu̯.uː.sin/",
+      "/pai̯ˈdeu̯.uː.si/",
     ]);
     expect(lesson3CourseAudioAssets[1].ttsText.split(", ")).toEqual(["/pai̯ˈdeu̯.eːn/"]);
     expect(lesson3CourseAudioAssets[2].ttsText.split(", ")).toEqual([
