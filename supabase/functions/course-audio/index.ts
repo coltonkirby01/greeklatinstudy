@@ -1,5 +1,5 @@
 import { resolveBuiltinGreekAsset, type GreekCourseAudioAsset } from "./builtin-greek-assets.ts";
-import { containsGreek, greekToClassicalIpa, stripUnpronouncedGreekNotation } from "./greek-ipa.ts";
+import { containsGreek, greekToClassicalIpa, greekToElevenLabsIpa, stripUnpronouncedGreekNotation } from "./greek-ipa.ts";
 import {
   DEFAULT_ELEVENLABS_VOICE_ID,
   LESSON3_AUDIO_MODEL,
@@ -60,8 +60,6 @@ async function sha256(bytes: Uint8Array) {
 }
 
 function serviceHeaders(serviceKey: string) {
-  // New sb_secret_* keys are API keys, not JWTs. Passing them as Bearer tokens
-  // can cause Invalid JWT errors, so backend Supabase calls use apikey only.
   return { apikey: serviceKey };
 }
 
@@ -126,8 +124,6 @@ function chartSpeechText(metadata: Record<string, unknown>) {
   });
   const width = parsed.reduce((max, cells) => Math.max(max, cells.length), 0);
   const ordered: string[] = [];
-  // Paradigms are pronounced vertically: every singular form first, then every
-  // plural form, matching the visual chart columns.
   for (let column = 0; column < width; column += 1) {
     for (const cells of parsed) if (cells[column]) ordered.push(stripUnpronouncedGreekNotation(cells[column]));
   }
@@ -160,8 +156,9 @@ async function resolveCloudGreekAsset(supabaseUrl: string, serviceKey: string, c
   const deck = Array.isArray(card.decks) ? card.decks[0] : card.decks;
   if (!deck || deck.language !== "greek" || !deck.published) return null;
   const greekText = greekTextFromCloudCard(card);
-  const ttsText = greekToClassicalIpa(greekText);
-  return ttsText ? { id: `cloud-card-${card.id}`, label: `${deck.title} Greek card`, ttsText } : null;
+  const canonicalIpa = greekToClassicalIpa(greekText);
+  const ttsText = greekToElevenLabsIpa(greekText);
+  return ttsText ? { id: `cloud-card-${card.id}`, label: `${deck.title} Greek card`, canonicalIpa, ttsText } : null;
 }
 
 async function inspectAudio(supabaseUrl: string, serviceKey: string, assetId: string) {
@@ -201,7 +198,8 @@ async function saveAudioRow(supabaseUrl: string, serviceKey: string, payload: Re
 async function ensureAsset(asset: GreekCourseAudioAsset, context: { apiKey: string; voiceId: string; supabaseUrl: string; serviceKey: string }) {
   const { apiKey, voiceId, supabaseUrl, serviceKey } = context;
   const pronunciationSystem = asset.pronunciationSystem ?? LESSON3_PRONUNCIATION_SYSTEM;
-  const sourceNote = `${asset.label}. ${pronunciationSystem}. TTS input: ${asset.ttsText}`;
+  const canonical = asset.canonicalIpa ? ` Canonical IPA: ${asset.canonicalIpa}.` : "";
+  const sourceNote = `${asset.label}. ${pronunciationSystem}.${canonical} ElevenLabs input: ${asset.ttsText}`;
   const existing = await inspectAudio(supabaseUrl, serviceKey, asset.id);
 
   if (existing && existing.source_note === sourceNote) {
@@ -244,8 +242,6 @@ async function ensureAsset(asset: GreekCourseAudioAsset, context: { apiKey: stri
   await saveAudioRow(supabaseUrl, serviceKey, {
     id: asset.id,
     mime_type: mimeType,
-    // Storage is the playback source. Keeping base64 empty avoids bloating the
-    // database and makes metadata reads much faster.
     audio_base64: "",
     storage_path: uploaded.path,
     pronunciation_system: pronunciationSystem,
@@ -286,7 +282,6 @@ Deno.serve(async (request) => {
       const builtin = resolveBuiltinGreekAsset(body.assetId);
       if (builtin) assets.push(builtin);
     } else {
-      // Backward compatibility for the first Lesson 3 client.
       assets.push(...lesson3CourseAudioAssets);
     }
     if (!assets.length) return json({ error: "No pronounceable or instructional Greek audio is defined for this card." }, 404);
