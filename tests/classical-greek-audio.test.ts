@@ -1,7 +1,11 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { resolveBuiltinGreekAsset } from "../supabase/functions/course-audio/builtin-greek-assets";
-import { greekToClassicalIpa, stripUnpronouncedGreekNotation } from "../supabase/functions/course-audio/greek-ipa";
+import {
+  greekToClassicalIpa,
+  greekToElevenLabsIpa,
+  stripUnpronouncedGreekNotation,
+} from "../supabase/functions/course-audio/greek-ipa";
 import {
   DEFAULT_ELEVENLABS_VOICE_ID,
   LESSON3_AUDIO_MODEL,
@@ -27,41 +31,57 @@ describe("Classical Greek course audio", () => {
     expect(resolveBuiltinGreekAsset("punct-4")?.pronunciationSystem).toContain("non-phonetic");
   });
 
-  it("uses Eleven v3 IPA input and a documented default voice", () => {
+  it("documents the source hierarchy and keeps canonical IPA separate from ElevenLabs", () => {
     expect(LESSON3_AUDIO_MODEL).toBe("eleven_v3");
     expect(DEFAULT_ELEVENLABS_VOICE_ID).toBe("JBFqnCBsd6RMkjVDRZzb");
-    expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("Classical Greek");
-    expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("accent approximated");
+    expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("Josolon");
+    expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("Smyth");
+    expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("Open University");
+    expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("University of Victoria");
     for (const asset of lesson3CourseAudioAssets) {
+      expect(asset.canonicalIpa).toMatch(/^\/.*\/$/u);
       expect(asset.ttsText).toMatch(/^\/.*\/$/u);
+      expect(asset.canonicalIpa).not.toContain("ˈ");
       expect(asset.ttsText).not.toContain("παιδεύ-");
     }
   });
 
   it("reads paradigms vertically: singulars first, then plurals, omitting parenthetical nu", () => {
     expect(lesson3CourseAudioAssets[0].ttsText.split(", ")).toEqual([
-      "/pai̯ˈdeu̯.ɔː/",
-      "/pai̯ˈdeu̯.eːs/",
-      "/pai̯ˈdeu̯.eː/",
-      "/pai̯ˈdeu̯.o.men/",
-      "/pai̯ˈdeu̯.e.te/",
-      "/pai̯ˈdeu̯.uː.si/",
+      "/pai̯dˈeu̯ɔː/",
+      "/pai̯dˈeu̯eːs/",
+      "/pai̯dˈeu̯eː/",
+      "/pai̯dˈeu̯omen/",
+      "/pai̯dˈeu̯ete/",
+      "/pai̯dˈeu̯uːsi/",
     ]);
-    expect(lesson3CourseAudioAssets[1].ttsText.split(", ")).toEqual(["/pai̯ˈdeu̯.eːn/"]);
+    expect(lesson3CourseAudioAssets[1].ttsText).toBe("/pai̯dˈeu̯eːn/");
     expect(lesson3CourseAudioAssets[2].ttsText.split(", ")).toEqual([
-      "/ˈpai̯.deu̯.e/",
-      "/pai̯.deu̯ˈe.tɔː/",
-      "/pai̯ˈdeu̯.e.te/",
-      "/pai̯.deu̯ˈon.tɔːn/",
+      "/pˈai̯deu̯e/",
+      "/pai̯deu̯ˈetɔː/",
+      "/pai̯dˈeu̯ete/",
+      "/pai̯deu̯ˈontɔːn/",
     ]);
   });
 
-  it("uses the course Classical values, stable monosyllables, and never pronounces parenthetical letters", () => {
+  it("uses Josolon/Vox Graeca-led Attic segmental rules", () => {
+    expect(resolveBuiltinGreekAsset("cap-zeta")?.canonicalIpa).toBe("/zd/");
+    expect(greekToClassicalIpa("οἶκος")).toContain("œ");
+    expect(greekToClassicalIpa("φυλάττω")).toContain("tt");
+    expect(greekToClassicalIpa("ἄγγελος")).toContain("ŋɡ");
+    expect(greekToClassicalIpa("βασιλεία")).toContain("ei");
+    expect(greekToClassicalIpa("χάρις")).toContain("kʰ");
+  });
+
+  it("preserves canonical pitch information but gives ElevenLabs stable stress approximation", () => {
+    expect(greekToClassicalIpa("μή")).not.toContain("ˈ");
+    expect(greekToClassicalIpa("μή")).toContain("́");
+    expect(greekToElevenLabsIpa("μή")).toBe("/mɛː/");
+    expect(greekToElevenLabsIpa("παιδεύω")).toContain("ˈ");
+  });
+
+  it("never pronounces parenthetical material or morphology dashes", () => {
     expect(stripUnpronouncedGreekNotation("παιδεύ-ουσι(ν)")).toBe("παιδεύουσι");
-    expect(greekToClassicalIpa("παιδεύει")).toContain("eː");
-    expect(greekToClassicalIpa("παιδεύω")).toContain("eu̯");
-    expect(greekToClassicalIpa("παιδεύουσι(ν)")).not.toContain("sin");
-    expect(greekToClassicalIpa("μή")).toBe("/mɛː/");
-    expect(greekToClassicalIpa("καί")).toBe("/kai̯/");
+    expect(greekToElevenLabsIpa("παιδεύ-ουσι(ν)")).not.toContain("n/");
   });
 });
