@@ -46,21 +46,21 @@ describe("Classical Greek course audio", () => {
     }
   });
 
-  it("reads paradigms vertically: singulars first, then plurals, omitting parenthetical nu", () => {
+  it("reads paradigms vertically and applies the Josolon/Vox Graeca hiatus treatment", () => {
     expect(lesson3CourseAudioAssets[0].ttsText.split(", ")).toEqual([
-      "/pai̯dˈeu̯ɔː/",
-      "/pai̯dˈeu̯eːs/",
-      "/pai̯dˈeu̯eː/",
-      "/pai̯dˈeu̯omen/",
-      "/pai̯dˈeu̯ete/",
-      "/pai̯dˈeu̯uːsi/",
+      "/pai̯dˈeu̯ːɔː/",
+      "/pai̯dˈeu̯ːeːs/",
+      "/pai̯dˈeu̯ːeː/",
+      "/pai̯dˈeu̯ːomen/",
+      "/pai̯dˈeu̯ːete/",
+      "/pai̯dˈeu̯ːuːsi/",
     ]);
-    expect(lesson3CourseAudioAssets[1].ttsText).toBe("/pai̯dˈeu̯eːn/");
+    expect(lesson3CourseAudioAssets[1].ttsText).toBe("/pai̯dˈeu̯ːeːn/");
     expect(lesson3CourseAudioAssets[2].ttsText.split(", ")).toEqual([
-      "/pˈai̯deu̯e/",
-      "/pai̯deu̯ˈetɔː/",
-      "/pai̯dˈeu̯ete/",
-      "/pai̯deu̯ˈontɔːn/",
+      "/pˈai̯deu̯ːe/",
+      "/pai̯deu̯ːˈetɔː/",
+      "/pai̯dˈeu̯ːete/",
+      "/pai̯deu̯ːˈontɔːn/",
     ]);
   });
 
