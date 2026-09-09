@@ -20,9 +20,17 @@ export function formatGreekLesson3ParadigmCell(value: string) {
 }
 
 export function greekLesson3ParadigmSpeechText(rows: readonly { cells: readonly string[] }[]) {
-  return rows
-    .flatMap((row) => row.cells)
-    .map((value) => value.replace(/-/g, "").replace(/\(([^)]+)\)/g, "$1"))
+  const width = rows.reduce((max, row) => Math.max(max, row.cells.length), 0);
+  const ordered: string[] = [];
+  for (let column = 0; column < width; column += 1) {
+    for (const row of rows) {
+      const value = row.cells[column];
+      if (value) ordered.push(value);
+    }
+  }
+  return ordered
+    .map((value) => value.replace(/-/g, "").replace(/\([^)]*\)/g, "").trim())
+    .filter(Boolean)
     .join(", ");
 }
 
@@ -75,23 +83,27 @@ export function loadGreekLesson3VocabularyDeck() {
 export function loadGreekLesson3GrammarDeck() {
   greekLesson3GrammarPromise ??= fetchText("data/greek-lesson3-grammar.json", "no-store").then((text) => {
     const source = JSON.parse(text) as GreekLesson3GrammarSourceCard[];
-    const cards: StudyCard[] = source.map((card, index) => ({
-      id: card.id,
-      deckId: "alpha-omega-lesson3-grammar",
-      front: card.prompt,
-      back: card.category,
-      category: card.category,
-      rank: index + 1,
-      source: "From Alpha to Omega, Lesson 3",
-      notes: "Whole-paradigm chart · model verb παιδεύω",
-      metadata: {
-        lesson: 3,
-        studySource: "grammar-chart",
-        grammarGroup: card.category,
-        chartColumns: card.columns,
-        chartRows: card.rows.map((row) => ({ ...row, cells: row.cells.map(formatGreekLesson3ParadigmCell) })),
-      },
-    }));
+    const cards: StudyCard[] = source.map((card, index) => {
+      const chartRows = card.rows.map((row) => ({ ...row, cells: row.cells.map(formatGreekLesson3ParadigmCell) }));
+      return {
+        id: card.id,
+        deckId: "alpha-omega-lesson3-grammar",
+        front: card.prompt,
+        back: card.category,
+        category: card.category,
+        rank: index + 1,
+        source: "From Alpha to Omega, Lesson 3",
+        notes: "Whole-paradigm chart · model verb παιδεύω",
+        metadata: {
+          lesson: 3,
+          studySource: "grammar-chart",
+          grammarGroup: card.category,
+          chartColumns: card.columns,
+          chartRows,
+          pronunciationText: greekLesson3ParadigmSpeechText(chartRows),
+        },
+      };
+    });
     return { id: "alpha-omega-lesson3-grammar", slug: "greek", title: "Greek Lesson 3 Grammar", eyebrow: "Present active paradigms", description: "Three whole-paradigm chart cards. Each card asks for the named paradigm and reveals the complete chart.", language: "greek", cards, supportsReverse: false, sourceNote: "From Alpha to Omega, Lesson 3; model verb παιδεύω." } satisfies DeckDefinition;
   });
   return greekLesson3GrammarPromise;
