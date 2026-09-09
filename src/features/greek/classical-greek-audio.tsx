@@ -142,18 +142,21 @@ export function ClassicalGreekAudio({ assetId, label, cloudCardId }: { assetId: 
   const src = courseAudioPublicUrl(asset);
   if (!src) return null;
 
+  const preventMediaSpace = (event: { key: string; preventDefault: () => void }) => {
+    // Buttons normally turn Space into a click. Suppressing that default on
+    // both keydown and keyup keeps Space exclusively assigned to the study
+    // session even after a learner has clicked the audio controls.
+    if (event.key === " ") event.preventDefault();
+  };
+
   return <div
     ref={controlRef}
     data-study-control="audio"
     role="group"
     aria-label={`Classical Greek audio for ${label}`}
     onClick={(event) => event.stopPropagation()}
-    onKeyDownCapture={(event) => {
-      // The custom player has no native media focus behavior. Prevent a focused
-      // audio button from treating Space as a click, then allow the study
-      // session's Space shortcut to continue bubbling to Reveal/Save & Next.
-      if (event.key === " ") event.preventDefault();
-    }}
+    onKeyDownCapture={preventMediaSpace}
+    onKeyUpCapture={preventMediaSpace}
     style={{ width: "100%", marginTop: "0.75rem", display: "flex", gap: "0.55rem", flexWrap: "wrap", justifyContent: "center", alignItems: "center", position: "relative" }}
   >
     <audio
@@ -175,7 +178,7 @@ export function ClassicalGreekAudio({ assetId, label, cloudCardId }: { assetId: 
       onClick={togglePlayback}
     >
       {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
-      {playing ? "Pause" : "Play"} · A
+      A · {playing ? "Pause" : "Play"}
     </button>
     <button
       type="button"
