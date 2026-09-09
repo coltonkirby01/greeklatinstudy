@@ -4,7 +4,7 @@ import type { DeckDefinition, StudyCard } from "../study/types";
 
 export type CloudDeck = { id: string; slug: string; title: string; description: string; subject: string; language: "greek" | "latin" | "other"; supports_reverse: boolean; published: boolean; staged_config: { enabled?: boolean; initialCount?: number; batchSize?: number } | null; created_at: string; updated_at: string };
 export type CloudCard = { id: string; deck_id: string; stable_key: string; front: string; back: string; category: string | null; rank: number | null; source: string | null; notes: string | null; reverse_prompt: string | null; position: number; metadata: Json | null };
-export type ImportCard = { front: string; back: string; category: string; rank: number | null; source: string; notes: string; reversePrompt: string; metadata?: Record<string, unknown> };
+export type ImportCard = { front: string; back: string; category: string; rank: number | null; source: string; notes: string; reversePrompt: string; metadata?: Json };
 function client() { if (!supabase) throw new Error("Connect Supabase before using cloud decks."); return supabase; }
 export async function listPublishedDecks() { const { data, error } = await client().from("decks").select("*").eq("published", true).order("title"); if (error) throw error; return (data ?? []) as CloudDeck[]; }
 export async function listAdminDecks() { const { data, error } = await client().from("decks").select("*").order("updated_at", { ascending: false }); if (error) throw error; return (data ?? []) as CloudDeck[]; }
