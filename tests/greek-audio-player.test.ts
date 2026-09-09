@@ -24,4 +24,12 @@ describe("Greek study audio player", () => {
     expect(source).toContain("audio.currentTime = 0;");
     expect(source).toContain("onClick={replay}");
   });
+
+  it("keeps repeat playback fast while periodically checking for revised shared audio", () => {
+    expect(source).toContain('storageCacheVersion = "classical-greek-audio-v3"');
+    expect(source).toContain("persistentPathMaxAgeMs = 5 * 60 * 1_000");
+    expect(source).toContain("if (request.cloudCardId)");
+    expect(source).toContain("generateCourseAudio(request)");
+    expect(source).toContain("fetchCourseAudioAsset(request.assetId, true)");
+  });
 });
