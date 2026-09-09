@@ -48,6 +48,16 @@ type Props = {
 };
 
 function candidateKey(candidate: Candidate) { return `${candidate.source.id}:${candidate.card.id}`; }
+
+export function sourceIdsNeedingCoverage(activeSourceIds: readonly string[], recentSourceIds: readonly string[]) {
+  const active = [...new Set(activeSourceIds)];
+  if (active.length <= 1 || recentSourceIds.length === 0) return active;
+  const window = recentSourceIds.slice(-(active.length * 3));
+  const seen = new Set(window);
+  const missing = active.filter((sourceId) => !seen.has(sourceId));
+  return missing.length ? missing : active;
+}
+
 export function retainSelectedCandidate(current: Candidate | null, sources: StudySourceDefinition[]) {
   if (!current) return null;
   const source = sources.find((item) => item.id === current.source.id);
@@ -102,6 +112,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   const [envelopes, setEnvelopes] = useState<Record<string, DeckProgressEnvelope>>({});
   const envelopesRef = useRef<Record<string, DeckProgressEnvelope>>({});
   const persistQueue = useRef<Promise<void>>(Promise.resolve());
+  const recentSourceIdsRef = useRef<string[]>([]);
   const [ready, setReady] = useState(false);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>("adaptive");
   const [current, setCurrent] = useState<Candidate | null>(null);
@@ -244,7 +255,12 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     let candidates = allCandidates();
     if (!candidates.length) return null;
     if (exclude && candidates.length > 1) candidates = candidates.filter((candidate) => candidateKey(candidate) !== candidateKey(exclude));
-    if (mode !== "sequential") candidates = avoidRecentlyPresentedCandidates(candidates, modeFor);
+    if (mode !== "sequential") {
+      const activeSourceIds = [...new Set(candidates.map((candidate) => candidate.source.id))];
+      const coverage = new Set(sourceIdsNeedingCoverage(activeSourceIds, recentSourceIdsRef.current));
+      if (coverage.size < activeSourceIds.length) candidates = candidates.filter((candidate) => coverage.has(candidate.source.id));
+      candidates = avoidRecentlyPresentedCandidates(candidates, modeFor);
+    }
     if (personalized) {
       const reviewed = candidates.filter((candidate) => getCardProgress(modeFor(candidate.source), candidate.card.id).reviews > 0);
       const pool = reviewed.length ? reviewed : candidates;
@@ -265,6 +281,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   function present(candidate: Candidate) {
     const state = modeFor(candidate.source);
     saveMode(candidate.source, presentCard(state, candidate.card));
+    recentSourceIdsRef.current = [...recentSourceIdsRef.current, candidate.source.id].slice(-24);
     setCurrent(candidate);
   }
   function resetUi() { setRevealed(false); setReviewFront(false); setBacktracking(false); setResult(null); setDifficulty(null); setCapturedTimeMs(null); setEditingTransaction(null); }
@@ -273,11 +290,13 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     if (!ready) return;
     resetUi(); setLastTransaction(null); setWarmup(null); setStartGateOpen(true);
     const retained = retainSelectedCandidate(current, sources);
-    if (retained) { setCurrent(retained); return; }
+    if (retained) { recentSourceIdsRef.current = [retained.source.id]; setCurrent(retained); return; }
+    recentSourceIdsRef.current = [];
     setCurrent(null);
     const selected = chooseNext();
     if (selected) present(selected);
-    // Filter changes keep the current card whenever it remains in the new pool.
+    // Filter changes keep the current card whenever it remains in the new pool,
+    // while source coverage ensures newly selected groups enter the rotation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, selectionSignature]);
 
