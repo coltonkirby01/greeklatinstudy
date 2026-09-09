@@ -1,5 +1,7 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
+import { resolveBuiltinGreekAsset } from "../supabase/functions/course-audio/builtin-greek-assets";
+import { greekToClassicalIpa, stripUnpronouncedGreekNotation } from "../supabase/functions/course-audio/greek-ipa";
 import {
   DEFAULT_ELEVENLABS_VOICE_ID,
   LESSON3_AUDIO_MODEL,
@@ -7,12 +9,22 @@ import {
   lesson3CourseAudioAssets,
 } from "../supabase/functions/course-audio/lesson3-assets";
 
-type GrammarCard = { id: string };
+type IdCard = { id: string };
 
-describe("Lesson 3 Classical Greek course audio", () => {
+describe("Classical Greek course audio", () => {
   it("defines one permanent audio asset for every active Lesson 3 grammar chart", () => {
-    const grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as GrammarCard[];
+    const grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as IdCard[];
     expect(lesson3CourseAudioAssets.map((asset) => asset.id).sort()).toEqual(grammar.map((card) => card.id).sort());
+  });
+
+  it("covers every current built-in Greek card, including non-phonetic symbol cards", () => {
+    const foundation = JSON.parse(fs.readFileSync("public/data/greek-cards.json", "utf8")) as IdCard[];
+    const vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson3-vocab.json", "utf8")) as IdCard[];
+    const grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as IdCard[];
+    for (const card of [...foundation, ...vocabulary, ...grammar]) {
+      expect(resolveBuiltinGreekAsset(card.id), card.id).not.toBeNull();
+    }
+    expect(resolveBuiltinGreekAsset("punct-4")?.pronunciationSystem).toContain("non-phonetic");
   });
 
   it("uses Eleven v3 IPA input and a documented default voice", () => {
@@ -42,5 +54,12 @@ describe("Lesson 3 Classical Greek course audio", () => {
       "/pai̯ˈdeu̯.e.te/",
       "/pai̯.deu̯ˈon.tɔːn/",
     ]);
+  });
+
+  it("uses the course Classical values for ει/ευ and never pronounces parenthetical letters", () => {
+    expect(stripUnpronouncedGreekNotation("παιδεύ-ουσι(ν)")).toBe("παιδεύουσι");
+    expect(greekToClassicalIpa("παιδεύει")).toContain("eː");
+    expect(greekToClassicalIpa("παιδεύω")).toContain("eu̯");
+    expect(greekToClassicalIpa("παιδεύουσι(ν)")).not.toContain("sin");
   });
 });
