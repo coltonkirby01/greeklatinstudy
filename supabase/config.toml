@@ -1,0 +1,2 @@
+[functions.course-audio]
+verify_jwt = false
