@@ -1,7 +1,7 @@
 import { greekToClassicalIpa } from "./greek-ipa.ts";
 import { lesson3CourseAudioAssets, type Lesson3CourseAudioAsset } from "./lesson3-assets.ts";
 
-export type GreekCourseAudioAsset = Lesson3CourseAudioAsset;
+export type GreekCourseAudioAsset = Lesson3CourseAudioAsset & { pronunciationSystem?: string };
 
 const lesson3Vocabulary: Record<string, { label: string; greek: string }> = {
   "lesson3-v1": { label: "γράφω", greek: "γράφω" },
@@ -17,8 +17,8 @@ const lesson3Vocabulary: Record<string, { label: string; greek: string }> = {
   "lesson3-v11": { label: "καὶ … καί", greek: "καὶ … καί" },
 };
 
-// These are sound demonstrations for the alphabet cards, following the
-// pronunciation choices stated in From Alpha to Omega rather than Modern Greek.
+// Sound demonstrations for alphabet cards. These follow the pronunciation
+// choices printed in From Alpha to Omega rather than Modern Greek values.
 const alphabetSounds: Record<string, { label: string; ipa: string }> = {
   alpha: { label: "Alpha sound", ipa: "/a/" },
   beta: { label: "Beta sound", ipa: "/b/" },
@@ -46,6 +46,19 @@ const alphabetSounds: Record<string, { label: string; ipa: string }> = {
   omega: { label: "Omega sound", ipa: "/ɔː/" },
 };
 
+// Punctuation and accent cards do not encode a pronounceable Greek segment.
+// They still receive audio so every Greek study card has a player; the audio
+// names the textbook symbol instead of pretending the mark itself has a sound.
+const symbolLabels: Record<string, { label: string; text: string }> = {
+  "punct-1": { label: "Comma", text: "Comma" },
+  "punct-2": { label: "Period", text: "Period" },
+  "punct-3": { label: "Colon or high dot", text: "Colon, or high dot" },
+  "punct-4": { label: "Greek question mark", text: "Greek question mark" },
+  "accent-1": { label: "Acute accent", text: "Acute accent" },
+  "accent-2": { label: "Grave accent", text: "Grave accent" },
+  "accent-3": { label: "Circumflex accent", text: "Circumflex accent" },
+};
+
 export function resolveBuiltinGreekAsset(assetId: string): GreekCourseAudioAsset | null {
   const paradigm = lesson3CourseAudioAssets.find((asset) => asset.id === assetId);
   if (paradigm) return paradigm;
@@ -58,5 +71,13 @@ export function resolveBuiltinGreekAsset(assetId: string): GreekCourseAudioAsset
 
   const alphabetMatch = /^(?:cap|low)-(.+)$/u.exec(assetId);
   const alphabet = alphabetMatch ? alphabetSounds[alphabetMatch[1]] : null;
-  return alphabet ? { id: assetId, label: alphabet.label, ttsText: alphabet.ipa } : null;
+  if (alphabet) return { id: assetId, label: alphabet.label, ttsText: alphabet.ipa };
+
+  const symbol = symbolLabels[assetId];
+  return symbol ? {
+    id: assetId,
+    label: symbol.label,
+    ttsText: symbol.text,
+    pronunciationSystem: "From Alpha to Omega — instructional symbol name (non-phonetic card)",
+  } : null;
 }
