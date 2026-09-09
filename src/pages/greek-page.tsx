@@ -1,8 +1,8 @@
-import { Volume2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { greekLesson3ParadigmSpeechText, loadGreekDeck, loadGreekLesson3GrammarDeck, loadGreekLesson3VocabularyDeck } from "../data/builtin-decks";
+import { loadGreekDeck, loadGreekLesson3GrammarDeck, loadGreekLesson3VocabularyDeck } from "../data/builtin-decks";
 import { useAuth } from "../features/auth/auth-context";
+import { ClassicalGreekAudio } from "../features/greek/classical-greek-audio";
 import { loadGreekFilterSelection, saveGreekFilterSelection } from "../features/study/filter-preferences";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
 import { FilterCheckbox, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
@@ -71,20 +71,6 @@ function chartRows(card: StudyCard): GreekChartRow[] {
   });
 }
 
-function speakGreekLesson3Paradigm(rows: GreekChartRow[]) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") return;
-  const text = greekLesson3ParadigmSpeechText(rows);
-  if (!text) return;
-  const speech = window.speechSynthesis;
-  speech.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "el-GR";
-  const greekVoice = speech.getVoices().find((voice) => voice.lang.toLowerCase().startsWith("el"));
-  if (greekVoice) utterance.voice = greekVoice;
-  utterance.rate = 0.85;
-  speech.speak(utterance);
-}
-
 function GreekLesson3Paradigm({ card }: { card: StudyCard }) {
   const columns = chartColumns(card), rows = chartRows(card);
   return <div className="chart-scroll">
@@ -92,18 +78,7 @@ function GreekLesson3Paradigm({ card }: { card: StudyCard }) {
       <thead><tr><th scope="col">{columns.length === 1 ? "Form" : "Person"}</th>{columns.map((column) => <th scope="col" key={column}>{column}</th>)}</tr></thead>
       <tbody>{rows.map((row) => <tr key={row.label}><th scope="row">{row.label}</th>{row.cells.map((cell, index) => <td key={`${row.label}-${columns[index] ?? index}`}><strong className="greek-front compact-greek">{cell}</strong></td>)}</tr>)}</tbody>
     </table>
-    <span
-      className="icon-text-button"
-      role="button"
-      tabIndex={-1}
-      data-study-control="audio"
-      title="Uses your device's Greek speech voice"
-      aria-label={`Play Greek audio for ${card.category ?? "this paradigm"}`}
-      style={{ marginTop: "0.75rem" }}
-      onClick={(event) => { event.stopPropagation(); speakGreekLesson3Paradigm(rows); }}
-    >
-      <Volume2 aria-hidden="true" /> Play Greek audio
-    </span>
+    <ClassicalGreekAudio assetId={card.id} label={card.category ?? "Lesson 3 paradigm"} />
   </div>;
 }
 
