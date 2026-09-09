@@ -26,9 +26,21 @@ describe("Lesson 3 Classical Greek course audio", () => {
     }
   });
 
-  it("reads every paradigm form in chart order", () => {
-    expect(lesson3CourseAudioAssets[0].ttsText.split(", ")).toHaveLength(6);
-    expect(lesson3CourseAudioAssets[1].ttsText.split(", ")).toHaveLength(1);
-    expect(lesson3CourseAudioAssets[2].ttsText.split(", ")).toHaveLength(4);
+  it("reads paradigms vertically: singulars first, then plurals", () => {
+    expect(lesson3CourseAudioAssets[0].ttsText.split(", ")).toEqual([
+      "/pai̯ˈdeu̯.ɔː/",
+      "/pai̯ˈdeu̯.eːs/",
+      "/pai̯ˈdeu̯.eː/",
+      "/pai̯ˈdeu̯.o.men/",
+      "/pai̯ˈdeu̯.e.te/",
+      "/pai̯ˈdeu̯.uː.sin/",
+    ]);
+    expect(lesson3CourseAudioAssets[1].ttsText.split(", ")).toEqual(["/pai̯ˈdeu̯.eːn/"]);
+    expect(lesson3CourseAudioAssets[2].ttsText.split(", ")).toEqual([
+      "/ˈpai̯.deu̯.e/",
+      "/pai̯.deu̯ˈe.tɔː/",
+      "/pai̯ˈdeu̯.e.te/",
+      "/pai̯.deu̯ˈon.tɔːn/",
+    ]);
   });
 });
