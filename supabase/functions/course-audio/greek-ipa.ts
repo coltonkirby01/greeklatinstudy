@@ -39,17 +39,14 @@ function clusters(word: string) {
 }
 
 function accentPrefix(marks: string[]) {
-  // From Alpha to Omega describes the Classical accents as pitch contours.
-  // Eleven v3 does not provide deterministic Ancient-Greek pitch-accent control,
-  // so acute/circumflex are marked with primary prominence as the closest stable
-  // TTS approximation. Grave is intentionally not promoted to primary stress.
+  // The textbook describes these as pitch accents. Eleven v3 does not expose
+  // deterministic Ancient-Greek pitch control, so prominence approximates an
+  // accented syllable in polysyllables. Monosyllables need no stress marker.
   return marks.includes(acute) || marks.includes(circumflex) ? "ˈ" : marks.includes(grave) ? "" : "";
 }
 
 function vowelSound(cluster: Cluster) {
   const lower = cluster.base.toLowerCase();
-  // A circumflex can occur only on a long syllable, so it supplies length for
-  // α/ι/υ when the source text does not also carry an explicit macron.
   const long = cluster.marks.includes(macron) || cluster.marks.includes(circumflex);
   if (cluster.marks.includes(iotaSubscript)) {
     if (lower === "α") return "aːi̯";
@@ -66,10 +63,23 @@ function vowelSound(cluster: Cluster) {
   return "";
 }
 
+function syllableCount(units: Cluster[]) {
+  let count = 0;
+  for (let index = 0; index < units.length; index += 1) {
+    const current = units[index];
+    if (!vowels.has(current.base)) continue;
+    count += 1;
+    const next = units[index + 1];
+    if (!next || !vowels.has(next.base) || next.marks.includes(diaeresis) || current.marks.includes(iotaSubscript)) continue;
+    const pair = `${current.base.toLowerCase()}${next.base.toLowerCase()}`;
+    if (diphthongs[pair]) index += 1;
+  }
+  return count;
+}
+
 export function stripUnpronouncedGreekNotation(text: string) {
-  // Parenthetical letters in paradigms are optional written forms; by course
-  // convention they are omitted from the default pronunciation. Stem-ending
-  // dashes are visual morphology only and are never spoken.
+  // Parenthetical letters are optional written forms and are omitted from the
+  // default recording. Stem-ending dashes are visual morphology only.
   return text.replace(/\([^)]*\)/g, "").replace(/-/g, "").replace(/\s+/g, " ").trim();
 }
 
@@ -107,6 +117,7 @@ export function greekToClassicalIpa(text: string) {
       if (lower === "σ" && nextLower && ["β", "γ", "δ", "μ"].includes(nextLower)) sound = "z";
       result += sound;
     }
+    if (syllableCount(units) <= 1) result = result.replace(/ˈ/g, "");
     return result;
   }).filter(Boolean).map((word) => `/${word}/`).join(", ");
 }
