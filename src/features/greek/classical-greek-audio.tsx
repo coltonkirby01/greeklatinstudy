@@ -10,7 +10,8 @@ type CourseAudioAsset = {
 
 type AudioRequest = { assetId: string; cloudCardId?: string };
 type RememberedPath = { path: string; checkedAt: number };
-const assetCache = new Map<string, Promise<CourseAudioAsset | null>>();
+type MemoryAsset = { promise: Promise<CourseAudioAsset | null>; checkedAt: number };
+const assetCache = new Map<string, MemoryAsset>();
 const generationRequests = new Map<string, Promise<boolean>>();
 const storageCacheVersion = "classical-greek-audio-v3";
 const persistentPathMaxAgeMs = 5 * 60 * 1_000;
@@ -83,7 +84,8 @@ async function generateCourseAudio(request: AudioRequest) {
 export function loadCourseAudioAsset(request: AudioRequest) {
   const key = cacheKey(request);
   const cached = assetCache.get(key);
-  if (cached) return cached;
+  if (cached && Date.now() - cached.checkedAt <= persistentPathMaxAgeMs) return cached.promise;
+  if (cached) assetCache.delete(key);
 
   const pending = (async () => {
     const remembered = readPersistentPath(request.assetId);
@@ -107,7 +109,7 @@ export function loadCourseAudioAsset(request: AudioRequest) {
     return asset;
   });
 
-  assetCache.set(key, pending);
+  assetCache.set(key, { promise: pending, checkedAt: Date.now() });
   return pending;
 }
 
