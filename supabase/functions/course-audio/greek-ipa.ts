@@ -10,8 +10,8 @@ const iotaSubscript = "\u0345";
 
 const vowels = new Set(["α", "ε", "η", "ι", "ο", "υ", "ω", "Α", "Ε", "Η", "Ι", "Ο", "Υ", "Ω"]);
 const diphthongs: Record<string, string> = {
-  αι: "ai̯", αυ: "au̯", ει: "ei̯", ευ: "ey̯", ηυ: "ɛːy̯", οι: "oi̯", ου: "uː", υι: "yi̯",
-  ΑΙ: "ai̯", ΑΥ: "au̯", ΕΙ: "ei̯", ΕΥ: "ey̯", ΗΥ: "ɛːy̯", ΟΙ: "oi̯", ΟΥ: "uː", ΥΙ: "yi̯",
+  αι: "ai̯", αυ: "au̯", ει: "eː", ευ: "eu̯", ηυ: "ɛːu̯", οι: "oi̯", ου: "uː", υι: "yi̯",
+  ΑΙ: "ai̯", ΑΥ: "au̯", ΕΙ: "eː", ΕΥ: "eu̯", ΗΥ: "ɛːu̯", ΟΙ: "oi̯", ΟΥ: "uː", ΥΙ: "yi̯",
 };
 
 const consonants: Record<string, string> = {
@@ -39,15 +39,18 @@ function clusters(word: string) {
 }
 
 function accentPrefix(marks: string[]) {
-  // The book describes Classical accents as pitch, not stress. ElevenLabs does
-  // not expose reliable pitch-accent control, so acute/circumflex are marked as
-  // stress only as a TTS approximation; grave is left un-stressed.
+  // From Alpha to Omega describes the Classical accents as pitch contours.
+  // Eleven v3 does not provide deterministic Ancient-Greek pitch-accent control,
+  // so acute/circumflex are marked with primary prominence as the closest stable
+  // TTS approximation. Grave is intentionally not promoted to primary stress.
   return marks.includes(acute) || marks.includes(circumflex) ? "ˈ" : marks.includes(grave) ? "" : "";
 }
 
 function vowelSound(cluster: Cluster) {
   const lower = cluster.base.toLowerCase();
-  const long = cluster.marks.includes(macron);
+  // A circumflex can occur only on a long syllable, so it supplies length for
+  // α/ι/υ when the source text does not also carry an explicit macron.
+  const long = cluster.marks.includes(macron) || cluster.marks.includes(circumflex);
   if (cluster.marks.includes(iotaSubscript)) {
     if (lower === "α") return "aːi̯";
     if (lower === "η") return "ɛːi̯";
@@ -65,7 +68,8 @@ function vowelSound(cluster: Cluster) {
 
 export function stripUnpronouncedGreekNotation(text: string) {
   // Parenthetical letters in paradigms are optional written forms; by course
-  // convention they are not pronounced in the default recording.
+  // convention they are omitted from the default pronunciation. Stem-ending
+  // dashes are visual morphology only and are never spoken.
   return text.replace(/\([^)]*\)/g, "").replace(/-/g, "").replace(/\s+/g, " ").trim();
 }
 
@@ -98,6 +102,7 @@ export function greekToClassicalIpa(text: string) {
       }
 
       let sound = consonants[current.base] ?? "";
+      if (lower === "ρ" && current.marks.includes(roughBreathing)) sound = "r̥";
       if (lower === "γ" && nextLower && ["γ", "κ", "ξ", "χ"].includes(nextLower)) sound = "ŋ";
       if (lower === "σ" && nextLower && ["β", "γ", "δ", "μ"].includes(nextLower)) sound = "z";
       result += sound;
