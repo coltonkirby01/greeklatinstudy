@@ -19,6 +19,13 @@ export function formatGreekLesson3ParadigmCell(value: string) {
   return value;
 }
 
+export function greekLesson3ParadigmSpeechText(rows: readonly { cells: readonly string[] }[]) {
+  return rows
+    .flatMap((row) => row.cells)
+    .map((value) => value.replace(/-/g, "").replace(/\(([^)]+)\)/g, "$1"))
+    .join(", ");
+}
+
 export function parseCsv(text: string) {
   const rows: string[][] = []; let row: string[] = [], field = "", quoted = false;
   for (let index = 0; index < text.length; index += 1) { const char = text[index]; if (quoted) { if (char === '"') { if (text[index + 1] === '"') { field += '"'; index += 1; } else quoted = false; } else field += char; } else if (char === '"') quoted = true; else if (char === ",") { row.push(field); field = ""; } else if (char === "\n") { row.push(field.replace(/\r$/, "")); rows.push(row); row = []; field = ""; } else field += char; }
