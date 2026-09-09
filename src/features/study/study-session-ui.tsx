@@ -63,8 +63,8 @@ export function StudyRatingControls({ revealed, result, difficulty, editing, onR
         result,
         typingTarget: Boolean(target?.closest("input, textarea, select, [contenteditable='true'], [role='textbox'], [role='listbox']")),
         // A focused flashcard face still uses the global Enter grading shortcut;
-        // other buttons retain their native Enter activation.
-        controlsTarget: Boolean(target?.closest("button:not(.flashcard-face), .session-toolbar, .study-start-card")),
+        // other buttons and explicit in-card controls retain their native activation.
+        controlsTarget: Boolean(target?.closest("button:not(.flashcard-face), [data-study-control], .session-toolbar, .study-start-card")),
       });
       if (!shortcut) return;
       event.preventDefault();
