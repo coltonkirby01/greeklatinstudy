@@ -4,15 +4,30 @@ import type { ImportCard } from "./deck-service";
 
 const normalizeHeader = (value: unknown) => String(value ?? "").trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
 function metadataObject(value: unknown) { return value && typeof value === "object" && !Array.isArray(value) ? { ...(value as Record<string, unknown>) } : {}; }
+function parseJsonArrayCell(value: unknown) {
+  if (Array.isArray(value)) return value;
+  const text = String(value ?? "").trim();
+  if (!text) return null;
+  try { const parsed = JSON.parse(text) as unknown; return Array.isArray(parsed) ? parsed : null; }
+  catch { return null; }
+}
+
 export function rowsToCards(rows: unknown[][]) {
   if (rows.length < 2) throw new Error("The import file has no card rows."); const headers = rows[0].map(normalizeHeader), column = (...names: string[]) => headers.findIndex((header) => names.includes(header));
   const front = column("front", "question", "prompt"), back = column("back", "answer", "definition"); if (front < 0 || back < 0) throw new Error("Imports require Front and Back columns.");
-  const category = column("category"), rank = column("rank", "frequency rank"), source = column("source"), notes = column("notes", "note"), reversePrompt = column("reverse prompt", "reverse"), pronunciationText = column("pronunciation text", "audio text", "greek audio text");
+  const category = column("category"), rank = column("rank", "frequency rank"), source = column("source"), notes = column("notes", "note"), reversePrompt = column("reverse prompt", "reverse"), pronunciationText = column("pronunciation text", "audio text", "greek audio text"), chartColumns = column("chart columns", "paradigm columns"), chartRows = column("chart rows", "paradigm rows");
   return rows.slice(1).map((row) => {
+    const metadata: Record<string, unknown> = {};
     const pronunciation = pronunciationText >= 0 ? String(row[pronunciationText] ?? "").trim() : "";
-    return { front: String(row[front] ?? "").trim(), back: String(row[back] ?? "").trim(), category: category >= 0 ? String(row[category] ?? "").trim() : "", rank: rank >= 0 && String(row[rank] ?? "").trim() ? Number(row[rank]) : null, source: source >= 0 ? String(row[source] ?? "").trim() : "", notes: notes >= 0 ? String(row[notes] ?? "").trim() : "", reversePrompt: reversePrompt >= 0 ? String(row[reversePrompt] ?? "").trim() : "", metadata: pronunciation ? { pronunciationText: pronunciation } : undefined };
+    if (pronunciation) metadata.pronunciationText = pronunciation;
+    const columns = chartColumns >= 0 ? parseJsonArrayCell(row[chartColumns]) : null;
+    const paradigmRows = chartRows >= 0 ? parseJsonArrayCell(row[chartRows]) : null;
+    if (columns) metadata.chartColumns = columns;
+    if (paradigmRows) { metadata.chartRows = paradigmRows; metadata.studySource = "grammar-chart"; }
+    return { front: String(row[front] ?? "").trim(), back: String(row[back] ?? "").trim(), category: category >= 0 ? String(row[category] ?? "").trim() : "", rank: rank >= 0 && String(row[rank] ?? "").trim() ? Number(row[rank]) : null, source: source >= 0 ? String(row[source] ?? "").trim() : "", notes: notes >= 0 ? String(row[notes] ?? "").trim() : "", reversePrompt: reversePrompt >= 0 ? String(row[reversePrompt] ?? "").trim() : "", metadata: Object.keys(metadata).length ? metadata : undefined };
   }).filter((card) => card.front && card.back).map((card, index) => ({ ...card, rank: Number.isFinite(card.rank) ? card.rank : index + 1 })) satisfies ImportCard[];
 }
+
 export function jsonToCards(value: unknown) {
   const source = Array.isArray(value) ? value : value && typeof value === "object" && Array.isArray((value as { cards?: unknown[] }).cards) ? (value as { cards: unknown[] }).cards : null;
   if (!source) throw new Error("JSON must be an array of cards or an object with a cards array.");
