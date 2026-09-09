@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
-import { formatGreekLesson3ParadigmCell, latinRowsToCards, parseCsv } from "../src/data/builtin-decks";
+import { formatGreekLesson3ParadigmCell, greekLesson3ParadigmSpeechText, latinRowsToCards, parseCsv } from "../src/data/builtin-decks";
 import { jsonToCards, rowsToCards } from "../src/features/decks/import-parser";
 import { buildHenleCharts } from "../src/features/henle/henle-data";
 
@@ -75,6 +75,19 @@ describe("authoritative source migration", () => {
       "παιδευ-όντων",
     ]);
     expect(formatGreekLesson3ParadigmCell("παιδεύ-ετε")).toBe("παιδεύ-ετε");
+  });
+
+  it("builds speech text from the full Greek forms rather than pronouncing dash punctuation", () => {
+    expect(greekLesson3ParadigmSpeechText([
+      { cells: ["παιδεύ-ω", "παιδεύ-ομεν"] },
+      { cells: ["παιδεύ-εις", "παιδεύ-ετε"] },
+      { cells: ["παιδεύ-ει", "παιδεύ-ουσι(ν)"] },
+    ])).toBe("παιδεύω, παιδεύομεν, παιδεύεις, παιδεύετε, παιδεύει, παιδεύουσιν");
+    expect(greekLesson3ParadigmSpeechText([{ cells: ["παιδεύ-ειν"] }])).toBe("παιδεύειν");
+    expect(greekLesson3ParadigmSpeechText([
+      { cells: ["παίδευ-ε", "παιδεύ-ετε"] },
+      { cells: ["παιδευ-έτω", "παιδευ-όντων"] },
+    ])).toBe("παίδευε, παιδεύετε, παιδευέτω, παιδευόντων");
   });
 });
 
