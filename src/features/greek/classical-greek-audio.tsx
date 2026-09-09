@@ -1,3 +1,4 @@
+import { Pause, Play, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "../../lib/supabase-config";
 
@@ -94,31 +95,46 @@ function isTypingTarget(target: EventTarget | null) {
 
 export function ClassicalGreekAudio({ assetId, label, cloudCardId }: { assetId: string; label: string; cloudCardId?: string }) {
   const [asset, setAsset] = useState<CourseAudioAsset | null | undefined>(undefined);
+  const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const controlRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let active = true;
     setAsset(undefined);
+    setPlaying(false);
     void loadCourseAudioAsset({ assetId, cloudCardId }).then((loaded) => { if (active) setAsset(loaded); });
     return () => { active = false; };
   }, [assetId, cloudCardId]);
+
+  function togglePlayback() {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (!audio.paused) { audio.pause(); return; }
+    if (audio.ended) audio.currentTime = 0;
+    void audio.play().catch(() => setPlaying(false));
+  }
+
+  function replay() {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = 0;
+    void audio.play().catch(() => setPlaying(false));
+  }
 
   useEffect(() => {
     function keydown(event: KeyboardEvent) {
       if (event.key.toLowerCase() !== "a" || event.altKey || event.ctrlKey || event.metaKey || isTypingTarget(event.target)) return;
       const control = controlRef.current;
-      const audio = audioRef.current;
       const face = control?.closest(".flashcard-face");
-      if (!control || !audio || face?.getAttribute("aria-hidden") === "true") return;
+      if (!control || !audioRef.current || face?.getAttribute("aria-hidden") === "true") return;
       event.preventDefault();
       event.stopImmediatePropagation();
-      if (audio.paused) void audio.play().catch(() => undefined);
-      else audio.pause();
+      togglePlayback();
     }
     window.addEventListener("keydown", keydown, true);
     return () => window.removeEventListener("keydown", keydown, true);
-  }, []);
+  });
 
   // The hidden answer face mounts while the learner is still viewing the
   // question, so preload="auto" starts fetching before Reveal is pressed.
@@ -129,24 +145,45 @@ export function ClassicalGreekAudio({ assetId, label, cloudCardId }: { assetId: 
   return <div
     ref={controlRef}
     data-study-control="audio"
+    role="group"
+    aria-label={`Classical Greek audio for ${label}`}
     onClick={(event) => event.stopPropagation()}
     onKeyDownCapture={(event) => {
-      // Native audio players normally bind Space to play/pause after receiving
-      // focus. Prevent only that default action and let the study-session Space
-      // shortcut continue bubbling to Reveal or Save & Next.
+      // The custom player has no native media focus behavior. Prevent a focused
+      // audio button from treating Space as a click, then allow the study
+      // session's Space shortcut to continue bubbling to Reveal/Save & Next.
       if (event.key === " ") event.preventDefault();
     }}
-    style={{ width: "100%", marginTop: "0.75rem", display: "grid", justifyItems: "center" }}
+    style={{ width: "100%", marginTop: "0.75rem", display: "flex", gap: "0.55rem", flexWrap: "wrap", justifyContent: "center", alignItems: "center", position: "relative" }}
   >
     <audio
       ref={audioRef}
-      controls
       preload="auto"
       src={src}
-      aria-label={`Audio for ${label}. Press A to play or pause.`}
-      style={{ width: "min(100%, 32rem)" }}
+      onPlay={() => setPlaying(true)}
+      onPause={() => setPlaying(false)}
+      onEnded={() => setPlaying(false)}
+      aria-hidden="true"
+      tabIndex={-1}
+      style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }}
+    />
+    <button
+      type="button"
+      className="small-outline-button"
+      aria-keyshortcuts="A"
+      aria-label={`${playing ? "Pause" : "Play"} Classical Greek audio. Keyboard shortcut A.`}
+      onClick={togglePlayback}
     >
-      Your browser does not support HTML audio.
-    </audio>
+      {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
+      {playing ? "Pause" : "Play"} · A
+    </button>
+    <button
+      type="button"
+      className="small-outline-button"
+      aria-label="Replay Classical Greek audio from the beginning"
+      onClick={replay}
+    >
+      <RotateCcw aria-hidden="true" /> Replay
+    </button>
   </div>;
 }
