@@ -20,6 +20,8 @@ The active asset IDs match the three Lesson 3 grammar card IDs exactly.
 
 The `course-audio` Edge Function is deliberately limited to the three hard-coded Lesson 3 assets. It does not accept arbitrary text and it does not regenerate an asset that already has stored audio, preventing ordinary calls from repeatedly consuming paid TTS credits.
 
+The web app uses the project's `sb_publishable_...` key only in the `apikey` header. Because modern publishable keys are not JWTs, `course-audio` has platform `verify_jwt` disabled and validates the supplied `apikey` itself against Supabase's `SUPABASE_PUBLISHABLE_KEYS` environment. Server-side table writes use the project secret/service key supplied automatically to the Edge Function environment. No elevated Supabase credential is shipped to the browser.
+
 Required secret:
 
 ```text
@@ -35,6 +37,8 @@ ELEVENLABS_CLASSICAL_GREEK_VOICE_ID
 If no voice ID is supplied, the function uses ElevenLabs' documented quickstart voice, George (`JBFqnCBsd6RMkjVDRZzb`). The model is fixed to `eleven_v3` and output is MP3 at `mp3_44100_128`.
 
 Never place the ElevenLabs API key in `VITE_*`, browser code, GitHub source, or a public Supabase table. It belongs only in Supabase Edge Function secrets.
+
+Once the ElevenLabs secret is configured, the first Lesson 3 grammar audio lookup that finds no stored asset calls the fixed generator. The generator creates the three MP3s once and saves them globally; later users only read the stored recordings.
 
 ## Regeneration
 
