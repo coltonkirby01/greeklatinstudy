@@ -77,26 +77,42 @@ describe("authoritative source migration", () => {
     expect(formatGreekLesson3ParadigmCell("παιδεύ-ετε")).toBe("παιδεύ-ετε");
   });
 
-  it("builds speech text from the full Greek forms rather than pronouncing dash punctuation", () => {
+  it("builds paradigm speech vertically and omits visual dashes and parenthetical letters", () => {
     expect(greekLesson3ParadigmSpeechText([
       { cells: ["παιδεύ-ω", "παιδεύ-ομεν"] },
       { cells: ["παιδεύ-εις", "παιδεύ-ετε"] },
       { cells: ["παιδεύ-ει", "παιδεύ-ουσι(ν)"] },
-    ])).toBe("παιδεύω, παιδεύομεν, παιδεύεις, παιδεύετε, παιδεύει, παιδεύουσιν");
+    ])).toBe("παιδεύω, παιδεύεις, παιδεύει, παιδεύομεν, παιδεύετε, παιδεύουσι");
     expect(greekLesson3ParadigmSpeechText([{ cells: ["παιδεύ-ειν"] }])).toBe("παιδεύειν");
     expect(greekLesson3ParadigmSpeechText([
       { cells: ["παίδευ-ε", "παιδεύ-ετε"] },
       { cells: ["παιδευ-έτω", "παιδευ-όντων"] },
-    ])).toBe("παίδευε, παιδεύετε, παιδευέτω, παιδευόντων");
+    ])).toBe("παίδευε, παιδευέτω, παιδεύετε, παιδευόντων");
   });
 });
 
 describe("administrator importer", () => {
   it("parses CSV fields including Reverse Prompt", () => {
     const rows = parseCsv('Front,Back,Category,Rank,Reverse Prompt\n"amō","I love",Verb,1,"say I love"\n');
-    expect(rowsToCards(rows)).toEqual([{ front: "amō", back: "I love", category: "Verb", rank: 1, source: "", notes: "", reversePrompt: "say I love" }]);
+    expect(rowsToCards(rows)).toEqual([{ front: "amō", back: "I love", category: "Verb", rank: 1, source: "", notes: "", reversePrompt: "say I love", metadata: undefined }]);
   });
-  it("accepts JSON card arrays", () => {
+
+  it("preserves uploaded Greek paradigm rows so pronunciation can be generated automatically", () => {
+    const rows = parseCsv('Front,Back,Chart Columns,Chart Rows\n"Present Active","chart","[\"\"Singular\"\",\"\"Plural\"\"]","[{\"\"label\"\":\"\"1st\"\",\"\"cells\"\":[\"\"λύ-ω\"\",\"\"λύ-ομεν\"\"]}]"\n');
+    const card = rowsToCards(rows)[0];
+    expect(card.metadata).toMatchObject({
+      studySource: "grammar-chart",
+      chartColumns: ["Singular", "Plural"],
+      chartRows: [{ label: "1st", cells: ["λύ-ω", "λύ-ομεν"] }],
+    });
+  });
+
+  it("accepts JSON card arrays and paradigm metadata", () => {
     expect(jsonToCards([{ Front: "λόγος", Back: "word", Category: "Noun" }])[0]).toMatchObject({ front: "λόγος", back: "word", category: "Noun" });
+    expect(jsonToCards([{ prompt: "Present", back: "chart", columns: ["Singular"], rows: [{ label: "1st", cells: ["λύω"] }] }])[0].metadata).toMatchObject({
+      studySource: "grammar-chart",
+      chartColumns: ["Singular"],
+      chartRows: [{ label: "1st", cells: ["λύω"] }],
+    });
   });
 });
