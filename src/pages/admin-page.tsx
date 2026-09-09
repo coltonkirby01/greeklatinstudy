@@ -20,6 +20,22 @@ import {
 } from "../features/decks/deck-service";
 import { parseDeckImport } from "../features/decks/import-parser";
 
+function cardMetadata(card: CloudCard | null) {
+  const value = card?.metadata;
+  return value && typeof value === "object" && !Array.isArray(value) ? { ...(value as Record<string, unknown>) } : {};
+}
+
+function metadataText(card: CloudCard | null, key: string) {
+  const value = cardMetadata(card)[key];
+  return typeof value === "string" ? value : "";
+}
+
+function setOptionalMetadata(metadata: Record<string, unknown>, key: string, value: FormDataEntryValue | null) {
+  const text = String(value ?? "").trim();
+  if (text) metadata[key] = text;
+  else delete metadata[key];
+}
+
 export function AdminPage() {
   const auth = useAuth();
   if (auth.loading) return <main className="page-shell"><p>Checking administrator access…</p></main>;
@@ -106,6 +122,13 @@ function AdminWorkspace() {
     if (!selected) return;
     const form = event.currentTarget;
     const data = new FormData(form);
+    const metadata = cardMetadata(editing);
+    if (selected.language === "greek") {
+      setOptionalMetadata(metadata, "pronunciationText", data.get("pronunciationText"));
+      setOptionalMetadata(metadata, "canonicalIpa", data.get("canonicalIpa"));
+      setOptionalMetadata(metadata, "elevenLabsIpa", data.get("elevenLabsIpa"));
+      setOptionalMetadata(metadata, "pronunciationSystem", data.get("pronunciationSystem"));
+    }
     await act(async () => {
       await saveCard({
         ...(editing ?? {}),
@@ -117,6 +140,7 @@ function AdminWorkspace() {
         rank: String(data.get("rank") ?? "").trim() ? Number(data.get("rank")) : null,
         source: String(data.get("source") ?? "").trim() || null,
         notes: String(data.get("notes") ?? "").trim() || null,
+        metadata: (Object.keys(metadata).length ? metadata : null) as CloudCard["metadata"],
       });
       setEditing(null);
       form.reset();
@@ -161,7 +185,7 @@ function AdminWorkspace() {
               <DeckSettings deck={selected} cardCount={cards.length} working={working} act={act} refresh={refreshDecks} />
               <section className="import-panel panel-surface">
                 <div className="section-heading-row"><div><p className="eyebrow">Bulk import</p><h2>Upload cards</h2></div><FileSpreadsheet aria-hidden="true" /></div>
-                <p className="form-help">Required: Front, Back. Optional: Category, Rank, Source, Notes, Reverse Prompt. <a href={`${import.meta.env.BASE_URL}sample-deck.csv`} download>Download sample CSV</a>.</p>
+                <p className="form-help">Required: Front, Back. Optional: Category, Rank, Source, Notes, Reverse Prompt. Greek imports can also use Pronunciation Text, Canonical IPA, ElevenLabs IPA, Pronunciation System, Chart Columns, and Chart Rows; pronunciation fields are optional because Greek audio is generated automatically. <a href={`${import.meta.env.BASE_URL}sample-deck.csv`} download>Download sample CSV</a>.</p>
                 <div className="import-actions">
                   <label className="file-button secondary-button">Choose CSV, XLSX, or JSON<input type="file" accept=".csv,.xlsx,.xls,.json,text/csv,application/json" onChange={(event) => void chooseImport(event.target.files?.[0])} /></label>
                   <label className="check-label"><input type="checkbox" checked={replace} onChange={(event) => setReplace(event.target.checked)} /><span>Replace existing cards</span></label>
@@ -225,6 +249,13 @@ function CardEditor({ selected, editing, categories, newCategory, working, setEd
         <label><span>Rank</span><input name="rank" type="number" defaultValue={editing?.rank ?? ""} /></label>
         <label><span>Source</span><input name="source" defaultValue={editing?.source ?? ""} /></label>
         <label className="wide-field"><span>Notes</span><textarea name="notes" rows={2} defaultValue={editing?.notes ?? ""} /></label>
+        {selected.language === "greek" && <>
+          <p className="form-help wide-field">Greek audio is generated automatically. Use these fields only when a reviewed source needs to preserve vowel length, a lexical exception, or a specific synthesis realization.</p>
+          <label className="wide-field"><span>Pronunciation text (optional)</span><input name="pronunciationText" defaultValue={metadataText(editing, "pronunciationText")} placeholder="Greek text with any needed macrons" /></label>
+          <label><span>Canonical IPA (optional)</span><input name="canonicalIpa" defaultValue={metadataText(editing, "canonicalIpa")} placeholder="Scholarly reconstruction" /></label>
+          <label><span>ElevenLabs IPA (optional)</span><input name="elevenLabsIpa" defaultValue={metadataText(editing, "elevenLabsIpa")} placeholder="TTS realization" /></label>
+          <label className="wide-field"><span>Pronunciation system/source (optional)</span><input name="pronunciationSystem" defaultValue={metadataText(editing, "pronunciationSystem")} placeholder="e.g. Reviewed Classical Attic" /></label>
+        </>}
         <button className="primary-button form-submit" disabled={working}>{editing ? "Save card" : "Add card"}</button>
       </form>
       <form className="category-form" onSubmit={(event) => {
