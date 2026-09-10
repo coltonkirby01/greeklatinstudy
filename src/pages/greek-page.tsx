@@ -156,7 +156,6 @@ export function GreekPage() {
   return <main className="page-shell study-page">
     <div className="study-page-heading">
       <div><p className="eyebrow">Grammar · vocabulary</p><h1>Greek</h1></div>
-      <p>Select entire headings without opening them, or open any unchecked heading to choose individual children. Alphabet, punctuation, accents, and paradigms are grammar; Lesson 3 is the current vocabulary source.</p>
     </div>
     {!user && <div className="guest-banner"><span>You are studying as a guest. Progress stays on this device.</span><Link to="/account">Sign in to sync</Link></div>}
     {error && <div className="inline-alert">{error}</div>}
