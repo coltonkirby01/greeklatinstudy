@@ -1,9 +1,10 @@
 import type { GrammarCardFilters, OptionalSelection } from "./latin-study-filters";
 
-export type LatinMaterial = "vocabulary" | "grammar-forms" | "grammar-charts";
+export type LatinMaterial = "vocabulary" | "grammar-forms" | "grammar-charts" | "passive-indicative-paradigms";
 export type LatinFilterPreferences = {
   materials: Set<LatinMaterial>;
   vocabularyParts: OptionalSelection;
+  paradigmCards: OptionalSelection;
   formFilters: GrammarCardFilters;
   chartFilters: GrammarCardFilters;
 };
@@ -15,7 +16,7 @@ type StorageLike = {
 
 const GREEK_FILTER_KEY = "greeklatinstudy:greek-filters:v1";
 const LATIN_FILTER_KEY = "greeklatinstudy:latin-filters:v1";
-const LATIN_MATERIALS = new Set<LatinMaterial>(["vocabulary", "grammar-forms", "grammar-charts"]);
+const LATIN_MATERIALS = new Set<LatinMaterial>(["vocabulary", "grammar-forms", "grammar-charts", "passive-indicative-paradigms"]);
 
 function availableStorage(storage?: StorageLike | null) {
   if (storage !== undefined) return storage;
@@ -29,6 +30,11 @@ function stringArray(value: unknown) {
 
 function restoreOptionalSelection(value: unknown): OptionalSelection {
   if (value === null) return null;
+  return new Set(stringArray(value));
+}
+
+function restoreOptionalSelectionDefaultAll(value: unknown): OptionalSelection {
+  if (value === undefined || value === null) return null;
   return new Set(stringArray(value));
 }
 
@@ -83,6 +89,7 @@ export function loadLatinFilterPreferences(storage?: StorageLike | null): LatinF
   const fallback = (): LatinFilterPreferences => ({
     materials: new Set<LatinMaterial>(["vocabulary"]),
     vocabularyParts: null,
+    paradigmCards: null,
     formFilters: blankGrammarFilters(),
     chartFilters: blankGrammarFilters(),
   });
@@ -98,6 +105,7 @@ export function loadLatinFilterPreferences(storage?: StorageLike | null): LatinF
     return {
       materials,
       vocabularyParts: restoreOptionalSelection(stored.vocabularyParts),
+      paradigmCards: restoreOptionalSelectionDefaultAll(stored.paradigmCards),
       formFilters: restoreGrammarFilters(stored.formFilters),
       chartFilters: restoreGrammarFilters(stored.chartFilters),
     };
@@ -113,6 +121,7 @@ export function saveLatinFilterPreferences(preferences: LatinFilterPreferences, 
     target.setItem(LATIN_FILTER_KEY, JSON.stringify({
       materials: [...preferences.materials],
       vocabularyParts: storeOptionalSelection(preferences.vocabularyParts),
+      paradigmCards: storeOptionalSelection(preferences.paradigmCards),
       formFilters: storeGrammarFilters(preferences.formFilters),
       chartFilters: storeGrammarFilters(preferences.chartFilters),
     }));
