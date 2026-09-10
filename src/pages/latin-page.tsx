@@ -54,7 +54,7 @@ function ParadigmDeckFilters({
 }: {
   title: string;
   material: Material;
-  deck: DeckDefinition | undefined;
+  deck: DeckDefinition | null | undefined;
   tenses: readonly string[];
   active: boolean;
   selection: OptionalSelection;
