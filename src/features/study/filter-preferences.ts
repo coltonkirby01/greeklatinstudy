@@ -38,8 +38,8 @@ function restoreOptionalSelectionDefaultAll(value: unknown): OptionalSelection {
   return new Set(stringArray(value));
 }
 
-function storeOptionalSelection(selection: OptionalSelection) {
-  return selection === null ? null : [...selection];
+function storeOptionalSelection(selection: OptionalSelection | undefined) {
+  return selection == null ? null : [...selection];
 }
 
 function blankGrammarFilters(): GrammarCardFilters {
