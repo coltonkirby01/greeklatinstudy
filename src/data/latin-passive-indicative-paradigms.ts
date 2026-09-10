@@ -9,6 +9,12 @@ type LatinParadigmSourceCard = {
   rows: LatinParadigmChartRow[];
 };
 
+const RULES_BY_TENSE: Record<string, string> = {
+  "Passive Indicative — Present Tense": "243, 246-248",
+  "Passive Indicative — Imperfect Tense": "244, 249-251",
+  "Passive Indicative — Future Tense": "245, 252-254",
+};
+
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
 let promise: Promise<DeckDefinition> | null = null;
 
@@ -17,23 +23,27 @@ export function loadLatinPassiveIndicativeParadigmsDeck() {
     .then(async (response) => {
       if (!response.ok) throw new Error("The Latin passive indicative paradigm deck could not be loaded.");
       const source = await response.json() as LatinParadigmSourceCard[];
-      const cards: StudyCard[] = source.map((card, index) => ({
-        id: card.id,
-        deckId: "latin-passive-indicative-paradigms",
-        front: card.prompt,
-        back: card.category,
-        category: card.category,
-        rank: index + 1,
-        source: "Henle Latin Grammar — Passive Voice, Indicative Mood",
-        notes: "Whole-paradigm chart",
-        metadata: {
-          studySource: "latin-passive-indicative-paradigm",
-          chartColumns: card.columns,
-          chartRows: card.rows,
-          voiceGroup: "Passive Voice",
-          formGroup: "Indicative",
-        },
-      }));
+      const cards: StudyCard[] = source.map((card, index) => {
+        const rules = RULES_BY_TENSE[card.category] ?? "";
+        return {
+          id: card.id,
+          deckId: "latin-passive-indicative-paradigms",
+          front: rules ? `${card.prompt} — R. ${rules}` : card.prompt,
+          back: card.category,
+          category: card.category,
+          rank: index + 1,
+          source: "Latin Quick Reference v67 — Passive Voice, Indicative Mood",
+          notes: "Whole-paradigm chart",
+          metadata: {
+            studySource: "latin-passive-indicative-paradigm",
+            chartColumns: card.columns,
+            chartRows: card.rows,
+            voiceGroup: "Passive Voice",
+            formGroup: "Indicative",
+            ruleLabel: rules,
+          },
+        } satisfies StudyCard;
+      });
 
       return {
         id: "latin-passive-indicative-paradigms",
@@ -44,7 +54,7 @@ export function loadLatinPassiveIndicativeParadigmsDeck() {
         language: "latin",
         cards,
         supportsReverse: false,
-        sourceNote: "Henle Latin Grammar: passive indicative present, imperfect, and future paradigms.",
+        sourceNote: "Latin Quick Reference v67, Passive Voice: indicative present-system paradigms only.",
       } satisfies DeckDefinition;
     });
 
