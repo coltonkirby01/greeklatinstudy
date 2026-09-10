@@ -15,6 +15,10 @@ import {
 
 type IdCard = { id: string };
 
+function withoutPitchMarks(ipa: string) {
+  return ipa.normalize("NFD").replace(/[\u0300\u0301]/gu, "");
+}
+
 describe("Classical Greek course audio", () => {
   it("defines one permanent audio asset for every active Lesson 3 grammar chart", () => {
     const grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as IdCard[];
@@ -94,7 +98,7 @@ describe("Classical Greek course audio", () => {
     ];
 
     for (const [greek, fragments] of references) {
-      const ipa = greekToClassicalIpa(greek);
+      const ipa = withoutPitchMarks(greekToClassicalIpa(greek));
       for (const fragment of fragments) expect(ipa, greek).toContain(fragment);
     }
   });
