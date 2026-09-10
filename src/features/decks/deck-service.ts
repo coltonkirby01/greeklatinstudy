@@ -26,6 +26,27 @@ export async function importCards(deckId: string, cards: ImportCard[], replace: 
   for (let index = 0; index < rows.length; index += 400) { const { error } = await client().from("cards").insert(rows.slice(index, index + 400)); if (error) throw error; }
   return loadCards(deckId);
 }
+
+/**
+ * Pre-generates shared audio for published Greek cloud cards. The Edge Function
+ * still validates the deck language/publication state and reuses an existing
+ * asset when its pronunciation signature has not changed. Small concurrent
+ * batches keep imports responsive without flooding ElevenLabs.
+ */
+export async function prewarmGreekAudioCards(cards: readonly Pick<CloudCard, "id">[]) {
+  const api = client();
+  const uniqueIds = [...new Set(cards.map((card) => card.id).filter(Boolean))];
+  let ready = 0, failed = 0;
+  for (let index = 0; index < uniqueIds.length; index += 4) {
+    const results = await Promise.all(uniqueIds.slice(index, index + 4).map(async (cloudCardId) => {
+      const { error } = await api.functions.invoke("course-audio", { body: { cloudCardId } });
+      return !error;
+    }));
+    for (const ok of results) ok ? ready += 1 : failed += 1;
+  }
+  return { ready, failed };
+}
+
 export async function saveCard(card: Partial<CloudCard> & { deck_id: string; front: string; back: string }) { if (card.id) { const { id, ...changes } = card; const { data, error } = await client().from("cards").update(changes).eq("id", id).select("*").single(); if (error) throw error; return data as CloudCard; } const current = await loadCards(card.deck_id); const { data, error } = await client().from("cards").insert({ ...card, stable_key: card.stable_key || `${current.length + 1}-${slugify(card.front).slice(0, 48) || "card"}`, position: card.position || current.length + 1 }).select("*").single(); if (error) throw error; return data as CloudCard; }
 export async function deleteCard(cardId: string) { const { error } = await client().from("cards").delete().eq("id", cardId); if (error) throw error; }
 export async function swapCardPositions(first: CloudCard, second: CloudCard) { const api = client(), temporary = -Math.abs(first.position) - 1_000_000; let response = await api.from("cards").update({ position: temporary }).eq("id", first.id); if (response.error) throw response.error; response = await api.from("cards").update({ position: first.position }).eq("id", second.id); if (response.error) throw response.error; response = await api.from("cards").update({ position: second.position }).eq("id", first.id); if (response.error) throw response.error; }
