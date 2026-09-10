@@ -1,4 +1,4 @@
-import { Pause, Play, RotateCcw } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "../../lib/supabase-config";
 
@@ -139,13 +139,6 @@ export function ClassicalGreekAudio({ assetId, label, cloudCardId }: { assetId: 
     void audio.play().catch(() => setPlaying(false));
   }
 
-  function replay() {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.currentTime = 0;
-    void audio.play().catch(() => setPlaying(false));
-  }
-
   useEffect(() => {
     function keydown(event: KeyboardEvent) {
       if (event.key.toLowerCase() !== "a" || event.altKey || event.ctrlKey || event.metaKey || isTypingTarget(event.target)) return;
@@ -169,7 +162,7 @@ export function ClassicalGreekAudio({ assetId, label, cloudCardId }: { assetId: 
   const preventMediaSpace = (event: { key: string; preventDefault: () => void }) => {
     // Buttons normally turn Space into a click. Suppressing that default on
     // both keydown and keyup keeps Space exclusively assigned to the study
-    // session even after a learner has clicked the audio controls.
+    // session even after a learner has clicked the audio control.
     if (event.key === " ") event.preventDefault();
   };
 
@@ -181,7 +174,7 @@ export function ClassicalGreekAudio({ assetId, label, cloudCardId }: { assetId: 
     onClick={(event) => event.stopPropagation()}
     onKeyDownCapture={preventMediaSpace}
     onKeyUpCapture={preventMediaSpace}
-    style={{ width: "100%", marginTop: "0.75rem", display: "flex", gap: "0.55rem", flexWrap: "wrap", justifyContent: "center", alignItems: "center", position: "relative" }}
+    style={{ width: "100%", marginTop: "0.75rem", display: "flex", justifyContent: "center", alignItems: "center", position: "relative" }}
   >
     <audio
       ref={audioRef}
@@ -203,14 +196,6 @@ export function ClassicalGreekAudio({ assetId, label, cloudCardId }: { assetId: 
     >
       {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
       A · {playing ? "Pause" : "Play"}
-    </button>
-    <button
-      type="button"
-      className="small-outline-button"
-      aria-label="Replay Classical Greek audio from the beginning"
-      onClick={replay}
-    >
-      <RotateCcw aria-hidden="true" /> Replay
     </button>
   </div>;
 }
