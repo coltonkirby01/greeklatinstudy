@@ -2,9 +2,10 @@ import { BarChart3, Clock3, Cloud, Gauge, Laptop, TrendingUp } from "lucide-reac
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { loadGreekDeck, loadGreekLesson3GrammarDeck, loadGreekLesson3VocabularyDeck, loadLatinDeck } from "../data/builtin-decks";
+import { loadLatinActiveIndicativeParadigmsDeck } from "../data/latin-active-indicative-paradigms";
+import { loadLatinPassiveIndicativeParadigmsDeck } from "../data/latin-passive-indicative-paradigms";
 import { useAuth } from "../features/auth/auth-context";
 import { blankCardProgress, createModeState, directionalCopy, formatResponseTime, studyStats } from "../features/study/engine";
-import { loadHenle } from "../features/henle/henle-data";
 import { loadProgressEnvelope, saveProgressEnvelope } from "../features/study/progress-repository";
 import { intrinsicCardDifficulty, scoredSession, userProficiencyScore } from "../features/study/scoring";
 import { deleteReviewsFromStatsInEnvelope, deleteSessionFromEnvelope, renameReviewsInEnvelope, renameSessionInEnvelope, sessionCustomNameFromReviews } from "../features/study/session-management";
@@ -271,7 +272,14 @@ export function StatsPage() {
   const [actionError, setActionError] = useState<string | null>(null);
 
   const { value, error, loading } = useAsync(async () => {
-    const [greekFoundation, greekVocabulary, greekGrammar, latinVocabulary, henle] = await Promise.all([loadGreekDeck(), loadGreekLesson3VocabularyDeck(), loadGreekLesson3GrammarDeck(), loadLatinDeck(), loadHenle()]);
+    const [greekFoundation, greekVocabulary, greekGrammar, latinVocabulary, activeParadigms, passiveParadigms] = await Promise.all([
+      loadGreekDeck(),
+      loadGreekLesson3VocabularyDeck(),
+      loadGreekLesson3GrammarDeck(),
+      loadLatinDeck(),
+      loadLatinActiveIndicativeParadigmsDeck(),
+      loadLatinPassiveIndicativeParadigmsDeck(),
+    ]);
     const sources: StatsSource[] = [
       { language: "Greek", source: "Lessons 1–2", mode: "Forward", direction: "forward", deck: greekFoundation, cards: greekFoundation.cards, studyKey: "forward" },
       { language: "Greek", source: "Lessons 1–2", mode: "Reverse", direction: "reverse", deck: greekFoundation, cards: greekFoundation.cards, studyKey: "reverse" },
@@ -281,9 +289,8 @@ export function StatsPage() {
       { language: "Greek", source: "Lesson 3 Grammar", mode: "Reverse", direction: "reverse", deck: greekGrammar, cards: greekGrammar.cards, studyKey: "reverse" },
       { language: "Latin", source: "Dickinson Vocabulary", mode: "Forward", direction: "forward", deck: latinVocabulary, cards: latinVocabulary.cards, studyKey: "forward" },
       { language: "Latin", source: "Dickinson Vocabulary", mode: "Reverse", direction: "reverse", deck: latinVocabulary, cards: latinVocabulary.cards, studyKey: "reverse" },
-      { language: "Latin", source: "Henle Grammar Forms", mode: "Forward", direction: "forward", deck: henle.individualDeck, cards: henle.individualDeck.cards, studyKey: "individual:forward" },
-      { language: "Latin", source: "Henle Grammar Forms", mode: "Reverse", direction: "reverse", deck: henle.individualDeck, cards: henle.individualDeck.cards, studyKey: "individual:reverse" },
-      { language: "Latin", source: "Henle Whole Charts", mode: "Charts", direction: "forward", deck: henle.chartDeck, cards: henle.chartDeck.cards, studyKey: "chart" },
+      { language: "Latin", source: "Active Indicative Paradigms", mode: "Charts", direction: "forward", deck: activeParadigms, cards: activeParadigms.cards, studyKey: "chart" },
+      { language: "Latin", source: "Passive Indicative Paradigms", mode: "Charts", direction: "forward", deck: passiveParadigms, cards: passiveParadigms.cards, studyKey: "chart" },
     ];
     const uniqueDeckIds = [...new Set(sources.map((source) => source.deck.id))];
     const loaded = await Promise.all(uniqueDeckIds.map(async (deckId) => [deckId, await loadProgressEnvelope(deckId, user)] as const));
@@ -442,7 +449,7 @@ function LanguageStats({ language, rows, cards, sessions, href, sessionName }: {
 
     <div className="stats-analysis-grid">
       <RankedCards title="Hardest for you" subtitle="Wrong answers, hard ratings, and slow recall" cards={hardest} metric={(card) => `${percent(card.accuracy)} · ${formatResponseTime(card.averageTimeMs)}`} />
-      <RankedCards title="Highest difficulty mastered" subtitle="Intrinsic difficulty from lesson/rank/Henle progression" cards={difficultMastered} metric={(card) => difficultyLabel(card.intrinsicDifficulty)} />
+      <RankedCards title="Highest difficulty mastered" subtitle="Intrinsic difficulty from lesson, rank, and grammar progression" cards={difficultMastered} metric={(card) => difficultyLabel(card.intrinsicDifficulty)} />
       <RankedCards title="Most improved" subtitle="Compares early vs. recent accuracy, speed, and ratings" cards={improved} metric={(card) => `+${Math.round(card.improvement ?? 0)} improvement`} icon={<TrendingUp aria-hidden="true" />} />
       <RankedCards title="Slowest recall" subtitle="Highest average active front-side time" cards={slowest} metric={(card) => `${formatResponseTime(card.averageTimeMs)} avg.`} />
       <RankedCards title="Most reviewed" subtitle="Cards receiving the most repetitions" cards={mostReviewed} metric={(card) => `${card.progress.reviews} reviews`} />
