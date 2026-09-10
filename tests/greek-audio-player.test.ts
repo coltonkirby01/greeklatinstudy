@@ -4,25 +4,27 @@ import { describe, expect, it } from "vitest";
 describe("Greek study audio player", () => {
   const source = fs.readFileSync("src/features/greek/classical-greek-audio.tsx", "utf8");
 
-  it("uses a compact custom player instead of browser media controls", () => {
+  it("uses one compact A play/pause control instead of browser media controls", () => {
     expect(source).toContain("aria-keyshortcuts=\"A\"");
     expect(source).toContain('A · {playing ? "Pause" : "Play"}');
-    expect(source).toContain("Replay");
+    expect(source).not.toContain("Replay");
+    expect(source).not.toContain("RotateCcw");
+    expect(source).not.toContain("onClick={replay}");
     expect(source).not.toMatch(/<audio[\s\S]*?\scontrols(?:[=\s>])/u);
     expect(source).not.toContain("playbackRate");
     expect(source).not.toContain("download=");
   });
 
-  it("keeps Space assigned to study navigation even after an audio button has focus", () => {
+  it("keeps Space assigned to study navigation even after the audio button has focus", () => {
     expect(source).toContain("onKeyDownCapture={preventMediaSpace}");
     expect(source).toContain("onKeyUpCapture={preventMediaSpace}");
     expect(source).toContain('if (event.key === " ") event.preventDefault();');
     expect(source).toContain("Space exclusively assigned to the study");
   });
 
-  it("supports replaying from the beginning without dragging a progress bar", () => {
-    expect(source).toContain("audio.currentTime = 0;");
-    expect(source).toContain("onClick={replay}");
+  it("starts again from the beginning when A or Play is used after audio has ended", () => {
+    expect(source).toContain("if (audio.ended) audio.currentTime = 0;");
+    expect(source).toContain("onClick={togglePlayback}");
   });
 
   it("keeps repeat playback fast while periodically checking for revised shared audio", () => {
