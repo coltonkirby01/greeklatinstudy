@@ -19,30 +19,34 @@ describe("study filter preferences", () => {
     expect([...loadGreekFilterSelection(["lesson1-uppercase"], storage)]).toEqual([]);
   });
 
-  it("restores Latin materials and nested selections exactly", () => {
+  it("restores Latin vocabulary and paradigm selections exactly", () => {
     const storage = memoryStorage();
     saveLatinFilterPreferences({
-      materials: new Set(["grammar-forms", "grammar-charts"]),
-      vocabularyParts: new Set(["Nouns", "Verbs"]),
-      formFilters: { sections: new Set(["Verbs"]), verbSubsections: new Set(["Deponent Verbs"]), voices: new Set(["Deponent"]), formGroups: new Set(["Indicative", "Infinitive"]) },
-      chartFilters: { sections: new Set(["Pronouns"]), verbSubsections: null, voices: null, formGroups: null },
+      materials: new Set(["active-indicative-paradigms", "passive-indicative-paradigms"]),
+      vocabularyParts: new Set(["Noun: 1st Declension", "Verb: 1st Conjugation"]),
+      paradigmCards: new Set(["latin-active-indicative-present-1st", "latin-passive-indicative-present-1st"]),
     }, storage);
 
     const restored = loadLatinFilterPreferences(storage);
-    expect([...restored.materials].sort()).toEqual(["grammar-charts", "grammar-forms"]);
-    expect([...(restored.vocabularyParts ?? [])].sort()).toEqual(["Nouns", "Verbs"]);
-    expect([...(restored.formFilters.sections ?? [])]).toEqual(["Verbs"]);
-    expect([...(restored.formFilters.verbSubsections ?? [])]).toEqual(["Deponent Verbs"]);
-    expect([...(restored.formFilters.voices ?? [])]).toEqual(["Deponent"]);
-    expect([...(restored.formFilters.formGroups ?? [])].sort()).toEqual(["Indicative", "Infinitive"]);
-    expect([...(restored.chartFilters.sections ?? [])]).toEqual(["Pronouns"]);
+    expect([...restored.materials].sort()).toEqual(["active-indicative-paradigms", "passive-indicative-paradigms"]);
+    expect([...(restored.vocabularyParts ?? [])].sort()).toEqual(["Noun: 1st Declension", "Verb: 1st Conjugation"]);
+    expect([...(restored.paradigmCards ?? [])].sort()).toEqual(["latin-active-indicative-present-1st", "latin-passive-indicative-present-1st"]);
   });
 
-  it("uses the original defaults when no stored preference exists", () => {
+  it("drops deleted Henle material keys from older stored preferences", () => {
+    const storage = memoryStorage();
+    storage.setItem("greeklatinstudy:latin-filters:v1", JSON.stringify({
+      materials: ["grammar-forms", "grammar-charts", "vocabulary"],
+      vocabularyParts: null,
+      paradigmCards: null,
+    }));
+    expect([...loadLatinFilterPreferences(storage).materials]).toEqual(["vocabulary"]);
+  });
+
+  it("uses vocabulary as the default when no stored preference exists", () => {
     const restored = loadLatinFilterPreferences(memoryStorage());
     expect([...restored.materials]).toEqual(["vocabulary"]);
     expect(restored.vocabularyParts).toBeNull();
-    expect(restored.formFilters.sections).toBeNull();
-    expect(restored.chartFilters.sections).toBeNull();
+    expect(restored.paradigmCards).toBeNull();
   });
 });
