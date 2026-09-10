@@ -1,0 +1,134 @@
+[
+  {
+    "id": "latin-passive-indicative-present-1st",
+    "category": "Passive Indicative — Present Tense",
+    "prompt": "Passive Voice, Indicative Mood, Present Tense, 1st Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["laud-or", "laud-āmur"] },
+      { "label": "2nd person", "cells": ["laud-āris", "laud-āminī"] },
+      { "label": "3rd person", "cells": ["laud-ātur", "laud-antur"] }
+    ]
+  },
+  {
+    "id": "latin-passive-indicative-present-2nd",
+    "category": "Passive Indicative — Present Tense",
+    "prompt": "Passive Voice, Indicative Mood, Present Tense, 2nd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mon-eor", "mon-ēmur"] },
+      { "label": "2nd person", "cells": ["mon-ēris", "mon-ēminī"] },
+      { "label": "3rd person", "cells": ["mon-ētur", "mon-entur"] }
+    ]
+  },
+  {
+    "id": "latin-passive-indicative-present-3rd",
+    "category": "Passive Indicative — Present Tense",
+    "prompt": "Passive Voice, Indicative Mood, Present Tense, 3rd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mitt-or", "mitt-imur"] },
+      { "label": "2nd person", "cells": ["mitt-eris", "mitt-iminī"] },
+      { "label": "3rd person", "cells": ["mitt-itur", "mitt-untur"] }
+    ]
+  },
+  {
+    "id": "latin-passive-indicative-present-4th",
+    "category": "Passive Indicative — Present Tense",
+    "prompt": "Passive Voice, Indicative Mood, Present Tense, 4th Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["aud-ior", "aud-īmur"] },
+      { "label": "2nd person", "cells": ["aud-īris", "aud-īminī"] },
+      { "label": "3rd person", "cells": ["aud-ītur", "aud-iuntur"] }
+    ]
+  },
+  {
+    "id": "latin-passive-indicative-imperfect-1st",
+    "category": "Passive Indicative — Imperfect Tense",
+    "prompt": "Passive Voice, Indicative Mood, Imperfect Tense, 1st Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["laud-ābar", "laud-ābāmur"] },
+      { "label": "2nd person", "cells": ["laud-ābāris", "laud-ābāminī"] },
+      { "label": "3rd person", "cells": ["laud-ābātur", "laud-ābantur"] }
+    ]
+  },
+  {
+    "id": "latin-passive-indicative-imperfect-2nd",
+    "category": "Passive Indicative — Imperfect Tense",
+    "prompt": "Passive Voice, Indicative Mood, Imperfect Tense, 2nd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mon-ēbar", "mon-ēbāmur"] },
+      { "label": "2nd person", "cells": ["mon-ēbāris", "mon-ēbāminī"] },
+      { "label": "3rd person", "cells": ["mon-ēbātur", "mon-ēbantur"] }
+    ]
+  },
+  {
+    "id": "latin-passive-indicative-imperfect-3rd",
+    "category": "Passive Indicative — Imperfect Tense",
+    "prompt": "Passive Voice, Indicative Mood, Imperfect Tense, 3rd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mitt-ēbar", "mitt-ēbāmur"] },
+      { "label": "2nd person", "cells": ["mitt-ēbāris", "mitt-ēbāminī"] },
+      { "label": "3rd person", "cells": ["mitt-ēbātur", "mitt-ēbantur"] }
+    ]
+  },
+  {
+    "id": "latin-passive-indicative-imperfect-4th",
+    "category": "Passive Indicative — Imperfect Tense",
+    "prompt": "Passive Voice, Indicative Mood, Imperfect Tense, 4th Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["aud-iēbar", "aud-iēbāmur"] },
+      { "label": "2nd person", "cells": ["aud-iēbāris", "aud-iēbāminī"] },
+      { "label": "3rd person", "cells": ["aud-iēbātur", "aud-iēbantur"] }
+    ]
+  },
+  {
+    "id": "latin-passive-indicative-future-1st",
+    "category": "Passive Indicative — Future Tense",
+    "prompt": "Passive Voice, Indicative Mood, Future Tense, 1st Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["laud-ābor", "laud-ābimur"] },
+      { "label": "2nd person", "cells": ["laud-āberis", "laud-ābiminī"] },
+      { "label": "3rd person", "cells": ["laud-ābitur", "laud-ābuntur"] }
+    ]
+  },
+  {
+    "id": "latin-passive-indicative-future-2nd",
+    "category": "Passive Indicative — Future Tense",
+    "prompt": "Passive Voice, Indicative Mood, Future Tense, 2nd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mon-ēbor", "mon-ēbimur"] },
+      { "label": "2nd person", "cells": ["mon-ēberis", "mon-ēbiminī"] },
+      { "label": "3rd person", "cells": ["mon-ēbitur", "mon-ēbuntur"] }
+    ]
+  },
+  {
+    "id": "latin-passive-indicative-future-3rd",
+    "category": "Passive Indicative — Future Tense",
+    "prompt": "Passive Voice, Indicative Mood, Future Tense, 3rd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mitt-ar", "mitt-ēmur"] },
+      { "label": "2nd person", "cells": ["mitt-ēris", "mitt-ēminī"] },
+      { "label": "3rd person", "cells": ["mitt-ētur", "mitt-entur"] }
+    ]
+  },
+  {
+    "id": "latin-passive-indicative-future-4th",
+    "category": "Passive Indicative — Future Tense",
+    "prompt": "Passive Voice, Indicative Mood, Future Tense, 4th Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["aud-iar", "aud-iēmur"] },
+      { "label": "2nd person", "cells": ["aud-iēris", "aud-iēminī"] },
+      { "label": "3rd person", "cells": ["aud-iētur", "aud-ientur"] }
+    ]
+  }
+]
