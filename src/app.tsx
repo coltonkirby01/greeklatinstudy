@@ -37,7 +37,6 @@ export function App() {
           <Route path="latin" element={<LatinPage />} />
           <Route path="latin/passive-indicative-paradigms" element={<Navigate to="/latin" replace />} />
           <Route path="stats" element={<StatsPage />} />
-          <Route path="henle" element={<Navigate to="/latin" replace />} />
           <Route path="decks/:slug" element={<DynamicDeckPage />} />
           <Route path="reading" element={<ReadingPage />} />
           <Route path="account" element={<AccountPage />} />
