@@ -1,166 +1,132 @@
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { loadLatinDeck } from "../data/builtin-decks";
+import { loadLatinActiveIndicativeParadigmsDeck } from "../data/latin-active-indicative-paradigms";
 import { loadLatinPassiveIndicativeParadigmsDeck } from "../data/latin-passive-indicative-paradigms";
 import { useAuth } from "../features/auth/auth-context";
-import { HenleChartTable } from "../features/henle/henle-chart";
-import { loadHenle, type HenleChart } from "../features/henle/henle-data";
 import { LatinParadigmTable } from "../features/latin/latin-paradigm-table";
-import { loadLatinFilterPreferences, saveLatinFilterPreferences } from "../features/study/filter-preferences";
-import { HENLE_PART1_SECTIONS, matchesGrammarCard, matchesVocabularyCard, vocabularyFamily, type GrammarCardFilters, type OptionalSelection } from "../features/study/latin-study-filters";
+import { loadLatinFilterPreferences, saveLatinFilterPreferences, type LatinMaterial } from "../features/study/filter-preferences";
+import { matchesVocabularyCard, vocabularyFamily, type OptionalSelection } from "../features/study/latin-study-filters";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
 import { FilterCheckbox, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
-import type { DeckDefinition, StudyCard, StudyDirection } from "../features/study/types";
+import type { DeckDefinition, StudyDirection } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
 
-type Material = "vocabulary" | "grammar-forms" | "grammar-charts" | "passive-indicative-paradigms";
-type GrammarSelections = GrammarCardFilters;
+type Material = LatinMaterial;
 
-const verbVoices = ["Active Voice", "Passive Voice", "Deponent", "Semi-Deponent"] as const;
-const verbSubsections = ["Verb Foundations & Principal Parts", "Regular Verbs — Active Voice", "Regular Verbs — Passive Voice", "Third Conjugation -iō — Active Voice", "Third Conjugation -iō — Passive Voice", "Deponent Verbs", "Semi-Deponent Verbs", "Irregular Verbs", "Defective Verbs", "Participles — Declension"] as const;
-const verbFormGroups = ["Indicative", "Subjunctive", "Imperative", "Infinitive", "Participle", "Gerund", "Gerundive", "Supine", "Principal Parts", "Personal Endings", "Stems"] as const;
-const paradigmTenses = ["Present Tense", "Imperfect Tense", "Future Tense"] as const;
-
-function blankGrammarSelections(): GrammarSelections { return { sections: null, verbSubsections: null, voices: null, formGroups: null }; }
-function emptyGrammarSelections(): GrammarSelections { return { sections: new Set(), verbSubsections: null, voices: null, formGroups: null }; }
-function cloneGrammarSelections(filters: GrammarSelections): GrammarSelections {
-  return {
-    sections: filters.sections === null ? null : new Set(filters.sections),
-    verbSubsections: filters.verbSubsections === null ? null : new Set(filters.verbSubsections),
-    voices: filters.voices === null ? null : new Set(filters.voices),
-    formGroups: filters.formGroups === null ? null : new Set(filters.formGroups),
-  };
-}
+const activeParadigmTenses = ["Present Tense", "Imperfect Tense", "Future Tense", "Perfect Tense", "Pluperfect Tense", "Future Perfect Tense"] as const;
+const passiveParadigmTenses = ["Present Tense", "Imperfect Tense", "Future Tense"] as const;
 
 function setValues(current: OptionalSelection, allValues: readonly string[], values: readonly string[], checked: boolean): OptionalSelection {
   const next = current === null ? new Set(allValues) : new Set(current);
   for (const value of values) checked ? next.add(value) : next.delete(value);
   return next.size === allValues.length ? null : next;
 }
-function selected(selection: OptionalSelection, value: string) { return selection === null || selection.has(value); }
-function selectionKey(selection: OptionalSelection) { return selection === null ? "*" : [...selection].sort().join(","); }
-function grammarSelectionKey(filters: GrammarSelections) { return [selectionKey(filters.sections), selectionKey(filters.voices), selectionKey(filters.formGroups), selectionKey(filters.verbSubsections)].join("~"); }
-function grammarFiltersAreAll(filters: GrammarSelections) { return filters.sections === null && filters.voices === null && filters.formGroups === null && filters.verbSubsections === null; }
+
+function selected(selection: OptionalSelection, value: string) {
+  return selection === null || selection.has(value);
+}
+
+function selectionKey(selection: OptionalSelection) {
+  return selection === null ? "*" : [...selection].sort().join(",");
+}
+
 function selectionState(selection: OptionalSelection, allValues: readonly string[], active = true) {
   if (!active) return { checked: false, mixed: false, selectedCount: 0 };
   const selectedCount = selection === null ? allValues.length : allValues.filter((value) => selection.has(value)).length;
-  return { checked: selectedCount === allValues.length, mixed: selectedCount > 0 && selectedCount < allValues.length, selectedCount };
-}
-function grammarHasAny(filters: GrammarSelections) { return filters.sections === null || filters.sections.size > 0; }
-
-function sectionCounts(cards: readonly StudyCard[]) {
-  const counts = new Map<string, number>(HENLE_PART1_SECTIONS.map((section) => [section, 0]));
-  for (const card of cards) if (counts.has(card.category ?? "")) counts.set(card.category ?? "", (counts.get(card.category ?? "") ?? 0) + 1);
-  return counts;
+  return {
+    checked: selectedCount === allValues.length,
+    mixed: selectedCount > 0 && selectedCount < allValues.length,
+    selectedCount,
+  };
 }
 
-function HenleSourceFilters({ cards, filters, setFilters, active, onActivate }: {
-  cards: readonly StudyCard[];
-  filters: GrammarSelections;
-  setFilters: Dispatch<SetStateAction<GrammarSelections>>;
+function ParadigmDeckFilters({
+  title,
+  material,
+  deck,
+  tenses,
+  active,
+  selection,
+  allParadigmIds,
+  onDeckChange,
+  onValuesChange,
+}: {
+  title: string;
+  material: Material;
+  deck: DeckDefinition | undefined;
+  tenses: readonly string[];
   active: boolean;
-  onActivate: () => void;
+  selection: OptionalSelection;
+  allParadigmIds: readonly string[];
+  onDeckChange: (material: Material, ids: readonly string[], checked: boolean) => void;
+  onValuesChange: (material: Material, ids: readonly string[], checked: boolean) => void;
 }) {
-  const counts = useMemo(() => sectionCounts(cards), [cards]);
-  const allSections = HENLE_PART1_SECTIONS as readonly string[];
-  const allVoices = verbVoices as readonly string[];
-  const allFormGroups = verbFormGroups as readonly string[];
-  const allSubsections = verbSubsections as readonly string[];
-  const verbsIncluded = active && selected(filters.sections, "Verbs");
-  const voiceState = selectionState(filters.voices, allVoices, verbsIncluded);
-  const formState = selectionState(filters.formGroups, allFormGroups, verbsIncluded);
-  const familyState = selectionState(filters.verbSubsections, allSubsections, verbsIncluded);
+  const deckIds = deck?.cards.map((card) => card.id) ?? [];
+  const state = selectionState(selection, deckIds, active);
 
-  function activateOnly(key: keyof GrammarSelections, values: readonly string[]) {
-    const next = emptyGrammarSelections();
-    next.sections = key === "sections" ? new Set(values) : new Set(["Verbs"]);
-    if (key !== "sections") next[key] = new Set(values);
-    onActivate();
-    setFilters(next);
-  }
-
-  function addVerbSubset(key: "voices" | "formGroups" | "verbSubsections", values: readonly string[]) {
-    if (!active) { activateOnly(key, values); return; }
-    setFilters((current) => ({ ...current, sections: setValues(current.sections, allSections, ["Verbs"], true), [key]: new Set(values) }));
-  }
-
-  function selectAllVerbDimension(key: "voices" | "formGroups" | "verbSubsections") {
-    if (!active) onActivate();
-    setFilters((current) => ({ ...current, sections: setValues(current.sections, allSections, ["Verbs"], true), [key]: null }));
-  }
-
-  function change(key: keyof GrammarSelections, allValues: readonly string[], values: readonly string[], checked: boolean) {
-    if (!active && checked) { activateOnly(key, values); return; }
-    if (key !== "sections" && !verbsIncluded && checked) { addVerbSubset(key, values); return; }
-    setFilters((current) => ({ ...current, [key]: setValues(current[key], allValues, values, checked) }));
-  }
-
-  return <>
-    {HENLE_PART1_SECTIONS.filter((section) => section !== "Verbs").map((section) => {
-      const count = counts.get(section) ?? 0;
-      return <FilterCheckbox key={section} label={section} count={count} checked={active && selected(filters.sections, section)} disabled={count === 0} onChange={(checked) => change("sections", allSections, [section], checked)} />;
-    })}
-
+  return (
     <FilterDisclosure
-      title="Verbs"
-      count={counts.get("Verbs") ?? 0}
-      summary="Voice · mood/form · family"
+      title={title}
+      count={deck?.cards.length ?? 0}
+      summary={`${state.selectedCount} of ${deckIds.length || 0} selected`}
       nested
-      checked={verbsIncluded && filters.voices === null && filters.formGroups === null && filters.verbSubsections === null}
-      mixed={verbsIncluded && (filters.voices !== null || filters.formGroups !== null || filters.verbSubsections !== null)}
-      onCheckedChange={(checked) => {
-        if (!active && checked) { onActivate(); setFilters({ ...blankGrammarSelections(), sections: new Set(["Verbs"]) }); return; }
-        setFilters((current) => ({ ...current, sections: setValues(current.sections, allSections, ["Verbs"], checked), voices: null, formGroups: null, verbSubsections: null }));
-      }}
+      checked={state.checked}
+      mixed={state.mixed}
+      onCheckedChange={(checked) => onDeckChange(material, deckIds, checked)}
     >
-      <FilterDisclosure title="Voice" summary={`${voiceState.selectedCount} of ${allVoices.length} selected`} nested checked={voiceState.checked} mixed={voiceState.mixed} onCheckedChange={(checked) => {
-        if (!verbsIncluded && checked) { selectAllVerbDimension("voices"); return; }
-        setFilters((current) => ({ ...current, voices: checked ? null : new Set() }));
-      }}>
-        <FilterSection title="Voice" description="Choose one voice, several voices, or all of them.">
-          {verbVoices.map((value) => <FilterCheckbox key={value} label={value} checked={verbsIncluded && selected(filters.voices, value)} onChange={(checked) => change("voices", allVoices, [value], checked)} />)}
-        </FilterSection>
-      </FilterDisclosure>
-
-      <FilterDisclosure title="Mood / form" summary={`${formState.selectedCount} of ${allFormGroups.length} selected`} nested checked={formState.checked} mixed={formState.mixed} onCheckedChange={(checked) => {
-        if (!verbsIncluded && checked) { selectAllVerbDimension("formGroups"); return; }
-        setFilters((current) => ({ ...current, formGroups: checked ? null : new Set() }));
-      }}>
-        <FilterSection title="Mood / form" description="For example, choose Indicative alone or combine several forms.">
-          {verbFormGroups.map((value) => <FilterCheckbox key={value} label={value} checked={verbsIncluded && selected(filters.formGroups, value)} onChange={(checked) => change("formGroups", allFormGroups, [value], checked)} />)}
-        </FilterSection>
-      </FilterDisclosure>
-
-      <FilterDisclosure title="Verb family" summary={`${familyState.selectedCount} of ${allSubsections.length} selected`} nested checked={familyState.checked} mixed={familyState.mixed} onCheckedChange={(checked) => {
-        if (!verbsIncluded && checked) { selectAllVerbDimension("verbSubsections"); return; }
-        setFilters((current) => ({ ...current, verbSubsections: checked ? null : new Set() }));
-      }}>
-        <FilterSection title="Verb family" description="Optionally narrow by conjugation or special verb family.">
-          {verbSubsections.map((value) => <FilterCheckbox key={value} label={value} checked={verbsIncluded && selected(filters.verbSubsections, value)} onChange={(checked) => change("verbSubsections", allSubsections, [value], checked)} />)}
-        </FilterSection>
-      </FilterDisclosure>
+      {deck && tenses.map((tense) => {
+        const prefix = title.startsWith("Active") ? "Active Indicative" : "Passive Indicative";
+        const cards = deck.cards.filter((card) => card.category === `${prefix} — ${tense}`);
+        const ids = cards.map((card) => card.id);
+        const tenseState = selectionState(selection, ids, active);
+        return (
+          <FilterDisclosure
+            key={tense}
+            title={tense}
+            count={cards.length}
+            summary={`${tenseState.selectedCount} of ${cards.length} conjugations selected`}
+            nested
+            checked={tenseState.checked}
+            mixed={tenseState.mixed}
+            onCheckedChange={(checked) => onValuesChange(material, ids, checked)}
+          >
+            <FilterSection title={tense} description="Choose the conjugations you want in the paradigm study pool.">
+              {cards.map((card) => {
+                const promptWithoutRule = card.front.split(" — R.")[0];
+                const label = promptWithoutRule.split(", ").at(-1) ?? promptWithoutRule;
+                return (
+                  <FilterCheckbox
+                    key={card.id}
+                    label={label}
+                    checked={active && selected(selection, card.id)}
+                    onChange={(checked) => onValuesChange(material, [card.id], checked)}
+                  />
+                );
+              })}
+            </FilterSection>
+          </FilterDisclosure>
+        );
+      })}
     </FilterDisclosure>
-  </>;
+  );
 }
 
 export function LatinPage() {
   const { value: vocabularyDeck, error: vocabularyError } = useAsync(loadLatinDeck, []);
-  const { value: paradigmDeck, error: paradigmError } = useAsync(loadLatinPassiveIndicativeParadigmsDeck, []);
+  const { value: activeParadigmDeck, error: activeParadigmError } = useAsync(loadLatinActiveIndicativeParadigmsDeck, []);
+  const { value: passiveParadigmDeck, error: passiveParadigmError } = useAsync(loadLatinPassiveIndicativeParadigmsDeck, []);
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [initialFilters] = useState(loadLatinFilterPreferences);
   const [direction, setDirection] = useState<StudyDirection>("forward");
   const [materials, setMaterials] = useState<Set<Material>>(() => new Set(initialFilters.materials));
-  const [grammarRequested, setGrammarRequested] = useState(false);
-  const needsGrammar = grammarRequested || materials.has("grammar-forms") || materials.has("grammar-charts");
-  const { value: henle, error: henleError, loading: henleLoading } = useAsync(async () => needsGrammar ? loadHenle() : null, [needsGrammar]);
-
   const [vocabularyParts, setVocabularyParts] = useState<OptionalSelection>(() => initialFilters.vocabularyParts === null ? null : new Set(initialFilters.vocabularyParts));
   const [paradigmCards, setParadigmCards] = useState<OptionalSelection>(() => initialFilters.paradigmCards === null ? null : new Set(initialFilters.paradigmCards));
-  const [formFilters, setFormFilters] = useState<GrammarSelections>(() => cloneGrammarSelections(initialFilters.formFilters));
-  const [chartFilters, setChartFilters] = useState<GrammarSelections>(() => cloneGrammarSelections(initialFilters.chartFilters));
+
   const resumeSession = useMemo(() => {
-    const id = searchParams.get("session"), startedAt = Number(searchParams.get("sessionStartedAt"));
+    const id = searchParams.get("session");
+    const startedAt = Number(searchParams.get("sessionStartedAt"));
     return id && Number.isFinite(startedAt) && startedAt > 0 ? { id, startedAt } : null;
   }, [searchParams]);
 
@@ -169,10 +135,8 @@ export function LatinPage() {
       materials: new Set(materials),
       vocabularyParts: vocabularyParts === null ? null : new Set(vocabularyParts),
       paradigmCards: paradigmCards === null ? null : new Set(paradigmCards),
-      formFilters: cloneGrammarSelections(formFilters),
-      chartFilters: cloneGrammarSelections(chartFilters),
     });
-  }, [chartFilters, formFilters, materials, paradigmCards, vocabularyParts]);
+  }, [materials, paradigmCards, vocabularyParts]);
 
   const vocabularyGroups = useMemo(() => {
     const groups = new Map<string, Array<{ value: string; count: number }>>();
@@ -188,105 +152,259 @@ export function LatinPage() {
     }
     return groups;
   }, [vocabularyDeck]);
+
   const allVocabularyParts = useMemo(() => [...vocabularyGroups.values()].flat().map((item) => item.value), [vocabularyGroups]);
   const vocabularyActive = materials.has("vocabulary");
   const vocabularyState = selectionState(vocabularyParts, allVocabularyParts, vocabularyActive);
 
-  const allParadigmIds = useMemo(() => paradigmDeck?.cards.map((card) => card.id) ?? [], [paradigmDeck]);
-  const paradigmActive = materials.has("passive-indicative-paradigms");
-  const paradigmState = selectionState(paradigmCards, allParadigmIds, paradigmActive);
+  const activeParadigmIds = useMemo(() => activeParadigmDeck?.cards.map((card) => card.id) ?? [], [activeParadigmDeck]);
+  const passiveParadigmIds = useMemo(() => passiveParadigmDeck?.cards.map((card) => card.id) ?? [], [passiveParadigmDeck]);
+  const allParadigmIds = useMemo(() => [...activeParadigmIds, ...passiveParadigmIds], [activeParadigmIds, passiveParadigmIds]);
+  const activeParadigmsActive = materials.has("active-indicative-paradigms");
+  const passiveParadigmsActive = materials.has("passive-indicative-paradigms");
+  const activeParadigmState = selectionState(paradigmCards, activeParadigmIds, activeParadigmsActive);
+  const passiveParadigmState = selectionState(paradigmCards, passiveParadigmIds, passiveParadigmsActive);
+  const grammarSelectedCount = activeParadigmState.selectedCount + passiveParadigmState.selectedCount;
+  const grammarChecked = activeParadigmState.checked && passiveParadigmState.checked;
+  const grammarMixed = (activeParadigmsActive || passiveParadigmsActive) && (!grammarChecked || activeParadigmState.mixed || passiveParadigmState.mixed);
 
   const vocabularyCards = useMemo(() => vocabularyDeck?.cards.filter((card) => matchesVocabularyCard(card, vocabularyParts)) ?? [], [vocabularyDeck, vocabularyParts]);
-  const paradigmStudyCards = useMemo(() => paradigmDeck?.cards.filter((card) => selected(paradigmCards, card.id)) ?? [], [paradigmCards, paradigmDeck]);
-  const grammarFormCards = useMemo(() => henle?.individualDeck.cards.filter((card) => matchesGrammarCard(card, formFilters)) ?? [], [formFilters, henle]);
-  const grammarChartCards = useMemo(() => henle?.chartDeck.cards.filter((card) => matchesGrammarCard(card, chartFilters)) ?? [], [chartFilters, henle]);
+  const activeParadigmStudyCards = useMemo(() => activeParadigmDeck?.cards.filter((card) => selected(paradigmCards, card.id)) ?? [], [activeParadigmDeck, paradigmCards]);
+  const passiveParadigmStudyCards = useMemo(() => passiveParadigmDeck?.cards.filter((card) => selected(paradigmCards, card.id)) ?? [], [paradigmCards, passiveParadigmDeck]);
 
   const sources = useMemo(() => {
     const next: StudySourceDefinition[] = [];
-    if (materials.has("vocabulary") && vocabularyDeck) next.push({ id: "vocabulary", label: "Dickinson vocabulary", deck: vocabularyDeck, cards: vocabularyCards, studyKey: direction, direction });
-    if (materials.has("grammar-forms") && henle) next.push({ id: "grammar-forms", label: "Henle grammar form", deck: henle.individualDeck, cards: grammarFormCards, studyKey: `individual:${direction}`, direction });
-    if (materials.has("grammar-charts") && henle) next.push({ id: "grammar-charts", label: "Henle whole chart", deck: henle.chartDeck, cards: grammarChartCards, studyKey: "chart", direction: "forward" });
-    if (materials.has("passive-indicative-paradigms") && paradigmDeck) next.push({ id: "passive-indicative-paradigms", label: "Passive indicative paradigm", deck: paradigmDeck, cards: paradigmStudyCards, studyKey: "chart", direction: "forward" });
+    if (vocabularyActive && vocabularyDeck && vocabularyCards.length) {
+      next.push({ id: "vocabulary", label: "Dickinson vocabulary", deck: vocabularyDeck, cards: vocabularyCards, studyKey: direction, direction });
+    }
+    if (activeParadigmsActive && activeParadigmDeck && activeParadigmStudyCards.length) {
+      next.push({ id: "active-indicative-paradigms", label: "Active indicative paradigm", deck: activeParadigmDeck, cards: activeParadigmStudyCards, studyKey: "chart", direction: "forward" });
+    }
+    if (passiveParadigmsActive && passiveParadigmDeck && passiveParadigmStudyCards.length) {
+      next.push({ id: "passive-indicative-paradigms", label: "Passive indicative paradigm", deck: passiveParadigmDeck, cards: passiveParadigmStudyCards, studyKey: "chart", direction: "forward" });
+    }
     return next;
-  }, [direction, grammarChartCards, grammarFormCards, henle, materials, paradigmDeck, paradigmStudyCards, vocabularyCards, vocabularyDeck]);
+  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, direction, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, vocabularyActive, vocabularyCards, vocabularyDeck]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
-  const virtualDeck = useMemo<DeckDefinition>(() => ({ id: "latin-study-app", slug: "latin", title: "Latin", eyebrow: "Vocabulary · grammar", description: "A unified Latin study surface that can mix Dickinson vocabulary with Henle forms, whole charts, and selected paradigm decks while preserving each source's progress.", language: "latin", cards: selectedCards, supportsReverse: true }), [selectedCards]);
-  const resetKey = `${direction}|${[...materials].sort().join(",")}|v:${selectionKey(vocabularyParts)}|p:${selectionKey(paradigmCards)}|f:${grammarSelectionKey(formFilters)}|c:${grammarSelectionKey(chartFilters)}`;
-  const hasDirectionalCards = materials.has("vocabulary") || materials.has("grammar-forms");
-  const formActive = materials.has("grammar-forms"), chartActive = materials.has("grammar-charts");
-  const formAll = formActive && grammarFiltersAreAll(formFilters), chartAll = chartActive && grammarFiltersAreAll(chartFilters);
+  const virtualDeck = useMemo<DeckDefinition>(() => ({
+    id: "latin-study-app",
+    slug: "latin",
+    title: "Latin",
+    eyebrow: "Vocabulary · grammar",
+    description: "A unified Latin study surface for Dickinson vocabulary and selected Latin paradigms.",
+    language: "latin",
+    cards: selectedCards,
+    supportsReverse: true,
+  }), [selectedCards]);
+  const resetKey = `${direction}|${[...materials].sort().join(",")}|v:${selectionKey(vocabularyParts)}|p:${selectionKey(paradigmCards)}`;
 
-  function toggleMaterial(material: Material, checked: boolean) { setMaterials((current) => { const next = new Set(current); checked ? next.add(material) : next.delete(material); return next; }); }
-  function activateVocabularyOnly(values: readonly string[]) { toggleMaterial("vocabulary", true); setVocabularyParts(new Set(values)); }
+  function toggleMaterial(material: Material, checked: boolean) {
+    setMaterials((current) => {
+      const next = new Set(current);
+      checked ? next.add(material) : next.delete(material);
+      return next;
+    });
+  }
+
+  function activateVocabularyOnly(values: readonly string[]) {
+    toggleMaterial("vocabulary", true);
+    setVocabularyParts(new Set(values));
+  }
+
   function changeVocabulary(values: readonly string[], checked: boolean) {
-    if (!vocabularyActive && checked) { activateVocabularyOnly(values); return; }
+    if (!vocabularyActive && checked) {
+      activateVocabularyOnly(values);
+      return;
+    }
     setVocabularyParts((current) => setValues(current, allVocabularyParts, values, checked));
   }
-  function activateParadigmsOnly(values: readonly string[]) { toggleMaterial("passive-indicative-paradigms", true); setParadigmCards(new Set(values)); }
-  function changeParadigms(values: readonly string[], checked: boolean) {
-    if (!paradigmActive && checked) { activateParadigmsOnly(values); return; }
+
+  function currentlySelectedParadigmIds(current: OptionalSelection) {
+    if (current !== null) return new Set(current);
+    const next = new Set<string>();
+    if (activeParadigmsActive) activeParadigmIds.forEach((id) => next.add(id));
+    if (passiveParadigmsActive) passiveParadigmIds.forEach((id) => next.add(id));
+    return next;
+  }
+
+  function changeParadigmDeck(material: Material, ids: readonly string[], checked: boolean) {
+    toggleMaterial(material, checked);
+    setParadigmCards((current) => {
+      if (checked) {
+        if (current === null) return null;
+        const next = new Set(current);
+        ids.forEach((id) => next.add(id));
+        return next.size === allParadigmIds.length ? null : next;
+      }
+      const next = current === null ? new Set(allParadigmIds) : new Set(current);
+      ids.forEach((id) => next.delete(id));
+      return next;
+    });
+  }
+
+  function changeParadigmValues(material: Material, values: readonly string[], checked: boolean) {
+    const active = materials.has(material);
+    if (!active && checked) {
+      setMaterials((current) => new Set(current).add(material));
+      setParadigmCards((current) => {
+        const next = currentlySelectedParadigmIds(current);
+        values.forEach((value) => next.add(value));
+        return next.size === allParadigmIds.length ? null : next;
+      });
+      return;
+    }
     setParadigmCards((current) => setValues(current, allParadigmIds, values, checked));
   }
 
-  return <main className="page-shell study-page latin-page">
-    <div className="study-page-heading">
-      <div><p className="eyebrow">Vocabulary · forms · whole charts · paradigms</p><h1>Latin</h1></div>
-      <p>Open any source to choose individual children, whether or not its parent is selected. Parent checkboxes remain the fast way to select or clear everything below.</p>
-    </div>
-    {!user && <div className="guest-banner"><span>You are studying as a guest. Progress stays on this device.</span><Link to="/account">Sign in to sync</Link></div>}
-    {(vocabularyError || henleError || paradigmError) && <div className="inline-alert">{vocabularyError ?? henleError ?? paradigmError}</div>}
+  function changeGrammarParent(checked: boolean) {
+    setMaterials((current) => {
+      const next = new Set(current);
+      if (checked) {
+        next.add("active-indicative-paradigms");
+        next.add("passive-indicative-paradigms");
+      } else {
+        next.delete("active-indicative-paradigms");
+        next.delete("passive-indicative-paradigms");
+      }
+      return next;
+    });
+    setParadigmCards(checked ? null : new Set());
+  }
 
-    <StudyFilterMenu summary={`${selectedCards.length.toLocaleString()} cards in the current pool${henleLoading && needsGrammar ? " · loading grammar…" : ""}`} detail="Each source is a vertical accordion. Opening and selecting are independent; choosing a child never forces the whole parent on.">
-      <FilterDisclosure title="Latin Vocabulary (Dickinson)" count={vocabularyDeck?.cards.length ?? 997} summary="Frequency-ranked · top 100, then 25-card unlocks" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onCheckedChange={(checked) => { toggleMaterial("vocabulary", checked); setVocabularyParts(checked ? null : new Set()); }}>
-        {vocabularyDeck && <FilterSection title="Vocabulary categories" description="Choose a category directly, or open a category with multiple subtypes for a narrower selection.">
-          {[...vocabularyGroups.entries()].map(([family, items]) => {
-            const values = items.map((item) => item.value), state = selectionState(vocabularyParts, values, vocabularyActive), count = items.reduce((sum, item) => sum + item.count, 0);
-            if (items.length === 1) { const item = items[0]; return <FilterCheckbox key={family} label={family} count={count} checked={vocabularyActive && selected(vocabularyParts, item.value)} onChange={(checked) => changeVocabulary([item.value], checked)} />; }
-            return <FilterDisclosure key={family} title={family} count={count} summary={`${state.selectedCount} of ${values.length} types selected`} checked={state.checked} mixed={state.mixed} onCheckedChange={(checked) => { if (!vocabularyActive && checked) { activateVocabularyOnly(values); return; } changeVocabulary(values, checked); }} nested>
-              <FilterSection title={family} description={`Choose all ${family.toLowerCase()} vocabulary or only specific types.`}>
-                {items.map((item) => <FilterCheckbox key={item.value} label={item.value.includes(":") ? item.value.split(":").slice(1).join(":").trim() : item.value} count={item.count} checked={vocabularyActive && selected(vocabularyParts, item.value)} onChange={(checked) => changeVocabulary([item.value], checked)} />)}
-              </FilterSection>
-            </FilterDisclosure>;
-          })}
-        </FilterSection>}
-      </FilterDisclosure>
+  const paradigmError = activeParadigmError ?? passiveParadigmError;
 
-      <FilterDisclosure title="Henle Grammar Forms" count={2_062} summary="Individual Part 1 forms · Forward and Reverse" checked={formAll} mixed={formActive && !formAll && grammarHasAny(formFilters)} onOpenChange={(open) => { if (open) setGrammarRequested(true); }} onCheckedChange={(checked) => { toggleMaterial("grammar-forms", checked); setFormFilters(checked ? blankGrammarSelections() : emptyGrammarSelections()); }}>
-        {henle ? <HenleSourceFilters cards={henle.individualDeck.cards} filters={formFilters} setFilters={setFormFilters} active={formActive} onActivate={() => toggleMaterial("grammar-forms", true)} /> : <div className="filter-disclosure-body">{henleLoading ? "Loading Henle grammar forms…" : "Open this section to load its child options."}</div>}
-      </FilterDisclosure>
+  return (
+    <main className="page-shell study-page latin-page">
+      <div className="study-page-heading">
+        <div><p className="eyebrow">Vocabulary · paradigms</p><h1>Latin</h1></div>
+      </div>
 
-      <FilterDisclosure title="Henle Whole Charts" count={henle?.chartDeck.cards.length ?? 248} summary="Complete paradigms · independent chart mastery" checked={chartAll} mixed={chartActive && !chartAll && grammarHasAny(chartFilters)} onOpenChange={(open) => { if (open) setGrammarRequested(true); }} onCheckedChange={(checked) => { toggleMaterial("grammar-charts", checked); setChartFilters(checked ? blankGrammarSelections() : emptyGrammarSelections()); }}>
-        {henle ? <HenleSourceFilters cards={henle.chartDeck.cards} filters={chartFilters} setFilters={setChartFilters} active={chartActive} onActivate={() => toggleMaterial("grammar-charts", true)} /> : <div className="filter-disclosure-body">{henleLoading ? "Loading Henle whole charts…" : "Open this section to load its child options."}</div>}
-      </FilterDisclosure>
+      {!user && <div className="guest-banner"><span>You are studying as a guest. Progress stays on this device.</span><Link to="/account">Sign in to sync</Link></div>}
+      {(vocabularyError || paradigmError) && <div className="inline-alert">{vocabularyError ?? paradigmError}</div>}
 
-      <FilterDisclosure title="Passive Indicative Paradigms" count={paradigmDeck?.cards.length ?? 12} summary="Present · imperfect · future · 1st–4th conjugations" checked={paradigmState.checked} mixed={paradigmState.mixed} onCheckedChange={(checked) => { toggleMaterial("passive-indicative-paradigms", checked); setParadigmCards(checked ? null : new Set()); }}>
-        {paradigmDeck && paradigmTenses.map((tense) => {
-          const cards = paradigmDeck.cards.filter((card) => card.category?.includes(tense));
-          const ids = cards.map((card) => card.id);
-          const state = selectionState(paradigmCards, ids, paradigmActive);
-          return <FilterDisclosure key={tense} title={tense} count={cards.length} summary={`${state.selectedCount} of ${cards.length} conjugations selected`} nested checked={state.checked} mixed={state.mixed} onCheckedChange={(checked) => changeParadigms(ids, checked)}>
-            <FilterSection title={tense} description="Choose the conjugations you want in the paradigm study pool.">
-              {cards.map((card) => {
-                const label = card.front.split(", ").at(-1) ?? card.front;
-                return <FilterCheckbox key={card.id} label={label} checked={paradigmActive && selected(paradigmCards, card.id)} onChange={(checked) => changeParadigms([card.id], checked)} />;
+      <StudyFilterMenu
+        summary={`${selectedCards.length.toLocaleString()} cards in the current pool`}
+        detail="Choose Latin vocabulary, grammar paradigms, or any combination of them."
+      >
+        <FilterDisclosure
+          title="Latin Vocabulary (Dickinson)"
+          count={vocabularyDeck?.cards.length ?? 997}
+          summary="Frequency-ranked · top 100, then 25-card unlocks"
+          checked={vocabularyState.checked}
+          mixed={vocabularyState.mixed}
+          onCheckedChange={(checked) => {
+            toggleMaterial("vocabulary", checked);
+            setVocabularyParts(checked ? null : new Set());
+          }}
+        >
+          {vocabularyDeck && (
+            <FilterSection title="Vocabulary categories" description="Choose a category directly, or open a category with multiple subtypes for a narrower selection.">
+              {[...vocabularyGroups.entries()].map(([family, items]) => {
+                const values = items.map((item) => item.value);
+                const state = selectionState(vocabularyParts, values, vocabularyActive);
+                const count = items.reduce((sum, item) => sum + item.count, 0);
+                if (items.length === 1) {
+                  const item = items[0];
+                  return <FilterCheckbox key={family} label={family} count={count} checked={vocabularyActive && selected(vocabularyParts, item.value)} onChange={(checked) => changeVocabulary([item.value], checked)} />;
+                }
+                return (
+                  <FilterDisclosure
+                    key={family}
+                    title={family}
+                    count={count}
+                    summary={`${state.selectedCount} of ${values.length} types selected`}
+                    checked={state.checked}
+                    mixed={state.mixed}
+                    onCheckedChange={(checked) => {
+                      if (!vocabularyActive && checked) {
+                        activateVocabularyOnly(values);
+                        return;
+                      }
+                      changeVocabulary(values, checked);
+                    }}
+                    nested
+                  >
+                    <FilterSection title={family} description={`Choose all ${family.toLowerCase()} vocabulary or only specific types.`}>
+                      {items.map((item) => (
+                        <FilterCheckbox
+                          key={item.value}
+                          label={item.value.includes(":") ? item.value.split(":").slice(1).join(":").trim() : item.value}
+                          count={item.count}
+                          checked={vocabularyActive && selected(vocabularyParts, item.value)}
+                          onChange={(checked) => changeVocabulary([item.value], checked)}
+                        />
+                      ))}
+                    </FilterSection>
+                  </FilterDisclosure>
+                );
               })}
             </FilterSection>
-          </FilterDisclosure>;
-        })}
-      </FilterDisclosure>
-    </StudyFilterMenu>
+          )}
+        </FilterDisclosure>
 
-    {vocabularyDeck ? <MultiSourceStudySession deck={virtualDeck} sources={sources} resetKey={resetKey} direction={direction} onDirectionChange={hasDirectionalCards ? setDirection : undefined} directionLabels={{ forward: "Forward", reverse: "Reverse" }} resumeSession={resumeSession} cardMeta={(card, source) => source.id === "vocabulary" ? `Entry ${Number(card.metadata?.deckPosition ?? 0)} of ${vocabularyDeck.cards.length} · Dickinson rank ${card.rank}` : source.id === "passive-indicative-paradigms" ? `${card.category ?? "Passive Indicative"} · whole paradigm` : `Rule ${Number(card.metadata?.rule ?? card.rank)}`} priorityPrompt={(card, copy) => String(card.metadata?.studySource) === "grammar-chart" || String(card.metadata?.studySource) === "latin-passive-indicative-paradigm" ? `${card.front} · Complete chart` : copy.prompt} renderFront={(card, copy, source) => {
-      if (source.id === "passive-indicative-paradigms") return <span className="henle-chart-face"><strong className="henle-card-title">{card.front}</strong><span className="chart-instruction">Reconstruct the complete paradigm from memory.</span><LatinParadigmTable card={card} revealed={false} /></span>;
-      if (source.id === "grammar-charts") { const chart = card.metadata?.chart as HenleChart; return <span className="henle-chart-face"><strong className="henle-card-title">{chart.title}</strong><span className="chart-instruction">Reconstruct the complete chart from memory.</span><HenleChartTable items={chart.items} revealed={false} /></span>; }
-      if (source.id === "grammar-forms") return source.direction === "forward" ? <span className="henle-card-copy"><strong className="henle-card-title">{String(card.metadata?.title ?? "")}</strong><span className="henle-prompt">{String(card.metadata?.prompt ?? copy.prompt)}</span></span> : <span className="henle-prompt henle-form-prompt">{copy.prompt}</span>;
-      return <span className={direction === "forward" ? "latin-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
-    }} renderBack={(card, copy, source) => {
-      if (source.id === "passive-indicative-paradigms") return <span className="henle-chart-face"><strong className="henle-card-title">{card.front}</strong><LatinParadigmTable card={card} revealed /></span>;
-      if (source.id === "grammar-charts") { const chart = card.metadata?.chart as HenleChart; return <span className="henle-chart-face"><strong className="henle-card-title">{chart.title}</strong><span className="answer-notes">Rule {Number(card.metadata?.rule ?? chart.rule)}</span><HenleChartTable items={chart.items} revealed /></span>; }
-      if (source.id === "grammar-forms") return <span className="answer-block henle-answer-block"><strong className="henle-answer">{copy.answer}</strong><span className="answer-notes">Rule {Number(card.metadata?.rule ?? card.rank)}</span></span>;
-      return <span className="answer-block"><strong className={direction === "reverse" ? "latin-front compact-latin" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>;
-    }} /> : <div className="study-loading panel-surface"><span className="loading-mark">A</span><p>Preparing Latin…</p></div>}
-  </main>;
+        <FilterDisclosure
+          title="Grammer"
+          count={allParadigmIds.length || 36}
+          summary={`${grammarSelectedCount} of ${allParadigmIds.length || 36} paradigms selected`}
+          checked={grammarChecked}
+          mixed={grammarMixed}
+          onCheckedChange={changeGrammarParent}
+        >
+          <ParadigmDeckFilters
+            title="Active Indicative Paradigms"
+            material="active-indicative-paradigms"
+            deck={activeParadigmDeck}
+            tenses={activeParadigmTenses}
+            active={activeParadigmsActive}
+            selection={paradigmCards}
+            allParadigmIds={allParadigmIds}
+            onDeckChange={changeParadigmDeck}
+            onValuesChange={changeParadigmValues}
+          />
+          <ParadigmDeckFilters
+            title="Passive Indicative Paradigms"
+            material="passive-indicative-paradigms"
+            deck={passiveParadigmDeck}
+            tenses={passiveParadigmTenses}
+            active={passiveParadigmsActive}
+            selection={paradigmCards}
+            allParadigmIds={allParadigmIds}
+            onDeckChange={changeParadigmDeck}
+            onValuesChange={changeParadigmValues}
+          />
+        </FilterDisclosure>
+      </StudyFilterMenu>
+
+      {vocabularyDeck ? (
+        <MultiSourceStudySession
+          deck={virtualDeck}
+          sources={sources}
+          resetKey={resetKey}
+          direction={direction}
+          onDirectionChange={vocabularyActive ? setDirection : undefined}
+          directionLabels={{ forward: "Forward", reverse: "Reverse" }}
+          resumeSession={resumeSession}
+          cardMeta={(card, source) => source.id === "vocabulary"
+            ? `Entry ${Number(card.metadata?.deckPosition ?? 0)} of ${vocabularyDeck.cards.length} · Dickinson rank ${card.rank}`
+            : `${card.category ?? "Indicative paradigm"} · whole paradigm`}
+          priorityPrompt={(card, copy) => String(card.metadata?.studySource).includes("indicative-paradigm") ? `${card.front} · Complete chart` : copy.prompt}
+          renderFront={(card, copy, source) => {
+            if (source.id === "active-indicative-paradigms" || source.id === "passive-indicative-paradigms") {
+              return <span className="henle-chart-face"><strong className="henle-card-title">{card.front}</strong><span className="chart-instruction">Reconstruct the complete paradigm from memory.</span><LatinParadigmTable card={card} revealed={false} /></span>;
+            }
+            return <span className={direction === "forward" ? "latin-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
+          }}
+          renderBack={(card, copy, source) => {
+            if (source.id === "active-indicative-paradigms" || source.id === "passive-indicative-paradigms") {
+              return <span className="henle-chart-face"><strong className="henle-card-title">{card.front}</strong><LatinParadigmTable card={card} revealed /></span>;
+            }
+            return <span className="answer-block"><strong className={direction === "reverse" ? "latin-front compact-latin" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>;
+          }}
+        />
+      ) : (
+        <div className="study-loading panel-surface"><span className="loading-mark">A</span><p>Preparing Latin…</p></div>
+      )}
+    </main>
+  );
 }
