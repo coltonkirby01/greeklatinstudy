@@ -9,7 +9,46 @@ function client() { if (!supabase) throw new Error("Connect Supabase before usin
 export async function listPublishedDecks() { const { data, error } = await client().from("decks").select("*").eq("published", true).order("title"); if (error) throw error; return (data ?? []) as CloudDeck[]; }
 export async function listAdminDecks() { const { data, error } = await client().from("decks").select("*").order("updated_at", { ascending: false }); if (error) throw error; return (data ?? []) as CloudDeck[]; }
 export async function createDeck(input: { title: string; slug: string; description: string; subject: string; language: CloudDeck["language"]; supportsReverse: boolean }) { const { data, error } = await client().from("decks").insert({ title: input.title, slug: input.slug, description: input.description, subject: input.subject, language: input.language, supports_reverse: input.supportsReverse }).select("*").single(); if (error) throw error; return data as CloudDeck; }
-export async function updateDeck(deckId: string, changes: Partial<CloudDeck>) { const { data, error } = await client().from("decks").update({ ...changes, updated_at: new Date().toISOString() }).eq("id", deckId).select("*").single(); if (error) throw error; return data as CloudDeck; }
+
+/**
+ * Pre-generates shared audio for published Greek cloud cards. The Edge Function
+ * validates publication/language and reuses an existing asset when its source
+ * signature has not changed. Four-at-a-time avoids flooding ElevenLabs while
+ * still making a newly published/imported deck ready before students study it.
+ */
+export async function prewarmGreekAudioCards(cards: readonly Pick<CloudCard, "id">[]) {
+  const api = client();
+  const uniqueIds = [...new Set(cards.map((card) => card.id).filter(Boolean))];
+  let ready = 0, failed = 0;
+  for (let index = 0; index < uniqueIds.length; index += 4) {
+    const results = await Promise.all(uniqueIds.slice(index, index + 4).map(async (cloudCardId) => {
+      try {
+        const { error } = await api.functions.invoke("course-audio", { body: { cloudCardId } });
+        return !error;
+      } catch {
+        return false;
+      }
+    }));
+    for (const ok of results) ok ? ready += 1 : failed += 1;
+  }
+  return { ready, failed };
+}
+
+async function prewarmDeckIfPublishedGreek(deck: Pick<CloudDeck, "id" | "language" | "published">, cards?: readonly CloudCard[]) {
+  if (deck.language !== "greek" || !deck.published) return { ready: 0, failed: 0 };
+  return prewarmGreekAudioCards(cards ?? await loadCards(deck.id));
+}
+
+export async function updateDeck(deckId: string, changes: Partial<CloudDeck>) {
+  const { data, error } = await client().from("decks").update({ ...changes, updated_at: new Date().toISOString() }).eq("id", deckId).select("*").single();
+  if (error) throw error;
+  const deck = data as CloudDeck;
+  // Publishing a Greek deck is the durable onboarding point: all of its audio
+  // is generated into shared storage before the admin action completes.
+  if (changes.published === true) await prewarmDeckIfPublishedGreek(deck);
+  return deck;
+}
+
 export async function loadCards(deckId: string) { const rows: CloudCard[] = []; for (let start = 0; ; start += 1_000) { const { data, error } = await client().from("cards").select("*").eq("deck_id", deckId).order("position").range(start, start + 999); if (error) throw error; const page = (data ?? []) as CloudCard[]; rows.push(...page); if (page.length < 1_000) break; } return rows; }
 export async function loadPublishedDeck(slug: string) {
   const { data, error } = await client().from("decks").select("*").eq("slug", slug).eq("published", true).single(); if (error) throw error; const deck = data as CloudDeck, rows = await loadCards(deck.id);
@@ -24,30 +63,30 @@ export async function importCards(deckId: string, cards: ImportCard[], replace: 
   const existing = replace ? 0 : (await loadCards(deckId)).length;
   const rows = cards.map((card, index) => ({ deck_id: deckId, stable_key: `${existing + index + 1}-${slugify(card.front).slice(0, 48) || "card"}`, front: card.front, back: card.back, category: card.category || null, rank: card.rank, source: card.source || null, notes: card.notes || null, reverse_prompt: card.reversePrompt || null, metadata: (card.metadata ?? null) as Json, position: existing + index + 1 }));
   for (let index = 0; index < rows.length; index += 400) { const { error } = await client().from("cards").insert(rows.slice(index, index + 400)); if (error) throw error; }
-  return loadCards(deckId);
+  const loaded = await loadCards(deckId);
+  const { data: deck, error: deckError } = await client().from("decks").select("id,language,published").eq("id", deckId).single();
+  if (deckError) throw deckError;
+  await prewarmDeckIfPublishedGreek(deck as Pick<CloudDeck, "id" | "language" | "published">, loaded);
+  return loaded;
 }
-
-/**
- * Pre-generates shared audio for published Greek cloud cards. The Edge Function
- * still validates the deck language/publication state and reuses an existing
- * asset when its pronunciation signature has not changed. Small concurrent
- * batches keep imports responsive without flooding ElevenLabs.
- */
-export async function prewarmGreekAudioCards(cards: readonly Pick<CloudCard, "id">[]) {
-  const api = client();
-  const uniqueIds = [...new Set(cards.map((card) => card.id).filter(Boolean))];
-  let ready = 0, failed = 0;
-  for (let index = 0; index < uniqueIds.length; index += 4) {
-    const results = await Promise.all(uniqueIds.slice(index, index + 4).map(async (cloudCardId) => {
-      const { error } = await api.functions.invoke("course-audio", { body: { cloudCardId } });
-      return !error;
-    }));
-    for (const ok of results) ok ? ready += 1 : failed += 1;
+export async function saveCard(card: Partial<CloudCard> & { deck_id: string; front: string; back: string }) {
+  let saved: CloudCard;
+  if (card.id) {
+    const { id, ...changes } = card;
+    const { data, error } = await client().from("cards").update(changes).eq("id", id).select("*").single();
+    if (error) throw error;
+    saved = data as CloudCard;
+  } else {
+    const current = await loadCards(card.deck_id);
+    const { data, error } = await client().from("cards").insert({ ...card, stable_key: card.stable_key || `${current.length + 1}-${slugify(card.front).slice(0, 48) || "card"}`, position: card.position || current.length + 1 }).select("*").single();
+    if (error) throw error;
+    saved = data as CloudCard;
   }
-  return { ready, failed };
+  const { data: deck, error: deckError } = await client().from("decks").select("id,language,published").eq("id", card.deck_id).single();
+  if (deckError) throw deckError;
+  await prewarmDeckIfPublishedGreek(deck as Pick<CloudDeck, "id" | "language" | "published">, [saved]);
+  return saved;
 }
-
-export async function saveCard(card: Partial<CloudCard> & { deck_id: string; front: string; back: string }) { if (card.id) { const { id, ...changes } = card; const { data, error } = await client().from("cards").update(changes).eq("id", id).select("*").single(); if (error) throw error; return data as CloudCard; } const current = await loadCards(card.deck_id); const { data, error } = await client().from("cards").insert({ ...card, stable_key: card.stable_key || `${current.length + 1}-${slugify(card.front).slice(0, 48) || "card"}`, position: card.position || current.length + 1 }).select("*").single(); if (error) throw error; return data as CloudCard; }
 export async function deleteCard(cardId: string) { const { error } = await client().from("cards").delete().eq("id", cardId); if (error) throw error; }
 export async function swapCardPositions(first: CloudCard, second: CloudCard) { const api = client(), temporary = -Math.abs(first.position) - 1_000_000; let response = await api.from("cards").update({ position: temporary }).eq("id", first.id); if (response.error) throw response.error; response = await api.from("cards").update({ position: first.position }).eq("id", second.id); if (response.error) throw response.error; response = await api.from("cards").update({ position: second.position }).eq("id", first.id); if (response.error) throw response.error; }
 export async function listCategories(deckId: string) { const { data, error } = await client().from("deck_categories").select("*").eq("deck_id", deckId).order("position"); if (error) throw error; return data ?? []; }
