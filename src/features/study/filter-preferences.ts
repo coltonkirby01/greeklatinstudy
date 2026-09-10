@@ -1,12 +1,10 @@
-import type { GrammarCardFilters, OptionalSelection } from "./latin-study-filters";
+import type { OptionalSelection } from "./latin-study-filters";
 
-export type LatinMaterial = "vocabulary" | "grammar-forms" | "grammar-charts" | "passive-indicative-paradigms";
+export type LatinMaterial = "vocabulary" | "active-indicative-paradigms" | "passive-indicative-paradigms";
 export type LatinFilterPreferences = {
   materials: Set<LatinMaterial>;
   vocabularyParts: OptionalSelection;
   paradigmCards: OptionalSelection;
-  formFilters: GrammarCardFilters;
-  chartFilters: GrammarCardFilters;
 };
 
 type StorageLike = {
@@ -16,7 +14,7 @@ type StorageLike = {
 
 const GREEK_FILTER_KEY = "greeklatinstudy:greek-filters:v1";
 const LATIN_FILTER_KEY = "greeklatinstudy:latin-filters:v1";
-const LATIN_MATERIALS = new Set<LatinMaterial>(["vocabulary", "grammar-forms", "grammar-charts", "passive-indicative-paradigms"]);
+const LATIN_MATERIALS = new Set<LatinMaterial>(["vocabulary", "active-indicative-paradigms", "passive-indicative-paradigms"]);
 
 function availableStorage(storage?: StorageLike | null) {
   if (storage !== undefined) return storage;
@@ -29,41 +27,12 @@ function stringArray(value: unknown) {
 }
 
 function restoreOptionalSelection(value: unknown): OptionalSelection {
-  if (value === null) return null;
-  return new Set(stringArray(value));
-}
-
-function restoreOptionalSelectionDefaultAll(value: unknown): OptionalSelection {
   if (value === undefined || value === null) return null;
   return new Set(stringArray(value));
 }
 
 function storeOptionalSelection(selection: OptionalSelection | undefined) {
   return selection == null ? null : [...selection];
-}
-
-function blankGrammarFilters(): GrammarCardFilters {
-  return { sections: null, verbSubsections: null, voices: null, formGroups: null };
-}
-
-function restoreGrammarFilters(value: unknown): GrammarCardFilters {
-  if (!value || typeof value !== "object") return blankGrammarFilters();
-  const stored = value as Record<string, unknown>;
-  return {
-    sections: restoreOptionalSelection(stored.sections),
-    verbSubsections: restoreOptionalSelection(stored.verbSubsections),
-    voices: restoreOptionalSelection(stored.voices),
-    formGroups: restoreOptionalSelection(stored.formGroups),
-  };
-}
-
-function storeGrammarFilters(filters: GrammarCardFilters) {
-  return {
-    sections: storeOptionalSelection(filters.sections),
-    verbSubsections: storeOptionalSelection(filters.verbSubsections),
-    voices: storeOptionalSelection(filters.voices),
-    formGroups: storeOptionalSelection(filters.formGroups),
-  };
 }
 
 export function loadGreekFilterSelection(defaultKeys: readonly string[], storage?: StorageLike | null) {
@@ -90,8 +59,6 @@ export function loadLatinFilterPreferences(storage?: StorageLike | null): LatinF
     materials: new Set<LatinMaterial>(["vocabulary"]),
     vocabularyParts: null,
     paradigmCards: null,
-    formFilters: blankGrammarFilters(),
-    chartFilters: blankGrammarFilters(),
   });
   const target = availableStorage(storage);
   if (!target) return fallback();
@@ -105,9 +72,7 @@ export function loadLatinFilterPreferences(storage?: StorageLike | null): LatinF
     return {
       materials,
       vocabularyParts: restoreOptionalSelection(stored.vocabularyParts),
-      paradigmCards: restoreOptionalSelectionDefaultAll(stored.paradigmCards),
-      formFilters: restoreGrammarFilters(stored.formFilters),
-      chartFilters: restoreGrammarFilters(stored.chartFilters),
+      paradigmCards: restoreOptionalSelection(stored.paradigmCards),
     };
   } catch {
     return fallback();
@@ -122,8 +87,6 @@ export function saveLatinFilterPreferences(preferences: LatinFilterPreferences, 
       materials: [...preferences.materials],
       vocabularyParts: storeOptionalSelection(preferences.vocabularyParts),
       paradigmCards: storeOptionalSelection(preferences.paradigmCards),
-      formFilters: storeGrammarFilters(preferences.formFilters),
-      chartFilters: storeGrammarFilters(preferences.chartFilters),
     }));
   } catch { /* Ignore unavailable browser storage. */ }
 }
