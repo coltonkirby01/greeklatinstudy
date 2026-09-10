@@ -73,6 +73,32 @@ describe("Classical Greek course audio", () => {
     expect(greekToClassicalIpa("χάρις")).toContain("kʰ");
   });
 
+  it("tracks a wider Josolon/Vox Graeca regression corpus across core Attic contrasts", () => {
+    const references: Array<[string, string[]]> = [
+      ["Ζεύς", ["zd", "eu̯"]],
+      ["οἶκος", ["œi̯"]],
+      ["εἰμί", ["eː"]],
+      ["ἄγγελος", ["ŋɡ"]],
+      ["πρᾶγμα", ["ŋm"]],
+      ["βασιλεία", ["ei̯ː"]],
+      ["αὐτός", ["au̯"]],
+      ["τῇ", ["ɛːi̯"]],
+      ["ᾠδή", ["ɔːi̯"]],
+      ["ῥήτωρ", ["r̥"]],
+      ["Πυρρός", ["rr̥"]],
+      ["φιλοσοφία", ["pʰ"]],
+      ["θεός", ["tʰ"]],
+      ["χείρ", ["kʰ"]],
+      ["ψυχή", ["ps"]],
+      ["ξένος", ["ks"]],
+    ];
+
+    for (const [greek, fragments] of references) {
+      const ipa = greekToClassicalIpa(greek);
+      for (const fragment of fragments) expect(ipa, greek).toContain(fragment);
+    }
+  });
+
   it("preserves canonical pitch information but gives ElevenLabs stable stress approximation", () => {
     expect(greekToClassicalIpa("μή")).not.toContain("ˈ");
     expect(greekToClassicalIpa("μή")).toContain("́");
