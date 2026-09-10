@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 describe("Greek study audio player", () => {
   const source = fs.readFileSync("src/features/greek/classical-greek-audio.tsx", "utf8");
+  const sessionSource = fs.readFileSync("src/features/study/multi-source-study-session.tsx", "utf8");
 
   it("uses one compact A play/pause control instead of browser media controls", () => {
     expect(source).toContain("aria-keyshortcuts=\"A\"");
@@ -20,6 +21,8 @@ describe("Greek study audio player", () => {
     expect(source).toContain("onKeyUpCapture={preventMediaSpace}");
     expect(source).toContain('if (event.key === " ") event.preventDefault();');
     expect(source).toContain("Space exclusively assigned to the study");
+    expect(sessionSource).toContain('controlsTarget: Boolean(target?.closest(".session-toolbar, .study-start-card"))');
+    expect(sessionSource).not.toContain('controlsTarget: Boolean(target?.closest("[data-study-control]'));
   });
 
   it("starts again from the beginning when A or Play is used after audio has ended", () => {
