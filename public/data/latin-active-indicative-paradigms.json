@@ -1,0 +1,266 @@
+[
+  {
+    "id": "latin-active-indicative-present-1st",
+    "category": "Active Indicative — Present Tense",
+    "prompt": "Active Voice, Indicative Mood, Present Tense, 1st Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["laud-ō", "laud-āmus"] },
+      { "label": "2nd person", "cells": ["laud-ās", "laud-ātis"] },
+      { "label": "3rd person", "cells": ["laud-at", "laud-ant"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-present-2nd",
+    "category": "Active Indicative — Present Tense",
+    "prompt": "Active Voice, Indicative Mood, Present Tense, 2nd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mon-eō", "mon-ēmus"] },
+      { "label": "2nd person", "cells": ["mon-ēs", "mon-ētis"] },
+      { "label": "3rd person", "cells": ["mon-et", "mon-ent"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-present-3rd",
+    "category": "Active Indicative — Present Tense",
+    "prompt": "Active Voice, Indicative Mood, Present Tense, 3rd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mitt-ō", "mitt-imus"] },
+      { "label": "2nd person", "cells": ["mitt-is", "mitt-itis"] },
+      { "label": "3rd person", "cells": ["mitt-it", "mitt-unt"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-present-4th",
+    "category": "Active Indicative — Present Tense",
+    "prompt": "Active Voice, Indicative Mood, Present Tense, 4th Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["aud-iō", "aud-īmus"] },
+      { "label": "2nd person", "cells": ["aud-īs", "aud-ītis"] },
+      { "label": "3rd person", "cells": ["aud-it", "aud-iunt"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-imperfect-1st",
+    "category": "Active Indicative — Imperfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Imperfect Tense, 1st Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["laud-ābam", "laud-ābāmus"] },
+      { "label": "2nd person", "cells": ["laud-ābās", "laud-ābātis"] },
+      { "label": "3rd person", "cells": ["laud-ābat", "laud-ābant"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-imperfect-2nd",
+    "category": "Active Indicative — Imperfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Imperfect Tense, 2nd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mon-ēbam", "mon-ēbāmus"] },
+      { "label": "2nd person", "cells": ["mon-ēbās", "mon-ēbātis"] },
+      { "label": "3rd person", "cells": ["mon-ēbat", "mon-ēbant"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-imperfect-3rd",
+    "category": "Active Indicative — Imperfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Imperfect Tense, 3rd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mitt-ēbam", "mitt-ēbāmus"] },
+      { "label": "2nd person", "cells": ["mitt-ēbās", "mitt-ēbātis"] },
+      { "label": "3rd person", "cells": ["mitt-ēbat", "mitt-ēbant"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-imperfect-4th",
+    "category": "Active Indicative — Imperfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Imperfect Tense, 4th Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["aud-iēbam", "aud-iēbāmus"] },
+      { "label": "2nd person", "cells": ["aud-iēbās", "aud-iēbātis"] },
+      { "label": "3rd person", "cells": ["aud-iēbat", "aud-iēbant"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-future-1st",
+    "category": "Active Indicative — Future Tense",
+    "prompt": "Active Voice, Indicative Mood, Future Tense, 1st Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["laud-ābō", "laud-ābimus"] },
+      { "label": "2nd person", "cells": ["laud-ābis", "laud-ābitis"] },
+      { "label": "3rd person", "cells": ["laud-ābit", "laud-ābunt"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-future-2nd",
+    "category": "Active Indicative — Future Tense",
+    "prompt": "Active Voice, Indicative Mood, Future Tense, 2nd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mon-ēbō", "mon-ēbimus"] },
+      { "label": "2nd person", "cells": ["mon-ēbis", "mon-ēbitis"] },
+      { "label": "3rd person", "cells": ["mon-ēbit", "mon-ēbunt"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-future-3rd",
+    "category": "Active Indicative — Future Tense",
+    "prompt": "Active Voice, Indicative Mood, Future Tense, 3rd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mitt-am", "mitt-ēmus"] },
+      { "label": "2nd person", "cells": ["mitt-ēs", "mitt-ētis"] },
+      { "label": "3rd person", "cells": ["mitt-et", "mitt-ent"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-future-4th",
+    "category": "Active Indicative — Future Tense",
+    "prompt": "Active Voice, Indicative Mood, Future Tense, 4th Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["aud-iam", "aud-iēmus"] },
+      { "label": "2nd person", "cells": ["aud-iēs", "aud-iētis"] },
+      { "label": "3rd person", "cells": ["aud-iet", "aud-ient"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-perfect-1st",
+    "category": "Active Indicative — Perfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Perfect Tense, 1st Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["laudāv-ī", "laudāv-imus"] },
+      { "label": "2nd person", "cells": ["laudāv-istī", "laudāv-istis"] },
+      { "label": "3rd person", "cells": ["laudāv-it", "laudāv-ērunt"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-perfect-2nd",
+    "category": "Active Indicative — Perfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Perfect Tense, 2nd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["monu-ī", "monu-imus"] },
+      { "label": "2nd person", "cells": ["monu-istī", "monu-istis"] },
+      { "label": "3rd person", "cells": ["monu-it", "monu-ērunt"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-perfect-3rd",
+    "category": "Active Indicative — Perfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Perfect Tense, 3rd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mīs-ī", "mīs-imus"] },
+      { "label": "2nd person", "cells": ["mīs-istī", "mīs-istis"] },
+      { "label": "3rd person", "cells": ["mīs-it", "mīs-ērunt"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-perfect-4th",
+    "category": "Active Indicative — Perfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Perfect Tense, 4th Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["audīv-ī", "audīv-imus"] },
+      { "label": "2nd person", "cells": ["audīv-istī", "audīv-istis"] },
+      { "label": "3rd person", "cells": ["audīv-it", "audīv-ērunt"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-pluperfect-1st",
+    "category": "Active Indicative — Pluperfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Pluperfect Tense, 1st Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["laudāv-eram", "laudāv-erāmus"] },
+      { "label": "2nd person", "cells": ["laudāv-erās", "laudāv-erātis"] },
+      { "label": "3rd person", "cells": ["laudāv-erat", "laudāv-erant"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-pluperfect-2nd",
+    "category": "Active Indicative — Pluperfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Pluperfect Tense, 2nd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["monu-eram", "monu-erāmus"] },
+      { "label": "2nd person", "cells": ["monu-erās", "monu-erātis"] },
+      { "label": "3rd person", "cells": ["monu-erat", "monu-erant"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-pluperfect-3rd",
+    "category": "Active Indicative — Pluperfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Pluperfect Tense, 3rd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mīs-eram", "mīs-erāmus"] },
+      { "label": "2nd person", "cells": ["mīs-erās", "mīs-erātis"] },
+      { "label": "3rd person", "cells": ["mīs-erat", "mīs-erant"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-pluperfect-4th",
+    "category": "Active Indicative — Pluperfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Pluperfect Tense, 4th Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["audīv-eram", "audīv-erāmus"] },
+      { "label": "2nd person", "cells": ["audīv-erās", "audīv-erātis"] },
+      { "label": "3rd person", "cells": ["audīv-erat", "audīv-erant"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-future-perfect-1st",
+    "category": "Active Indicative — Future Perfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Future Perfect Tense, 1st Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["laudāv-erō", "laudāv-erimus"] },
+      { "label": "2nd person", "cells": ["laudāv-eris", "laudāv-eritis"] },
+      { "label": "3rd person", "cells": ["laudāv-erit", "laudāv-erint"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-future-perfect-2nd",
+    "category": "Active Indicative — Future Perfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Future Perfect Tense, 2nd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["monu-erō", "monu-erimus"] },
+      { "label": "2nd person", "cells": ["monu-eris", "monu-eritis"] },
+      { "label": "3rd person", "cells": ["monu-erit", "monu-erint"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-future-perfect-3rd",
+    "category": "Active Indicative — Future Perfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Future Perfect Tense, 3rd Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["mīs-erō", "mīs-erimus"] },
+      { "label": "2nd person", "cells": ["mīs-eris", "mīs-eritis"] },
+      { "label": "3rd person", "cells": ["mīs-erit", "mīs-erint"] }
+    ]
+  },
+  {
+    "id": "latin-active-indicative-future-perfect-4th",
+    "category": "Active Indicative — Future Perfect Tense",
+    "prompt": "Active Voice, Indicative Mood, Future Perfect Tense, 4th Conjugation",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["audīv-erō", "audīv-erimus"] },
+      { "label": "2nd person", "cells": ["audīv-eris", "audīv-eritis"] },
+      { "label": "3rd person", "cells": ["audīv-erit", "audīv-erint"] }
+    ]
+  }
+]
