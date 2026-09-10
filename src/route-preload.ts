@@ -1,6 +1,7 @@
 export const loadHomePage = () => import("./pages/home-page");
 export const loadGreekPage = () => import("./pages/greek-page");
-export const loadLatinPage = () => import("./pages/latin-page");
+export const loadLatinPage = () => import("./pages/latin-page-with-paradigms");
+export const loadLatinPassiveIndicativePage = () => import("./pages/latin-passive-indicative-page");
 export const loadStatsPage = () => import("./pages/stats-page");
 export const loadDynamicDeckPage = () => import("./pages/dynamic-deck-page");
 export const loadReadingPage = () => import("./pages/reading-page");
@@ -12,6 +13,7 @@ const routeLoaders: Record<string, () => Promise<unknown>> = {
   "/": loadHomePage,
   "/greek": loadGreekPage,
   "/latin": loadLatinPage,
+  "/latin/passive-indicative-paradigms": loadLatinPassiveIndicativePage,
   "/stats": loadStatsPage,
   "/reading": loadReadingPage,
   "/account": loadAccountPage,
