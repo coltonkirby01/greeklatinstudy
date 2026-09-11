@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { BUILTIN_STUDY_DECKS, builtinSessionDeckIds, loadBuiltinStatsSources } from "../src/features/study/builtin-study-catalog";
+import { BUILTIN_STUDY_DECKS, builtinSessionDeckIds, statsSourcesForBuiltinDeck, type BuiltinDeckRegistration } from "../src/features/study/builtin-study-catalog";
+import type { DeckDefinition } from "../src/features/study/types";
 
 describe("built-in study catalog", () => {
   it("has unique active deck ids and drives session coverage", () => {
@@ -18,20 +19,29 @@ describe("built-in study catalog", () => {
     }
   });
 
-  it("loads every registered deck with its complete current card set for Stats", async () => {
-    const statsSources = await loadBuiltinStatsSources();
-    for (const registration of BUILTIN_STUDY_DECKS) {
-      const deck = await registration.load();
-      const expectedCardIds = deck.cards.map((card) => card.id);
-      expect(deck.id).toBe(registration.id);
-      expect(expectedCardIds.length).toBeGreaterThan(0);
-      expect(new Set(expectedCardIds).size).toBe(expectedCardIds.length);
+  it("expands every Stats mode with the deck's complete current card array", () => {
+    const cards = [
+      { id: "weekly-1", front: "one", back: "uno" },
+      { id: "weekly-2", front: "two", back: "duo" },
+      { id: "weekly-3", front: "three", back: "tres" },
+    ];
+    const deck = { id: "weekly-deck", slug: "weekly-deck", title: "Weekly", language: "latin", cards } as DeckDefinition;
+    const registration: BuiltinDeckRegistration = {
+      id: deck.id,
+      language: "Latin",
+      source: "Weekly",
+      load: async () => deck,
+      modes: [
+        { mode: "Forward", direction: "forward", studyKey: "forward" },
+        { mode: "Reverse", direction: "reverse", studyKey: "reverse" },
+      ],
+    };
 
-      const sources = statsSources.filter((source) => source.deck.id === registration.id);
-      expect(sources).toHaveLength(registration.modes.length);
-      for (const source of sources) {
-        expect(source.cards.map((card) => card.id)).toEqual(expectedCardIds);
-      }
+    const sources = statsSourcesForBuiltinDeck(registration, deck);
+    expect(sources).toHaveLength(2);
+    for (const source of sources) {
+      expect(source.cards).toBe(deck.cards);
+      expect(source.cards.map((card) => card.id)).toEqual(["weekly-1", "weekly-2", "weekly-3"]);
     }
   });
 });
