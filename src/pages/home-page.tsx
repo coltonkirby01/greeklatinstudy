@@ -8,7 +8,7 @@ import "./home-page.css";
 
 const courseVisuals: Record<CourseId, ReactNode> = {
   greek: <span className="course-glyph course-glyph-word greek-course-title">Ἑλληνικά</span>,
-  latin: <span className="course-glyph course-glyph-word latin-course-title">LINGVA LATINA</span>,
+  latin: <span className="course-glyph course-glyph-word latin-course-title">LATINA</span>,
   reading: <span className="course-icon"><BookOpenText /></span>,
 };
 
