@@ -1,8 +1,42 @@
 [
   {
+    "id": "lesson3-chart-present-active-indicative-endings",
+    "category": "Present Active Indicative Endings",
+    "prompt": "Present Active Indicative Endings",
+    "source_ref": "Groton 3.20",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["-ω", "-ομεν"] },
+      { "label": "2nd person", "cells": ["-εις", "-ετε"] },
+      { "label": "3rd person", "cells": ["-ει", "-ουσι(ν)"] }
+    ]
+  },
+  {
+    "id": "lesson3-chart-present-active-infinitive-endings",
+    "category": "Present Active Infinitive Endings",
+    "prompt": "Present Active Infinitive Ending",
+    "source_ref": "Groton 3.21",
+    "columns": ["Ending"],
+    "rows": [
+      { "label": "Present Active Infinitive", "cells": ["-ειν"] }
+    ]
+  },
+  {
+    "id": "lesson3-chart-present-active-imperative-endings",
+    "category": "Present Active Imperative Endings",
+    "prompt": "Present Active Imperative Endings",
+    "source_ref": "Groton 3.22",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "2nd person", "cells": ["-ε", "-ετε"] },
+      { "label": "3rd person", "cells": ["-έτω", "-όντων"] }
+    ]
+  },
+  {
     "id": "lesson3-chart-present-active-indicative",
     "category": "Present Active Indicative",
     "prompt": "Present Active Indicative — παιδεύω",
+    "source_ref": "Groton 3.20",
     "columns": ["Singular", "Plural"],
     "rows": [
       { "label": "1st person", "cells": ["παιδεύ-ω", "παιδεύ-ομεν"] },
@@ -14,6 +48,7 @@
     "id": "lesson3-chart-present-active-infinitive",
     "category": "Present Active Infinitive",
     "prompt": "Present Active Infinitive — παιδεύω",
+    "source_ref": "Groton 3.21",
     "columns": ["Greek"],
     "rows": [
       { "label": "Present Active Infinitive", "cells": ["παιδεύ-ειν"] }
@@ -23,6 +58,7 @@
     "id": "lesson3-chart-present-active-imperative",
     "category": "Present Active Imperative",
     "prompt": "Present Active Imperative — παιδεύω",
+    "source_ref": "Groton 3.22",
     "columns": ["Singular", "Plural"],
     "rows": [
       { "label": "2nd person", "cells": ["παίδευ-ε", "παιδεύ-ετε"] },
