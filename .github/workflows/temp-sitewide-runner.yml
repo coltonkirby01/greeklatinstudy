@@ -29,16 +29,13 @@ jobs:
           end = source.index("\n          PY\n", start)
           lines = source[start:end].splitlines()
           script = "\n".join(line[10:] if line.startswith("          ") else line for line in lines) + "\n"
-          # Recent Lesson 4 wording made one exact-block replacement brittle. Let
-          # the structural post-fix below own that single block; keep all other
-          # guarded replacements strict.
           script = script.replace(
               "if found == 0:\n        raise SystemExit(f'Expected text not found in {path}: {old[:100]!r}')",
               "if found == 0:\n        if path == 'src/pages/greek-page.tsx' and 'firstDeclensionEndingsAlpha' in old:\n            return\n        raise SystemExit(f'Expected text not found in {path}: {old[:100]!r}')",
           )
-          # The original patch contains a second cleanup of the same global CSS
-          # selector. After the first global replacement it is intentionally gone.
-          script = script.replace("replace('src/styles.css', '.admin-deck-list, .reading-list', '.admin-deck-list')\n          replace('src/styles.css', '.admin-deck-list, .reading-list { grid-template-columns: 1fr; }', '.admin-deck-list { grid-template-columns: 1fr; }')", "replace('src/styles.css', '.admin-deck-list, .reading-list { grid-template-columns: 1fr; }', '.admin-deck-list { grid-template-columns: 1fr; }')")
+          # The post-fix below removes all copies and places sessionLanguage once
+          # before its first use, so skip the brittle intermediate remove-one call.
+          script = script.replace("replace('src/features/study/multi-source-study-session.tsx', '\\n  const sessionLanguage: \\\"Greek\\\" | \\\"Latin\\\" = deck.language === \\\"greek\\\" ? \\\"Greek\\\" : \\\"Latin\\\";\\n', '\\n', count=1)\n", "")
           Path('/tmp/sitewide_cleanup.py').write_text(script)
           EXTRACT
           python /tmp/sitewide_cleanup.py
@@ -46,8 +43,6 @@ jobs:
           from pathlib import Path
           import re
 
-          # Ensure all four Lesson 4 Endings children are visible, including the
-          # two feminine definite-article cards.
           path = Path('src/pages/greek-page.tsx')
           value = path.read_text()
           pattern = r'(        <FilterDisclosure title="Endings" summary=\{`\$\{lesson4EndingsState\.selectedCount\} of \$\{lesson4EndingsKeys\.length\} selected`\}[^\n]*>\n)(.*?)(\n        </FilterDisclosure>\n\n        <FilterDisclosure title="Paradigms")'
@@ -60,7 +55,6 @@ jobs:
               raise SystemExit('Could not normalize Lesson 4 Endings children')
           path.write_text(value)
 
-          # TypeScript requires parentheses when ?? and || are combined.
           for filename in ['src/features/study/session-management.ts', 'src/pages/stats-page.tsx']:
               p = Path(filename)
               v = p.read_text()
@@ -68,7 +62,6 @@ jobs:
               v = v.replace('builtinName ?? customName || automaticSessionName(language, reviews, startedAt)', 'builtinName ?? (customName || automaticSessionName(language, reviews, startedAt))')
               p.write_text(v)
 
-          # Ensure sessionLanguage is declared before it is used by useState.
           p = Path('src/features/study/multi-source-study-session.tsx')
           v = p.read_text()
           declaration = '  const sessionLanguage: "Greek" | "Latin" = deck.language === "greek" ? "Greek" : "Latin";\n'
