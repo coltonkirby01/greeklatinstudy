@@ -22,15 +22,15 @@ describe("built-in study catalog", () => {
     const statsSources = await loadBuiltinStatsSources();
     for (const registration of BUILTIN_STUDY_DECKS) {
       const deck = await registration.load();
+      const expectedCardIds = deck.cards.map((card) => card.id);
       expect(deck.id).toBe(registration.id);
-      expect(deck.cards.length).toBeGreaterThan(0);
-      expect(new Set(deck.cards.map((card) => card.id)).size).toBe(deck.cards.length);
+      expect(expectedCardIds.length).toBeGreaterThan(0);
+      expect(new Set(expectedCardIds).size).toBe(expectedCardIds.length);
 
       const sources = statsSources.filter((source) => source.deck.id === registration.id);
       expect(sources).toHaveLength(registration.modes.length);
       for (const source of sources) {
-        expect(source.cards).toBe(source.deck.cards);
-        expect(source.cards).toHaveLength(deck.cards.length);
+        expect(source.cards.map((card) => card.id)).toEqual(expectedCardIds);
       }
     }
   });
