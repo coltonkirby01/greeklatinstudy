@@ -30,6 +30,8 @@ jobs:
       - run: npm ci
       - name: Audit high-severity dependencies
         run: npm audit --audit-level=high
+      - name: Check repository maintenance invariants
+        run: npm run maintain:check
       - run: npm test
       - run: npm run build:pages
       - if: github.event_name != 'pull_request'

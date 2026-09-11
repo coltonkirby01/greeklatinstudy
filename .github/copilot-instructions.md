@@ -7,12 +7,23 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - Make the smallest coherent change and remove temporary patch files/workflows before merge.
 - Do not leave dead imports, retired UI, duplicate registries, temporary tables/functions, commented-out implementations, backup copies, or one-off scripts in the production tree.
 - Reuse shared study components and registries instead of creating a second list or parallel implementation.
+- Run `npm run maintain:check` before finalizing every nontrivial change. CI runs it too and must remain green.
 - Run the full tests and production Pages build; do not raise bundle budgets to make a change pass.
 - Before deleting something that looks unused, prove it is not part of persistence migration, source protection, auth/RLS, deployment, audio caching, or future deck administration.
 
+## Weekly card additions
+
+- Assume new cards will be added regularly. Prefer data-driven updates that require changing source/card data only.
+- Adding cards to an **existing registered built-in deck** must automatically flow into Stats, permanent Learner/Reviewer sessions, cloud progress, saved-card handling, and Select all/Deselect all behavior without adding another hand-maintained deck list.
+- Keep stable deck IDs and stable existing card IDs. Give every new card a stable unique ID before release so old cloud progress remains attached.
+- `src/features/study/builtin-study-catalog.ts` is the canonical registry for active built-in Greek/Latin decks, Stats modes, and session coverage. Do not create a parallel registry.
+- A genuinely **new deck or new study direction** must be registered in `BUILTIN_STUDY_DECKS` in the same change that exposes it in the UI. The catalog regression test must pass before merge.
+- If a weekly addition introduces a new filter category/lesson, update the language selector hierarchy so Select all includes it and existing saved filter preferences degrade safely. Never make new cards invisible only because an old explicit selector array was not extended.
+- Update protected source-count tests only when the source was intentionally expanded. Never regenerate authoritative Greek/Latin/Henle source data from model memory.
+
 ## Built-in cards and Stats/session coverage
 
-- `src/features/study/builtin-study-catalog.ts` is the canonical registry for active built-in Greek/Latin decks, their Stats modes, and session coverage. Add a new built-in deck or study direction there in the same change that exposes it in the UI.
+- `src/features/study/builtin-study-catalog.ts` is the canonical registry for active built-in Greek/Latin decks, their Stats modes, and session coverage.
 - Adding cards to an existing registered deck automatically belongs in Stats because Stats loads the complete registered deck. Do not maintain a separate Account-page deck list.
 - Preserve stable deck/card IDs when expanding source material so existing cloud progress remains attached.
 - Greek Lesson 3 has three ending cards plus three παιδεύω paradigm cards. Greek Lesson 4 has two first-declension ending cards, four model-noun paradigms, and two feminine definite-article cards.

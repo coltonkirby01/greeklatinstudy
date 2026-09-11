@@ -12,8 +12,8 @@ import type { DeckDefinition, StudyDirection } from "./types";
 
 export type BuiltinStudyLanguage = "Greek" | "Latin";
 
-type BuiltinMode = { mode: string; direction: StudyDirection; studyKey: string };
-type BuiltinDeckRegistration = {
+export type BuiltinMode = { mode: string; direction: StudyDirection; studyKey: string };
+export type BuiltinDeckRegistration = {
   id: string;
   language: BuiltinStudyLanguage;
   source: string;
@@ -48,19 +48,23 @@ export function builtinSourceLabel(deckId: string, studyKey: string) {
   return deckId;
 }
 
+export function statsSourcesForBuiltinDeck(registration: BuiltinDeckRegistration, deck: DeckDefinition) {
+  if (deck.id !== registration.id) throw new Error(`Built-in study registry mismatch: expected ${registration.id}, loaded ${deck.id}.`);
+  return registration.modes.map((mode) => ({
+    language: registration.language,
+    source: registration.source,
+    mode: mode.mode,
+    direction: mode.direction,
+    deck,
+    cards: deck.cards,
+    studyKey: mode.studyKey,
+  }));
+}
+
 export async function loadBuiltinStatsSources() {
   const groups = await Promise.all(BUILTIN_STUDY_DECKS.map(async (registration) => {
     const deck = await registration.load();
-    if (deck.id !== registration.id) throw new Error(`Built-in study registry mismatch: expected ${registration.id}, loaded ${deck.id}.`);
-    return registration.modes.map((mode) => ({
-      language: registration.language,
-      source: registration.source,
-      mode: mode.mode,
-      direction: mode.direction,
-      deck,
-      cards: deck.cards,
-      studyKey: mode.studyKey,
-    }));
+    return statsSourcesForBuiltinDeck(registration, deck);
   }));
   return groups.flat();
 }

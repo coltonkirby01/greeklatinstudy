@@ -12,7 +12,8 @@
     "build:pages": "npm run build",
     "preview": "vite preview",
     "test": "vitest run",
-    "check": "npm run test && npm run build"
+    "maintain:check": "node scripts/maintenance-check.mjs",
+    "check": "npm run maintain:check && npm run test && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.115.0",
