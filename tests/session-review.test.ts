@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { blankCardProgress } from "../src/features/study/engine";
-import { autoReviewDefaults, sessionProgressSummary } from "../src/features/study/session-review";
+import { AUTO_WRONG_REVIEW_COUNT, autoReviewDefaults, sessionProgressSummary } from "../src/features/study/session-review";
 import type { CardProgress, ReviewRecord } from "../src/features/study/types";
 
 function progressWith(...history: ReviewRecord[]): CardProgress {
@@ -12,11 +12,12 @@ function review(id: string, reviewedAt: number, result: "right" | "wrong", diffi
 }
 
 describe("automatic review defaults", () => {
-  it("defaults every revealed card to right while using time only for difficulty", () => {
-    expect(autoReviewDefaults(2_999)).toEqual({ result: "right", difficulty: "easy" });
-    expect(autoReviewDefaults(3_000)).toEqual({ result: "right", difficulty: "medium" });
-    expect(autoReviewDefaults(9_999)).toEqual({ result: "right", difficulty: "medium" });
-    expect(autoReviewDefaults(10_000)).toEqual({ result: "right", difficulty: "hard" });
+  it("defaults the first seven reviews to wrong and review eight onward to right", () => {
+    expect(AUTO_WRONG_REVIEW_COUNT).toBe(7);
+    expect(autoReviewDefaults(2_999, 0)).toEqual({ result: "wrong", difficulty: "easy" });
+    expect(autoReviewDefaults(3_000, 6)).toEqual({ result: "wrong", difficulty: "medium" });
+    expect(autoReviewDefaults(9_999, 7)).toEqual({ result: "right", difficulty: "medium" });
+    expect(autoReviewDefaults(10_000, 12)).toEqual({ result: "right", difficulty: "hard" });
   });
 });
 

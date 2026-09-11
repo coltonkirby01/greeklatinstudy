@@ -27,29 +27,32 @@ describe("study keyboard shortcuts", () => {
     expect(studyShortcut({ ...context, key: " ", revealed: true, result: "right" })).toEqual({ type: "save" });
   });
 
-  it("maps F to flip, R/W to correctness, and 1/2/3 to difficulty only after reveal", () => {
+  it("maps F to flip and 1/2/3 to difficulty only after reveal", () => {
     expect(studyShortcut({ ...context, key: "f" })).toBeNull();
     expect(studyShortcut({ ...context, key: "f", revealed: true })).toEqual({ type: "flip" });
     expect(studyShortcut({ ...context, key: "F", revealed: true })).toEqual({ type: "flip" });
-    expect(studyShortcut({ ...context, key: "r" })).toBeNull();
-    expect(studyShortcut({ ...context, key: "r", revealed: true })).toEqual({ type: "result", value: "right" });
-    expect(studyShortcut({ ...context, key: "R", revealed: true })).toEqual({ type: "result", value: "right" });
-    expect(studyShortcut({ ...context, key: "w", revealed: true })).toEqual({ type: "result", value: "wrong" });
     expect(studyShortcut({ ...context, key: "1", revealed: true })).toEqual({ type: "difficulty", value: "easy" });
     expect(studyShortcut({ ...context, key: "2", revealed: true })).toEqual({ type: "difficulty", value: "medium" });
     expect(studyShortcut({ ...context, key: "3", revealed: true })).toEqual({ type: "difficulty", value: "hard" });
   });
 
-  it("uses Enter to toggle correctness and leaves Shift+Enter unassigned after reveal", () => {
+  it("does not use R or W as correctness shortcuts", () => {
+    expect(studyShortcut({ ...context, key: "r", revealed: true })).toBeNull();
+    expect(studyShortcut({ ...context, key: "R", revealed: true })).toBeNull();
+    expect(studyShortcut({ ...context, key: "w", revealed: true })).toBeNull();
+    expect(studyShortcut({ ...context, key: "W", revealed: true })).toBeNull();
+  });
+
+  it("uses Enter alone to toggle correctness and captures it even on focused buttons", () => {
     expect(studyShortcut({ ...context, key: "Enter", revealed: true })).toBeNull();
     expect(studyEnterShortcut({ key: "Enter", shiftKey: false, revealed: true, result: "right", typingTarget: false })).toEqual({ type: "result", value: "wrong" });
     expect(studyEnterShortcut({ key: "Enter", shiftKey: false, revealed: true, result: "wrong", typingTarget: false })).toEqual({ type: "result", value: "right" });
+    expect(studyEnterShortcut({ key: "Enter", shiftKey: false, revealed: true, result: "right", typingTarget: false, controlsTarget: true })).toEqual({ type: "result", value: "wrong" });
     expect(studyEnterShortcut({ key: "Enter", shiftKey: true, revealed: true, result: "right", typingTarget: false })).toBeNull();
   });
 
-  it("does not hijack Enter inside normal controls", () => {
+  it("does not hijack Enter while typing", () => {
     expect(studyEnterShortcut({ key: "Enter", shiftKey: false, revealed: true, result: "right", typingTarget: true })).toBeNull();
-    expect(studyEnterShortcut({ key: "Enter", shiftKey: true, revealed: true, result: "right", typingTarget: false, controlsTarget: true })).toBeNull();
   });
 
   it("saves with Space after the automatically supplied grade or manual overrides", () => {
