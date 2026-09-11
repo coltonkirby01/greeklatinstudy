@@ -82,7 +82,7 @@ export function StudyRatingControls({ revealed, result, difficulty, editing, onR
   const difficultyKeys: Record<ReviewDifficulty, string> = { easy: "1", medium: "2", hard: "3" };
   return <div className="study-controls">
     {!revealed ? <button className="primary-button study-primary" type="button" onClick={onReveal}>Reveal Answer <kbd>Space</kbd></button> : <>
-      <button className="small-outline-button" type="button" onClick={onFlip}>Flip question / answer <kbd>Shift+Enter</kbd></button>
+      <button className="small-outline-button" type="button" onClick={onFlip}>Flip question / answer <kbd>F</kbd></button>
       <div className="rating-grid" style={{ gridTemplateColumns: "1fr" }}>
         <fieldset className="rating-box"><legend className="sr-only">Correctness</legend><div className="choice-row two-choices"><button type="button" className="rating-choice right-choice" aria-pressed={result === "right"} onClick={() => onResult("right")}>Right <kbd>R</kbd></button><button type="button" className="rating-choice wrong-choice" aria-pressed={result === "wrong"} onClick={() => onResult("wrong")}>Wrong <kbd>W</kbd></button></div></fieldset>
         <fieldset className="rating-box"><legend className="sr-only">Difficulty</legend><div className="choice-row three-choices">{(["easy", "medium", "hard"] as ReviewDifficulty[]).map((value) => <button key={value} type="button" className="rating-choice" aria-pressed={difficulty === value} onClick={() => onDifficulty(value)}>{value[0].toUpperCase() + value.slice(1)} <kbd>{difficultyKeys[value]}</kbd></button>)}</div></fieldset>

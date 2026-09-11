@@ -31,11 +31,11 @@ type EnterShortcutContext = {
 /**
  * Enter is intentionally handled by the shared rating controls so the same
  * behavior applies to every study controller without duplicating key logic.
- * Plain Enter toggles Right/Wrong; Shift+Enter flips the revealed card face.
+ * Plain Enter toggles Right/Wrong. Shift+Enter is intentionally unassigned;
+ * F flips the revealed card face through the shared global shortcut handler.
  */
 export function studyEnterShortcut({ key, shiftKey, revealed, result, typingTarget, controlsTarget = false }: EnterShortcutContext): StudyShortcut {
-  if (key !== "Enter" || !revealed || typingTarget || controlsTarget) return null;
-  if (shiftKey) return { type: "flip" };
+  if (key !== "Enter" || shiftKey || !revealed || typingTarget || controlsTarget) return null;
   return { type: "result", value: result === "wrong" ? "right" : "wrong" };
 }
 
@@ -48,12 +48,13 @@ export function studyShortcut({ key, startGateOpen, revealed, result, typingTarg
   if (!revealed) return null;
 
   const normalized = key.toLowerCase();
+  if (normalized === "f") return { type: "flip" };
   if (normalized === "r") return { type: "result", value: "right" };
   if (normalized === "w") return { type: "result", value: "wrong" };
   if (key === "1") return { type: "difficulty", value: "easy" };
   if (key === "2") return { type: "difficulty", value: "medium" };
   if (key === "3") return { type: "difficulty", value: "hard" };
-  // Enter/Shift+Enter are handled by studyEnterShortcut in StudyRatingControls.
+  // Plain Enter is handled by studyEnterShortcut in StudyRatingControls.
   if (key === " " && result) return { type: "save" };
   return null;
 }
