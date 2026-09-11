@@ -17,6 +17,7 @@ const protectedTextStyle: CSSProperties = { position: "relative", zIndex: 2 };
 const interactiveStyle: CSSProperties = { position: "relative", zIndex: 3 };
 const visualLinkStyle: CSSProperties = { ...interactiveStyle, width: "fit-content", display: "inline-flex", color: "inherit", textDecoration: "none" };
 const titleLinkStyle: CSSProperties = { ...interactiveStyle, color: "inherit", textDecoration: "underline", textDecorationThickness: "1px" };
+const homePolishCss = `.flashcard-course .course-card-top{min-height:7.25rem;margin-bottom:1.1rem}.flashcard-course>.eyebrow{margin-top:0}.flashcard-course h2{min-height:5.25rem;align-content:start}.flashcard-course .course-source-links{min-height:2rem;margin-top:.9rem}.flashcard-course .course-link{margin-top:auto}@media(max-width:720px){.flashcard-course h2,.flashcard-course .course-card-top,.flashcard-course .course-source-links{min-height:0}}`;
 
 function preloadCourse(id: CourseId, href: string) {
   preloadRoute(href);
@@ -36,6 +37,7 @@ function preloadCourse(id: CourseId, href: string) {
 export function HomePage() {
   const { user } = useAuth();
   return <main className="page-shell home-page">
+    <style>{homePolishCss}</style>
     <section className="home-intro">
       <div><h1>Build a durable memory of Greek and Latin.</h1><p className="home-lede">Greek and Latin each have one study app. Choose exactly what belongs in a session, from several Greek lesson categories to a mixture of Latin vocabulary and grammar, then reveal, rate, and review adaptively.</p></div>
       <div className="method-note"><Repeat2 /><div><strong>One deliberate cycle</strong><span>Choose · recall · reveal · rate · review</span></div></div>
