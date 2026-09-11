@@ -1,0 +1,84 @@
+[
+  {
+    "id": "lesson4-chart-first-declension-thea",
+    "category": "First Declension Feminine Nouns — θεά",
+    "prompt": "First Declension Feminine Nouns — θεά",
+    "source_ref": "Groton 4.29",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["θε-ά", "θε-αί"] },
+      { "label": "Genitive", "cells": ["θε-ᾶς", "θε-ῶν"] },
+      { "label": "Dative", "cells": ["θε-ᾷ", "θε-αῖς"] },
+      { "label": "Accusative", "cells": ["θε-άν", "θε-άς"] },
+      { "label": "Vocative", "cells": ["θε-ά", "θε-αί"] }
+    ]
+  },
+  {
+    "id": "lesson4-chart-first-declension-hesychia",
+    "category": "First Declension Feminine Nouns — ἡσυχίᾱ",
+    "prompt": "First Declension Feminine Nouns — ἡσυχίᾱ",
+    "source_ref": "Groton 4.29",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["ἡσυχί-ᾱ", "ἡσυχί-αι"] },
+      { "label": "Genitive", "cells": ["ἡσυχί-ᾱς", "ἡσυχι-ῶν"] },
+      { "label": "Dative", "cells": ["ἡσυχί-ᾳ", "ἡσυχί-αις"] },
+      { "label": "Accusative", "cells": ["ἡσυχί-ᾱν", "ἡσυχί-ᾱς"] },
+      { "label": "Vocative", "cells": ["ἡσυχί-ᾱ", "ἡσυχί-αι"] }
+    ]
+  },
+  {
+    "id": "lesson4-chart-first-declension-chora",
+    "category": "First Declension Feminine Nouns — χώρᾱ",
+    "prompt": "First Declension Feminine Nouns — χώρᾱ",
+    "source_ref": "Groton 4.29",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["χώρ-ᾱ", "χῶρ-αι"] },
+      { "label": "Genitive", "cells": ["χώρ-ᾱς", "χωρ-ῶν"] },
+      { "label": "Dative", "cells": ["χώρ-ᾳ", "χώρ-αις"] },
+      { "label": "Accusative", "cells": ["χώρ-ᾱν", "χώρ-ᾱς"] },
+      { "label": "Vocative", "cells": ["χώρ-ᾱ", "χῶρ-αι"] }
+    ]
+  },
+  {
+    "id": "lesson4-chart-first-declension-skene",
+    "category": "First Declension Feminine Nouns — σκηνή",
+    "prompt": "First Declension Feminine Nouns — σκηνή",
+    "source_ref": "Groton 4.29",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["σκην-ή", "σκην-αί"] },
+      { "label": "Genitive", "cells": ["σκην-ῆς", "σκην-ῶν"] },
+      { "label": "Dative", "cells": ["σκην-ῇ", "σκην-αῖς"] },
+      { "label": "Accusative", "cells": ["σκην-ήν", "σκην-άς"] },
+      { "label": "Vocative", "cells": ["σκην-ή", "σκην-αί"] }
+    ]
+  },
+  {
+    "id": "lesson4-chart-definite-article-feminine-singular",
+    "category": "Feminine Definite Article — Singular",
+    "prompt": "Feminine Definite Article — Singular",
+    "source_ref": "Groton 4.30",
+    "columns": ["Greek"],
+    "rows": [
+      { "label": "Nominative", "cells": ["ἡ"] },
+      { "label": "Genitive", "cells": ["τῆς"] },
+      { "label": "Dative", "cells": ["τῇ"] },
+      { "label": "Accusative", "cells": ["τήν"] }
+    ]
+  },
+  {
+    "id": "lesson4-chart-definite-article-feminine-plural",
+    "category": "Feminine Definite Article — Plural",
+    "prompt": "Feminine Definite Article — Plural",
+    "source_ref": "Groton 4.30",
+    "columns": ["Greek"],
+    "rows": [
+      { "label": "Nominative", "cells": ["αἱ"] },
+      { "label": "Genitive", "cells": ["τῶν"] },
+      { "label": "Dative", "cells": ["ταῖς"] },
+      { "label": "Accusative", "cells": ["τάς"] }
+    ]
+  }
+]
