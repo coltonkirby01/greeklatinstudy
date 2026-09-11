@@ -1,9 +1,10 @@
-import { ArrowLeft, Cloud, Laptop, Pause, Play, SkipForward } from "lucide-react";
+import { ArrowLeft, Bookmark, Pause, Play, SkipForward } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../auth/auth-context";
 import { createEnvelope, createModeState, directionalCopy, getCardProgress, maybeUnlockNextBatch, presentCard, priorityScore, recordReview } from "./engine";
 import { deleteReviewEvent, loadLocalEnvelope, loadProgressEnvelope, mergeProgressEnvelopes, saveProgressEnvelope, upsertReviewEvent } from "./progress-repository";
+import { savedCardRef } from "./saved-cards";
 import { intrinsicCardDifficulty } from "./scoring";
 import { collectManagedSessions, displayManagedSessionName, sessionDeckIdsForLanguage, type ManagedSession } from "./session-management";
 import { autoReviewDefaults, sessionProgressSummary } from "./session-review";
@@ -44,6 +45,8 @@ type Props = {
   renderFront?: (card: StudyCard, copy: DirectionalCardCopy, source: StudySourceDefinition) => ReactNode;
   renderBack?: (card: StudyCard, copy: DirectionalCardCopy, source: StudySourceDefinition) => ReactNode;
   priorityPrompt?: (card: StudyCard, copy: DirectionalCardCopy) => ReactNode;
+  savedCardRefs?: ReadonlySet<string>;
+  onToggleSavedCard?: (deckId: string, cardId: string) => void;
 };
 
 function candidateKey(candidate: Candidate) { return `${candidate.source.id}:${candidate.card.id}`; }
@@ -107,7 +110,7 @@ function avoidRecentlyPresentedCandidates(candidates: Candidate[], modeFor: (sou
   return filtered.length >= 3 ? filtered : candidates;
 }
 
-export function MultiSourceStudySession({ deck, sources, direction, onDirectionChange, directionLabels = PropsDefaults, resetKey, resumeSession, renderFront, renderBack, priorityPrompt }: Props) {
+export function MultiSourceStudySession({ deck, sources, direction, onDirectionChange, directionLabels = PropsDefaults, resetKey, resumeSession, renderFront, renderBack, priorityPrompt, savedCardRefs, onToggleSavedCard }: Props) {
   const { user } = useAuth();
   const [envelopes, setEnvelopes] = useState<Record<string, DeckProgressEnvelope>>({});
   const envelopesRef = useRef<Record<string, DeckProgressEnvelope>>({});
@@ -118,7 +121,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   const [current, setCurrent] = useState<Candidate | null>(null);
   const [revealed, setRevealed] = useState(false), [reviewFront, setReviewFront] = useState(false), [result, setResult] = useState<ReviewResult | null>(null), [difficulty, setDifficulty] = useState<ReviewDifficulty | null>(null);
   const [capturedTimeMs, setCapturedTimeMs] = useState<number | null>(null), [lastTransaction, setLastTransaction] = useState<MixedReviewTransaction | null>(null), [editingTransaction, setEditingTransaction] = useState<MixedReviewTransaction | null>(null);
-  const [syncStatus, setSyncStatus] = useState<SyncStatus>("loading"), [notice, setNotice] = useState<string | null>(() => resumeSession ? "Continuing the selected past session. Your long-term memory and adaptive priorities are unchanged." : null);
+  const [, setSyncStatus] = useState<SyncStatus>("loading"), [notice, setNotice] = useState<string | null>(() => resumeSession ? "Continuing the selected past session. Your long-term memory and adaptive priorities are unchanged." : null);
   const [backtracking, setBacktracking] = useState(false), [startGateOpen, setStartGateOpen] = useState(true);
   const [session, setSession] = useState<SessionMeta>(() => resumeSession ?? makeSession());
   const [warmup, setWarmup] = useState<WarmupMeta | null>(null);
@@ -243,6 +246,18 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     return items;
   }
 
+  function persistedCurrentCandidate() {
+    let latest: { candidate: Candidate; updatedAt: number } | null = null;
+    for (const source of sources) {
+      const state = modeFor(source);
+      if (!state.currentCardId) continue;
+      const card = source.cards.find((item) => item.id === state.currentCardId);
+      if (!card) continue;
+      if (!latest || state.updatedAt > latest.updatedAt) latest = { candidate: { source, card }, updatedAt: state.updatedAt };
+    }
+    return latest?.candidate ?? null;
+  }
+
   function personalizedScore(candidate: Candidate) {
     const state = modeFor(candidate.source);
     const base = priorityScore(candidate.card, state, { ignoreRecency: false });
@@ -293,16 +308,17 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     if (retained) { recentSourceIdsRef.current = [retained.source.id]; setCurrent(retained); return; }
     recentSourceIdsRef.current = [];
     setCurrent(null);
-    const selected = chooseNext();
+    const selected = chooseNext(persistedCurrentCandidate());
     if (selected) present(selected);
-    // Filter changes keep the current card whenever it remains in the new pool,
-    // while source coverage ensures newly selected groups enter the rotation.
+    // Filter changes keep the current card whenever it remains in the new pool.
+    // On initial load, the most recent persisted current-card pointer represents
+    // an unanswered/abandoned card and is advanced exactly like Skip.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, selectionSignature]);
 
   const currentState = current ? modeFor(current.source) : null;
   const copy = current ? directionalCopy(current.card, current.source.direction) : null;
-  const timer = useResponseTimer(current && currentState ? `${current.source.deck.id}:${current.source.studyKey}:${current.card.id}:${getCardProgress(currentState, current.card.id).lastPresentedAt}` : null, Boolean(current && currentState && !revealed && !editingTransaction && !startGateOpen));
+  const timer = useResponseTimer(current && currentState ? `${current.source.deck.id}:${current.source.studyKey}:${current.card.id}:${currentState.updatedAt}` : null, Boolean(current && currentState && !revealed && !editingTransaction && !startGateOpen));
 
   const states = useMemo(() => {
     const map = new Map<string, StudyModeState>();
@@ -317,6 +333,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   const stats = sessionProgress.stats;
   const priority = useMemo(() => visibleCandidates.map(({ source, card }) => ({ card, progress: getCardProgress(states.get(source.id) ?? modeFor(source), card.id), score: priorityScore(card, states.get(source.id) ?? modeFor(source), { ignoreRecency: true }) })).sort((a, b) => b.score - a.score).slice(0, 5), [modeFor, states, visibleCandidates]);
   const sourceByCard = useMemo(() => new Map(sources.flatMap((source) => source.cards.map((card) => [`${card.deckId}:${card.id}`, source] as const))), [sources]);
+  const currentSaved = Boolean(current && savedCardRefs?.has(savedCardRef(current.source.deck.id, current.card.id)));
 
   function reveal() {
     if (!current || revealed || editingTransaction || startGateOpen) return;
@@ -335,6 +352,10 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     resetUi();
     setNotice(null);
     present(selected);
+  }
+  function toggleSavedCard() {
+    if (!current || !onToggleSavedCard) return;
+    onToggleSavedCard(current.source.deck.id, current.card.id);
   }
   function clearResumeUrl() {
     const url = new URL(window.location.href);
@@ -420,15 +441,14 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   useEffect(() => {
     function keydown(event: KeyboardEvent) {
       const target = event.target as HTMLElement | null;
-      const shortcut = studyShortcut({
-        key: event.key,
-        startGateOpen,
-        revealed,
-        result,
-        difficulty,
-        typingTarget: Boolean(target?.closest("input, textarea, select, [contenteditable='true'], [role='textbox'], [role='listbox']")),
-        controlsTarget: Boolean(target?.closest(".session-toolbar, .study-start-card")),
-      });
+      const typingTarget = Boolean(target?.closest("input, textarea, select, [contenteditable='true'], [role='textbox'], [role='listbox']"));
+      const controlsTarget = Boolean(target?.closest("button:not(.flashcard-face), [data-study-control], .session-toolbar, .study-start-card"));
+      if (!typingTarget && !controlsTarget && event.key.toLowerCase() === "s" && onToggleSavedCard && current) {
+        event.preventDefault();
+        toggleSavedCard();
+        return;
+      }
+      const shortcut = studyShortcut({ key: event.key, startGateOpen, revealed, result, difficulty, typingTarget, controlsTarget });
       if (!shortcut) return;
       if (shortcut.type === "start") { event.preventDefault(); setStartGateOpen(false); return; }
       if (shortcut.type === "reveal") { event.preventDefault(); reveal(); return; }
@@ -450,6 +470,15 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   const timerToggleDisabled = revealed || Boolean(editingTransaction) || !currentState;
   const front = <><span className="card-side">Question</span>{renderFront ? renderFront(current.card, copy, current.source) : <span className="study-prompt">{copy.prompt}</span>}</>;
   const backFace = <><span className="card-side">Answer</span>{renderBack ? renderBack(current.card, copy, current.source) : <span className="answer-block"><strong className="study-answer">{copy.answer}</strong>{current.card.notes && <span className="answer-notes">{current.card.notes}</span>}</span>}</>;
+  const frontControls = <>
+    <div className="card-overlay-actions">
+      <button type="button" className="small-outline-button card-overlay-button" data-study-control="back" disabled={!lastTransaction} onClick={back}><ArrowLeft /> Back</button>
+      <button type="button" className="small-outline-button card-overlay-button" data-study-control="skip" disabled={Boolean(editingTransaction)} onClick={skip}>Skip <SkipForward /></button>
+    </div>
+    {onToggleSavedCard && <div className="card-overlay-actions">
+      <button type="button" className="small-outline-button card-overlay-button save-card-button" data-study-control="save-card" aria-pressed={currentSaved} onClick={toggleSavedCard} title="Save or unsave this card (S)"><Bookmark aria-hidden="true" /> {currentSaved ? "Saved" : "Save card"} <kbd>S</kbd></button>
+    </div>}
+  </>;
 
   return <div className="study-grid" data-testid="study-session" data-study-key={current.source.studyKey}>
     <section className={`study-panel panel-surface ${gated ? "is-gated" : ""}`} aria-label={`${deck.title} study card`}>
@@ -461,24 +490,12 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
           <label className="compact-select-label"><span className="sr-only">Study session</span><select value={sessionControlValue} disabled={Boolean(editingTransaction)} onChange={(event) => { const value = event.target.value; if (value === "__new__") startNewSession(); else if (value !== "__current__") continueSession(value); }}><option value="__current__">{currentSessionName}</option><option value="__new__">Start new session</option>{selectableSessions.map((item) => <option key={item.id} value={item.id} disabled={item.inferred}>{sessionLabel(item)}</option>)}</select></label>
           <div className="toolbar-timer" aria-label={`Front-card response time ${displayedTimer} seconds`}>
             <span className="toolbar-timer-value">{displayedTimer}</span>
-            <button
-              type="button"
-              className="toolbar-timer-toggle"
-              data-study-control="timer"
-              onClick={() => setStartGateOpen((open) => !open)}
-              disabled={timerToggleDisabled}
-              aria-label={startGateOpen ? "Play timer" : "Pause timer"}
-              title={startGateOpen ? "Play timer" : "Pause timer"}
-            >
-              {startGateOpen ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
-            </button>
+            <button type="button" className="toolbar-timer-toggle" data-study-control="timer" onClick={() => setStartGateOpen((open) => !open)} disabled={timerToggleDisabled} aria-label={startGateOpen ? "Play timer" : "Pause timer"} title={startGateOpen ? "Play timer" : "Pause timer"}>{startGateOpen ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}</button>
           </div>
         </div>
-        <div className={`storage-status ${syncStatus === "error" ? "storage-error" : ""}`}>{user ? <Cloud aria-hidden="true" /> : <Laptop aria-hidden="true" />}<span>{warmup ? `Warm-up · ${warmup.total - warmup.remaining + 1} of ${warmup.total}` : syncStatus === "loading" ? "Loading progress" : syncStatus === "syncing" ? "Syncing…" : syncStatus === "error" ? "Saved locally; cloud sync needs attention" : user ? "Cloud progress synced" : "Guest progress on this device"}</span></div>
       </div>
       {notice && <button className="inline-notice" type="button" onClick={() => setNotice(null)}>{notice}</button>}
-      <div className="flashcard-meta flashcard-actions-only"><div className="card-nav-actions"><button type="button" className="small-outline-button" disabled={!lastTransaction} onClick={back}><ArrowLeft /> Back</button><button type="button" className="small-outline-button" disabled={Boolean(editingTransaction)} onClick={skip}>Skip <SkipForward /></button></div></div>
-      <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} />
+      <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} frontControls={frontControls} />
       <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
     </section>
     <StudySidebar copy={copy} direction={direction} stats={stats} initialReviewed={sessionProgress.initialReviewed} initialTotal={sessionProgress.initialTotal} initialPercent={sessionProgress.initialPercent} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
