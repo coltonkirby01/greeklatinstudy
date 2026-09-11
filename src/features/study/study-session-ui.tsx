@@ -27,7 +27,7 @@ export function StudyStartGate({ onStart, onWarmup }: { onStart: () => void; onW
   </div>;
 }
 
-export function StudyCardFaces({ revealed, showingAnswer, backtracking, onReveal, onFlip, front, back }: {
+export function StudyCardFaces({ revealed, showingAnswer, backtracking, onReveal, onFlip, front, back, frontControls }: {
   revealed: boolean;
   showingAnswer: boolean;
   backtracking: boolean;
@@ -35,8 +35,10 @@ export function StudyCardFaces({ revealed, showingAnswer, backtracking, onReveal
   onFlip: () => void;
   front: ReactNode;
   back: ReactNode;
+  frontControls?: ReactNode;
 }) {
   return <div className={`flashcard-scene ${showingAnswer ? "is-flipped" : ""} ${backtracking ? "is-backtracking" : ""}`}>
+    {frontControls && <div className="flashcard-card-controls" hidden={showingAnswer}>{frontControls}</div>}
     <div className="flashcard-inner">
       <button type="button" className="flashcard-face flashcard-front-face" onClick={() => revealed ? onFlip() : onReveal()} aria-label={revealed ? "Return to answer" : "Reveal answer"} aria-hidden={showingAnswer} tabIndex={showingAnswer ? -1 : 0}>{front}</button>
       <button type="button" className="flashcard-face flashcard-back-face" onClick={onFlip} aria-label="Return to question" aria-hidden={!showingAnswer} tabIndex={showingAnswer ? 0 : -1}>{back}</button>
@@ -65,8 +67,6 @@ export function StudyRatingControls({ revealed, result, difficulty, editing, onR
         revealed,
         result,
         typingTarget: Boolean(target?.closest("input, textarea, select, [contenteditable='true'], [role='textbox'], [role='listbox']")),
-        // A focused flashcard face still uses the global Enter grading shortcut;
-        // other buttons and explicit in-card controls retain their native activation.
         controlsTarget: Boolean(target?.closest("button:not(.flashcard-face), [data-study-control], .session-toolbar, .study-start-card")),
       });
       if (!shortcut) return;
