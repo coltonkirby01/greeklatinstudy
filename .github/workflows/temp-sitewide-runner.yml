@@ -33,9 +33,10 @@ jobs:
               "if found == 0:\n        raise SystemExit(f'Expected text not found in {path}: {old[:100]!r}')",
               "if found == 0:\n        if path == 'src/pages/greek-page.tsx' and 'firstDeclensionEndingsAlpha' in old:\n            return\n        raise SystemExit(f'Expected text not found in {path}: {old[:100]!r}')",
           )
-          # The post-fix below removes all copies and places sessionLanguage once
-          # before its first use, so skip the brittle intermediate remove-one call.
-          script = script.replace("replace('src/features/study/multi-source-study-session.tsx', '\\n  const sessionLanguage: \\\"Greek\\\" | \\\"Latin\\\" = deck.language === \\\"greek\\\" ? \\\"Greek\\\" : \\\"Latin\\\";\\n', '\\n', count=1)\n", "")
+          script = script.replace(
+              "if count is not None and found != count:\n        raise SystemExit(f'Expected {count} matches in {path}, found {found}: {old[:100]!r}')\n    write(path, value.replace(old, new))",
+              "if count is not None and found != count:\n        if path == 'src/features/study/multi-source-study-session.tsx' and count == 1 and found == 2 and 'sessionLanguage' in old:\n            write(path, value.replace(old, new, 1))\n            return\n        raise SystemExit(f'Expected {count} matches in {path}, found {found}: {old[:100]!r}')\n    write(path, value.replace(old, new))",
+          )
           Path('/tmp/sitewide_cleanup.py').write_text(script)
           EXTRACT
           python /tmp/sitewide_cleanup.py
