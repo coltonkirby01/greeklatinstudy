@@ -54,3 +54,22 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Refresh ElevenLabs usage snapshot
+        env:
+          SUPABASE_URL: https://wqgvpgmudouftyhnvvpr.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_s4DGueytgij3zvSce1D1hQ_jtEf1X1e
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=$(curl --silent --show-error --output /tmp/elevenlabs-usage-response.json --write-out '%{http_code}' \
+            --request POST "$SUPABASE_URL/functions/v1/elevenlabs-usage" \
+            --header "apikey: $SUPABASE_PUBLISHABLE_KEY" \
+            --header 'Content-Type: application/json' \
+            --data '{}')
+          cat /tmp/elevenlabs-usage-response.json
+          echo
+          if [[ "$status" != "200" ]]; then
+            echo "ElevenLabs usage refresh failed with HTTP $status" >&2
+            exit 1
+          fi
