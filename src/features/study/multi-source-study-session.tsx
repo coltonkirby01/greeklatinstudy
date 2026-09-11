@@ -355,7 +355,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     if (!current || revealed || editingTransaction || startGateOpen) return;
     setBacktracking(false); setReviewFront(false);
     const responseTimeMs = timer.capture();
-    const suggested = autoReviewDefaults(responseTimeMs);
+    const suggested = autoReviewDefaults(responseTimeMs, currentState ? getCardProgress(currentState, current.card.id).reviews : 0);
     setCapturedTimeMs(responseTimeMs); setResult(suggested.result); setDifficulty(suggested.difficulty); setRevealed(true);
   }
   function toggleReviewFace() { if (revealed) setReviewFront((value) => !value); }
