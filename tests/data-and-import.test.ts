@@ -18,10 +18,10 @@ describe("authoritative source migration", () => {
     expect(greekLesson3Vocabulary).toHaveLength(11);
     expect(greekLesson3Grammar).toHaveLength(3);
     expect(greekLesson4Vocabulary).toHaveLength(11);
-    expect(greekLesson4Grammar).toHaveLength(6);
+    expect(greekLesson4Grammar).toHaveLength(8);
     expect(greekLesson4Vocabulary.every((card) => card.source_ref === "Groton 4.32")).toBe(true);
-    expect(greekLesson4Grammar.slice(0, 4).every((card) => card.source_ref === "Groton 4.29")).toBe(true);
-    expect(greekLesson4Grammar.slice(4).every((card) => card.source_ref === "Groton 4.30")).toBe(true);
+    expect(greekLesson4Grammar.slice(0, 6).every((card) => card.source_ref === "Groton 4.29")).toBe(true);
+    expect(greekLesson4Grammar.slice(6).every((card) => card.source_ref === "Groton 4.30")).toBe(true);
 
     expect(new Set(greekLesson3Grammar.map((card) => card.category))).toEqual(new Set(["Present Active Indicative", "Present Active Infinitive", "Present Active Imperative"]));
     expect(greekLesson3Grammar.map((card) => card.id).sort()).toEqual([
@@ -49,6 +49,26 @@ describe("authoritative source migration", () => {
       { label: "3rd person", cells: ["παιδευ-έτω", "παιδευ-όντων"] },
     ]);
 
+    const singularEndings = greekLesson4Grammar.find((card) => card.id === "lesson4-chart-first-declension-endings-singular");
+    expect(singularEndings?.columns).toEqual(["α-type", "η-type"]);
+    expect(singularEndings?.rows).toEqual([
+      { label: "Nominative", cells: ["-ᾱ", "-η"] },
+      { label: "Genitive", cells: ["-ᾱς", "-ης"] },
+      { label: "Dative", cells: ["-ᾳ", "-ῃ"] },
+      { label: "Accusative", cells: ["-ᾱν", "-ην"] },
+      { label: "Vocative", cells: ["-ᾱ", "-η"] },
+    ]);
+
+    const pluralEndings = greekLesson4Grammar.find((card) => card.id === "lesson4-chart-first-declension-endings-plural");
+    expect(pluralEndings?.columns).toEqual(["Ending"]);
+    expect(pluralEndings?.rows).toEqual([
+      { label: "Nominative", cells: ["-αι"] },
+      { label: "Genitive", cells: ["-ων"] },
+      { label: "Dative", cells: ["-αις"] },
+      { label: "Accusative", cells: ["-ᾱς"] },
+      { label: "Vocative", cells: ["-αι"] },
+    ]);
+
     const goddess = greekLesson4Grammar.find((card) => card.id === "lesson4-chart-first-declension-thea");
     expect(goddess?.columns).toEqual(["Singular", "Plural"]);
     expect(goddess?.rows).toEqual([
@@ -58,7 +78,7 @@ describe("authoritative source migration", () => {
       { label: "Accusative", cells: ["θε-άν", "θε-άς"] },
       { label: "Vocative", cells: ["θε-ά", "θε-αί"] },
     ]);
-    for (const card of greekLesson4Grammar.slice(0, 4)) {
+    for (const card of greekLesson4Grammar.slice(2, 6)) {
       expect(card.rows.flatMap((row) => row.cells).every((form) => form.includes("-")), card.id).toBe(true);
     }
 

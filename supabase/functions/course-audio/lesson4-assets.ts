@@ -25,8 +25,15 @@ export const lesson4VocabularyAudio: Readonly<Record<string, { label: string; gr
   "lesson4-v11": { label: "ὦ", greek: "ὦ" },
 };
 
-/** Paradigms are spoken vertically: singular first, then plural. */
+/** Paradigms are spoken vertically: one column at a time. */
 export const lesson4CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
+  paradigm("lesson4-chart-first-declension-endings-singular", "First Declension Feminine Endings — Singular", [
+    "-ᾱ", "-ᾱς", "-ᾳ", "-ᾱν", "-ᾱ",
+    "-η", "-ης", "-ῃ", "-ην", "-η",
+  ]),
+  paradigm("lesson4-chart-first-declension-endings-plural", "First Declension Feminine Endings — Plural", [
+    "-αι", "-ων", "-αις", "-ᾱς", "-αι",
+  ]),
   paradigm("lesson4-chart-first-declension-thea", "First Declension Feminine Nouns — θεά", [
     "θε-ά", "θε-ᾶς", "θε-ᾷ", "θε-άν", "θε-ά",
     "θε-αί", "θε-ῶν", "θε-αῖς", "θε-άς", "θε-αί",

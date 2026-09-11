@@ -1,5 +1,33 @@
 [
   {
+    "id": "lesson4-chart-first-declension-endings-singular",
+    "category": "First Declension Feminine Endings — Singular",
+    "prompt": "First Declension Feminine Endings — Singular",
+    "source_ref": "Groton 4.29",
+    "columns": ["α-type", "η-type"],
+    "rows": [
+      { "label": "Nominative", "cells": ["-ᾱ", "-η"] },
+      { "label": "Genitive", "cells": ["-ᾱς", "-ης"] },
+      { "label": "Dative", "cells": ["-ᾳ", "-ῃ"] },
+      { "label": "Accusative", "cells": ["-ᾱν", "-ην"] },
+      { "label": "Vocative", "cells": ["-ᾱ", "-η"] }
+    ]
+  },
+  {
+    "id": "lesson4-chart-first-declension-endings-plural",
+    "category": "First Declension Feminine Endings — Plural",
+    "prompt": "First Declension Feminine Endings — Plural",
+    "source_ref": "Groton 4.29",
+    "columns": ["Ending"],
+    "rows": [
+      { "label": "Nominative", "cells": ["-αι"] },
+      { "label": "Genitive", "cells": ["-ων"] },
+      { "label": "Dative", "cells": ["-αις"] },
+      { "label": "Accusative", "cells": ["-ᾱς"] },
+      { "label": "Vocative", "cells": ["-αι"] }
+    ]
+  },
+  {
     "id": "lesson4-chart-first-declension-thea",
     "category": "First Declension Feminine Nouns — θεά",
     "prompt": "First Declension Feminine Nouns — θεά",
