@@ -442,7 +442,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     function keydown(event: KeyboardEvent) {
       const target = event.target as HTMLElement | null;
       const typingTarget = Boolean(target?.closest("input, textarea, select, [contenteditable='true'], [role='textbox'], [role='listbox']"));
-      const controlsTarget = Boolean(target?.closest("button:not(.flashcard-face), [data-study-control], .session-toolbar, .study-start-card"));
+      const controlsTarget = Boolean(target?.closest(".session-toolbar, .study-start-card"));
       if (!typingTarget && !controlsTarget && event.key.toLowerCase() === "s" && onToggleSavedCard && current) {
         event.preventDefault();
         toggleSavedCard();
