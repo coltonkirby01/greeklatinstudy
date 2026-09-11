@@ -16,7 +16,7 @@ const overlayLinkStyle: CSSProperties = { position: "absolute", inset: 0, zIndex
 const protectedTextStyle: CSSProperties = { position: "relative", zIndex: 2 };
 const interactiveStyle: CSSProperties = { position: "relative", zIndex: 3 };
 const visualLinkStyle: CSSProperties = { ...interactiveStyle, width: "fit-content", display: "inline-flex", color: "inherit", textDecoration: "none" };
-const titleLinkStyle: CSSProperties = { color: "inherit", textDecoration: "none" };
+const titleLinkStyle: CSSProperties = { ...interactiveStyle, color: "inherit", textDecoration: "underline", textDecorationThickness: "1px" };
 
 function preloadCourse(id: CourseId, href: string) {
   preloadRoute(href);
@@ -37,7 +37,7 @@ export function HomePage() {
   const { user } = useAuth();
   return <main className="page-shell home-page">
     <section className="home-intro">
-      <div><p className="eyebrow">Active recall · adaptive review</p><h1>Build a durable memory of Greek and Latin.</h1><p className="home-lede">Greek and Latin each have one study app. Choose exactly what belongs in a session, from several Greek lesson categories to a mixture of Latin vocabulary and grammar, then reveal, rate, and review adaptively.</p></div>
+      <div><h1>Build a durable memory of Greek and Latin.</h1><p className="home-lede">Greek and Latin each have one study app. Choose exactly what belongs in a session, from several Greek lesson categories to a mixture of Latin vocabulary and grammar, then reveal, rate, and review adaptively.</p></div>
       <div className="method-note"><Repeat2 /><div><strong>One deliberate cycle</strong><span>Choose · recall · reveal · rate · review</span></div></div>
     </section>
     <section className="course-grid">
@@ -51,18 +51,18 @@ export function HomePage() {
   </main>;
 }
 
-function Course({ id, visual, count, eyebrow, title, description, sourceLinks, href, linkLabel }: { id: CourseId; visual: ReactNode; count: string; eyebrow: string; title: string; description: string; sourceLinks: readonly { label: string; href: string }[]; href: string; linkLabel: string }) {
+function Course({ id, visual, count, eyebrow, title, titleLinks, description, sourceLinks, href, linkLabel }: { id: CourseId; visual: ReactNode; count: string; eyebrow: string; title: string; titleLinks: readonly { label: string; href: string }[]; description: string; sourceLinks: readonly { label: string; href: string }[]; href: string; linkLabel: string }) {
   const flashcardCourse = id === "greek" || id === "latin";
   const preload = () => preloadCourse(id, href);
-  return <article className="course-card" onPointerEnter={preload} onPointerDown={preload} onFocusCapture={preload}>
+  return <article className={`course-card ${flashcardCourse ? "flashcard-course" : ""} ${id}-course`} onPointerEnter={preload} onPointerDown={preload} onFocusCapture={preload}>
     <Link to={href} aria-hidden="true" tabIndex={-1} style={overlayLinkStyle} />
     <div className="course-card-top">
       {flashcardCourse ? <Link to={href} aria-label={`Open ${eyebrow} flashcards`} style={visualLinkStyle}>{visual}</Link> : visual}
       {count && <span className="course-count" style={protectedTextStyle}>{count}</span>}
     </div>
     <p className="eyebrow" style={protectedTextStyle}>{eyebrow}</p>
-    <h2 style={protectedTextStyle}>{id === "reading" ? <Link to={href} style={titleLinkStyle}>{title}</Link> : title}</h2>
-    <p style={protectedTextStyle}>{description}</p>
+    <h2 style={protectedTextStyle}>{titleLinks.length > 0 ? titleLinks.map((item, index) => <span key={item.href}>{index > 0 && <span aria-hidden="true"> · </span>}<a href={item.href} target="_blank" rel="noreferrer" style={titleLinkStyle}>{item.label}</a></span>) : <Link to={href} style={{ color: "inherit", textDecoration: "none" }}>{title}</Link>}</h2>
+    {description && <p style={protectedTextStyle}>{description}</p>}
     {sourceLinks.length > 0 && <div className="course-source-links" aria-label={`${eyebrow} sources`} style={interactiveStyle}>
       {sourceLinks.map((source) => <a key={source.href} href={source.href} target="_blank" rel="noreferrer">{source.label} <ExternalLink aria-hidden="true" /></a>)}
     </div>}
