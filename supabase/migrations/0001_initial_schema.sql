@@ -1,5 +1,5 @@
--- Greek & Latin Study: accounts, independent study modes, deck administration,
--- readings, and private audio. Run this once in a new Supabase project.
+-- Greek & Latin Study: accounts, independent study modes, and deck administration.
+-- Run this once in a new Supabase project.
 
 create extension if not exists pgcrypto;
 
@@ -89,23 +89,6 @@ create table public.review_events (
 
 create index review_events_user_deck_idx on public.review_events(user_id, deck_id, reviewed_at desc);
 
-create table public.readings (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  title text not null check (length(trim(title)) > 0),
-  language text not null check (language in ('greek', 'latin')),
-  text text not null check (length(trim(text)) > 0),
-  audio_path text,
-  audio_provider text not null default 'none',
-  pronunciation_system text not null default 'Not specified',
-  word_timings jsonb not null default '[]'::jsonb,
-  sentence_segments jsonb not null default '[]'::jsonb,
-  playback_rate numeric not null default 1 check (playback_rate between 0.25 and 3),
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-create index readings_user_updated_idx on public.readings(user_id, updated_at desc);
 
 alter table public.admin_users enable row level security;
 alter table public.decks enable row level security;
@@ -113,7 +96,6 @@ alter table public.deck_categories enable row level security;
 alter table public.cards enable row level security;
 alter table public.user_deck_states enable row level security;
 alter table public.review_events enable row level security;
-alter table public.readings enable row level security;
 
 create policy "users can read their admin membership"
 on public.admin_users for select to authenticated
@@ -166,42 +148,7 @@ create policy "users delete their own reviews"
 on public.review_events for delete to authenticated
 using (user_id = auth.uid());
 
-create policy "users read their own readings"
-on public.readings for select to authenticated
-using (user_id = auth.uid());
-create policy "users create their own readings"
-on public.readings for insert to authenticated
-with check (user_id = auth.uid());
-create policy "users update their own readings"
-on public.readings for update to authenticated
-using (user_id = auth.uid()) with check (user_id = auth.uid());
-create policy "users delete their own readings"
-on public.readings for delete to authenticated
-using (user_id = auth.uid());
 
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'reading-audio',
-  'reading-audio',
-  false,
-  52428800,
-  array['audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'audio/wav', 'audio/ogg', 'audio/webm']
-)
-on conflict (id) do nothing;
-
-create policy "users read their own reading audio"
-on storage.objects for select to authenticated
-using (bucket_id = 'reading-audio' and (storage.foldername(name))[1] = auth.uid()::text);
-create policy "users upload their own reading audio"
-on storage.objects for insert to authenticated
-with check (bucket_id = 'reading-audio' and (storage.foldername(name))[1] = auth.uid()::text);
-create policy "users update their own reading audio"
-on storage.objects for update to authenticated
-using (bucket_id = 'reading-audio' and (storage.foldername(name))[1] = auth.uid()::text)
-with check (bucket_id = 'reading-audio' and (storage.foldername(name))[1] = auth.uid()::text);
-create policy "users delete their own reading audio"
-on storage.objects for delete to authenticated
-using (bucket_id = 'reading-audio' and (storage.foldername(name))[1] = auth.uid()::text);
 
 -- Bootstrap exactly one owner after creating their account:
 -- insert into public.admin_users (user_id) values ('THE-AUTH-USER-UUID');

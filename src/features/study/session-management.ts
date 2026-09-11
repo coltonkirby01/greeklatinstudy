@@ -1,3 +1,4 @@
+import { builtinSessionDeckIds, builtinSourceLabel } from "./builtin-study-catalog";
 import type { DeckProgressEnvelope, ReviewRecord } from "./types";
 
 export type ManagedSession = {
@@ -10,6 +11,7 @@ export type ManagedSession = {
   name?: string;
   inferred?: boolean;
   reviewIds?: string[];
+  builtin?: boolean;
 };
 
 export type SessionMutation = {
@@ -24,31 +26,43 @@ type SessionReview = {
   review: ReviewRecord;
 };
 
-const SESSION_DECKS = {
-  Greek: ["greek-i", "alpha-omega-lesson3-vocab", "alpha-omega-lesson3-grammar", "alpha-omega-lesson4-vocab", "alpha-omega-lesson4-grammar"],
-  Latin: ["dickinson-latin-core", "henle-part1-forms", "latin-active-indicative-paradigms", "latin-passive-indicative-paradigms"],
-} as const;
+export type BuiltinSessionKind = "learner" | "reviewer";
+const BUILTIN_SESSION_KINDS = ["learner", "reviewer"] as const;
+
+export function builtinSessionId(language: "Greek" | "Latin", kind: BuiltinSessionKind) {
+  return `builtin-${language.toLowerCase()}-${kind}`;
+}
+
+export function builtinSessionNameFromId(id: string) {
+  if (id === builtinSessionId("Greek", "learner") || id === builtinSessionId("Latin", "learner")) return "Learner";
+  if (id === builtinSessionId("Greek", "reviewer") || id === builtinSessionId("Latin", "reviewer")) return "Reviewer";
+  return null;
+}
+
+export function isBuiltinSessionId(id: string) { return builtinSessionNameFromId(id) !== null; }
+
+export function builtinManagedSessions(language: "Greek" | "Latin"): ManagedSession[] {
+  return BUILTIN_SESSION_KINDS.map((kind) => ({
+    id: builtinSessionId(language, kind),
+    language,
+    sources: [],
+    startedAt: 0,
+    lastReviewedAt: 0,
+    reviews: 0,
+    name: kind === "learner" ? "Learner" : "Reviewer",
+    builtin: true,
+  }));
+}
 
 export function sessionDeckIdsForLanguage(language: "Greek" | "Latin") {
-  return [...SESSION_DECKS[language]];
+  return builtinSessionDeckIds(language);
 }
 
 function deckLanguage(deckId: string): "Greek" | "Latin" {
   return deckId.startsWith("greek-") || deckId.startsWith("alpha-omega-") ? "Greek" : "Latin";
 }
 
-function sourceLabel(deckId: string, studyKey: string) {
-  if (deckId === "greek-i") return "Lessons 1–2";
-  if (deckId === "alpha-omega-lesson3-vocab") return "Lesson 3 Vocabulary";
-  if (deckId === "alpha-omega-lesson3-grammar") return "Lesson 3 Grammar";
-  if (deckId === "alpha-omega-lesson4-vocab") return "Lesson 4 Vocabulary";
-  if (deckId === "alpha-omega-lesson4-grammar") return "Lesson 4 Grammar";
-  if (deckId === "dickinson-latin-core") return "Dickinson Vocabulary";
-  if (deckId === "henle-part1-forms") return studyKey.startsWith("chart") ? "Henle Whole Charts" : "Henle Grammar Forms";
-  if (deckId === "latin-active-indicative-paradigms") return "Active Indicative Paradigms";
-  if (deckId === "latin-passive-indicative-paradigms") return "Passive Indicative Paradigms";
-  return deckId;
-}
+function sourceLabel(deckId: string, studyKey: string) { return builtinSourceLabel(deckId, studyKey); }
 
 export function sessionCustomNameFromReviews(reviews: Array<Pick<ReviewRecord, "sessionName" | "reviewedAt">>) {
   let latest: { name: string; reviewedAt: number } | null = null;
@@ -84,9 +98,10 @@ function summarizeChronologicalSession(id: string, language: "Greek" | "Latin", 
     startedAt,
     lastReviewedAt,
     reviews: entries.length,
-    name: latestName?.name,
+    name: builtinSessionNameFromId(id) ?? latestName?.name,
     inferred,
     reviewIds,
+    builtin: isBuiltinSessionId(id),
   };
 }
 
@@ -143,13 +158,23 @@ export function collectManagedSessions(envelopes: Record<string, DeckProgressEnv
   return sessions.sort((a, b) => b.startedAt - a.startedAt || b.lastReviewedAt - a.lastReviewedAt);
 }
 
+export function managedSessionsForLanguage(envelopes: Record<string, DeckProgressEnvelope | null>, language: "Greek" | "Latin") {
+  const existing = collectManagedSessions(envelopes).filter((session) => session.language === language);
+  const byId = new Map(existing.map((session) => [session.id, session]));
+  for (const builtin of builtinManagedSessions(language)) {
+    const current = byId.get(builtin.id);
+    byId.set(builtin.id, current ? { ...current, name: builtin.name, builtin: true } : builtin);
+  }
+  return [...byId.values()].sort((a, b) => Number(Boolean(b.builtin)) - Number(Boolean(a.builtin)) || b.lastReviewedAt - a.lastReviewedAt || b.startedAt - a.startedAt);
+}
+
 export function automaticManagedSessionName(session: ManagedSession, formatter = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" })) {
   const focus = session.sources.length === 1 ? session.sources[0] : session.sources.length === 2 ? session.sources.join(" + ") : "Mixed study";
   return `${session.language} · ${focus} · ${formatter.format(session.startedAt)}`;
 }
 
 export function displayManagedSessionName(session: ManagedSession) {
-  return session.name?.trim() || automaticManagedSessionName(session);
+  return builtinSessionNameFromId(session.id) ?? (session.name?.trim() || automaticManagedSessionName(session));
 }
 
 function mutateReviewsInEnvelope(
@@ -200,6 +225,7 @@ function excludeSessionReviewsInEnvelope(
 }
 
 export function renameSessionInEnvelope(envelope: DeckProgressEnvelope, sessionId: string, name: string, now = Date.now()): SessionMutation {
+  if (isBuiltinSessionId(sessionId)) return { envelope, changed: false, reviewIds: [] };
   return mutateReviewsInEnvelope(
     envelope,
     (review) => review.sessionId === sessionId && review.activityKind !== "warmup",
@@ -219,6 +245,7 @@ export function renameReviewsInEnvelope(envelope: DeckProgressEnvelope, reviewId
 }
 
 export function deleteSessionFromEnvelope(envelope: DeckProgressEnvelope, sessionId: string, now = Date.now()): SessionMutation {
+  if (isBuiltinSessionId(sessionId)) return { envelope, changed: false, reviewIds: [] };
   const mutation = excludeSessionReviewsInEnvelope(
     envelope,
     (review) => review.sessionId === sessionId && review.activityKind !== "warmup",

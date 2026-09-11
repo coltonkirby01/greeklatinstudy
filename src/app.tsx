@@ -9,7 +9,6 @@ import {
   loadHomePage,
   loadLatinPage,
   loadNotFoundPage,
-  loadReadingPage,
   loadStatsPage,
 } from "./route-preload";
 
@@ -18,7 +17,6 @@ const GreekPage = lazy(async () => ({ default: (await loadGreekPage()).GreekPage
 const LatinPage = lazy(async () => ({ default: (await loadLatinPage()).LatinPage }));
 const StatsPage = lazy(async () => ({ default: (await loadStatsPage()).StatsPage }));
 const DynamicDeckPage = lazy(async () => ({ default: (await loadDynamicDeckPage()).DynamicDeckPage }));
-const ReadingPage = lazy(async () => ({ default: (await loadReadingPage()).ReadingPage }));
 const AccountPage = lazy(async () => ({ default: (await loadAccountPage()).AccountPage }));
 const AdminPage = lazy(async () => ({ default: (await loadAdminPage()).AdminPage }));
 const NotFoundPage = lazy(async () => ({ default: (await loadNotFoundPage()).NotFoundPage }));
@@ -32,16 +30,15 @@ export function App() {
     <Suspense fallback={<RouteLoading />}>
       <Routes>
         <Route element={<SiteLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="greek" element={<GreekPage />} />
-          <Route path="latin" element={<LatinPage />} />
-          <Route path="latin/passive-indicative-paradigms" element={<Navigate to="/latin" replace />} />
-          <Route path="stats" element={<StatsPage />} />
-          <Route path="decks/:slug" element={<DynamicDeckPage />} />
-          <Route path="reading" element={<ReadingPage />} />
-          <Route path="account" element={<AccountPage />} />
-          <Route path="admin" element={<AdminPage />} />
-          <Route path="*" element={<NotFoundPage />} />
+<Route index element={<HomePage />} />
+<Route path="greek" element={<GreekPage />} />
+<Route path="latin" element={<LatinPage />} />
+<Route path="latin/passive-indicative-paradigms" element={<Navigate to="/latin" replace />} />
+<Route path="stats" element={<StatsPage />} />
+<Route path="decks/:slug" element={<DynamicDeckPage />} />
+<Route path="account" element={<AccountPage />} />
+<Route path="admin" element={<AdminPage />} />
+<Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </Suspense>

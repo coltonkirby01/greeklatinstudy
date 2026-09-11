@@ -30,11 +30,11 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 ### Greek selector
 
 - Greek has top-level quick selectors for All Vocabulary and All Grammar; narrower lesson selectors remain independently adjustable.
-- All Grammar includes Lesson 1 Alphabet and Punctuation, Lesson 2 Accent Marks, and all current Lesson 3 grammar paradigms. The only material currently classified as Greek vocabulary is Lesson 3 Vocabulary.
+- All Grammar includes Lesson 1 Alphabet and Punctuation, Lesson 2 Accent Marks, and all current Lesson 3 and Lesson 4 grammar cards. Greek vocabulary currently includes Lessons 3 and 4 Vocabulary.
 - Greek filtering is organized by lesson.
 - Lesson 1 contains Alphabet and Punctuation. Alphabet expands to independent Uppercase and Lowercase choices. Alphabet and punctuation are Grammar, not vocabulary.
 - Lesson 2 contains Accent Marks. Accent marks are Grammar, not vocabulary.
-- The only current Greek vocabulary source is Lesson 3 Vocabulary.
+- Current Greek vocabulary sources are Lessons 3 and 4 Vocabulary.
 - Greek Lesson 3 contains separate Vocabulary and Grammar headings. Lesson 3 Grammar currently contains exactly three whole-paradigm chart cards: Present Active Indicative, Present Active Infinitive, and Present Active Imperative from the παιδεύω paradigm.
 - Each Lesson 3 grammar filter corresponds to one whole chart card, not a collection of individual person/number form cards. Do not reintroduce the retired 11 isolated Lesson 3 grammar questions unless explicitly requested.
 - Forward study asks for the named whole paradigm and reveals its chart. Reverse study shows the complete chart and asks the user to identify the paradigm; Reverse must not decompose the chart back into isolated form-identification cards.
@@ -57,7 +57,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 
 ## Built-in deck invariants
 
-- Built-in source counts are Greek Lessons 1–2: 55 cards; Greek Lesson 3 Vocabulary: 11 cards; Greek Lesson 3 Grammar: 3 whole-paradigm chart cards; Dickinson Latin: 997; Henle: 2,062 unique cards across 331 rules; Henle Whole Charts: 248 groups.
+- Built-in source counts are Greek Lessons 1–2: 55 cards; Greek Lesson 3 Vocabulary: 11 cards; Greek Lesson 3 Grammar: 6 cards (3 endings + 3 paradigms); Dickinson Latin: 997; Henle: 2,062 unique cards across 331 rules; Henle Whole Charts: 248 groups.
 - Greek Lesson 3 grammar categories are Present Active Indicative, Present Active Infinitive, and Present Active Imperative unless the course source is deliberately expanded.
 - The three active Lesson 3 grammar card IDs are `lesson3-chart-present-active-indicative`, `lesson3-chart-present-active-infinitive`, and `lesson3-chart-present-active-imperative`. The retired `lesson3-g-*` individual-form IDs may remain only in historical progress storage; they must never re-enter the active study pool, warmups, Highest-Priority Review, or new session statistics.
 - Any deck-data change must update and pass the source-count tests deliberately.
@@ -133,13 +133,13 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 
 - Space reveals an unrevealed card after the Start gate has been dismissed; reveal also fills `Right` plus the time-based difficulty default.
 - After reveal, Enter toggles correctness between Right and Wrong without saving.
-- After reveal, Shift+Enter flips between question and answer without saving and without adding response time.
+- After reveal, F flips between question and answer without saving and without adding response time.
 - After reveal, R = Right and W = Wrong and may override or confirm the automatic correctness selection.
 - After reveal, 1 = Easy, 2 = Medium, and 3 = Hard and may override the automatic difficulty selection.
 - Clicking an unrevealed question card reveals the answer. After reveal, clicking whichever card face is visible flips to the opposite face, including clicking the answer side to return to the question.
 - Because reveal supplies both defaults, Space after reveal = Save & Next unless the grade state is deliberately cleared by future UI behavior.
 - The difficulty controls remain visible beneath the Right/Wrong controls so the user can override the suggested value before saving.
-- Do not let global study shortcuts interfere with typing in inputs, textareas, selects, editable regions, listboxes, toolbar controls, Start-gate controls, or native activation of ordinary buttons. A focused flashcard face is the exception: Enter/Shift+Enter retain the study shortcuts rather than triggering an unintended face-button click.
+- Do not let global study shortcuts interfere with typing in inputs, textareas, selects, editable regions, listboxes, toolbar controls, Start-gate controls, or native activation of ordinary buttons. A focused flashcard face is the exception: Enter/F retain the study shortcuts rather than triggering an unintended face-button click.
 - When adding overlays or dialogs, preserve keyboard accessibility and prevent the activating/dismissing key from leaking through to underlying controls.
 
 ## Continuous memory and synchronization

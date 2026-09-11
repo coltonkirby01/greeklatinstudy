@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpenText, Cloud, ExternalLink, Repeat2 } from "lucide-react";
+import { ArrowRight, Cloud, ExternalLink, Repeat2 } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { homeCourses, type CourseId } from "../config/site";
@@ -9,7 +9,6 @@ import "./home-page.css";
 const courseVisuals: Record<CourseId, ReactNode> = {
   greek: <span className="course-glyph course-glyph-word greek-course-title">Ἑλληνικά</span>,
   latin: <span className="course-glyph course-glyph-word latin-course-title">LATINA</span>,
-  reading: <span className="course-icon"><BookOpenText /></span>,
 };
 
 const overlayLinkStyle: CSSProperties = { position: "absolute", inset: 0, zIndex: 1, borderRadius: "inherit" };
@@ -47,7 +46,7 @@ export function HomePage() {
     </section>
     <section className="sign-in-callout panel-surface">
       <div className="callout-icon"><Cloud /></div>
-      <div><h2>{user ? "Your progress is connected" : "Keep your place on every device"}</h2><p>{user ? "Forward, reverse, whole-chart, reading, and imported-deck progress can sync to your account." : "Guest study works immediately on this device. Sign in when cloud accounts are configured to sync everywhere."}</p></div>
+      <div><h2>{user ? "Your progress is connected" : "Keep your place on every device"}</h2><p>{user ? "Forward, reverse, whole-chart, session, and saved-card progress can sync to your account." : "Guest study works immediately on this device. Sign in when cloud accounts are configured to sync everywhere."}</p></div>
       <Link className="button-link primary-button" to="/account">{user ? "View account" : "Sign in to sync"}</Link>
     </section>
   </main>;

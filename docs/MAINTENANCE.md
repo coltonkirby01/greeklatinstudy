@@ -56,7 +56,7 @@ The `cards` arrays placed into each active `StudySourceDefinition` are the selec
 
 - `src/features/study/multi-source-study-session.tsx` — primary Greek/Latin mixed-source controller.
 - `src/features/study/study-session.tsx` — ordinary/imported single-deck controller.
-- `src/features/study/study-session-ui.tsx` — shared card faces, grading controls, Start gate, Enter/Shift+Enter interaction, and sidebar.
+- `src/features/study/study-session-ui.tsx` — shared card faces, grading controls, Start gate, Enter/F interaction, and sidebar.
 - `src/features/study/session-review.ts` — automatic reveal defaults and active-session Progress calculations.
 - `src/features/study/study-shortcuts.ts` — keyboard semantics and shared Enter helper.
 - `src/features/study/use-response-timer.ts` — active recall timer and focus/visibility handling.
@@ -70,16 +70,16 @@ The `cards` arrays placed into each active `StudySourceDefinition` are the selec
 - Clicking an unrevealed question reveals the answer and captures response time.
 - After reveal, clicking whichever card face is visible flips to the opposite face.
 - Plain Enter toggles the suggested correctness between Right and Wrong.
-- Shift+Enter flips question/answer after reveal.
-- R/W set correctness directly.
+- F flips question/answer after reveal.
+- R/W are intentionally unassigned.
 - 1/2/3 set Easy/Medium/Hard directly.
 - Space reveals before answer and saves after reveal.
 - Post-reveal flipping never restarts or adds response time.
-- Native keyboard behavior for ordinary controls must remain usable. A focused flashcard face is the deliberate exception: Enter/Shift+Enter retain the study shortcuts.
+- Native keyboard behavior for ordinary controls must remain usable. A focused flashcard face is the deliberate exception: Enter/F retain the study shortcuts.
 
 ### Current automatic grading defaults
 
-Reveal freezes active front-side recall time. Correctness always starts as `Right`. Time selects only the initial difficulty:
+Reveal freezes active front-side recall time. Correctness follows the rolling three-review default. Time selects only the initial difficulty:
 
 - under 3.00 seconds → `Easy`
 - 3.00 seconds through under 10.00 seconds → `Medium`
@@ -150,7 +150,6 @@ Never regenerate Henle or Dickinson material from model memory. Preserve protect
 
 ## Reading and administration
 
-- `src/pages/reading-page.tsx` and `src/features/reading/` — Reading & Audio.
 - `src/pages/admin-page.tsx` and `src/features/decks/` — administrator deck management/imports.
 
 These routes are lazy-loaded. Keep heavy admin/import functionality out of the initial shell.

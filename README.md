@@ -1,6 +1,6 @@
 # Greek & Latin Study
 
-A permanent, maintainable edition of the Greek & Latin Study web application. It preserves the scholarly cream-and-burgundy appearance and active-recall workflow of the original ChatGPT Site while adding a shared flashcard engine, complete Henle grammar data, independent bidirectional learning histories, cloud-ready accounts, deck administration, and reading/audio practice.
+A permanent, maintainable edition of the Greek & Latin Study web application. It preserves the scholarly cream-and-burgundy appearance and active-recall workflow of the original ChatGPT Site while adding a shared flashcard engine, complete Henle grammar data, independent bidirectional learning histories, cloud-ready accounts, deck administration.
 
 The original ChatGPT Site remains intact. This repository is the source of truth for the GitHub edition.
 
@@ -10,7 +10,9 @@ The original ChatGPT Site remains intact. This repository is the source of truth
 | --- | ---: | --- |
 | Greek I | 55 cards | Symbol → Name; Name → Symbol |
 | Greek Lesson 3 Vocabulary | 11 cards | Greek → English; English → Greek |
-| Greek Lesson 3 Grammar | 11 forms | Prompt → Form; Form → Identify |
+| Greek Lesson 3 Grammar | 6 cards | Three ending charts + three model-verb paradigms |
+| Greek Lesson 4 Vocabulary | 11 cards | Greek → English; English → Greek |
+| Greek Lesson 4 Grammar | 8 cards | Endings, model-noun paradigms, and feminine article |
 | Dickinson Latin Core | 997 entries | Latin → English; English → Latin; staged 100 then 25 |
 | Henle Part I Forms | 2,062 unique cards; 331 rules | Prompt → Form; Form → Identify |
 | Henle Whole Charts | 248 multi-form rule groups | Reconstruct complete chart |
@@ -22,10 +24,10 @@ The Henle JSON is generated from the exact supplied `Henle_Part1_Forms_Full_App.
 - React 19, TypeScript, Vite
 - React Router with a GitHub Pages 404 fallback
 - Supabase Auth, Postgres, Row Level Security, Storage, and optional Edge Functions
-- Vitest for review logic, import parsing, reading synchronization, and source-count protection
+- Vitest for review logic, import parsing, session behavior, and source-count protection
 - GitHub Actions for test, build, and Pages deployment
 
-The app remains usable without Supabase: all built-in decks and guest progress work locally. The production deployment is connected to the owner's **Latin Greek** Supabase project for accounts, cloud progress, administrator-created decks, saved readings, and private audio storage.
+The app remains usable without Supabase: all built-in decks and guest progress work locally. The production deployment is connected to the owner's **Latin Greek** Supabase project for accounts, cloud progress, administrator-created decks and synced study progress.
 
 The initial application shell deliberately does not bundle the Supabase SDK. Authentication restores asynchronously behind a separate chunk so the public shell can become interactive sooner. `scripts/check-bundle-size.mjs` keeps the main JavaScript bundle under 100 KB gzip to prevent a future refactor from silently undoing that split.
 
@@ -39,7 +41,6 @@ src/
     auth/                  Supabase session and administrator status
     decks/                 cloud deck service and CSV/XLSX/JSON importer
     henle/                 authoritative data adapter and chart renderer
-    reading/               passages, timing model, audio storage, TTS provider interface
     study/                 timer, adaptive scheduler, progress, Back/Skip, shared UI
   pages/                   route-level screens
   lib/supabase-config.ts   lightweight public configuration used before SDK load
@@ -47,7 +48,6 @@ src/
 public/data/               versioned built-in source data
 public/privacy/, terms/    crawlable privacy and terms pages
 supabase/migrations/       complete schema and RLS policies
-supabase/functions/tts/    optional secret-bearing TTS proxy
 tests/                     invariant and behavior tests
 ```
 
@@ -92,11 +92,11 @@ If `reverse_prompt` is blank, a normal imported deck uses Back as the reverse qu
 New ordinary decks automatically inherit:
 
 - forward and optional reverse modes with separate learning histories
-- smooth 3D card flipping by clicking the visible card; after reveal Shift+Enter also flips question/answer
+- smooth 3D card flipping by clicking the visible card; after reveal F also flips question/answer
 - Enter after reveal toggles the correctness selection between Right and Wrong
 - hundredths-of-a-second front timer behind an explicit Start gate
 - focus/visibility protection that returns an unrevealed card to the Start gate rather than charging hidden time
-- Reveal plus automatic `Right` correctness and time-based Easy/Medium/Hard difficulty defaults
+- Reveal plus rolling-history correctness and time-based Easy/Medium/Hard difficulty defaults
 - manual Right/Wrong and Easy/Medium/Hard overrides before save
 - Save & Next after the default or manually changed grade
 - Back with true grade rollback, and ungraded Skip
@@ -113,17 +113,17 @@ One deck has a progress envelope containing independent `modes`, keyed by `study
 
 The timer displays hundredths of a second and measures only active time spent viewing the unrevealed question side. It begins only after the Start gate is dismissed, stops when the answer is revealed, and never charges hidden or unfocused time. If the tab/window loses focus while an unrevealed card is active, the user must pass through the Start gate again on return; timing does not silently auto-resume.
 
-Reveal captures and freezes the response time. After reveal, flipping between question and answer by click or Shift+Enter does not restart or add time. Moving normally to the next card in an already active, focused session does not require another Start gate.
+Reveal captures and freezes the response time. After reveal, flipping between question and answer by click or F does not restart or add time. Moving normally to the next card in an already active, focused session does not require another Start gate.
 
 ### Grading and adaptive review
 
-Correctness and difficulty remain separate recorded inputs. When an answer is revealed, correctness always starts as **Right**. The captured active recall time chooses the initial difficulty:
+Correctness and difficulty remain separate recorded inputs. Automatic correctness is per card and per study direction: attempts 1–3 default to **Wrong**; starting with attempt 4, the default is the majority result among that card's three most recent saved reviews. The captured active recall time chooses the initial difficulty:
 
 - under 3.00 seconds → **Easy**
 - 3.00 seconds through under 10.00 seconds → **Medium**
 - 10.00 seconds or more → **Hard**
 
-These are defaults, not forced grades. The user may change Right/Wrong and Easy/Medium/Hard independently before saving. Plain Enter toggles Right/Wrong; R and W choose correctness directly; 1/2/3 choose difficulty directly. Shift+Enter is reserved for flipping question/answer after reveal.
+These are defaults, not forced grades. Enter toggles Right/Wrong; R/W are intentionally unassigned; 1/2/3 choose Easy/Medium/Hard; F flips the revealed card. Manual corrections are saved into the rolling history and affect later defaults.
 
 Response time is always stored independently, so speed contributes to adaptive priority and scheduling in addition to the selected correctness and difficulty.
 
@@ -165,8 +165,6 @@ The migration creates:
 - `decks`, `deck_categories`, and `cards` for reusable administrator-created decks
 - `user_deck_states` for the current sparse state of every mode
 - `review_events` for individual review audit/sync records
-- `readings` for private passage metadata and timing arrays
-- private `reading-audio` Storage with a 50 MB object limit
 - `admin_users` with self-visible membership checks used directly by administrator-only RLS policies
 
 Every private row policy compares `user_id` to `(select auth.uid())`, allowing Postgres to initialize the identity once per query. Deck/card writes additionally require a matching self-visible row in `admin_users`. The administrator page refusing access is only a usability layer; RLS remains authoritative if someone manually calls an endpoint or visits `/admin`. Supabase's security advisor reports no findings, and its performance advisor reports no actionable RLS warnings after the hardening migrations.
@@ -177,9 +175,9 @@ Email/password signup, secure Supabase sessions, logout, and password recovery a
 
 For this production project's exact Supabase redirects, Google origin/callback values, provider steps, and verification checklist, see [`docs/AUTH-SETUP.md`](docs/AUTH-SETUP.md).
 
-### Guest migration and backup
+### Cloud progress
 
-Guest state is always kept locally first. On sign-in, each local and cloud mode is reconciled independently by its update time, then saved back to the account. Saved guest readings are also uploaded to the signed-in account. The Account page exports v2 JSON backups and imports both v2 backups and the original Henle v4 backup format. Browser same-origin rules prevent a new GitHub domain from directly reading the original Site's localStorage, so migration is explicit instead of silently discarding or covertly reaching across origins.
+Signed-in progress is synchronized through Supabase `user_deck_states` and review events. Guest study remains browser-local until the user signs in; signed-in study uses the same local cache as a performance layer while the cloud account remains the durable cross-device source.
 
 ## Deck administration and imports
 
@@ -193,22 +191,7 @@ Only a row in `admin_users` grants access. The administrator area can:
 
 CSV requires `Front` and `Back`. Optional columns are `Category`, `Rank`, `Source`, `Notes`, and `Reverse Prompt`. See `public/sample-deck.csv`. JSON accepts an array or `{ "cards": [...] }`; case-insensitive equivalents of the same field names are recognized. XLSX uses its first sheet and first row as headers.
 
-Published custom decks remain addressable through `/decks/:slug` and use the same shared `StudySession` engine. The primary public navigation intentionally remains Home, Greek, Latin, Stats, and Reading; do not reintroduce a separate Decks library into that navigation unless explicitly requested. Specialized formats should adapt source data into `StudyCard` and supply custom front/back renderers rather than forking timer, grading, sync, or scheduling logic.
-
-## Reading & Audio
-
-Users can create, save, edit, and delete Greek or Latin passages. The reading player includes Play, Pause, Restart, playback speed, Previous Sentence, Next Sentence, large text, current-word highlighting, and automatic scroll-to-word behavior.
-
-Audio is provider-neutral:
-
-1. With no attached file, browser speech synthesis produces audio. Word highlighting listens to the browser's real speech-boundary events—not a guessed JavaScript interval.
-2. Manually uploaded or teacher-recorded audio is stored privately in Supabase Storage.
-3. Imported word timing metadata uses `{ index, startMs, endMs }` and drives highlighting from the media element's real current time.
-4. `TtsProvider` and the optional `supabase/functions/tts` proxy support a future external provider without exposing its secret to frontend code.
-
-When uploaded audio has no timings, the app deliberately does not fake karaoke synchronization. Greek browser voices are labeled as device/browser voices and warn that `el-*` generally means Modern Greek; the UI never presents a Modern Greek voice as Classical, Koine, or Erasmian. Saved readings record the selected pronunciation label.
-
-The Edge Function remains inactive until an owner-approved provider is selected. Then deploy it and set server-only `TTS_API_URL`, `TTS_API_KEY`, `TTS_PROVIDER_LABEL`, and `TTS_PRONUNCIATION_LABEL` secrets. Provider request/response mapping may need a small adapter because vendor APIs differ.
+Published custom decks remain addressable through `/decks/:slug` and use the same shared `StudySession` engine. The primary public navigation intentionally remains Home, Greek, Latin, and Stats; do not reintroduce a separate Decks library into that navigation unless explicitly requested. Specialized formats should adapt source data into `StudyCard` and supply custom front/back renderers rather than forking timer, grading, sync, or scheduling logic.
 
 ## Deployment and performance checks
 
