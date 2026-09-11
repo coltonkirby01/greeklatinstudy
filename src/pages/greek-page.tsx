@@ -29,12 +29,15 @@ const keys = {
   punctuation: "lesson1-punctuation",
   accents: "lesson2-accents",
   lesson3Vocabulary: "lesson3-vocabulary",
+  presentActiveIndicativeEndings: "lesson3-present-active-indicative-endings",
+  presentActiveInfinitiveEndings: "lesson3-present-active-infinitive-endings",
+  presentActiveImperativeEndings: "lesson3-present-active-imperative-endings",
   presentActiveIndicative: "lesson3-present-active-indicative",
   presentActiveInfinitive: "lesson3-present-active-infinitive",
   presentActiveImperative: "lesson3-present-active-imperative",
   lesson4Vocabulary: "lesson4-vocabulary",
-  firstDeclensionEndingsSingular: "lesson4-first-declension-endings-singular",
-  firstDeclensionEndingsPlural: "lesson4-first-declension-endings-plural",
+  firstDeclensionEndingsAlpha: "lesson4-first-declension-endings-alpha",
+  firstDeclensionEndingsEta: "lesson4-first-declension-endings-eta",
   firstDeclensionThea: "lesson4-first-declension-thea",
   firstDeclensionHesychia: "lesson4-first-declension-hesychia",
   firstDeclensionChora: "lesson4-first-declension-chora",
@@ -47,22 +50,29 @@ const allKeys = Object.values(keys);
 const lesson1Keys = [keys.uppercase, keys.lowercase, keys.punctuation] as const;
 const alphabetKeys = [keys.uppercase, keys.lowercase] as const;
 const lesson2Keys = [keys.accents] as const;
-const lesson3GrammarKeys = [keys.presentActiveIndicative, keys.presentActiveInfinitive, keys.presentActiveImperative] as const;
+const lesson3EndingsKeys = [keys.presentActiveIndicativeEndings, keys.presentActiveInfinitiveEndings, keys.presentActiveImperativeEndings] as const;
+const lesson3ParadigmKeys = [keys.presentActiveIndicative, keys.presentActiveInfinitive, keys.presentActiveImperative] as const;
+const lesson3GrammarKeys = [...lesson3EndingsKeys, ...lesson3ParadigmKeys] as const;
 const lesson3Keys = [keys.lesson3Vocabulary, ...lesson3GrammarKeys] as const;
-const lesson4GrammarKeys = [keys.firstDeclensionEndingsSingular, keys.firstDeclensionEndingsPlural, keys.firstDeclensionThea, keys.firstDeclensionHesychia, keys.firstDeclensionChora, keys.firstDeclensionSkene, keys.feminineArticleSingular, keys.feminineArticlePlural] as const;
+const lesson4EndingsKeys = [keys.firstDeclensionEndingsAlpha, keys.firstDeclensionEndingsEta] as const;
+const lesson4ParadigmKeys = [keys.firstDeclensionThea, keys.firstDeclensionHesychia, keys.firstDeclensionChora, keys.firstDeclensionSkene, keys.feminineArticleSingular, keys.feminineArticlePlural] as const;
+const lesson4GrammarKeys = [...lesson4EndingsKeys, ...lesson4ParadigmKeys] as const;
 const lesson4Keys = [keys.lesson4Vocabulary, ...lesson4GrammarKeys] as const;
 const allVocabularyKeys = [keys.lesson3Vocabulary, keys.lesson4Vocabulary] as const;
 const allGrammarKeys = [...lesson1Keys, ...lesson2Keys, ...lesson3GrammarKeys, ...lesson4GrammarKeys] as const;
 
 const lesson3GrammarCategoryByKey = new Map<string, string>([
+  [keys.presentActiveIndicativeEndings, "Present Active Indicative Endings"],
+  [keys.presentActiveInfinitiveEndings, "Present Active Infinitive Endings"],
+  [keys.presentActiveImperativeEndings, "Present Active Imperative Endings"],
   [keys.presentActiveIndicative, "Present Active Indicative"],
   [keys.presentActiveInfinitive, "Present Active Infinitive"],
   [keys.presentActiveImperative, "Present Active Imperative"],
 ]);
 
 const lesson4GrammarCategoryByKey = new Map<string, string>([
-  [keys.firstDeclensionEndingsSingular, "First Declension Feminine Endings — Singular"],
-  [keys.firstDeclensionEndingsPlural, "First Declension Feminine Endings — Plural"],
+  [keys.firstDeclensionEndingsAlpha, "First Declension Feminine Endings — α-type"],
+  [keys.firstDeclensionEndingsEta, "First Declension Feminine Endings — η-type"],
   [keys.firstDeclensionThea, "First Declension Feminine Nouns — θεά"],
   [keys.firstDeclensionHesychia, "First Declension Feminine Nouns — ἡσυχίᾱ"],
   [keys.firstDeclensionChora, "First Declension Feminine Nouns — χώρᾱ"],
@@ -151,9 +161,11 @@ export function GreekPage() {
   const alphabetState = groupState(selected, alphabetKeys);
   const lesson2State = groupState(selected, lesson2Keys);
   const lesson3State = groupState(selected, lesson3Keys);
-  const lesson3GrammarState = groupState(selected, lesson3GrammarKeys);
+  const lesson3EndingsState = groupState(selected, lesson3EndingsKeys);
+  const lesson3ParadigmState = groupState(selected, lesson3ParadigmKeys);
   const lesson4State = groupState(selected, lesson4Keys);
-  const lesson4GrammarState = groupState(selected, lesson4GrammarKeys);
+  const lesson4EndingsState = groupState(selected, lesson4EndingsKeys);
+  const lesson4ParadigmState = groupState(selected, lesson4ParadigmKeys);
   const vocabularyState = groupState(selected, allVocabularyKeys);
   const grammarState = groupState(selected, allGrammarKeys);
 
@@ -264,10 +276,16 @@ export function GreekPage() {
           <FilterCheckbox label="All Lesson 3 vocabulary" count={decks.lesson3Vocabulary.cards.length} checked={selected.has(keys.lesson3Vocabulary)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson3Vocabulary], checked))} />
         </FilterDisclosure>
 
-        <FilterDisclosure title="Grammar" summary={`${lesson3GrammarState.selectedCount} of ${lesson3GrammarKeys.length} paradigms selected`} count={decks.lesson3Grammar.cards.length} nested checked={lesson3GrammarState.checked} mixed={lesson3GrammarState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson3GrammarKeys, checked))}>
-          <FilterCheckbox label="Present Active Indicative" count={countLesson3Grammar("Present Active Indicative")} checked={selected.has(keys.presentActiveIndicative)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveIndicative], checked))} />
-          <FilterCheckbox label="Present Active Infinitive" count={countLesson3Grammar("Present Active Infinitive")} checked={selected.has(keys.presentActiveInfinitive)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveInfinitive], checked))} />
-          <FilterCheckbox label="Present Active Imperative" count={countLesson3Grammar("Present Active Imperative")} checked={selected.has(keys.presentActiveImperative)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveImperative], checked))} />
+        <FilterDisclosure title="Endings" summary={`${lesson3EndingsState.selectedCount} of ${lesson3EndingsKeys.length} selected`} count={lesson3EndingsKeys.length} nested checked={lesson3EndingsState.checked} mixed={lesson3EndingsState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson3EndingsKeys, checked))}>
+          <FilterCheckbox label="Present Active Indicative Endings" count={countLesson3Grammar("Present Active Indicative Endings")} checked={selected.has(keys.presentActiveIndicativeEndings)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveIndicativeEndings], checked))} />
+          <FilterCheckbox label="Present Active Infinitive Ending" count={countLesson3Grammar("Present Active Infinitive Endings")} checked={selected.has(keys.presentActiveInfinitiveEndings)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveInfinitiveEndings], checked))} />
+          <FilterCheckbox label="Present Active Imperative Endings" count={countLesson3Grammar("Present Active Imperative Endings")} checked={selected.has(keys.presentActiveImperativeEndings)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveImperativeEndings], checked))} />
+        </FilterDisclosure>
+
+        <FilterDisclosure title="Paradigms" summary={`${lesson3ParadigmState.selectedCount} of ${lesson3ParadigmKeys.length} selected`} count={lesson3ParadigmKeys.length} nested checked={lesson3ParadigmState.checked} mixed={lesson3ParadigmState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson3ParadigmKeys, checked))}>
+          <FilterCheckbox label="Present Active Indicative — παιδεύω" count={countLesson3Grammar("Present Active Indicative")} checked={selected.has(keys.presentActiveIndicative)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveIndicative], checked))} />
+          <FilterCheckbox label="Present Active Infinitive — παιδεύω" count={countLesson3Grammar("Present Active Infinitive")} checked={selected.has(keys.presentActiveInfinitive)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveInfinitive], checked))} />
+          <FilterCheckbox label="Present Active Imperative — παιδεύω" count={countLesson3Grammar("Present Active Imperative")} checked={selected.has(keys.presentActiveImperative)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveImperative], checked))} />
         </FilterDisclosure>
       </FilterDisclosure>
 
@@ -276,8 +294,16 @@ export function GreekPage() {
           <FilterCheckbox label="All Lesson 4 vocabulary" count={decks.lesson4Vocabulary.cards.length} checked={selected.has(keys.lesson4Vocabulary)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson4Vocabulary], checked))} />
         </FilterDisclosure>
 
-        <FilterDisclosure title="Grammar" summary={`${lesson4GrammarState.selectedCount} of ${lesson4GrammarKeys.length} paradigms selected`} count={decks.lesson4Grammar.cards.length} nested checked={lesson4GrammarState.checked} mixed={lesson4GrammarState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson4GrammarKeys, checked))}>
-          {[...lesson4GrammarCategoryByKey.entries()].map(([key, category]) => <FilterCheckbox key={key} label={category} count={countLesson4Grammar(category)} checked={selected.has(key)} onChange={(checked) => setSelected((current) => updateSet(current, [key], checked))} />)}
+        <FilterDisclosure title="Endings" summary={`${lesson4EndingsState.selectedCount} of ${lesson4EndingsKeys.length} selected`} count={lesson4EndingsKeys.length} nested checked={lesson4EndingsState.checked} mixed={lesson4EndingsState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson4EndingsKeys, checked))}>
+          <FilterCheckbox label="First Declension Feminine — α-type Endings" count={countLesson4Grammar("First Declension Feminine Endings — α-type")} checked={selected.has(keys.firstDeclensionEndingsAlpha)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.firstDeclensionEndingsAlpha], checked))} />
+          <FilterCheckbox label="First Declension Feminine — η-type Endings" count={countLesson4Grammar("First Declension Feminine Endings — η-type")} checked={selected.has(keys.firstDeclensionEndingsEta)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.firstDeclensionEndingsEta], checked))} />
+        </FilterDisclosure>
+
+        <FilterDisclosure title="Paradigms" summary={`${lesson4ParadigmState.selectedCount} of ${lesson4ParadigmKeys.length} selected`} count={lesson4ParadigmKeys.length} nested checked={lesson4ParadigmState.checked} mixed={lesson4ParadigmState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson4ParadigmKeys, checked))}>
+          {lesson4ParadigmKeys.map((key) => {
+            const category = lesson4GrammarCategoryByKey.get(key)!;
+            return <FilterCheckbox key={key} label={category} count={countLesson4Grammar(category)} checked={selected.has(key)} onChange={(checked) => setSelected((current) => updateSet(current, [key], checked))} />;
+          })}
         </FilterDisclosure>
       </FilterDisclosure>
     </StudyFilterMenu>}
@@ -292,7 +318,7 @@ export function GreekPage() {
       resumeSession={resumeSession}
       savedCardRefs={savedCards.refs}
       onToggleSavedCard={savedCards.toggleSaved}
-      cardMeta={(card, source) => source.deck.id === decks.foundation.id ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.deck.id === decks.lesson3Vocabulary.id ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson4Vocabulary.id ? `Lesson 4 vocabulary · ${card.notes ?? ""}` : `Lesson ${Number(card.metadata?.lesson ?? 3)} grammar · ${card.category ?? ""} · whole paradigm`}
+      cardMeta={(card, source) => source.deck.id === decks.foundation.id ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.deck.id === decks.lesson3Vocabulary.id ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson4Vocabulary.id ? `Lesson 4 vocabulary · ${card.notes ?? ""}` : `Lesson ${Number(card.metadata?.lesson ?? 3)} grammar · ${card.category ?? ""}`}
       renderFront={(card, copy, source) => {
         if (source.deck.id === decks.lesson3Grammar.id || source.deck.id === decks.lesson4Grammar.id) return <span className="study-prompt reverse-text-prompt">{card.front}</span>;
         return <span className={source.direction === "forward" ? "greek-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
