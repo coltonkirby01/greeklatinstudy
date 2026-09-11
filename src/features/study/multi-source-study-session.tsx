@@ -116,6 +116,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   const envelopesRef = useRef<Record<string, DeckProgressEnvelope>>({});
   const persistQueue = useRef<Promise<void>>(Promise.resolve());
   const recentSourceIdsRef = useRef<string[]>([]);
+  const savedTogglePendingRef = useRef(false);
   const [ready, setReady] = useState(false);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>("adaptive");
   const [current, setCurrent] = useState<Candidate | null>(null);
@@ -303,18 +304,33 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
 
   useEffect(() => {
     if (!ready) return;
-    resetUi(); setLastTransaction(null); setWarmup(null); setStartGateOpen(true);
+    const savedToggleChangedSelection = savedTogglePendingRef.current;
+    if (savedToggleChangedSelection) savedTogglePendingRef.current = false;
     const retained = retainSelectedCandidate(current, sources);
+    if (savedToggleChangedSelection && retained) {
+      setCurrent(retained);
+      return;
+    }
+    resetUi(); setLastTransaction(null); setWarmup(null);
+    if (!savedToggleChangedSelection) setStartGateOpen(true);
     if (retained) { recentSourceIdsRef.current = [retained.source.id]; setCurrent(retained); return; }
     recentSourceIdsRef.current = [];
     setCurrent(null);
     const selected = chooseNext(persistedCurrentCandidate());
     if (selected) present(selected);
     // Filter changes keep the current card whenever it remains in the new pool.
-    // On initial load, the most recent persisted current-card pointer represents
-    // an unanswered/abandoned card and is advanced exactly like Skip.
+    // A Save/Unsave source update is not a study-filter change and must not
+    // reopen the Start gate. On initial load, the most recent persisted
+    // current-card pointer represents an unanswered/abandoned card and is
+    // advanced exactly like Skip.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, selectionSignature]);
+
+  useEffect(() => {
+    if (!savedTogglePendingRef.current) return;
+    const clearPending = window.setTimeout(() => { savedTogglePendingRef.current = false; }, 0);
+    return () => window.clearTimeout(clearPending);
+  }, [savedCardRefs]);
 
   const currentState = current ? modeFor(current.source) : null;
   const copy = current ? directionalCopy(current.card, current.source.direction) : null;
@@ -355,6 +371,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   }
   function toggleSavedCard() {
     if (!current || !onToggleSavedCard) return;
+    savedTogglePendingRef.current = true;
     onToggleSavedCard(current.source.deck.id, current.card.id);
   }
   function clearResumeUrl() {
