@@ -1,7 +1,7 @@
 import { BarChart3, Clock3, Cloud, Gauge, Laptop, TrendingUp } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { loadGreekDeck, loadGreekLesson3GrammarDeck, loadGreekLesson3VocabularyDeck, loadLatinDeck } from "../data/builtin-decks";
+import { Link, useSearchParams } from "react-router-dom";
+import { loadGreekDeck, loadGreekLesson3GrammarDeck, loadGreekLesson3VocabularyDeck, loadGreekLesson4GrammarDeck, loadGreekLesson4VocabularyDeck, loadLatinDeck } from "../data/builtin-decks";
 import { loadLatinActiveIndicativeParadigmsDeck } from "../data/latin-active-indicative-paradigms";
 import { loadLatinPassiveIndicativeParadigmsDeck } from "../data/latin-passive-indicative-paradigms";
 import { useAuth } from "../features/auth/auth-context";
@@ -264,7 +264,9 @@ function weeklyTrendData(sessions: SessionSummary[]) {
 
 export function StatsPage() {
   const { user } = useAuth();
-  const [selectedSessions, setSelectedSessions] = useState<Set<string> | null>(null);
+  const [searchParams] = useSearchParams();
+  const requestedSessionId = searchParams.get("session");
+  const [selectedSessions, setSelectedSessions] = useState<Set<string> | null>(() => requestedSessionId ? new Set([requestedSessionId]) : null);
   const [revision, setRevision] = useState(0);
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [draftName, setDraftName] = useState("");
@@ -272,10 +274,12 @@ export function StatsPage() {
   const [actionError, setActionError] = useState<string | null>(null);
 
   const { value, error, loading } = useAsync(async () => {
-    const [greekFoundation, greekVocabulary, greekGrammar, latinVocabulary, activeParadigms, passiveParadigms] = await Promise.all([
+    const [greekFoundation, greekVocabulary, greekGrammar, greekLesson4Vocabulary, greekLesson4Grammar, latinVocabulary, activeParadigms, passiveParadigms] = await Promise.all([
       loadGreekDeck(),
       loadGreekLesson3VocabularyDeck(),
       loadGreekLesson3GrammarDeck(),
+      loadGreekLesson4VocabularyDeck(),
+      loadGreekLesson4GrammarDeck(),
       loadLatinDeck(),
       loadLatinActiveIndicativeParadigmsDeck(),
       loadLatinPassiveIndicativeParadigmsDeck(),
@@ -286,11 +290,15 @@ export function StatsPage() {
       { language: "Greek", source: "Lesson 3 Vocabulary", mode: "Forward", direction: "forward", deck: greekVocabulary, cards: greekVocabulary.cards, studyKey: "forward" },
       { language: "Greek", source: "Lesson 3 Vocabulary", mode: "Reverse", direction: "reverse", deck: greekVocabulary, cards: greekVocabulary.cards, studyKey: "reverse" },
       { language: "Greek", source: "Lesson 3 Grammar", mode: "Forward", direction: "forward", deck: greekGrammar, cards: greekGrammar.cards, studyKey: "forward" },
-      { language: "Greek", source: "Lesson 3 Grammar", mode: "Reverse", direction: "reverse", deck: greekGrammar, cards: greekGrammar.cards, studyKey: "reverse" },
+      { language: "Greek", source: "Lesson 4 Vocabulary", mode: "Forward", direction: "forward", deck: greekLesson4Vocabulary, cards: greekLesson4Vocabulary.cards, studyKey: "forward" },
+      { language: "Greek", source: "Lesson 4 Vocabulary", mode: "Reverse", direction: "reverse", deck: greekLesson4Vocabulary, cards: greekLesson4Vocabulary.cards, studyKey: "reverse" },
+      { language: "Greek", source: "Lesson 4 Grammar", mode: "Forward", direction: "forward", deck: greekLesson4Grammar, cards: greekLesson4Grammar.cards, studyKey: "forward" },
       { language: "Latin", source: "Dickinson Vocabulary", mode: "Forward", direction: "forward", deck: latinVocabulary, cards: latinVocabulary.cards, studyKey: "forward" },
       { language: "Latin", source: "Dickinson Vocabulary", mode: "Reverse", direction: "reverse", deck: latinVocabulary, cards: latinVocabulary.cards, studyKey: "reverse" },
       { language: "Latin", source: "Active Indicative Paradigms", mode: "Charts", direction: "forward", deck: activeParadigms, cards: activeParadigms.cards, studyKey: "chart" },
+      { language: "Latin", source: "Active Indicative Paradigms", mode: "Reverse", direction: "reverse", deck: activeParadigms, cards: activeParadigms.cards, studyKey: "reverse" },
       { language: "Latin", source: "Passive Indicative Paradigms", mode: "Charts", direction: "forward", deck: passiveParadigms, cards: passiveParadigms.cards, studyKey: "chart" },
+      { language: "Latin", source: "Passive Indicative Paradigms", mode: "Reverse", direction: "reverse", deck: passiveParadigms, cards: passiveParadigms.cards, studyKey: "reverse" },
     ];
     const uniqueDeckIds = [...new Set(sources.map((source) => source.deck.id))];
     const loaded = await Promise.all(uniqueDeckIds.map(async (deckId) => [deckId, await loadProgressEnvelope(deckId, user)] as const));

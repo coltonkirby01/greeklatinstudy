@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { blankCardProgress } from "../src/features/study/engine";
-import { AUTO_WRONG_REVIEW_COUNT, autoReviewDefaults, sessionProgressSummary } from "../src/features/study/session-review";
+import { INITIAL_AUTO_WRONG_REVIEWS, RECENT_AUTO_GRADE_WINDOW, autoReviewDefaults, autoReviewResult, sessionProgressSummary } from "../src/features/study/session-review";
 import type { CardProgress, ReviewRecord } from "../src/features/study/types";
 
 function progressWith(...history: ReviewRecord[]): CardProgress {
@@ -12,12 +12,43 @@ function review(id: string, reviewedAt: number, result: "right" | "wrong", diffi
 }
 
 describe("automatic review defaults", () => {
-  it("defaults the first seven reviews to wrong and review eight onward to right", () => {
-    expect(AUTO_WRONG_REVIEW_COUNT).toBe(7);
-    expect(autoReviewDefaults(2_999, 0)).toEqual({ result: "wrong", difficulty: "easy" });
-    expect(autoReviewDefaults(3_000, 6)).toEqual({ result: "wrong", difficulty: "medium" });
-    expect(autoReviewDefaults(9_999, 7)).toEqual({ result: "right", difficulty: "medium" });
-    expect(autoReviewDefaults(10_000, 12)).toEqual({ result: "right", difficulty: "hard" });
+  it("defaults attempts one through three to wrong", () => {
+    expect(INITIAL_AUTO_WRONG_REVIEWS).toBe(3);
+    expect(RECENT_AUTO_GRADE_WINDOW).toBe(3);
+    expect(autoReviewResult(progressWith())).toBe("wrong");
+    expect(autoReviewResult(progressWith(review("a", 1, "right", "easy", 1_000)))).toBe("wrong");
+    expect(autoReviewResult(progressWith(review("a", 1, "right", "easy", 1_000), review("b", 2, "right", "easy", 1_000)))).toBe("wrong");
+  });
+
+  it("uses the majority of the three most recent saved reviews after attempt three", () => {
+    const mostlyRight = progressWith(
+      review("a", 1, "wrong", "hard", 10_000),
+      review("b", 2, "right", "medium", 5_000),
+      review("c", 3, "right", "easy", 2_000),
+    );
+    mostlyRight.reviews = 3;
+    const mostlyWrong = progressWith(
+      review("a", 1, "right", "easy", 2_000),
+      review("b", 2, "wrong", "medium", 5_000),
+      review("c", 3, "wrong", "hard", 10_000),
+    );
+    mostlyWrong.reviews = 3;
+    expect(autoReviewResult(mostlyRight)).toBe("right");
+    expect(autoReviewResult(mostlyWrong)).toBe("wrong");
+    expect(autoReviewDefaults(2_999, mostlyRight)).toEqual({ result: "right", difficulty: "easy" });
+    expect(autoReviewDefaults(10_000, mostlyWrong)).toEqual({ result: "wrong", difficulty: "hard" });
+  });
+
+  it("changes with the rolling last-three window rather than lifetime accuracy", () => {
+    const progress = progressWith(
+      review("a", 1, "right", "easy", 1_000),
+      review("b", 2, "right", "easy", 1_000),
+      review("c", 3, "right", "easy", 1_000),
+      review("d", 4, "wrong", "hard", 10_000),
+      review("e", 5, "wrong", "hard", 10_000),
+    );
+    progress.reviews = 5;
+    expect(autoReviewResult(progress)).toBe("wrong");
   });
 });
 

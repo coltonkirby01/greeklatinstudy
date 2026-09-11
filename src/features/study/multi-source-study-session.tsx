@@ -345,7 +345,10 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     return map;
   }, [envelopes, sources]);
   const visibleCandidates = useMemo(() => sources.flatMap((source) => { const state = states.get(source.id); return state ? availableCards(source, state).map((card) => ({ source, card })) : []; }), [sources, states]);
-  const sessionProgress = useMemo(() => sessionProgressSummary(visibleCandidates.map(({ source, card }) => ({ progress: getCardProgress(states.get(source.id) ?? modeFor(source), card.id) })), session.id), [modeFor, session.id, states, visibleCandidates]);
+  const sessionProgress = useMemo(() => {
+  const items = Object.values(envelopes).flatMap((envelope) => Object.values(envelope.modes).flatMap((mode) => Object.values(mode.cards).map((progress) => ({ progress }))));
+  return sessionProgressSummary(items, session.id);
+}, [envelopes, session.id]);
   const stats = sessionProgress.stats;
   const priority = useMemo(() => visibleCandidates.map(({ source, card }) => ({ card, progress: getCardProgress(states.get(source.id) ?? modeFor(source), card.id), score: priorityScore(card, states.get(source.id) ?? modeFor(source), { ignoreRecency: true }) })).sort((a, b) => b.score - a.score).slice(0, 5), [modeFor, states, visibleCandidates]);
   const sourceByCard = useMemo(() => new Map(sources.flatMap((source) => source.cards.map((card) => [`${card.deckId}:${card.id}`, source] as const))), [sources]);
@@ -355,7 +358,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     if (!current || revealed || editingTransaction || startGateOpen) return;
     setBacktracking(false); setReviewFront(false);
     const responseTimeMs = timer.capture();
-    const suggested = autoReviewDefaults(responseTimeMs, currentState ? getCardProgress(currentState, current.card.id).reviews : 0);
+    const suggested = autoReviewDefaults(responseTimeMs, currentState ? getCardProgress(currentState, current.card.id) : undefined);
     setCapturedTimeMs(responseTimeMs); setResult(suggested.result); setDifficulty(suggested.difficulty); setRevealed(true);
   }
   function toggleReviewFace() { if (revealed) setReviewFront((value) => !value); }
@@ -515,6 +518,6 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
       <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} frontControls={frontControls} />
       <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
     </section>
-    <StudySidebar copy={copy} direction={direction} stats={stats} initialReviewed={sessionProgress.initialReviewed} initialTotal={sessionProgress.initialTotal} initialPercent={sessionProgress.initialPercent} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
+    <StudySidebar copy={copy} direction={direction} stats={stats} sessionId={session.id} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
   </div>;
 }

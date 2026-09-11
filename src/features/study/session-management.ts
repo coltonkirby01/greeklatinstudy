@@ -25,8 +25,8 @@ type SessionReview = {
 };
 
 const SESSION_DECKS = {
-  Greek: ["greek-i", "alpha-omega-lesson3-vocab", "alpha-omega-lesson3-grammar"],
-  Latin: ["dickinson-latin-core", "henle-part1-forms"],
+  Greek: ["greek-i", "alpha-omega-lesson3-vocab", "alpha-omega-lesson3-grammar", "alpha-omega-lesson4-vocab", "alpha-omega-lesson4-grammar"],
+  Latin: ["dickinson-latin-core", "henle-part1-forms", "latin-active-indicative-paradigms", "latin-passive-indicative-paradigms"],
 } as const;
 
 export function sessionDeckIdsForLanguage(language: "Greek" | "Latin") {
@@ -41,8 +41,12 @@ function sourceLabel(deckId: string, studyKey: string) {
   if (deckId === "greek-i") return "Lessons 1–2";
   if (deckId === "alpha-omega-lesson3-vocab") return "Lesson 3 Vocabulary";
   if (deckId === "alpha-omega-lesson3-grammar") return "Lesson 3 Grammar";
+  if (deckId === "alpha-omega-lesson4-vocab") return "Lesson 4 Vocabulary";
+  if (deckId === "alpha-omega-lesson4-grammar") return "Lesson 4 Grammar";
   if (deckId === "dickinson-latin-core") return "Dickinson Vocabulary";
   if (deckId === "henle-part1-forms") return studyKey.startsWith("chart") ? "Henle Whole Charts" : "Henle Grammar Forms";
+  if (deckId === "latin-active-indicative-paradigms") return "Active Indicative Paradigms";
+  if (deckId === "latin-passive-indicative-paradigms") return "Passive Indicative Paradigms";
   return deckId;
 }
 
