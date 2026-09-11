@@ -14,7 +14,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 
 ## App structure and filtering
 
-- The primary public navigation is Home, Greek, Latin, Stats, and Reading. Stats is a first-class navigation destination, not something users should have to discover only inside a study page.
+- The primary public navigation is Home, Greek, Latin, and Stats. Stats is a first-class navigation destination, not something users should have to discover only inside a study page. Reading/Audio was deliberately removed and must not be reintroduced unless explicitly requested.
 - The public study navigation has one Greek app and one Latin app. Do not reintroduce separate Henle, vocabulary, grammar, or Decks apps/pages in the primary navigation.
 - `/henle` is a compatibility redirect into `/latin`; Henle grammar is studied inside the Latin app.
 - Individual imported/custom deck routes under `/decks/:slug` may remain addressable, but there is no standalone `/decks` library page or Decks navigation item.
@@ -35,9 +35,9 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - Lesson 1 contains Alphabet and Punctuation. Alphabet expands to independent Uppercase and Lowercase choices. Alphabet and punctuation are Grammar, not vocabulary.
 - Lesson 2 contains Accent Marks. Accent marks are Grammar, not vocabulary.
 - Current Greek vocabulary sources are Lessons 3 and 4 Vocabulary.
-- Greek Lesson 3 contains separate Vocabulary and Grammar headings. Lesson 3 Grammar currently contains exactly three whole-paradigm chart cards: Present Active Indicative, Present Active Infinitive, and Present Active Imperative from the παιδεύω paradigm.
-- Each Lesson 3 grammar filter corresponds to one whole chart card, not a collection of individual person/number form cards. Do not reintroduce the retired 11 isolated Lesson 3 grammar questions unless explicitly requested.
-- Forward study asks for the named whole paradigm and reveals its chart. Reverse study shows the complete chart and asks the user to identify the paradigm; Reverse must not decompose the chart back into isolated form-identification cards.
+- Greek Lesson 3 contains separate Vocabulary, Endings, and Paradigms groupings. Lesson 3 Grammar currently contains six cards: three ending-only cards (Present Active Indicative, Infinitive, Imperative) plus three corresponding παιδεύω paradigm cards.
+- The three ending cards each preserve one complete endings chart; the three paradigm cards each preserve one complete παιδεύω chart. Do not decompose them into isolated person/number questions unless explicitly requested.
+- Lesson 3 grammar is currently forward-only. Do not add a reverse grammar direction unless explicitly requested; vocabulary Forward/Reverse remains separate.
 - Keep Lesson 3 vocabulary progress separate from Lesson 3 chart progress even when both are mixed in one session.
 - Every Greek vocabulary card must show a Classical-Greek pronunciation guide on the answer side in both Forward and Reverse study. Future Greek vocabulary imports must use the shared pronunciation helper rather than requiring a hand-maintained pronunciation list.
 - Greek card types remain multi-select. Lesson material, vocabulary, grammar, punctuation, accents, and future lesson categories may be combined in one adaptive session without merging their stored histories.
@@ -54,6 +54,14 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - Henle Individual Forms and Whole Charts show the authoritative Henle Rule number on the answer side when source data supplies it.
 - Henle Whole Chart answers must explicitly identify stems as `Stem:` and endings/personal signs as `Ending:` whenever the source metadata identifies them as such. Ordinary finite forms may show a defensible `Stem / base + Ending → Complete form` breakdown when the source supports it. Do not invent a morphological split where the data is ambiguous.
 - Do not reintroduce a separate "How to read this answer" instructional block on Henle cards unless the user explicitly asks for it.
+
+## Weekly card additions
+
+- New cards are expected regularly. Prefer additions that change authoritative card/deck data only and automatically flow through the canonical built-in study catalog.
+- Keep all existing deck IDs and card IDs stable. Every new card must have a stable unique ID before release.
+- `src/features/study/builtin-study-catalog.ts` is the single active built-in deck/Stats/session registry. Do not create parallel Account, Stats, or session registries.
+- Adding cards to an existing registered deck must automatically reach Stats and session coverage because the catalog loads the complete deck. If a new lesson/category is introduced, extend the language selector so Select all/Deselect all and saved filter preferences handle it safely.
+- A genuinely new deck or direction must be registered in `BUILTIN_STUDY_DECKS` in the same change. Run `npm run maintain:check` and the full test/build suite before merge.
 
 ## Built-in deck invariants
 
@@ -100,7 +108,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 
 ## Review and mastery behavior
 
-- Correctness and difficulty remain separate recorded inputs. When an answer is revealed, correctness defaults to `Right` for every card, while difficulty is selected automatically from the captured active front-side recall time.
+- Correctness and difficulty remain separate recorded inputs. On attempts 1–3 for a card in a study mode/direction, correctness defaults to `Wrong`; from attempt 4 onward, correctness defaults to the majority result of that card's three most recent saved reviews. Difficulty is selected independently from captured active front-side recall time.
 - Automatic difficulty thresholds are: under 3.00 seconds = `Easy`; 3.00 seconds through under 10.00 seconds = `Medium`; 10.00 seconds or more = `Hard`.
 - These are defaults, not irreversible grades. The user may change correctness and difficulty independently before Save & Next.
 - Never overwrite a user's manual Right/Wrong or Easy/Medium/Hard change after the default has been shown.
@@ -118,7 +126,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 
 - The front timer displays hundredths of a second.
 - The timer measures only active time spent viewing the unrevealed front of the current card.
-- The timer stops when the answer is revealed; that captured value is used to choose the initial Easy/Medium/Hard difficulty. Correctness starts as Right regardless of elapsed time.
+- The timer stops when the answer is revealed; that captured value is used only to choose the initial Easy/Medium/Hard difficulty. Correctness follows the per-card rolling-review default and is independent of elapsed time.
 - Time while the browser tab/window is hidden or unfocused must never count.
 - A study session begins behind an explicit Start gate. The timer remains at rest until the user presses Start or a non-control key.
 - The Start gate also has an explicit Pause/Start-gate path available without leaving the browser tab.
@@ -134,7 +142,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - Space reveals an unrevealed card after the Start gate has been dismissed; reveal also fills `Right` plus the time-based difficulty default.
 - After reveal, Enter toggles correctness between Right and Wrong without saving.
 - After reveal, F flips between question and answer without saving and without adding response time.
-- After reveal, R = Right and W = Wrong and may override or confirm the automatic correctness selection.
+- After reveal, R and W are intentionally unassigned. Enter toggles Right/Wrong without saving.
 - After reveal, 1 = Easy, 2 = Medium, and 3 = Hard and may override the automatic difficulty selection.
 - Clicking an unrevealed question card reveals the answer. After reveal, clicking whichever card face is visible flips to the opposite face, including clicking the answer side to return to the question.
 - Because reveal supplies both defaults, Space after reveal = Save & Next unless the grade state is deliberately cleared by future UI behavior.
