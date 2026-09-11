@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { loadGreekDeck, loadGreekLesson3GrammarDeck, loadGreekLesson3VocabularyDeck } from "../data/builtin-decks";
+import {
+  loadGreekDeck,
+  loadGreekLesson3GrammarDeck,
+  loadGreekLesson3VocabularyDeck,
+  loadGreekLesson4GrammarDeck,
+  loadGreekLesson4VocabularyDeck,
+} from "../data/builtin-decks";
 import { useAuth } from "../features/auth/auth-context";
 import { ClassicalGreekAudio } from "../features/greek/classical-greek-audio";
 import { loadGreekFilterSelection, saveGreekFilterSelection } from "../features/study/filter-preferences";
@@ -26,6 +32,13 @@ const keys = {
   presentActiveIndicative: "lesson3-present-active-indicative",
   presentActiveInfinitive: "lesson3-present-active-infinitive",
   presentActiveImperative: "lesson3-present-active-imperative",
+  lesson4Vocabulary: "lesson4-vocabulary",
+  firstDeclensionThea: "lesson4-first-declension-thea",
+  firstDeclensionHesychia: "lesson4-first-declension-hesychia",
+  firstDeclensionChora: "lesson4-first-declension-chora",
+  firstDeclensionSkene: "lesson4-first-declension-skene",
+  feminineArticleSingular: "lesson4-feminine-article-singular",
+  feminineArticlePlural: "lesson4-feminine-article-plural",
 } as const;
 
 const allKeys = Object.values(keys);
@@ -34,13 +47,24 @@ const alphabetKeys = [keys.uppercase, keys.lowercase] as const;
 const lesson2Keys = [keys.accents] as const;
 const lesson3GrammarKeys = [keys.presentActiveIndicative, keys.presentActiveInfinitive, keys.presentActiveImperative] as const;
 const lesson3Keys = [keys.lesson3Vocabulary, ...lesson3GrammarKeys] as const;
-const allVocabularyKeys = [keys.lesson3Vocabulary] as const;
-const allGrammarKeys = [...lesson1Keys, ...lesson2Keys, ...lesson3GrammarKeys] as const;
+const lesson4GrammarKeys = [keys.firstDeclensionThea, keys.firstDeclensionHesychia, keys.firstDeclensionChora, keys.firstDeclensionSkene, keys.feminineArticleSingular, keys.feminineArticlePlural] as const;
+const lesson4Keys = [keys.lesson4Vocabulary, ...lesson4GrammarKeys] as const;
+const allVocabularyKeys = [keys.lesson3Vocabulary, keys.lesson4Vocabulary] as const;
+const allGrammarKeys = [...lesson1Keys, ...lesson2Keys, ...lesson3GrammarKeys, ...lesson4GrammarKeys] as const;
 
-const grammarCategoryByKey = new Map<string, string>([
+const lesson3GrammarCategoryByKey = new Map<string, string>([
   [keys.presentActiveIndicative, "Present Active Indicative"],
   [keys.presentActiveInfinitive, "Present Active Infinitive"],
   [keys.presentActiveImperative, "Present Active Imperative"],
+]);
+
+const lesson4GrammarCategoryByKey = new Map<string, string>([
+  [keys.firstDeclensionThea, "First Declension Feminine Nouns — θεά"],
+  [keys.firstDeclensionHesychia, "First Declension Feminine Nouns — ἡσυχίᾱ"],
+  [keys.firstDeclensionChora, "First Declension Feminine Nouns — χώρᾱ"],
+  [keys.firstDeclensionSkene, "First Declension Feminine Nouns — σκηνή"],
+  [keys.feminineArticleSingular, "Feminine Definite Article — Singular"],
+  [keys.feminineArticlePlural, "Feminine Definite Article — Plural"],
 ]);
 
 type GreekChartRow = { label: string; cells: string[] };
@@ -72,14 +96,19 @@ function chartRows(card: StudyCard): GreekChartRow[] {
   });
 }
 
-function GreekLesson3Paradigm({ card }: { card: StudyCard }) {
+function sourceRef(card: StudyCard) {
+  return typeof card.metadata?.sourceRef === "string" ? card.metadata.sourceRef : "";
+}
+
+function GreekParadigm({ card }: { card: StudyCard }) {
   const columns = chartColumns(card), rows = chartRows(card);
   return <div className="chart-scroll">
     <table className="henle-chart">
-      <thead><tr><th scope="col">{columns.length === 1 ? "Form" : "Person"}</th>{columns.map((column) => <th scope="col" key={column}>{column}</th>)}</tr></thead>
+      <thead><tr><th scope="col">{columns.length === 1 ? "Form" : "Case"}</th>{columns.map((column) => <th scope="col" key={column}>{column}</th>)}</tr></thead>
       <tbody>{rows.map((row) => <tr key={row.label}><th scope="row">{row.label}</th>{row.cells.map((cell, index) => <td key={`${row.label}-${columns[index] ?? index}`}><strong className="greek-front compact-greek">{cell}</strong></td>)}</tr>)}</tbody>
     </table>
-    <ClassicalGreekAudio assetId={card.id} label={card.category ?? "Lesson 3 paradigm"} />
+    {sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}
+    <ClassicalGreekAudio assetId={card.id} label={card.category ?? "Greek paradigm"} />
   </div>;
 }
 
@@ -89,12 +118,14 @@ function GreekCardAudio({ card }: { card: StudyCard }) {
 
 export function GreekPage() {
   const { value: decks, error } = useAsync(async () => {
-    const [foundation, lesson3Vocabulary, lesson3Grammar] = await Promise.all([
+    const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar] = await Promise.all([
       loadGreekDeck(),
       loadGreekLesson3VocabularyDeck(),
       loadGreekLesson3GrammarDeck(),
+      loadGreekLesson4VocabularyDeck(),
+      loadGreekLesson4GrammarDeck(),
     ]);
-    return { foundation, lesson3Vocabulary, lesson3Grammar };
+    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar };
   }, []);
   const { user } = useAuth();
   const savedCards = useSavedCards("greek", user);
@@ -115,6 +146,8 @@ export function GreekPage() {
   const lesson2State = groupState(selected, lesson2Keys);
   const lesson3State = groupState(selected, lesson3Keys);
   const lesson3GrammarState = groupState(selected, lesson3GrammarKeys);
+  const lesson4State = groupState(selected, lesson4Keys);
+  const lesson4GrammarState = groupState(selected, lesson4GrammarKeys);
   const vocabularyState = groupState(selected, allVocabularyKeys);
   const grammarState = groupState(selected, allGrammarKeys);
 
@@ -128,13 +161,18 @@ export function GreekPage() {
 
   const lesson3VocabularyCards = useMemo(() => selected.has(keys.lesson3Vocabulary) ? decks?.lesson3Vocabulary.cards ?? [] : [], [decks, selected]);
   const lesson3GrammarCards = useMemo(() => decks?.lesson3Grammar.cards.filter((card) => {
-    for (const [key, category] of grammarCategoryByKey) if (card.category === category) return selected.has(key);
+    for (const [key, category] of lesson3GrammarCategoryByKey) if (card.category === category) return selected.has(key);
+    return false;
+  }) ?? [], [decks, selected]);
+  const lesson4VocabularyCards = useMemo(() => selected.has(keys.lesson4Vocabulary) ? decks?.lesson4Vocabulary.cards ?? [] : [], [decks, selected]);
+  const lesson4GrammarCards = useMemo(() => decks?.lesson4Grammar.cards.filter((card) => {
+    for (const [key, category] of lesson4GrammarCategoryByKey) if (card.category === category) return selected.has(key);
     return false;
   }) ?? [], [decks, selected]);
 
   const savedCardCount = useMemo(() => {
     if (!decks) return 0;
-    return [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar]
+    return [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar, decks.lesson4Vocabulary, decks.lesson4Grammar]
       .flatMap((sourceDeck) => sourceDeck.cards.map((card) => savedCardRef(sourceDeck.id, card.id)))
       .filter((ref) => savedCards.refs.has(ref)).length;
   }, [decks, savedCards.refs]);
@@ -145,6 +183,8 @@ export function GreekPage() {
     if (foundationCards.length) next.push({ id: "lessons-1-2", label: "Lessons 1–2 grammar", deck: decks.foundation, cards: foundationCards, studyKey: direction, direction });
     if (lesson3VocabularyCards.length) next.push({ id: "lesson3-vocabulary", label: "Lesson 3 vocabulary", deck: decks.lesson3Vocabulary, cards: lesson3VocabularyCards, studyKey: direction, direction });
     if (lesson3GrammarCards.length) next.push({ id: "lesson3-grammar", label: "Lesson 3 grammar charts", deck: decks.lesson3Grammar, cards: lesson3GrammarCards, studyKey: "forward", direction: "forward" });
+    if (lesson4VocabularyCards.length) next.push({ id: "lesson4-vocabulary", label: "Lesson 4 vocabulary", deck: decks.lesson4Vocabulary, cards: lesson4VocabularyCards, studyKey: direction, direction });
+    if (lesson4GrammarCards.length) next.push({ id: "lesson4-grammar", label: "Lesson 4 grammar charts", deck: decks.lesson4Grammar, cards: lesson4GrammarCards, studyKey: "forward", direction: "forward" });
 
     if (includeSavedCards) {
       const alreadySelected = new Set(next.flatMap((source) => source.cards.map((card) => savedCardRef(source.deck.id, card.id))));
@@ -160,9 +200,11 @@ export function GreekPage() {
       appendSaved("saved-lessons-1-2", decks.foundation, direction, direction);
       appendSaved("saved-lesson3-vocabulary", decks.lesson3Vocabulary, direction, direction);
       appendSaved("saved-lesson3-grammar", decks.lesson3Grammar, "forward", "forward");
+      appendSaved("saved-lesson4-vocabulary", decks.lesson4Vocabulary, direction, direction);
+      appendSaved("saved-lesson4-grammar", decks.lesson4Grammar, "forward", "forward");
     }
     return next;
-  }, [decks, direction, foundationCards, includeSavedCards, lesson3GrammarCards, lesson3VocabularyCards, savedCards.refs]);
+  }, [decks, direction, foundationCards, includeSavedCards, lesson3GrammarCards, lesson3VocabularyCards, lesson4GrammarCards, lesson4VocabularyCards, savedCards.refs]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
   const virtualDeck = useMemo<DeckDefinition>(() => ({
@@ -179,7 +221,9 @@ export function GreekPage() {
   const resetKey = `${direction}|${[...selected].sort().join("|")}|saved:${savedSelectionKey}`;
 
   const countFoundation = (category: string) => decks?.foundation.cards.filter((card) => card.category === category).length ?? 0;
-  const countGrammar = (category: string) => decks?.lesson3Grammar.cards.filter((card) => card.category === category).length ?? 0;
+  const countLesson3Grammar = (category: string) => decks?.lesson3Grammar.cards.filter((card) => card.category === category).length ?? 0;
+  const countLesson4Grammar = (category: string) => decks?.lesson4Grammar.cards.filter((card) => card.category === category).length ?? 0;
+  const savedHint = "Cards you save with the card button or S shortcut are private to your account or this guest browser.";
 
   return <main className="page-shell study-page">
     <div className="study-page-heading">
@@ -188,16 +232,16 @@ export function GreekPage() {
     {!user && <div className="guest-banner"><span>You are studying as a guest. Progress stays on this device.</span><Link to="/account">Sign in to sync</Link></div>}
     {(error || savedCards.error) && <div className="inline-alert">{error ?? savedCards.error}</div>}
 
-    {decks && <StudyFilterMenu summary={`${selectedCards.length} cards in the current pool`} detail="A parent checkbox is only a select-all shortcut. You can expand an unchecked heading and select any child independently; changing filters never erases stored progress.">
-      <FilterSection title="Quick select" description="Vocabulary and grammar are classified by the course material, not by the visual form of the prompt.">
-        <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={setIncludeSavedCards} hint="Your saved Greek cards" />
-        <FilterCheckbox label="All Vocabulary" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onChange={(checked) => setSelected((current) => updateSet(current, allVocabularyKeys, checked))} hint="Lesson 3 vocabulary" />
-        <FilterCheckbox label="All Grammar" checked={grammarState.checked} mixed={grammarState.mixed} onChange={(checked) => setSelected((current) => updateSet(current, allGrammarKeys, checked))} hint="Lesson 1 alphabet + punctuation · Lesson 2 accents · Lesson 3 paradigms" />
+    {decks && <StudyFilterMenu summary={`${selectedCards.length} cards in the current pool`}>
+      <FilterSection title="Quick select">
+        <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={setIncludeSavedCards} hint={savedHint} />
+        <FilterCheckbox label="All Vocabulary" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onChange={(checked) => setSelected((current) => updateSet(current, allVocabularyKeys, checked))} />
+        <FilterCheckbox label="All Grammar" checked={grammarState.checked} mixed={grammarState.mixed} onChange={(checked) => setSelected((current) => updateSet(current, allGrammarKeys, checked))} />
       </FilterSection>
 
       <FilterDisclosure title="Lesson 1" summary={`Grammar · ${lesson1State.selectedCount} of ${lesson1Keys.length} groups selected`} checked={lesson1State.checked} mixed={lesson1State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson1Keys, checked))}>
         <FilterDisclosure title="Alphabet" summary={`${alphabetState.selectedCount} of ${alphabetKeys.length} cases selected`} count={countFoundation(categories.uppercase) + countFoundation(categories.lowercase)} nested checked={alphabetState.checked} mixed={alphabetState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, alphabetKeys, checked))}>
-          <FilterSection title="Letter case" description="Uppercase and lowercase remain separate grammar cards and can be combined.">
+          <FilterSection title="Letter case">
             <FilterCheckbox label="Uppercase" count={countFoundation(categories.uppercase)} checked={selected.has(keys.uppercase)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.uppercase], checked))} />
             <FilterCheckbox label="Lowercase" count={countFoundation(categories.lowercase)} checked={selected.has(keys.lowercase)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.lowercase], checked))} />
           </FilterSection>
@@ -210,18 +254,24 @@ export function GreekPage() {
       </FilterDisclosure>
 
       <FilterDisclosure title="Lesson 3" summary={`${lesson3State.selectedCount} of ${lesson3Keys.length} groups selected`} checked={lesson3State.checked} mixed={lesson3State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson3Keys, checked))}>
-        <FilterDisclosure title="Vocabulary" summary="11 supplied Lesson 3 entries" count={decks.lesson3Vocabulary.cards.length} nested checked={selected.has(keys.lesson3Vocabulary)} onCheckedChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson3Vocabulary], checked))}>
-          <FilterSection title="Lesson 3 vocabulary" description="This source is tracked separately from grammar progress.">
-            <FilterCheckbox label="All Lesson 3 vocabulary" count={decks.lesson3Vocabulary.cards.length} checked={selected.has(keys.lesson3Vocabulary)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson3Vocabulary], checked))} />
-          </FilterSection>
+        <FilterDisclosure title="Vocabulary" summary="11 entries" count={decks.lesson3Vocabulary.cards.length} nested checked={selected.has(keys.lesson3Vocabulary)} onCheckedChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson3Vocabulary], checked))}>
+          <FilterCheckbox label="All Lesson 3 vocabulary" count={decks.lesson3Vocabulary.cards.length} checked={selected.has(keys.lesson3Vocabulary)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson3Vocabulary], checked))} />
         </FilterDisclosure>
 
         <FilterDisclosure title="Grammar" summary={`${lesson3GrammarState.selectedCount} of ${lesson3GrammarKeys.length} paradigms selected`} count={decks.lesson3Grammar.cards.length} nested checked={lesson3GrammarState.checked} mixed={lesson3GrammarState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson3GrammarKeys, checked))}>
-          <FilterSection title="Lesson 3 grammar" description="Three whole-paradigm charts from the Lesson 3 model verb παιδεύω.">
-            <FilterCheckbox label="Present Active Indicative" count={countGrammar("Present Active Indicative")} checked={selected.has(keys.presentActiveIndicative)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveIndicative], checked))} />
-            <FilterCheckbox label="Present Active Infinitive" count={countGrammar("Present Active Infinitive")} checked={selected.has(keys.presentActiveInfinitive)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveInfinitive], checked))} />
-            <FilterCheckbox label="Present Active Imperative" count={countGrammar("Present Active Imperative")} checked={selected.has(keys.presentActiveImperative)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveImperative], checked))} />
-          </FilterSection>
+          <FilterCheckbox label="Present Active Indicative" count={countLesson3Grammar("Present Active Indicative")} checked={selected.has(keys.presentActiveIndicative)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveIndicative], checked))} />
+          <FilterCheckbox label="Present Active Infinitive" count={countLesson3Grammar("Present Active Infinitive")} checked={selected.has(keys.presentActiveInfinitive)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveInfinitive], checked))} />
+          <FilterCheckbox label="Present Active Imperative" count={countLesson3Grammar("Present Active Imperative")} checked={selected.has(keys.presentActiveImperative)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveImperative], checked))} />
+        </FilterDisclosure>
+      </FilterDisclosure>
+
+      <FilterDisclosure title="Lesson 4" summary={`${lesson4State.selectedCount} of ${lesson4Keys.length} groups selected`} checked={lesson4State.checked} mixed={lesson4State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson4Keys, checked))}>
+        <FilterDisclosure title="Vocabulary" summary={`${decks.lesson4Vocabulary.cards.length} entries`} count={decks.lesson4Vocabulary.cards.length} nested checked={selected.has(keys.lesson4Vocabulary)} onCheckedChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson4Vocabulary], checked))}>
+          <FilterCheckbox label="All Lesson 4 vocabulary" count={decks.lesson4Vocabulary.cards.length} checked={selected.has(keys.lesson4Vocabulary)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson4Vocabulary], checked))} />
+        </FilterDisclosure>
+
+        <FilterDisclosure title="Grammar" summary={`${lesson4GrammarState.selectedCount} of ${lesson4GrammarKeys.length} paradigms selected`} count={decks.lesson4Grammar.cards.length} nested checked={lesson4GrammarState.checked} mixed={lesson4GrammarState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson4GrammarKeys, checked))}>
+          {[...lesson4GrammarCategoryByKey.entries()].map(([key, category]) => <FilterCheckbox key={key} label={category} count={countLesson4Grammar(category)} checked={selected.has(key)} onChange={(checked) => setSelected((current) => updateSet(current, [key], checked))} />)}
         </FilterDisclosure>
       </FilterDisclosure>
     </StudyFilterMenu>}
@@ -236,18 +286,18 @@ export function GreekPage() {
       resumeSession={resumeSession}
       savedCardRefs={savedCards.refs}
       onToggleSavedCard={savedCards.toggleSaved}
-      cardMeta={(card, source) => source.deck.id === decks.foundation.id ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.deck.id === decks.lesson3Vocabulary.id ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : `Lesson 3 grammar · ${card.category ?? ""} · whole paradigm`}
+      cardMeta={(card, source) => source.deck.id === decks.foundation.id ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.deck.id === decks.lesson3Vocabulary.id ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson4Vocabulary.id ? `Lesson 4 vocabulary · ${card.notes ?? ""}` : `Lesson ${Number(card.metadata?.lesson ?? 3)} grammar · ${card.category ?? ""} · whole paradigm`}
       renderFront={(card, copy, source) => {
-        if (source.deck.id === decks.lesson3Grammar.id) return <span className="study-prompt reverse-text-prompt">{card.front}</span>;
+        if (source.deck.id === decks.lesson3Grammar.id || source.deck.id === decks.lesson4Grammar.id) return <span className="study-prompt reverse-text-prompt">{card.front}</span>;
         return <span className={source.direction === "forward" ? "greek-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
       }}
       renderBack={(card, copy, source) => {
         if (source.deck.id === decks.foundation.id) {
           const details = source.direction === "forward" ? card.back.split("\n").slice(1).join("\n") : card.reverseBack?.split("\n").slice(1).join("\n");
-          return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "greek-answer-title"}>{source.direction === "reverse" ? card.front : String(card.metadata?.backTitle ?? "Answer")}</strong><span className="answer-notes">{details}</span><GreekCardAudio card={card} /></div>;
+          return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "greek-answer-title"}>{source.direction === "reverse" ? card.front : String(card.metadata?.backTitle ?? "Answer")}</strong><span className="answer-notes">{details}</span>{sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}<GreekCardAudio card={card} /></div>;
         }
-        if (source.deck.id === decks.lesson3Grammar.id) return <div className="answer-block"><GreekLesson3Paradigm card={card} /></div>;
-        return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}<GreekCardAudio card={card} /></div>;
+        if (source.deck.id === decks.lesson3Grammar.id || source.deck.id === decks.lesson4Grammar.id) return <div className="answer-block"><GreekParadigm card={card} /></div>;
+        return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}{sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}<GreekCardAudio card={card} /></div>;
       }}
     /> : <div className="study-loading panel-surface"><span className="loading-mark">α</span><p>Preparing Greek…</p></div>}
   </main>;

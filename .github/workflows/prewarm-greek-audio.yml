@@ -24,6 +24,9 @@ jobs:
           ids+=(punct-1 punct-2 punct-3 punct-4 accent-1 accent-2 accent-3)
           ids+=(lesson3-v1 lesson3-v2 lesson3-v3 lesson3-v4 lesson3-v5 lesson3-v6 lesson3-v7 lesson3-v8 lesson3-v9 lesson3-v10 lesson3-v11)
           ids+=(lesson3-chart-present-active-indicative lesson3-chart-present-active-infinitive lesson3-chart-present-active-imperative)
+          ids+=(lesson4-v1 lesson4-v2 lesson4-v3 lesson4-v4 lesson4-v5 lesson4-v6 lesson4-v7 lesson4-v8 lesson4-v9 lesson4-v10 lesson4-v11)
+          ids+=(lesson4-chart-first-declension-thea lesson4-chart-first-declension-hesychia lesson4-chart-first-declension-chora lesson4-chart-first-declension-skene)
+          ids+=(lesson4-chart-definite-article-feminine-singular lesson4-chart-definite-article-feminine-plural)
 
           echo "Prewarming ${#ids[@]} Greek audio assets"
           for id in "${ids[@]}"; do
