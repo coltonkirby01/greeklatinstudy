@@ -5,6 +5,7 @@ import { useAuth } from "../features/auth/auth-context";
 import { ClassicalGreekAudio } from "../features/greek/classical-greek-audio";
 import { loadGreekFilterSelection, saveGreekFilterSelection } from "../features/study/filter-preferences";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
+import { loadIncludeSavedCards, saveIncludeSavedCards, savedCardRef, useSavedCards } from "../features/study/saved-cards";
 import { FilterCheckbox, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
 import type { DeckDefinition, StudyCard, StudyDirection } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
@@ -96,15 +97,18 @@ export function GreekPage() {
     return { foundation, lesson3Vocabulary, lesson3Grammar };
   }, []);
   const { user } = useAuth();
+  const savedCards = useSavedCards("greek", user);
   const [searchParams] = useSearchParams();
   const [direction, setDirection] = useState<StudyDirection>("forward");
   const [selected, setSelected] = useState<Set<string>>(() => loadGreekFilterSelection(allKeys));
+  const [includeSavedCards, setIncludeSavedCards] = useState(() => loadIncludeSavedCards("greek"));
   const resumeSession = useMemo(() => {
     const id = searchParams.get("session"), startedAt = Number(searchParams.get("sessionStartedAt"));
     return id && Number.isFinite(startedAt) && startedAt > 0 ? { id, startedAt } : null;
   }, [searchParams]);
 
   useEffect(() => { saveGreekFilterSelection(selected); }, [selected]);
+  useEffect(() => { saveIncludeSavedCards("greek", includeSavedCards); }, [includeSavedCards]);
 
   const lesson1State = groupState(selected, lesson1Keys);
   const alphabetState = groupState(selected, alphabetKeys);
@@ -128,14 +132,37 @@ export function GreekPage() {
     return false;
   }) ?? [], [decks, selected]);
 
+  const savedCardCount = useMemo(() => {
+    if (!decks) return 0;
+    return [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar]
+      .flatMap((sourceDeck) => sourceDeck.cards.map((card) => savedCardRef(sourceDeck.id, card.id)))
+      .filter((ref) => savedCards.refs.has(ref)).length;
+  }, [decks, savedCards.refs]);
+
   const sources = useMemo(() => {
     if (!decks) return [];
     const next: StudySourceDefinition[] = [];
     if (foundationCards.length) next.push({ id: "lessons-1-2", label: "Lessons 1–2 grammar", deck: decks.foundation, cards: foundationCards, studyKey: direction, direction });
     if (lesson3VocabularyCards.length) next.push({ id: "lesson3-vocabulary", label: "Lesson 3 vocabulary", deck: decks.lesson3Vocabulary, cards: lesson3VocabularyCards, studyKey: direction, direction });
     if (lesson3GrammarCards.length) next.push({ id: "lesson3-grammar", label: "Lesson 3 grammar charts", deck: decks.lesson3Grammar, cards: lesson3GrammarCards, studyKey: "forward", direction: "forward" });
+
+    if (includeSavedCards) {
+      const alreadySelected = new Set(next.flatMap((source) => source.cards.map((card) => savedCardRef(source.deck.id, card.id))));
+      const appendSaved = (id: string, sourceDeck: DeckDefinition, studyKey: string, sourceDirection: StudyDirection) => {
+        const cards = sourceDeck.cards.filter((card) => {
+          const ref = savedCardRef(sourceDeck.id, card.id);
+          return savedCards.refs.has(ref) && !alreadySelected.has(ref);
+        });
+        if (!cards.length) return;
+        next.push({ id, label: "Saved Cards", deck: sourceDeck, cards, studyKey, direction: sourceDirection });
+        cards.forEach((card) => alreadySelected.add(savedCardRef(sourceDeck.id, card.id)));
+      };
+      appendSaved("saved-lessons-1-2", decks.foundation, direction, direction);
+      appendSaved("saved-lesson3-vocabulary", decks.lesson3Vocabulary, direction, direction);
+      appendSaved("saved-lesson3-grammar", decks.lesson3Grammar, "forward", "forward");
+    }
     return next;
-  }, [decks, direction, foundationCards, lesson3GrammarCards, lesson3VocabularyCards]);
+  }, [decks, direction, foundationCards, includeSavedCards, lesson3GrammarCards, lesson3VocabularyCards, savedCards.refs]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
   const virtualDeck = useMemo<DeckDefinition>(() => ({
@@ -148,20 +175,22 @@ export function GreekPage() {
     cards: selectedCards,
     supportsReverse: true,
   }), [selectedCards]);
-  const resetKey = `${direction}|${[...selected].sort().join("|")}`;
+  const savedSelectionKey = includeSavedCards ? [...savedCards.refs].sort().join(",") : "off";
+  const resetKey = `${direction}|${[...selected].sort().join("|")}|saved:${savedSelectionKey}`;
 
   const countFoundation = (category: string) => decks?.foundation.cards.filter((card) => card.category === category).length ?? 0;
   const countGrammar = (category: string) => decks?.lesson3Grammar.cards.filter((card) => card.category === category).length ?? 0;
 
   return <main className="page-shell study-page">
     <div className="study-page-heading">
-      <div><p className="eyebrow">Grammar · vocabulary</p><h1>Greek</h1></div>
+      <div><h1>Greek</h1></div>
     </div>
     {!user && <div className="guest-banner"><span>You are studying as a guest. Progress stays on this device.</span><Link to="/account">Sign in to sync</Link></div>}
-    {error && <div className="inline-alert">{error}</div>}
+    {(error || savedCards.error) && <div className="inline-alert">{error ?? savedCards.error}</div>}
 
     {decks && <StudyFilterMenu summary={`${selectedCards.length} cards in the current pool`} detail="A parent checkbox is only a select-all shortcut. You can expand an unchecked heading and select any child independently; changing filters never erases stored progress.">
       <FilterSection title="Quick select" description="Vocabulary and grammar are classified by the course material, not by the visual form of the prompt.">
+        <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={setIncludeSavedCards} hint="Your saved Greek cards" />
         <FilterCheckbox label="All Vocabulary" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onChange={(checked) => setSelected((current) => updateSet(current, allVocabularyKeys, checked))} hint="Lesson 3 vocabulary" />
         <FilterCheckbox label="All Grammar" checked={grammarState.checked} mixed={grammarState.mixed} onChange={(checked) => setSelected((current) => updateSet(current, allGrammarKeys, checked))} hint="Lesson 1 alphabet + punctuation · Lesson 2 accents · Lesson 3 paradigms" />
       </FilterSection>
@@ -205,17 +234,19 @@ export function GreekPage() {
       onDirectionChange={setDirection}
       directionLabels={{ forward: "Forward", reverse: "Reverse" }}
       resumeSession={resumeSession}
-      cardMeta={(card, source) => source.id === "lessons-1-2" ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.id === "lesson3-vocabulary" ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : `Lesson 3 grammar · ${card.category ?? ""} · whole paradigm`}
+      savedCardRefs={savedCards.refs}
+      onToggleSavedCard={savedCards.toggleSaved}
+      cardMeta={(card, source) => source.deck.id === decks.foundation.id ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.deck.id === decks.lesson3Vocabulary.id ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : `Lesson 3 grammar · ${card.category ?? ""} · whole paradigm`}
       renderFront={(card, copy, source) => {
-        if (source.id === "lesson3-grammar") return <span className="study-prompt reverse-text-prompt">{card.front}</span>;
+        if (source.deck.id === decks.lesson3Grammar.id) return <span className="study-prompt reverse-text-prompt">{card.front}</span>;
         return <span className={source.direction === "forward" ? "greek-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
       }}
       renderBack={(card, copy, source) => {
-        if (source.id === "lessons-1-2") {
+        if (source.deck.id === decks.foundation.id) {
           const details = source.direction === "forward" ? card.back.split("\n").slice(1).join("\n") : card.reverseBack?.split("\n").slice(1).join("\n");
           return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "greek-answer-title"}>{source.direction === "reverse" ? card.front : String(card.metadata?.backTitle ?? "Answer")}</strong><span className="answer-notes">{details}</span><GreekCardAudio card={card} /></div>;
         }
-        if (source.id === "lesson3-grammar") return <div className="answer-block"><GreekLesson3Paradigm card={card} /></div>;
+        if (source.deck.id === decks.lesson3Grammar.id) return <div className="answer-block"><GreekLesson3Paradigm card={card} /></div>;
         return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}<GreekCardAudio card={card} /></div>;
       }}
     /> : <div className="study-loading panel-surface"><span className="loading-mark">α</span><p>Preparing Greek…</p></div>}
