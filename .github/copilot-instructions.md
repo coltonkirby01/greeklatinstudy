@@ -13,3 +13,5 @@ When adding or changing Greek or Latin cards, keep **Choose cards** concise. The
 - The **Current session** sidebar must summarize the session selected in the card-app session selector across that session's loaded Greek/Latin envelopes, independent of the currently visible card filters. Keep it aligned with the Stats page's session scope.
 - Stats/session coverage is mandatory for both languages. Adding cards to an existing Greek or Latin deck automatically belongs in Stats because the full deck is analyzed. Whenever a new built-in Greek/Latin deck or study direction is added, update both `SESSION_DECKS` in `session-management.ts` and the Stats source list in `stats-page.tsx` in the same change; never ship cards that can generate reviews but are absent from Stats/session selection.
 - For Greek ending-only chart audio on Eleven v3, read each chart column top-to-bottom without punctuation pauses inside the column and place exactly one `[pause]` between vertical columns.
+
+- In Greek Lesson 4, both feminine definite-article cards (singular and plural) belong under the `Endings` selector, not `Paradigms`; `Paradigms` is reserved for the model-noun paradigm cards.
