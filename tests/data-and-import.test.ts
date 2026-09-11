@@ -3,17 +3,26 @@ import { describe, expect, it } from "vitest";
 import { formatGreekLesson3ParadigmCell, greekLesson3ParadigmSpeechText, latinRowsToCards, parseCsv } from "../src/data/builtin-decks";
 import { jsonToCards, rowsToCards } from "../src/features/decks/import-parser";
 
-type GreekGrammarChart = { id: string; category: string; prompt: string; columns: string[]; rows: Array<{ label: string; cells: string[] }> };
+type GreekGrammarChart = { id: string; category: string; prompt: string; columns: string[]; rows: Array<{ label: string; cells: string[] }>; source_ref?: string };
+type GreekVocabularyCard = { id: string; source_ref?: string };
 
 describe("authoritative source migration", () => {
-  it("preserves source counts while using three whole-paradigm Lesson 3 grammar cards", () => {
+  it("preserves source counts while expanding Greek through Lesson 4", () => {
     const greek = JSON.parse(fs.readFileSync("public/data/greek-cards.json", "utf8"));
     const greekLesson3Vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson3-vocab.json", "utf8"));
     const greekLesson3Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as GreekGrammarChart[];
+    const greekLesson4Vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson4-vocab.json", "utf8")) as GreekVocabularyCard[];
+    const greekLesson4Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson4-grammar.json", "utf8")) as GreekGrammarChart[];
     const latin = latinRowsToCards(parseCsv(fs.readFileSync("public/data/dickinson-latin-core.csv", "utf8")));
     expect(greek).toHaveLength(55);
     expect(greekLesson3Vocabulary).toHaveLength(11);
     expect(greekLesson3Grammar).toHaveLength(3);
+    expect(greekLesson4Vocabulary).toHaveLength(11);
+    expect(greekLesson4Grammar).toHaveLength(6);
+    expect(greekLesson4Vocabulary.every((card) => card.source_ref === "Groton 4.32")).toBe(true);
+    expect(greekLesson4Grammar.slice(0, 4).every((card) => card.source_ref === "Groton 4.29")).toBe(true);
+    expect(greekLesson4Grammar.slice(4).every((card) => card.source_ref === "Groton 4.30")).toBe(true);
+
     expect(new Set(greekLesson3Grammar.map((card) => card.category))).toEqual(new Set(["Present Active Indicative", "Present Active Infinitive", "Present Active Imperative"]));
     expect(greekLesson3Grammar.map((card) => card.id).sort()).toEqual([
       "lesson3-chart-present-active-imperative",
@@ -39,6 +48,19 @@ describe("authoritative source migration", () => {
       { label: "2nd person", cells: ["παίδευ-ε", "παιδεύ-ετε"] },
       { label: "3rd person", cells: ["παιδευ-έτω", "παιδευ-όντων"] },
     ]);
+
+    const goddess = greekLesson4Grammar.find((card) => card.id === "lesson4-chart-first-declension-thea");
+    expect(goddess?.columns).toEqual(["Singular", "Plural"]);
+    expect(goddess?.rows).toEqual([
+      { label: "Nominative", cells: ["θε-ά", "θε-αί"] },
+      { label: "Genitive", cells: ["θε-ᾶς", "θε-ῶν"] },
+      { label: "Dative", cells: ["θε-ᾷ", "θε-αῖς"] },
+      { label: "Accusative", cells: ["θε-άν", "θε-άς"] },
+      { label: "Vocative", cells: ["θε-ά", "θε-αί"] },
+    ]);
+    for (const card of greekLesson4Grammar.slice(0, 4)) {
+      expect(card.rows.flatMap((row) => row.cells).every((form) => form.includes("-")), card.id).toBe(true);
+    }
 
     expect(latin).toHaveLength(997);
   });
