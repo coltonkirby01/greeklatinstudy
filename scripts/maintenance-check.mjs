@@ -23,6 +23,7 @@ const retiredPatterns = [
   ["local progress-file import", /legacy-import|Progress backup\s*&\s*migration/],
   ["retired Stats heading", /Continuous memory bank/],
   ["retired footer tagline", /Active recall\s*·\s*adaptive review\s*·\s*reading aloud/],
+  ["redundant Stats session language sublabel", /stats-session-language/],
 ];
 
 for (const file of tracked.filter((path) => path.startsWith("src/") || path.startsWith("public/"))) {
