@@ -21,7 +21,7 @@ describe("Greek study audio player", () => {
     expect(source).toContain("onKeyUpCapture={preventMediaSpace}");
     expect(source).toContain('if (event.key === " ") event.preventDefault();');
     expect(source).toContain("Space exclusively assigned to the study");
-    expect(sessionSource).toContain('controlsTarget: Boolean(target?.closest(".session-toolbar, .study-start-card"))');
+    expect(sessionSource).toContain('const controlsTarget = Boolean(target?.closest(".session-toolbar, .study-start-card"));');
     expect(sessionSource).not.toContain('closest("[data-study-control]');
   });
 
