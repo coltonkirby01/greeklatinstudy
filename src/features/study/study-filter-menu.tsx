@@ -2,24 +2,24 @@ import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 import "./study-filter-menu.css";
 
-export function StudyFilterMenu({ summary, detail, children }: { summary: string; detail?: string; children: ReactNode }) {
+const savedCardsHint = "Cards you save with the card button or S shortcut are private to your account or this guest browser.";
+
+export function StudyFilterMenu({ summary, children }: { summary: string; detail?: string; children: ReactNode }) {
   return <details className="study-filter-menu panel-surface">
     <summary>
       <span className="filter-summary-label"><SlidersHorizontal aria-hidden="true" /><span>Choose cards</span></span>
       <strong>{summary}</strong>
       <ChevronDown className="filter-chevron" aria-hidden="true" />
     </summary>
-    <div className="study-filter-menu-body">
-      {detail && <p className="filter-menu-detail">{detail}</p>}
-      {children}
-    </div>
+    <div className="study-filter-menu-body">{children}</div>
   </details>;
 }
 
 export function FilterSection({ title, description, onAll, onNone, children }: { title: string; description?: string; onAll?: () => void; onNone?: () => void; children: ReactNode }) {
+  const visibleDescription = title.toLowerCase() === "saved cards" ? undefined : description;
   return <section className="filter-section">
     <div className="filter-section-heading">
-      <div><h3>{title}</h3>{description && <p>{description}</p>}</div>
+      <div><h3>{title}</h3>{visibleDescription && <p>{visibleDescription}</p>}</div>
       {(onAll || onNone) && <div className="filter-actions">{onAll && <button type="button" onClick={onAll}>All</button>}{onNone && <button type="button" onClick={onNone}>None</button>}</div>}
     </div>
     <div className="filter-option-grid">{children}</div>
@@ -74,10 +74,11 @@ export function FilterCheckbox({ label, checked, mixed = false, onChange, count,
   useEffect(() => {
     if (checkboxRef.current) checkboxRef.current.indeterminate = mixed;
   }, [mixed]);
+  const visibleHint = label === "Saved Cards" ? savedCardsHint : hint;
 
   return <label className={`filter-checkbox ${nested ? "is-nested" : ""} ${disabled ? "is-disabled" : ""}`}>
     <input ref={checkboxRef} type="checkbox" checked={checked} disabled={disabled} onChange={(event) => onChange(event.target.checked)} />
-    <span className="filter-checkbox-copy"><strong>{label}</strong>{hint && <small>{hint}</small>}</span>
+    <span className="filter-checkbox-copy"><strong>{label}</strong>{visibleHint && <small>{visibleHint}</small>}</span>
     {typeof count === "number" && <span className="filter-count">{count.toLocaleString()}</span>}
   </label>;
 }
