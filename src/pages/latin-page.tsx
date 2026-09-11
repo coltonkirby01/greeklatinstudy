@@ -15,8 +15,6 @@ import { useAsync } from "../hooks/use-async";
 
 type Material = LatinMaterial;
 
-const DICKINSON_URL = "https://dcc.dickinson.edu/latin-core-list1";
-const HENLE_URL = "https://www.scribd.com/document/550308631/Henle-Latin-Grammar";
 const activeParadigmTenses = ["Present Tense", "Imperfect Tense", "Future Tense", "Perfect Tense", "Pluperfect Tense", "Future Perfect Tense"] as const;
 const passiveParadigmTenses = ["Present Tense", "Imperfect Tense", "Future Tense"] as const;
 
@@ -322,7 +320,7 @@ export function LatinPage() {
         </FilterSection>
 
         <FilterDisclosure
-          title={<a className="filter-source-link" href={DICKINSON_URL} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>Latin (Dickinson)</a>}
+          title="Latin (Dickinson)"
           ariaLabel="Latin Dickinson"
           count={vocabularyDeck?.cards.length ?? 997}
           summary="Frequency-ranked · top 100, then 25-card unlocks"
@@ -379,7 +377,7 @@ export function LatinPage() {
         </FilterDisclosure>
 
         <FilterDisclosure
-          title={<a className="filter-source-link" href={HENLE_URL} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>Grammer (Henle)</a>}
+          title="Grammer (Henle)"
           ariaLabel="Grammer Henle"
           count={allParadigmIds.length || 36}
           summary={`${grammarSelectedCount} of ${allParadigmIds.length || 36} paradigms selected`}
