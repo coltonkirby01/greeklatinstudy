@@ -66,6 +66,12 @@ type Usage = {
   updatedAt: string;
 };
 
+class ElevenLabsLookupError extends Error {
+  constructor(public code: string, message: string) {
+    super(message);
+  }
+}
+
 function safeInteger(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
 }
@@ -153,7 +159,16 @@ async function loadUsage(apiKey: string) {
   const response = await fetch("https://api.elevenlabs.io/v1/user/subscription", {
     headers: { "xi-api-key": apiKey, Accept: "application/json" },
   });
-  if (!response.ok) throw new Error(`ElevenLabs subscription lookup failed: ${response.status} ${await response.text()}`);
+  if (!response.ok) {
+    const detail = await response.text();
+    if (response.status === 401 && /user_read|missing_permissions/i.test(detail)) {
+      throw new ElevenLabsLookupError(
+        "missing_user_read",
+        "The ElevenLabs API key can generate speech but cannot read subscription usage. In ElevenLabs, open Developers → API Keys → More Actions (…) → Edit, then enable User: Read for this key.",
+      );
+    }
+    throw new Error(`ElevenLabs subscription lookup failed: ${response.status} ${detail}`);
+  }
   return normalizeUsage(await response.json() as Subscription);
 }
 
@@ -179,6 +194,7 @@ Deno.serve(async (request) => {
     if (!admin) return json({ ok: true, refreshed: true });
     return json({ ok: true, usage });
   } catch (error) {
+    if (error instanceof ElevenLabsLookupError) return json({ ok: false, code: error.code, error: error.message });
     return json({ error: error instanceof Error ? error.message : String(error) }, 502);
   }
 });
