@@ -15,3 +15,5 @@ When adding or changing Greek or Latin cards, keep **Choose cards** concise. The
 - For Greek ending-only chart audio on Eleven v3, read each chart column top-to-bottom without punctuation pauses inside the column and place exactly one `[pause]` between vertical columns.
 
 - In Greek Lesson 4, both feminine definite-article cards (singular and plural) belong under the `Endings` selector, not `Paradigms`; `Paradigms` is reserved for the model-noun paradigm cards.
+
+- ElevenLabs subscription usage is administrator-only. Keep the API key exclusively in Supabase Edge Function secrets; never expose it to browser code. The Admin usage panel may show only sanitized plan/credit/reset fields, and the database snapshot must remain readable only through `admin_users`-gated RLS.
