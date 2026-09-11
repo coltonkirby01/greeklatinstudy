@@ -1,0 +1,21 @@
+name: Test ElevenLabs usage permission handling
+on:
+  push:
+    branches:
+      - chatgpt/elevenlabs-usage-panel
+jobs:
+  test-usage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check usage endpoint
+        shell: bash
+        env:
+          SUPABASE_URL: https://wqgvpgmudouftyhnvvpr.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_s4DGueytgij3zvSce1D1hQ_jtEf1X1e
+        run: |
+          set -euo pipefail
+          status=$(curl --silent --show-error --output /tmp/usage.json --write-out '%{http_code}' --request POST "$SUPABASE_URL/functions/v1/elevenlabs-usage" --header "apikey: $SUPABASE_PUBLISHABLE_KEY" --header 'Content-Type: application/json' --data '{}')
+          cat /tmp/usage.json
+          echo
+          test "$status" = "200"
+          grep -Eq '"code":"missing_user_read"|"refreshed":true|"refreshed":false' /tmp/usage.json
