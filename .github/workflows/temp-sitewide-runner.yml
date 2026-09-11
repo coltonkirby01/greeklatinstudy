@@ -1,0 +1,56 @@
+name: Temporary cleanup runner
+on:
+  push:
+    branches:
+      - chatgpt/sitewide-cleanup
+permissions:
+  contents: write
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/sitewide-cleanup
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Extract and run guarded cleanup patch
+        shell: bash
+        run: |
+          python <<'EXTRACT'
+          from pathlib import Path
+          import textwrap
+          source = Path('.github/workflows/temp-sitewide-cleanup.yml').read_text()
+          marker = "          python <<'PY'\n"
+          start = source.index(marker) + len(marker)
+          end = source.index("\n          PY\n", start)
+          Path('/tmp/sitewide_cleanup.py').write_text(textwrap.dedent(source[start:end]))
+          EXTRACT
+          python /tmp/sitewide_cleanup.py
+          rm -f .github/workflows/temp-sitewide-cleanup.yml .github/workflows/temp-sitewide-runner.yml
+      - name: Audit removed-feature references
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! rg -n 'ElevenLabsUsagePanel|elevenlabs-usage|loadReadingPage|/reading|features/reading|Progress backup & migration|Portable by design|Active recall · adaptive review · reading aloud' src public README.md AGENTS.md docs supabase --glob '!supabase/migrations/0007_remove_retired_reading_and_usage.sql' --glob '!supabase/migrations/0006_elevenlabs_usage_snapshot.sql'
+      - name: Install dependencies
+        run: npm ci
+      - name: High-severity dependency audit
+        run: npm audit --audit-level=high
+      - name: Tests
+        run: npm test
+      - name: Production Pages build
+        run: npm run build:pages
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'chatgpt-cleanup-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Apply sitewide cleanup and permanent sessions'
+          git push origin HEAD:chatgpt/sitewide-cleanup
