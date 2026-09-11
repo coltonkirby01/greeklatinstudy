@@ -111,7 +111,19 @@ export function mergeProgressEnvelopes(local: DeckProgressEnvelope | null, remot
   for (const [key, mode] of Object.entries(cleanLocal.modes)) {
     if (!modes[key] || mode.updatedAt > modes[key].updatedAt) modes[key] = mode;
   }
-  return preparedEnvelope({ ...cleanRemote, updatedAt: Math.max(cleanLocal.updatedAt, cleanRemote.updatedAt), modes, pendingDeletedReviewIds, sessionDeletedReviewIds, deletedSessionIds }, deletedReviewIds);
+  const localSavedAt = cleanLocal.savedCardsUpdatedAt ?? 0;
+  const remoteSavedAt = cleanRemote.savedCardsUpdatedAt ?? 0;
+  const savedCardsSource = localSavedAt > remoteSavedAt ? cleanLocal : cleanRemote;
+  return preparedEnvelope({
+    ...cleanRemote,
+    updatedAt: Math.max(cleanLocal.updatedAt, cleanRemote.updatedAt),
+    modes,
+    savedCardRefs: savedCardsSource.savedCardRefs,
+    savedCardsUpdatedAt: Math.max(localSavedAt, remoteSavedAt) || undefined,
+    pendingDeletedReviewIds,
+    sessionDeletedReviewIds,
+    deletedSessionIds,
+  }, deletedReviewIds);
 }
 
 export async function loadProgressEnvelope(deckId: string, user: User | null) {
@@ -123,6 +135,8 @@ export async function loadProgressEnvelope(deckId: string, user: User | null) {
     saveLocalEnvelope(winner);
     const needsPush = !remote
       || Object.entries(winner.modes).some(([key, mode]) => !remote.modes[key] || mode.updatedAt > remote.modes[key].updatedAt)
+      || (winner.savedCardsUpdatedAt ?? 0) > (remote.savedCardsUpdatedAt ?? 0)
+      || !sameReviewIds(winner.savedCardRefs, remote.savedCardRefs)
       || !sameReviewIds(winner.deletedReviewIds, remote.deletedReviewIds)
       || !sameReviewIds(winner.sessionDeletedReviewIds, remote.sessionDeletedReviewIds)
       || !sameReviewIds(winner.deletedSessionIds, remote.deletedSessionIds)
