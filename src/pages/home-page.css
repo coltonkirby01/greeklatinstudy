@@ -19,6 +19,29 @@
   font-variant: small-caps;
 }
 
+.flashcard-course .course-card-top {
+  min-height: 7.25rem;
+  margin-bottom: 1.1rem;
+}
+
+.flashcard-course > .eyebrow {
+  margin-top: 0;
+}
+
+.flashcard-course h2 {
+  min-height: 5.25rem;
+  align-content: start;
+}
+
+.flashcard-course .course-source-links {
+  min-height: 2rem;
+  margin-top: 0.9rem;
+}
+
+.flashcard-course .course-link {
+  margin-top: auto;
+}
+
 .course-source-links {
   margin: -0.25rem 0 1rem;
   display: grid;
@@ -50,5 +73,11 @@
 
   .latin-course-title {
     font-size: clamp(1.7rem, 8.5vw, 2.7rem);
+  }
+
+  .flashcard-course h2,
+  .flashcard-course .course-card-top,
+  .flashcard-course .course-source-links {
+    min-height: 0;
   }
 }
