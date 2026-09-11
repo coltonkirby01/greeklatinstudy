@@ -42,6 +42,7 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - Every language always exposes two permanent built-in session types: **Learner** and **Reviewer**. Their IDs are deterministic in `session-management.ts`, so they exist for old and new users without provisioning rows.
 - Learner/Reviewer cannot be renamed or deleted. Custom sessions remain renameable/deletable and preserve long-term adaptive evidence when removed from Stats.
 - Stats must show Learner and Reviewer as selectable session scopes even before they have reviews.
+- Stats session selection is grouped into two language columns on desktop: **Greek** on the left and **Latin** on the right. Use one heading per column; do not repeat a Greek/Latin label inside each session card.
 
 ## Study controls and grading
 

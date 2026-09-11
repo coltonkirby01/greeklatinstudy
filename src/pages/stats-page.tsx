@@ -379,8 +379,21 @@ export function StatsPage() {
   const overall = proficiency(scopedCards), greekScore = proficiency(greekCards), latinScore = proficiency(latinCards);
   const trends = weeklyTrendData(scopedSessions);
   const filterLabel = allSessionsSelected ? "All sessions" : `${selectedSessions?.size ?? 0} of ${value.sessions.length} sessions`;
+const sortedSessions = [...value.sessions].sort((a, b) => Number(Boolean(b.builtin)) - Number(Boolean(a.builtin)) || b.startedAt - a.startedAt);
 
-  return <main className="page-shell stats-page">
+function renderSessionChoice(session: SessionSummary) {
+  const editing = editingSessionId === session.id, busy = busySessionId === session.id;
+  return <div className="stats-session-choice" key={session.id}>
+    <input type="checkbox" aria-label={`Include ${session.name} in Stats`} checked={allSessionsSelected || (selectedSessions?.has(session.id) ?? false)} onChange={(event) => toggleSession(session.id, event.target.checked)} />
+    <div style={{ minWidth: 0, flex: "1 1 auto", display: "grid", gap: "0.14rem" }}>
+      {editing ? <input autoFocus value={draftName} maxLength={80} aria-label="Session name" disabled={busy} style={{ margin: 0, width: "100%", minWidth: 0, padding: "0.25rem 0.4rem", border: "1px solid var(--line)", borderRadius: "6px", background: "var(--surface)", color: "var(--foreground)", font: "inherit", fontWeight: 700 }} onFocus={(event) => event.currentTarget.select()} onChange={(event) => setDraftName(event.target.value)} onBlur={() => void saveRename(session)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); event.currentTarget.blur(); } if (event.key === "Escape") { event.preventDefault(); setEditingSessionId(null); setDraftName(""); } }} /> : session.builtin ? <strong>{sessionName(session)}</strong> : <strong role="button" tabIndex={0} title="Double-click to rename" onDoubleClick={() => beginRename(session)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === "F2") beginRename(session); }}>{sessionName(session)}</strong>}
+      <small>{dateTime(session.startedAt)} · {session.reviews} reviews · score {session.score.toFixed(1)}{session.inferred ? " · imported legacy history" : ""}</small>
+    </div>
+    <div className="stats-filter-actions"><button className="text-button" type="button" onClick={() => setSelectedSessions(new Set([session.id]))}>Only</button>{!session.builtin && <button className="text-button" type="button" disabled={busy} onClick={() => void deleteSession(session)}>Delete</button>}</div>
+  </div>;
+}
+
+return <main className="page-shell stats-page">
     <header className="stats-hero">
       <div><h1>Study Stats</h1><p>Your complete Greek and Latin history is analyzed here. Use the session filter to compare one session, several sessions together, or your complete history.</p></div>
       <div className="stats-sync-note">{user ? <Cloud aria-hidden="true" /> : <Laptop aria-hidden="true" />}<span>{user ? "Showing your synced account progress" : "Showing guest progress saved on this device"}</span></div>
@@ -389,17 +402,7 @@ export function StatsPage() {
 
     <section className="panel-surface stats-session-filter">
       <div className="stats-section-heading"><div><p className="eyebrow">Stats scope</p><h2>Choose sessions</h2><p>{filterLabel}. Every score, card analysis, trend, and review list below follows this selection.</p></div><div className="stats-filter-actions"><button className="small-outline-button" type="button" onClick={() => setSelectedSessions(null)}>All</button><button className="small-outline-button" type="button" onClick={() => setSelectedSessions(new Set())}>Clear</button></div></div>
-      {value.sessions.length ? <div className="stats-session-picker">{[...value.sessions].sort((a, b) => Number(Boolean(b.builtin)) - Number(Boolean(a.builtin)) || b.startedAt - a.startedAt).map((session) => {
-        const editing = editingSessionId === session.id, busy = busySessionId === session.id;
-        return <div className="stats-session-choice" key={session.id}>
-          <input type="checkbox" aria-label={`Include ${session.name} in Stats`} checked={allSessionsSelected || (selectedSessions?.has(session.id) ?? false)} onChange={(event) => toggleSession(session.id, event.target.checked)} />
-          <div style={{ minWidth: 0, flex: "1 1 auto", display: "grid", gap: "0.14rem" }}>
-            {editing ? <input autoFocus value={draftName} maxLength={80} aria-label="Session name" disabled={busy} style={{ margin: 0, width: "100%", minWidth: 0, padding: "0.25rem 0.4rem", border: "1px solid var(--line)", borderRadius: "6px", background: "var(--surface)", color: "var(--foreground)", font: "inherit", fontWeight: 700 }} onFocus={(event) => event.currentTarget.select()} onChange={(event) => setDraftName(event.target.value)} onBlur={() => void saveRename(session)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); event.currentTarget.blur(); } if (event.key === "Escape") { event.preventDefault(); setEditingSessionId(null); setDraftName(""); } }} /> : session.builtin ? <strong>{sessionName(session)}</strong> : <strong role="button" tabIndex={0} title="Double-click to rename" onDoubleClick={() => beginRename(session)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === "F2") beginRename(session); }}>{sessionName(session)}</strong>}
-            <small><span className="stats-session-language">{session.language}</span> · {dateTime(session.startedAt)} · {session.reviews} reviews · score {session.score.toFixed(1)}{session.inferred ? " · imported legacy history" : ""}</small>
-          </div>
-          <div className="stats-filter-actions"><button className="text-button" type="button" onClick={() => setSelectedSessions(new Set([session.id]))}>Only</button>{!session.builtin && <button className="text-button" type="button" disabled={busy} onClick={() => void deleteSession(session)}>Delete</button>}</div>
-        </div>;
-      })}</div> : <p className="stats-empty">Complete reviews to create sessions.</p>}
+      {value.sessions.length ? <div className="stats-session-columns">{(["Greek", "Latin"] as const).map((language) => <section className="stats-session-column" key={language} aria-labelledby={`stats-${language.toLowerCase()}-sessions`}><h3 id={`stats-${language.toLowerCase()}-sessions`}>{language}</h3><div className="stats-session-picker">{sortedSessions.filter((session) => session.language === language).map(renderSessionChoice)}</div></section>)}</div> : <p className="stats-empty">Complete reviews to create sessions.</p>}
     </section>
 
     <section className="panel-surface stats-score-banner">

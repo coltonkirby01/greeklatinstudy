@@ -91,11 +91,32 @@
   flex-wrap: wrap;
 }
 
+.stats-session-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.stats-session-column {
+  min-width: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.stats-session-column h3 {
+  margin: 0;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--line);
+  color: var(--foreground);
+  font-family: var(--font-serif);
+}
+
 .stats-session-picker {
   max-height: 22rem;
   overflow: auto;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 0.55rem;
 }
 
@@ -130,12 +151,6 @@
   font-weight: 500;
 }
 
-.stats-session-language {
-  color: var(--foreground);
-  font-family: var(--font-serif);
-  font-size: 1.05rem;
-  font-weight: 700;
-}
 
 .stats-score-banner {
   padding: 1.2rem;
@@ -455,8 +470,7 @@
 @media (max-width: 900px) {
   .stats-overview-grid,
   .stats-analysis-grid,
-  .stats-trend-grid,
-  .stats-session-picker {
+  .stats-trend-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -478,7 +492,7 @@
   .stats-overview-grid,
   .stats-analysis-grid,
   .stats-trend-grid,
-  .stats-session-picker {
+  .stats-session-columns {
     grid-template-columns: 1fr;
   }
 
