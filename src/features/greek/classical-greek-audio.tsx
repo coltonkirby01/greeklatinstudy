@@ -159,11 +159,11 @@ export function ClassicalGreekAudio({ assetId, label, cloudCardId }: { assetId: 
   const src = courseAudioPublicUrl(asset);
   if (!src) return null;
 
-  const preventMediaSpace = (event: { key: string; preventDefault: () => void }) => {
-    // Buttons normally turn Space into a click. Suppressing that default on
-    // both keydown and keyup keeps Space exclusively assigned to the study
-    // session even after a learner has clicked the audio control.
-    if (event.key === " ") event.preventDefault();
+  const preventReservedStudyKeys = (event: { key: string; preventDefault: () => void }) => {
+    // Buttons normally turn Space or Enter into a click. Suppressing those
+    // defaults keeps Space assigned to the study flow and Enter assigned only
+    // to Right/Wrong. A remains the sole keyboard shortcut for this audio.
+    if (event.key === " " || event.key === "Enter") event.preventDefault();
   };
 
   return <div
@@ -172,8 +172,8 @@ export function ClassicalGreekAudio({ assetId, label, cloudCardId }: { assetId: 
     role="group"
     aria-label={`Classical Greek audio for ${label}`}
     onClick={(event) => event.stopPropagation()}
-    onKeyDownCapture={preventMediaSpace}
-    onKeyUpCapture={preventMediaSpace}
+    onKeyDownCapture={preventReservedStudyKeys}
+    onKeyUpCapture={preventReservedStudyKeys}
     style={{ width: "100%", marginTop: "0.75rem", display: "flex", justifyContent: "center", alignItems: "center", position: "relative" }}
   >
     <audio
