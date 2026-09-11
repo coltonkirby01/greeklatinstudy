@@ -8,12 +8,15 @@ import { LatinParadigmTable } from "../features/latin/latin-paradigm-table";
 import { loadLatinFilterPreferences, saveLatinFilterPreferences, type LatinMaterial } from "../features/study/filter-preferences";
 import { matchesVocabularyCard, vocabularyFamily, type OptionalSelection } from "../features/study/latin-study-filters";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
+import { loadIncludeSavedCards, saveIncludeSavedCards, savedCardRef, useSavedCards } from "../features/study/saved-cards";
 import { FilterCheckbox, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
 import type { DeckDefinition, StudyDirection } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
 
 type Material = LatinMaterial;
 
+const DICKINSON_URL = "https://dcc.dickinson.edu/latin-core-list1";
+const HENLE_URL = "https://www.scribd.com/document/550308631/Henle-Latin-Grammar";
 const activeParadigmTenses = ["Present Tense", "Imperfect Tense", "Future Tense", "Perfect Tense", "Pluperfect Tense", "Future Perfect Tense"] as const;
 const passiveParadigmTenses = ["Present Tense", "Imperfect Tense", "Future Tense"] as const;
 
@@ -117,12 +120,14 @@ export function LatinPage() {
   const { value: activeParadigmDeck, error: activeParadigmError } = useAsync(loadLatinActiveIndicativeParadigmsDeck, []);
   const { value: passiveParadigmDeck, error: passiveParadigmError } = useAsync(loadLatinPassiveIndicativeParadigmsDeck, []);
   const { user } = useAuth();
+  const savedCards = useSavedCards("latin", user);
   const [searchParams] = useSearchParams();
   const [initialFilters] = useState(loadLatinFilterPreferences);
   const [direction, setDirection] = useState<StudyDirection>("forward");
   const [materials, setMaterials] = useState<Set<Material>>(() => new Set(initialFilters.materials));
   const [vocabularyParts, setVocabularyParts] = useState<OptionalSelection>(() => initialFilters.vocabularyParts === null ? null : new Set(initialFilters.vocabularyParts));
   const [paradigmCards, setParadigmCards] = useState<OptionalSelection>(() => initialFilters.paradigmCards === null ? null : new Set(initialFilters.paradigmCards));
+  const [includeSavedCards, setIncludeSavedCards] = useState(() => loadIncludeSavedCards("latin"));
 
   const resumeSession = useMemo(() => {
     const id = searchParams.get("session");
@@ -137,6 +142,7 @@ export function LatinPage() {
       paradigmCards: paradigmCards === null ? null : new Set(paradigmCards),
     });
   }, [materials, paradigmCards, vocabularyParts]);
+  useEffect(() => { saveIncludeSavedCards("latin", includeSavedCards); }, [includeSavedCards]);
 
   const vocabularyGroups = useMemo(() => {
     const groups = new Map<string, Array<{ value: string; count: number }>>();
@@ -172,19 +178,42 @@ export function LatinPage() {
   const activeParadigmStudyCards = useMemo(() => activeParadigmDeck?.cards.filter((card) => selected(paradigmCards, card.id)) ?? [], [activeParadigmDeck, paradigmCards]);
   const passiveParadigmStudyCards = useMemo(() => passiveParadigmDeck?.cards.filter((card) => selected(paradigmCards, card.id)) ?? [], [paradigmCards, passiveParadigmDeck]);
 
+  const savedCardCount = useMemo(() => {
+    const decks = [vocabularyDeck, activeParadigmDeck, passiveParadigmDeck].filter((item): item is DeckDefinition => Boolean(item));
+    return decks.flatMap((sourceDeck) => sourceDeck.cards.map((card) => savedCardRef(sourceDeck.id, card.id))).filter((ref) => savedCards.refs.has(ref)).length;
+  }, [activeParadigmDeck, passiveParadigmDeck, savedCards.refs, vocabularyDeck]);
+
   const sources = useMemo(() => {
     const next: StudySourceDefinition[] = [];
+    const paradigmStudyKey = direction === "forward" ? "chart" : "reverse";
     if (vocabularyActive && vocabularyDeck && vocabularyCards.length) {
       next.push({ id: "vocabulary", label: "Dickinson vocabulary", deck: vocabularyDeck, cards: vocabularyCards, studyKey: direction, direction });
     }
     if (activeParadigmsActive && activeParadigmDeck && activeParadigmStudyCards.length) {
-      next.push({ id: "active-indicative-paradigms", label: "Active indicative paradigm", deck: activeParadigmDeck, cards: activeParadigmStudyCards, studyKey: "chart", direction: "forward" });
+      next.push({ id: "active-indicative-paradigms", label: "Active indicative paradigm", deck: activeParadigmDeck, cards: activeParadigmStudyCards, studyKey: paradigmStudyKey, direction });
     }
     if (passiveParadigmsActive && passiveParadigmDeck && passiveParadigmStudyCards.length) {
-      next.push({ id: "passive-indicative-paradigms", label: "Passive indicative paradigm", deck: passiveParadigmDeck, cards: passiveParadigmStudyCards, studyKey: "chart", direction: "forward" });
+      next.push({ id: "passive-indicative-paradigms", label: "Passive indicative paradigm", deck: passiveParadigmDeck, cards: passiveParadigmStudyCards, studyKey: paradigmStudyKey, direction });
+    }
+
+    if (includeSavedCards) {
+      const alreadySelected = new Set(next.flatMap((source) => source.cards.map((card) => savedCardRef(source.deck.id, card.id))));
+      const appendSaved = (id: string, sourceDeck: DeckDefinition | null | undefined, studyKey: string) => {
+        if (!sourceDeck) return;
+        const cards = sourceDeck.cards.filter((card) => {
+          const ref = savedCardRef(sourceDeck.id, card.id);
+          return savedCards.refs.has(ref) && !alreadySelected.has(ref);
+        });
+        if (!cards.length) return;
+        next.push({ id, label: "Saved Cards", deck: sourceDeck, cards, studyKey, direction });
+        cards.forEach((card) => alreadySelected.add(savedCardRef(sourceDeck.id, card.id)));
+      };
+      appendSaved("saved-vocabulary", vocabularyDeck, direction);
+      appendSaved("saved-active-indicative-paradigms", activeParadigmDeck, paradigmStudyKey);
+      appendSaved("saved-passive-indicative-paradigms", passiveParadigmDeck, paradigmStudyKey);
     }
     return next;
-  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, direction, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, vocabularyActive, vocabularyCards, vocabularyDeck]);
+  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, direction, includeSavedCards, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, savedCards.refs, vocabularyActive, vocabularyCards, vocabularyDeck]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
   const virtualDeck = useMemo<DeckDefinition>(() => ({
@@ -197,7 +226,8 @@ export function LatinPage() {
     cards: selectedCards,
     supportsReverse: true,
   }), [selectedCards]);
-  const resetKey = `${direction}|${[...materials].sort().join(",")}|v:${selectionKey(vocabularyParts)}|p:${selectionKey(paradigmCards)}`;
+  const savedSelectionKey = includeSavedCards ? [...savedCards.refs].sort().join(",") : "off";
+  const resetKey = `${direction}|${[...materials].sort().join(",")}|v:${selectionKey(vocabularyParts)}|p:${selectionKey(paradigmCards)}|saved:${savedSelectionKey}`;
 
   function toggleMaterial(material: Material, checked: boolean) {
     setMaterials((current) => {
@@ -277,18 +307,23 @@ export function LatinPage() {
   return (
     <main className="page-shell study-page latin-page">
       <div className="study-page-heading">
-        <div><p className="eyebrow">Vocabulary · paradigms</p><h1>Latin</h1></div>
+        <div><h1>Latin</h1></div>
       </div>
 
       {!user && <div className="guest-banner"><span>You are studying as a guest. Progress stays on this device.</span><Link to="/account">Sign in to sync</Link></div>}
-      {(vocabularyError || paradigmError) && <div className="inline-alert">{vocabularyError ?? paradigmError}</div>}
+      {(vocabularyError || paradigmError || savedCards.error) && <div className="inline-alert">{vocabularyError ?? paradigmError ?? savedCards.error}</div>}
 
       <StudyFilterMenu
         summary={`${selectedCards.length.toLocaleString()} cards in the current pool`}
-        detail="Choose Latin vocabulary, grammar paradigms, or any combination of them."
+        detail="Choose Latin vocabulary, grammar paradigms, Saved Cards, or any combination of them."
       >
+        <FilterSection title="Saved cards" description="Cards you save with the card button or S shortcut are private to your account or this guest browser.">
+          <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={setIncludeSavedCards} hint="Your saved Latin cards" />
+        </FilterSection>
+
         <FilterDisclosure
-          title="Latin Vocabulary (Dickinson)"
+          title={<a className="filter-source-link" href={DICKINSON_URL} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>Latin (Dickinson)</a>}
+          ariaLabel="Latin Dickinson"
           count={vocabularyDeck?.cards.length ?? 997}
           summary="Frequency-ranked · top 100, then 25-card unlocks"
           checked={vocabularyState.checked}
@@ -344,7 +379,8 @@ export function LatinPage() {
         </FilterDisclosure>
 
         <FilterDisclosure
-          title="Grammer"
+          title={<a className="filter-source-link" href={HENLE_URL} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>Grammer (Henle)</a>}
+          ariaLabel="Grammer Henle"
           count={allParadigmIds.length || 36}
           summary={`${grammarSelectedCount} of ${allParadigmIds.length || 36} paradigms selected`}
           checked={grammarChecked}
@@ -382,24 +418,30 @@ export function LatinPage() {
           sources={sources}
           resetKey={resetKey}
           direction={direction}
-          onDirectionChange={vocabularyActive ? setDirection : undefined}
+          onDirectionChange={setDirection}
           directionLabels={{ forward: "Forward", reverse: "Reverse" }}
           resumeSession={resumeSession}
-          cardMeta={(card, source) => source.id === "vocabulary"
+          savedCardRefs={savedCards.refs}
+          onToggleSavedCard={savedCards.toggleSaved}
+          cardMeta={(card, source) => source.deck.id === vocabularyDeck.id
             ? `Entry ${Number(card.metadata?.deckPosition ?? 0)} of ${vocabularyDeck.cards.length} · Dickinson rank ${card.rank}`
             : `${card.category ?? "Indicative paradigm"} · whole paradigm`}
-          priorityPrompt={(card, copy) => String(card.metadata?.studySource).includes("indicative-paradigm") ? `${card.front} · Complete chart` : copy.prompt}
+          priorityPrompt={(card, copy) => String(card.metadata?.studySource).includes("indicative-paradigm") ? (direction === "reverse" ? "Identify the complete paradigm" : `${card.front} · Complete chart`) : copy.prompt}
           renderFront={(card, copy, source) => {
-            if (source.id === "active-indicative-paradigms" || source.id === "passive-indicative-paradigms") {
+            const isParadigm = source.deck.id === activeParadigmDeck?.id || source.deck.id === passiveParadigmDeck?.id;
+            if (isParadigm) {
+              if (source.direction === "reverse") return <span className="henle-chart-face"><span className="chart-instruction">Identify this paradigm.</span><LatinParadigmTable card={card} revealed /></span>;
               return <span className="henle-chart-face"><strong className="henle-card-title">{card.front}</strong><span className="chart-instruction">Reconstruct the complete paradigm from memory.</span><LatinParadigmTable card={card} revealed={false} /></span>;
             }
-            return <span className={direction === "forward" ? "latin-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
+            return <span className={source.direction === "forward" ? "latin-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
           }}
           renderBack={(card, copy, source) => {
-            if (source.id === "active-indicative-paradigms" || source.id === "passive-indicative-paradigms") {
+            const isParadigm = source.deck.id === activeParadigmDeck?.id || source.deck.id === passiveParadigmDeck?.id;
+            if (isParadigm) {
+              if (source.direction === "reverse") return <span className="answer-block"><strong className="henle-card-title">{card.front}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>;
               return <span className="henle-chart-face"><strong className="henle-card-title">{card.front}</strong><LatinParadigmTable card={card} revealed /></span>;
             }
-            return <span className="answer-block"><strong className={direction === "reverse" ? "latin-front compact-latin" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>;
+            return <span className="answer-block"><strong className={source.direction === "reverse" ? "latin-front compact-latin" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>;
           }}
         />
       ) : (

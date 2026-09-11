@@ -27,7 +27,8 @@ export function FilterSection({ title, description, onAll, onNone, children }: {
 }
 
 type FilterDisclosureProps = {
-  title: string;
+  title: ReactNode;
+  ariaLabel?: string;
   summary?: string;
   children: ReactNode;
   nested?: boolean;
@@ -38,11 +39,12 @@ type FilterDisclosureProps = {
   count?: number;
 };
 
-export function FilterDisclosure({ title, summary, children, nested = false, checked, mixed = false, onCheckedChange, onOpenChange, count }: FilterDisclosureProps) {
+export function FilterDisclosure({ title, ariaLabel, summary, children, nested = false, checked, mixed = false, onCheckedChange, onOpenChange, count }: FilterDisclosureProps) {
   const checkboxRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (checkboxRef.current) checkboxRef.current.indeterminate = mixed;
   }, [mixed]);
+  const titleLabel = ariaLabel ?? (typeof title === "string" ? title : "filter group");
 
   return <details className={`filter-disclosure ${nested ? "is-nested" : ""}`} onToggle={(event) => onOpenChange?.(event.currentTarget.open)}>
     <summary>
@@ -52,7 +54,7 @@ export function FilterDisclosure({ title, summary, children, nested = false, che
           className="filter-disclosure-checkbox"
           type="checkbox"
           checked={Boolean(checked)}
-          aria-label={`Select all ${title}`}
+          aria-label={`Select all ${titleLabel}`}
           onClick={(event) => event.stopPropagation()}
           onChange={(event) => onCheckedChange(event.target.checked)}
         />}
