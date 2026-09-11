@@ -66,20 +66,25 @@ describe("unified study engine", () => {
     expect(priority.some((item) => item.card.id === "unselected")).toBe(false);
   });
 
-  it("does not ping-pong among the most recently presented adaptive cards when alternatives exist", () => {
+  it("does not ping-pong among the most recently reviewed adaptive cards when alternatives exist", () => {
     const pool: StudyCard[] = Array.from({ length: 7 }, (_, index) => ({ id: `card-${index + 1}`, deckId: "test", front: `front ${index + 1}`, back: `back ${index + 1}` }));
     let state = createModeState("test", "forward", pool.length, undefined, 1);
-    for (let index = 0; index < 4; index += 1) state = presentCard(state, pool[index], 10 + index);
+    for (let index = 0; index < 4; index += 1) {
+      state = presentCard(state, pool[index], 10 + index * 2);
+      state = recordReview(state, pool[index], { id: `review-${index}`, result: "right", difficulty: "medium", responseTimeMs: 1_000, reviewedAt: 11 + index * 2 });
+    }
     const next = pickNextCard(pool, state, "adaptive", { random: () => 0 });
     expect(next).not.toBeNull();
     expect(["card-1", "card-2", "card-3", "card-4"]).not.toContain(next?.id);
   });
 
-  it("Skip changes cards without grading", () => {
-    const state = presentCard(createModeState("test", "forward", 2), cards[0]);
+  it("Skip changes cards without logging the skipped card", () => {
+    const state = presentCard(createModeState("test", "forward", 2), cards[0], 10);
     const skipped = skipAndAdvance(state, cards, "sequential");
     expect(skipped.currentCardId).toBe("two");
     expect(skipped.totalReviews).toBe(0);
+    expect(skipped.reviewSequence).toEqual([]);
+    expect(getCardProgress(skipped, "one")).toMatchObject({ presented: 0, reviews: 0, lastPresentedAt: 0, responseTimeCount: 0, lastResponseTimeMs: 0, history: [] });
   });
 
   it("Back snapshot permits a corrected grade without double counting", () => {
