@@ -113,6 +113,8 @@
 .filter-disclosure-copy { min-width: 0; display: grid; gap: 0.1rem; }
 .filter-disclosure-copy strong { font-size: 0.82rem; }
 .filter-disclosure-copy small { color: var(--ink-soft); font-size: 0.69rem; }
+.filter-source-link { color: var(--burgundy); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
+.filter-source-link:hover { color: var(--foreground); }
 .filter-disclosure-body {
   padding: 0.65rem;
   display: grid;
