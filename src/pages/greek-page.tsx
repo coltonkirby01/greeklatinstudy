@@ -251,24 +251,24 @@ export function GreekPage() {
     {(error || savedCards.error) && <div className="inline-alert">{error ?? savedCards.error}</div>}
 
     {decks && <StudyFilterMenu summary={`${selectedCards.length} cards in the current pool`}>
-      <FilterSection title="Quick select">
+      <FilterSection title="Quick select" onAll={() => setSelected(new Set(allKeys))} onNone={() => { setSelected(new Set()); setIncludeSavedCards(false); }}>
         <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={setIncludeSavedCards} hint={savedHint} />
         <FilterCheckbox label="All Vocabulary" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onChange={(checked) => setSelected((current) => updateSet(current, allVocabularyKeys, checked))} />
         <FilterCheckbox label="All Grammar" checked={grammarState.checked} mixed={grammarState.mixed} onChange={(checked) => setSelected((current) => updateSet(current, allGrammarKeys, checked))} />
       </FilterSection>
 
-      <FilterDisclosure title="Lesson 1" summary={`Grammar · ${lesson1State.selectedCount} of ${lesson1Keys.length} groups selected`} checked={lesson1State.checked} mixed={lesson1State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson1Keys, checked))}>
+      <FilterDisclosure title="Lesson 1" summary={`${lesson1State.selectedCount} of ${lesson1Keys.length} groups selected`} checked={lesson1State.checked} mixed={lesson1State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson1Keys, checked))}>
         <FilterDisclosure title="Alphabet" summary={`${alphabetState.selectedCount} of ${alphabetKeys.length} cases selected`} count={countFoundation(categories.uppercase) + countFoundation(categories.lowercase)} nested checked={alphabetState.checked} mixed={alphabetState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, alphabetKeys, checked))}>
           <FilterSection title="Letter case">
             <FilterCheckbox label="Uppercase" count={countFoundation(categories.uppercase)} checked={selected.has(keys.uppercase)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.uppercase], checked))} />
             <FilterCheckbox label="Lowercase" count={countFoundation(categories.lowercase)} checked={selected.has(keys.lowercase)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.lowercase], checked))} />
           </FilterSection>
         </FilterDisclosure>
-        <FilterCheckbox label="Punctuation" count={countFoundation(categories.punctuation)} checked={selected.has(keys.punctuation)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.punctuation], checked))} hint="Grammar" />
+        <FilterCheckbox label="Punctuation" count={countFoundation(categories.punctuation)} checked={selected.has(keys.punctuation)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.punctuation], checked))} />
       </FilterDisclosure>
 
-      <FilterDisclosure title="Lesson 2" summary="Grammar · accent marks" checked={lesson2State.checked} mixed={lesson2State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson2Keys, checked))}>
-        <FilterCheckbox label="Accent marks" count={countFoundation(categories.accents)} checked={selected.has(keys.accents)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.accents], checked))} hint="Grammar" />
+      <FilterDisclosure title="Lesson 2" summary={`${lesson2State.selectedCount} of ${lesson2Keys.length} groups selected`} checked={lesson2State.checked} mixed={lesson2State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson2Keys, checked))}>
+        <FilterCheckbox label="Accent marks" count={countFoundation(categories.accents)} checked={selected.has(keys.accents)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.accents], checked))} />
       </FilterDisclosure>
 
       <FilterDisclosure title="Lesson 3" summary={`${lesson3State.selectedCount} of ${lesson3Keys.length} groups selected`} checked={lesson3State.checked} mixed={lesson3State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson3Keys, checked))}>
@@ -295,8 +295,10 @@ export function GreekPage() {
         </FilterDisclosure>
 
         <FilterDisclosure title="Endings" summary={`${lesson4EndingsState.selectedCount} of ${lesson4EndingsKeys.length} selected`} count={lesson4EndingsKeys.length} nested checked={lesson4EndingsState.checked} mixed={lesson4EndingsState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson4EndingsKeys, checked))}>
-          <FilterCheckbox label="First Declension Feminine — α-type Endings" count={countLesson4Grammar("First Declension Feminine Endings — α-type")} checked={selected.has(keys.firstDeclensionEndingsAlpha)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.firstDeclensionEndingsAlpha], checked))} />
-          <FilterCheckbox label="First Declension Feminine — η-type Endings" count={countLesson4Grammar("First Declension Feminine Endings — η-type")} checked={selected.has(keys.firstDeclensionEndingsEta)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.firstDeclensionEndingsEta], checked))} />
+          {lesson4EndingsKeys.map((key) => {
+  const category = lesson4GrammarCategoryByKey.get(key)!;
+  return <FilterCheckbox key={key} label={category} count={countLesson4Grammar(category)} checked={selected.has(key)} onChange={(checked) => setSelected((current) => updateSet(current, [key], checked))} />;
+})}
         </FilterDisclosure>
 
         <FilterDisclosure title="Paradigms" summary={`${lesson4ParadigmState.selectedCount} of ${lesson4ParadigmKeys.length} selected`} count={lesson4ParadigmKeys.length} nested checked={lesson4ParadigmState.checked} mixed={lesson4ParadigmState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson4ParadigmKeys, checked))}>

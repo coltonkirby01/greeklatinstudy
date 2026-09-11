@@ -1,14 +1,12 @@
 import { BarChart3, Clock3, Cloud, Gauge, Laptop, TrendingUp } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { loadGreekDeck, loadGreekLesson3GrammarDeck, loadGreekLesson3VocabularyDeck, loadGreekLesson4GrammarDeck, loadGreekLesson4VocabularyDeck, loadLatinDeck } from "../data/builtin-decks";
-import { loadLatinActiveIndicativeParadigmsDeck } from "../data/latin-active-indicative-paradigms";
-import { loadLatinPassiveIndicativeParadigmsDeck } from "../data/latin-passive-indicative-paradigms";
+import { loadBuiltinStatsSources } from "../features/study/builtin-study-catalog";
 import { useAuth } from "../features/auth/auth-context";
 import { blankCardProgress, createModeState, directionalCopy, formatResponseTime, studyStats } from "../features/study/engine";
 import { loadProgressEnvelope, saveProgressEnvelope } from "../features/study/progress-repository";
 import { intrinsicCardDifficulty, scoredSession, userProficiencyScore } from "../features/study/scoring";
-import { deleteReviewsFromStatsInEnvelope, deleteSessionFromEnvelope, renameReviewsInEnvelope, renameSessionInEnvelope, sessionCustomNameFromReviews } from "../features/study/session-management";
+import { builtinManagedSessions, builtinSessionNameFromId, deleteReviewsFromStatsInEnvelope, deleteSessionFromEnvelope, renameReviewsInEnvelope, renameSessionInEnvelope, sessionCustomNameFromReviews } from "../features/study/session-management";
 import type { CardProgress, DeckDefinition, DeckProgressEnvelope, ReviewRecord, StudyActivityKind, StudyCard, StudyDirection, StudyModeState } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
 import "./stats-page.css";
@@ -65,6 +63,7 @@ type SessionSummary = {
   accuracy: number;
   score: number;
   inferred: boolean;
+  builtin: boolean;
   changeFromPrevious: number | null;
 };
 type TrendPoint = { label: string; value: number };
@@ -155,13 +154,14 @@ function summarizeSession(id: string, language: Language, reviews: ReviewEvent[]
   const right = reviews.filter((review) => review.result === "right").length, easy = reviews.filter((review) => review.difficulty === "easy").length, medium = reviews.filter((review) => review.difficulty === "medium").length, hard = reviews.filter((review) => review.difficulty === "hard").length;
   const totalTimeMs = reviews.reduce((sum, review) => sum + review.responseTimeMs, 0);
   const customName = sessionCustomNameFromReviews(reviews.map((review) => review.review));
+  const builtinName = builtinSessionNameFromId(id);
   return {
-    id, language, name: customName || automaticSessionName(language, reviews, startedAt), startedAt, endedAt, reviews: reviews.length, right, wrong: reviews.length - right, easy, medium, hard, totalTimeMs,
+    id, language, name: builtinName ?? (customName || automaticSessionName(language, reviews, startedAt)), startedAt, endedAt, reviews: reviews.length, right, wrong: reviews.length - right, easy, medium, hard, totalTimeMs,
     averageTimeMs: totalTimeMs / reviews.length,
     averageCardDifficulty: reviews.reduce((sum, review) => sum + review.intrinsicDifficulty, 0) / reviews.length,
     accuracy: right / reviews.length,
     score: scoredSession(reviews.map((review) => ({ result: review.result, responseTimeMs: review.responseTimeMs, intrinsicDifficulty: review.intrinsicDifficulty }))),
-    inferred, changeFromPrevious: null,
+    inferred, builtin: Boolean(builtinName), changeFromPrevious: null,
   };
 }
 
@@ -194,7 +194,13 @@ function buildSessions(rawEvents: ReviewEvent[]) {
     closeBucket();
   }
   for (const language of ["Greek", "Latin"] as Language[]) {
-    const chronological = sessions.filter((session) => session.language === language).sort((a, b) => a.startedAt - b.startedAt);
+    for (const builtin of builtinManagedSessions(language)) {
+      if (sessions.some((session) => session.id === builtin.id)) continue;
+      sessions.push({ id: builtin.id, language, name: builtin.name ?? "Learner", startedAt: 0, endedAt: 0, reviews: 0, right: 0, wrong: 0, easy: 0, medium: 0, hard: 0, totalTimeMs: 0, averageTimeMs: 0, averageCardDifficulty: 0, accuracy: 0, score: 0, inferred: false, builtin: true, changeFromPrevious: null });
+    }
+  }
+  for (const language of ["Greek", "Latin"] as Language[]) {
+    const chronological = sessions.filter((session) => session.language === language && session.reviews > 0).sort((a, b) => a.startedAt - b.startedAt);
     chronological.forEach((session, index) => { session.changeFromPrevious = index ? Number((session.score - chronological[index - 1].score).toFixed(1)) : null; });
   }
   return { sessions, events };
@@ -248,6 +254,7 @@ function proficiency(cards: CardPerformance[]) {
 function weeklyTrendData(sessions: SessionSummary[]) {
   const buckets = new Map<number, SessionSummary[]>();
   for (const session of sessions) {
+    if (!session.reviews) continue;
     const date = new Date(session.startedAt), day = (date.getDay() + 6) % 7;
     date.setHours(0, 0, 0, 0); date.setDate(date.getDate() - day);
     const key = date.getTime(); buckets.set(key, [...(buckets.get(key) ?? []), session]);
@@ -274,32 +281,7 @@ export function StatsPage() {
   const [actionError, setActionError] = useState<string | null>(null);
 
   const { value, error, loading } = useAsync(async () => {
-    const [greekFoundation, greekVocabulary, greekGrammar, greekLesson4Vocabulary, greekLesson4Grammar, latinVocabulary, activeParadigms, passiveParadigms] = await Promise.all([
-      loadGreekDeck(),
-      loadGreekLesson3VocabularyDeck(),
-      loadGreekLesson3GrammarDeck(),
-      loadGreekLesson4VocabularyDeck(),
-      loadGreekLesson4GrammarDeck(),
-      loadLatinDeck(),
-      loadLatinActiveIndicativeParadigmsDeck(),
-      loadLatinPassiveIndicativeParadigmsDeck(),
-    ]);
-    const sources: StatsSource[] = [
-      { language: "Greek", source: "Lessons 1–2", mode: "Forward", direction: "forward", deck: greekFoundation, cards: greekFoundation.cards, studyKey: "forward" },
-      { language: "Greek", source: "Lessons 1–2", mode: "Reverse", direction: "reverse", deck: greekFoundation, cards: greekFoundation.cards, studyKey: "reverse" },
-      { language: "Greek", source: "Lesson 3 Vocabulary", mode: "Forward", direction: "forward", deck: greekVocabulary, cards: greekVocabulary.cards, studyKey: "forward" },
-      { language: "Greek", source: "Lesson 3 Vocabulary", mode: "Reverse", direction: "reverse", deck: greekVocabulary, cards: greekVocabulary.cards, studyKey: "reverse" },
-      { language: "Greek", source: "Lesson 3 Grammar", mode: "Forward", direction: "forward", deck: greekGrammar, cards: greekGrammar.cards, studyKey: "forward" },
-      { language: "Greek", source: "Lesson 4 Vocabulary", mode: "Forward", direction: "forward", deck: greekLesson4Vocabulary, cards: greekLesson4Vocabulary.cards, studyKey: "forward" },
-      { language: "Greek", source: "Lesson 4 Vocabulary", mode: "Reverse", direction: "reverse", deck: greekLesson4Vocabulary, cards: greekLesson4Vocabulary.cards, studyKey: "reverse" },
-      { language: "Greek", source: "Lesson 4 Grammar", mode: "Forward", direction: "forward", deck: greekLesson4Grammar, cards: greekLesson4Grammar.cards, studyKey: "forward" },
-      { language: "Latin", source: "Dickinson Vocabulary", mode: "Forward", direction: "forward", deck: latinVocabulary, cards: latinVocabulary.cards, studyKey: "forward" },
-      { language: "Latin", source: "Dickinson Vocabulary", mode: "Reverse", direction: "reverse", deck: latinVocabulary, cards: latinVocabulary.cards, studyKey: "reverse" },
-      { language: "Latin", source: "Active Indicative Paradigms", mode: "Charts", direction: "forward", deck: activeParadigms, cards: activeParadigms.cards, studyKey: "chart" },
-      { language: "Latin", source: "Active Indicative Paradigms", mode: "Reverse", direction: "reverse", deck: activeParadigms, cards: activeParadigms.cards, studyKey: "reverse" },
-      { language: "Latin", source: "Passive Indicative Paradigms", mode: "Charts", direction: "forward", deck: passiveParadigms, cards: passiveParadigms.cards, studyKey: "chart" },
-      { language: "Latin", source: "Passive Indicative Paradigms", mode: "Reverse", direction: "reverse", deck: passiveParadigms, cards: passiveParadigms.cards, studyKey: "reverse" },
-    ];
+    const sources: StatsSource[] = await loadBuiltinStatsSources();
     const uniqueDeckIds = [...new Set(sources.map((source) => source.deck.id))];
     const loaded = await Promise.all(uniqueDeckIds.map(async (deckId) => [deckId, await loadProgressEnvelope(deckId, user)] as const));
     const envelopes = Object.fromEntries(loaded.map(([deckId, result]) => [deckId, result.envelope])) as Record<string, DeckProgressEnvelope | null>;
@@ -342,11 +324,13 @@ export function StatsPage() {
     return loadedValue.events.filter((event) => event.scopeSessionId === sessionId).map((event) => event.reviewId);
   }
   function beginRename(session: SessionSummary) {
+    if (session.builtin) return;
     setEditingSessionId(session.id);
     setDraftName(session.name);
     setActionError(null);
   }
   async function saveRename(session: SessionSummary) {
+    if (session.builtin) return;
     const name = draftName.trim();
     if (!name) { setEditingSessionId(null); return; }
     if (name === session.name) { setEditingSessionId(null); return; }
@@ -367,6 +351,7 @@ export function StatsPage() {
     finally { setBusySessionId(null); }
   }
   async function deleteSession(session: SessionSummary) {
+    if (session.builtin) return;
     const reviewIds = session.inferred ? reviewIdsForSession(session.id) : [];
     const confirmed = window.confirm(`Delete “${session.name}”?\n\nWILL BE REMOVED:\n• The session itself\n• Its session-history entry\n• Its availability in the Greek and Latin flashcard session menus\n• All of this session's contribution to Stats\n\nWILL NOT BE REMOVED:\n• Accumulated card mastery and learned status\n• Difficulty/priority calculations and adaptive-review memory/history\n• Scheduling, strength, intervals, and due dates\n• Response-time learning memory\n• Dickinson progressive unlock status\n\nThe learning evidence stays available to the adaptive system, but it will no longer belong to a session or appear in Stats.`);
     if (!confirmed) return;
@@ -397,22 +382,22 @@ export function StatsPage() {
 
   return <main className="page-shell stats-page">
     <header className="stats-hero">
-      <div><p className="eyebrow">Continuous memory bank</p><h1>Study Stats</h1><p>Your complete Greek and Latin history is analyzed here. Use the session filter to compare one session, several sessions together, or your complete history.</p></div>
+      <div><h1>Study Stats</h1><p>Your complete Greek and Latin history is analyzed here. Use the session filter to compare one session, several sessions together, or your complete history.</p></div>
       <div className="stats-sync-note">{user ? <Cloud aria-hidden="true" /> : <Laptop aria-hidden="true" />}<span>{user ? "Showing your synced account progress" : "Showing guest progress saved on this device"}</span></div>
     </header>
     {(error || actionError) && <div className="inline-alert">{actionError || error}</div>}
 
     <section className="panel-surface stats-session-filter">
       <div className="stats-section-heading"><div><p className="eyebrow">Stats scope</p><h2>Choose sessions</h2><p>{filterLabel}. Every score, card analysis, trend, and review list below follows this selection.</p></div><div className="stats-filter-actions"><button className="small-outline-button" type="button" onClick={() => setSelectedSessions(null)}>All</button><button className="small-outline-button" type="button" onClick={() => setSelectedSessions(new Set())}>Clear</button></div></div>
-      {value.sessions.length ? <div className="stats-session-picker">{[...value.sessions].sort((a, b) => b.startedAt - a.startedAt).map((session) => {
+      {value.sessions.length ? <div className="stats-session-picker">{[...value.sessions].sort((a, b) => Number(Boolean(b.builtin)) - Number(Boolean(a.builtin)) || b.startedAt - a.startedAt).map((session) => {
         const editing = editingSessionId === session.id, busy = busySessionId === session.id;
         return <div className="stats-session-choice" key={session.id}>
           <input type="checkbox" aria-label={`Include ${session.name} in Stats`} checked={allSessionsSelected || (selectedSessions?.has(session.id) ?? false)} onChange={(event) => toggleSession(session.id, event.target.checked)} />
           <div style={{ minWidth: 0, flex: "1 1 auto", display: "grid", gap: "0.14rem" }}>
-            {editing ? <input autoFocus value={draftName} maxLength={80} aria-label="Session name" disabled={busy} style={{ margin: 0, width: "100%", minWidth: 0, padding: "0.25rem 0.4rem", border: "1px solid var(--line)", borderRadius: "6px", background: "var(--surface)", color: "var(--foreground)", font: "inherit", fontWeight: 700 }} onFocus={(event) => event.currentTarget.select()} onChange={(event) => setDraftName(event.target.value)} onBlur={() => void saveRename(session)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); event.currentTarget.blur(); } if (event.key === "Escape") { event.preventDefault(); setEditingSessionId(null); setDraftName(""); } }} /> : <strong role="button" tabIndex={0} title="Double-click to rename" onDoubleClick={() => beginRename(session)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === "F2") beginRename(session); }}>{sessionName(session)}</strong>}
+            {editing ? <input autoFocus value={draftName} maxLength={80} aria-label="Session name" disabled={busy} style={{ margin: 0, width: "100%", minWidth: 0, padding: "0.25rem 0.4rem", border: "1px solid var(--line)", borderRadius: "6px", background: "var(--surface)", color: "var(--foreground)", font: "inherit", fontWeight: 700 }} onFocus={(event) => event.currentTarget.select()} onChange={(event) => setDraftName(event.target.value)} onBlur={() => void saveRename(session)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); event.currentTarget.blur(); } if (event.key === "Escape") { event.preventDefault(); setEditingSessionId(null); setDraftName(""); } }} /> : session.builtin ? <strong>{sessionName(session)}</strong> : <strong role="button" tabIndex={0} title="Double-click to rename" onDoubleClick={() => beginRename(session)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === "F2") beginRename(session); }}>{sessionName(session)}</strong>}
             <small>{session.language} · {dateTime(session.startedAt)} · {session.reviews} reviews · score {session.score.toFixed(1)}{session.inferred ? " · imported legacy history" : ""}</small>
           </div>
-          <div className="stats-filter-actions"><button className="text-button" type="button" onClick={() => setSelectedSessions(new Set([session.id]))}>Only</button><button className="text-button" type="button" disabled={busy} onClick={() => void deleteSession(session)}>Delete</button></div>
+          <div className="stats-filter-actions"><button className="text-button" type="button" onClick={() => setSelectedSessions(new Set([session.id]))}>Only</button>{!session.builtin && <button className="text-button" type="button" disabled={busy} onClick={() => void deleteSession(session)}>Delete</button>}</div>
         </div>;
       })}</div> : <p className="stats-empty">Complete reviews to create sessions.</p>}
     </section>
@@ -445,14 +430,14 @@ function LanguageStats({ language, rows, cards, sessions, href, sessionName }: {
   const slowest = [...cards].sort((a, b) => b.averageTimeMs - a.averageTimeMs).slice(0, 8);
   const improved = [...cards].filter((card) => (card.improvement ?? 0) > 0).sort((a, b) => (b.improvement ?? 0) - (a.improvement ?? 0)).slice(0, 8);
   const mostReviewed = [...cards].sort((a, b) => b.progress.reviews - a.progress.reviews).slice(0, 8);
-  const cardRows = [...cards].sort((a, b) => b.totalTimeMs - a.totalTimeMs), rankedSessions = [...sessions].sort((a, b) => b.score - a.score || b.reviews - a.reviews);
+  const cardRows = [...cards].sort((a, b) => b.totalTimeMs - a.totalTimeMs), rankedSessions = [...sessions].filter((session) => session.reviews > 0).sort((a, b) => b.score - a.score || b.reviews - a.reviews);
   const visibleCardCount = Math.min(cardLimit, cardRows.length);
 
   return <section className="stats-language-section">
     <div className="stats-language-title"><div><p className="eyebrow">{language}</p><h2>{language} memory bank</h2></div><Link className="small-outline-button" to={href}>Open {language}</Link></div>
     <div className="stats-overview-grid">
       <Stat label="Proficiency score" value={`${score.score} · ${score.tier}`} /><Stat label="Avg. card difficulty" value={difficultyLabel(score.averageDifficulty)} /><Stat label="Hardest mastered" value={difficultyLabel(score.hardestMastered)} />
-      <Stat label="Total reviews" value={aggregate.totalReviews.toLocaleString()} /><Stat label="Accuracy" value={percent(aggregate.accuracy)} /><Stat label="Total active recall time" value={formatDuration(aggregate.totalRecallTimeMs)} /><Stat label="Avg. recall time" value={formatResponseTime(aggregate.averageResponseTimeMs)} /><Stat label="Study sessions" value={sessions.length.toLocaleString()} /><Stat label="Reviewed card-directions" value={aggregate.reviewed.toLocaleString()} /><Stat label="Mastered once" value={aggregate.mastered.toLocaleString()} /><Stat label="Ever wrong" value={aggregate.everWrong.toLocaleString()} /><Stat label="Marked hard" value={aggregate.hardCards.toLocaleString()} /><Stat label="Best streak" value={aggregate.bestStreak.toLocaleString()} /><Stat label="Last review" value={dateTime(aggregate.lastReviewedAt)} />
+      <Stat label="Total reviews" value={aggregate.totalReviews.toLocaleString()} /><Stat label="Accuracy" value={percent(aggregate.accuracy)} /><Stat label="Total active recall time" value={formatDuration(aggregate.totalRecallTimeMs)} /><Stat label="Avg. recall time" value={formatResponseTime(aggregate.averageResponseTimeMs)} /><Stat label="Study sessions" value={sessions.filter((session) => session.reviews > 0).length.toLocaleString()} /><Stat label="Reviewed card-directions" value={aggregate.reviewed.toLocaleString()} /><Stat label="Mastered once" value={aggregate.mastered.toLocaleString()} /><Stat label="Ever wrong" value={aggregate.everWrong.toLocaleString()} /><Stat label="Marked hard" value={aggregate.hardCards.toLocaleString()} /><Stat label="Best streak" value={aggregate.bestStreak.toLocaleString()} /><Stat label="Last review" value={dateTime(aggregate.lastReviewedAt)} />
     </div>
 
     <div className="stats-analysis-grid">
@@ -464,8 +449,8 @@ function LanguageStats({ language, rows, cards, sessions, href, sessionName }: {
     </div>
 
     <div className="panel-surface stats-table-wrap">
-      <div className="stats-section-heading"><div><p className="eyebrow">Session analysis</p><h3>Session rankings</h3><p>Use Continue to reopen an explicit past session. Double-click a session name under Choose sessions to rename it. Deleting a session removes it from Stats and session menus while preserving adaptive learning memory.</p></div><TrendingUp aria-hidden="true" /></div>
-      {rankedSessions.length ? <div className="stats-table-scroll"><table className="stats-table stats-session-table"><thead><tr><th>Rank</th><th>Session</th><th>Reviews</th><th>Accuracy</th><th>Avg. difficulty</th><th>Total time</th><th>Avg. time</th><th>Score</th><th>Vs. previous</th><th>Actions</th></tr></thead><tbody>{rankedSessions.map((session, index) => <tr key={session.id}><td>#{index + 1}</td><td><strong>{sessionName(session)}</strong><span className="stats-session-date">{dateTime(session.startedAt)}{session.inferred ? " · legacy inferred" : ""}</span></td><td>{session.reviews}</td><td>{percent(session.accuracy)}</td><td>{difficultyLabel(session.averageCardDifficulty)}</td><td>{formatDuration(session.totalTimeMs)}</td><td>{formatResponseTime(session.averageTimeMs)}</td><td><strong>{session.score.toFixed(1)}</strong></td><td>{session.changeFromPrevious === null ? "—" : `${session.changeFromPrevious >= 0 ? "+" : ""}${session.changeFromPrevious.toFixed(1)}`}</td><td><div className="stats-session-actions">{!session.inferred && <Link className="small-outline-button" to={`${href}?session=${encodeURIComponent(session.id)}&sessionStartedAt=${session.startedAt}`}>Continue</Link>}</div></td></tr>)}</tbody></table></div> : <p className="stats-empty">No sessions match this Stats selection.</p>}
+      <div className="stats-section-heading"><div><p className="eyebrow">Session analysis</p><h3>Session rankings</h3><p>Learner and Reviewer are permanent session types. Custom sessions can be continued, renamed, or deleted while adaptive learning memory remains intact.</p></div><TrendingUp aria-hidden="true" /></div>
+      {rankedSessions.length ? <div className="stats-table-scroll"><table className="stats-table stats-session-table"><thead><tr><th>Rank</th><th>Session</th><th>Reviews</th><th>Accuracy</th><th>Avg. difficulty</th><th>Total time</th><th>Avg. time</th><th>Score</th><th>Vs. previous</th><th>Actions</th></tr></thead><tbody>{rankedSessions.map((session, index) => <tr key={session.id}><td>#{index + 1}</td><td><strong>{sessionName(session)}</strong><span className="stats-session-date">{dateTime(session.startedAt)}{session.inferred ? " · legacy inferred" : ""}</span></td><td>{session.reviews}</td><td>{percent(session.accuracy)}</td><td>{difficultyLabel(session.averageCardDifficulty)}</td><td>{formatDuration(session.totalTimeMs)}</td><td>{formatResponseTime(session.averageTimeMs)}</td><td><strong>{session.score.toFixed(1)}</strong></td><td>{session.changeFromPrevious === null ? "—" : `${session.changeFromPrevious >= 0 ? "+" : ""}${session.changeFromPrevious.toFixed(1)}`}</td><td><div className="stats-session-actions">{!session.inferred && <Link className="small-outline-button" to={`${href}?session=${encodeURIComponent(session.id)}&sessionStartedAt=${session.startedAt || Date.now()}`}>Continue</Link>}</div></td></tr>)}</tbody></table></div> : <p className="stats-empty">No sessions match this Stats selection.</p>}
     </div>
 
     <div className="panel-surface stats-table-wrap">

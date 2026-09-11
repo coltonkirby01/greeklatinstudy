@@ -20,7 +20,7 @@ export function FilterSection({ title, description, onAll, onNone, children }: {
   return <section className="filter-section">
     <div className="filter-section-heading">
       <div><h3>{title}</h3>{visibleDescription && <p>{visibleDescription}</p>}</div>
-      {(onAll || onNone) && <div className="filter-actions">{onAll && <button type="button" onClick={onAll}>All</button>}{onNone && <button type="button" onClick={onNone}>None</button>}</div>}
+      {(onAll || onNone) && <div className="filter-actions">{onAll && <button type="button" onClick={onAll}>Select all</button>}{onNone && <button type="button" onClick={onNone}>Deselect all</button>}</div>}
     </div>
     <div className="filter-option-grid">{children}</div>
   </section>;

@@ -1,19 +1,53 @@
-# Repository editing instructions for card selectors
+# Greek & Latin Study — repository editing instructions
 
-When adding or changing Greek or Latin cards, keep **Choose cards** concise. The hierarchy, checkbox label, count, and summary should carry the structure. Do not add prose that merely repeats those controls.
+Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve existing user progress, session history, authentication, audio cache behavior, deployment workflows, source data, and mobile behavior unless the user explicitly asks to change them.
 
-- Do not add explanatory `StudyFilterMenu` detail text unless the user explicitly requests it.
-- In Greek Quick Select, **All Vocabulary** and **All Grammar** must have no hint or description text. Do not add replacement hints when later lessons are added.
-- Do not add nested `FilterSection` headings/descriptions that merely repeat a parent such as `Lesson 3 > Vocabulary` or `Lesson 3 > Grammar`. Put the actual child checkboxes directly under the disclosure when no genuinely new grouping is needed.
-- For Greek lessons that contain both ending-only cards and full model-word/model-verb charts, keep them under separate parent selectors named **Endings** and **Paradigms**. Ending-only cards belong under Endings; cards containing model words, model verbs, or complete article paradigms belong under Paradigms. Do not collapse these back into one generic Grammar selector.
-- Apply the same sparse-selector rule to future lessons: add the necessary lesson/type controls and counts, not redundant instructional copy.
-- **Saved Cards** is the intentional exception. Its checkbox hint in both Greek and Latin is exactly: `Cards you save with the card button or S shortcut are private to your account or this guest browser.`
-- Preserve selector behavior, mixed/indeterminate states, saved progress, and independent lesson/deck histories while simplifying copy.
-- Automatic correctness is user-progress-specific: attempts 1–3 for a card in a study mode/direction default to **Wrong**; from attempt 4 onward, use the majority result of that card's three most recent saved reviews. Never replace this with a global/shared default or merge Forward/Reverse histories.
-- The **Current session** sidebar must summarize the session selected in the card-app session selector across that session's loaded Greek/Latin envelopes, independent of the currently visible card filters. Keep it aligned with the Stats page's session scope.
-- Stats/session coverage is mandatory for both languages. Adding cards to an existing Greek or Latin deck automatically belongs in Stats because the full deck is analyzed. Whenever a new built-in Greek/Latin deck or study direction is added, update both `SESSION_DECKS` in `session-management.ts` and the Stats source list in `stats-page.tsx` in the same change; never ship cards that can generate reviews but are absent from Stats/session selection.
-- For Greek ending-only chart audio on Eleven v3, read each chart column top-to-bottom without punctuation pauses inside the column and place exactly one `[pause]` between vertical columns.
+## Clean first-pass rule
 
-- In Greek Lesson 4, both feminine definite-article cards (singular and plural) belong under the `Endings` selector, not `Paradigms`; `Paradigms` is reserved for the model-noun paradigm cards.
+- Make the smallest coherent change and remove temporary patch files/workflows before merge.
+- Do not leave dead imports, retired UI, duplicate registries, temporary tables/functions, commented-out implementations, backup copies, or one-off scripts in the production tree.
+- Reuse shared study components and registries instead of creating a second list or parallel implementation.
+- Run the full tests and production Pages build; do not raise bundle budgets to make a change pass.
+- Before deleting something that looks unused, prove it is not part of persistence migration, source protection, auth/RLS, deployment, audio caching, or future deck administration.
 
-- ElevenLabs subscription usage is administrator-only. Keep the API key exclusively in Supabase Edge Function secrets; never expose it to browser code. The Admin usage panel may show only sanitized plan/credit/reset fields, and the database snapshot must remain readable only through `admin_users`-gated RLS.
+## Built-in cards and Stats/session coverage
+
+- `src/features/study/builtin-study-catalog.ts` is the canonical registry for active built-in Greek/Latin decks, their Stats modes, and session coverage. Add a new built-in deck or study direction there in the same change that exposes it in the UI.
+- Adding cards to an existing registered deck automatically belongs in Stats because Stats loads the complete registered deck. Do not maintain a separate Account-page deck list.
+- Preserve stable deck/card IDs when expanding source material so existing cloud progress remains attached.
+- Greek Lesson 3 has three ending cards plus three παιδεύω paradigm cards. Greek Lesson 4 has two first-declension ending cards, four model-noun paradigms, and two feminine definite-article cards.
+- In Lesson 4, both feminine definite-article cards belong under **Endings**. **Paradigms** contains the four model-noun paradigms.
+
+## Choose cards
+
+- Both Greek and Latin Choose cards menus must retain top-level **Select all** and **Deselect all** actions.
+- Keep selectors concise; hierarchy, checkbox labels, counts, and summaries carry the structure.
+- Parent checkbox selection and disclosure expansion are independent. Mixed states must remain correct.
+- Filter changes narrow the pool only; never delete progress for deselected cards.
+- Saved Cards is the one selector that may carry its explanatory hint.
+
+## Sessions
+
+- Every language always exposes two permanent built-in session types: **Learner** and **Reviewer**. Their IDs are deterministic in `session-management.ts`, so they exist for old and new users without provisioning rows.
+- Learner/Reviewer cannot be renamed or deleted. Custom sessions remain renameable/deletable and preserve long-term adaptive evidence when removed from Stats.
+- Stats must show Learner and Reviewer as selectable session scopes even before they have reviews.
+
+## Study controls and grading
+
+- Space = reveal before answer; Save & Next after reveal.
+- F = flip question/answer after reveal.
+- Enter = toggle Right/Wrong after reveal. R/W are intentionally unassigned.
+- 1/2/3 = Easy/Medium/Hard. S = save/unsave a card. A = Greek audio.
+- Shift+Enter is unassigned.
+- Automatic correctness is per card + study mode/direction: attempts 1–3 default Wrong; from attempt 4 onward use the majority of the three most recent saved results. Difficulty remains time-based (<3s Easy, <10s Medium, otherwise Hard).
+- Back truly undoes/replaces the prior grade; Skip records no grade.
+
+## Greek audio
+
+- Playback uses cached Supabase Storage audio when available; replaying cached audio must not spend ElevenLabs generation credits.
+- For ending-only chart audio, read each vertical column continuously and put exactly one `[pause]` between columns.
+- Keep ElevenLabs API keys server-side only.
+
+## Removed features
+
+- Do not reintroduce Reading/Audio, progress-file backup/import, or the ElevenLabs usage-snapshot/admin panel unless the user explicitly requests a new implementation.

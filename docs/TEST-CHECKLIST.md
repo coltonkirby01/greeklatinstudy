@@ -8,7 +8,7 @@ Legend: ✅ passed; 🟡 implemented, external configuration/integration test pe
 
 - ✅ Greek Lessons 1–2 source has 55 cards.
 - ✅ Greek Lesson 3 Vocabulary has 11 cards.
-- ✅ Greek Lesson 3 Grammar has 11 form cards across Present Active Indicative, Infinitive, and Imperative.
+- ✅ Greek Lesson 3 Grammar has 6 cards across Present Active Indicative, Infinitive, and Imperative.
 - ✅ Dickinson source has 997 entries.
 - ✅ Henle source has 2,062 unique cards and 331 unique rules.
 - ✅ All 2,062 Henle cards have supplied reverse prompts and answers.
@@ -26,7 +26,7 @@ Legend: ✅ passed; 🟡 implemented, external configuration/integration test pe
 - ✅ Forward/Reverse and Adaptive/Sequential controls remain usable while the Start gate is open and do not start timing.
 - ✅ Reveal captures and freezes front-side time.
 - ✅ Enter flips between revealed answer/question faces without restarting timing.
-- ✅ R/W map to Right/Wrong; 1/2/3 map to Easy/Medium/Hard; Space reveals on front and saves after both rating dimensions are chosen.
+- ✅ R/W are intentionally unassigned; 1/2/3 map to Easy/Medium/Hard; Space reveals on front and saves after both rating dimensions are chosen.
 - ✅ Correctness and Easy/Medium/Hard are independent dimensions.
 - ✅ Slow correct responses reduce interval and increase priority.
 - ✅ Wrong, Hard, due state, recency, strength, and mastery affect scheduling/priority.
@@ -84,7 +84,6 @@ Legend: ✅ passed; 🟡 implemented, external configuration/integration test pe
 - ✅ XLSX parser and preview path build successfully.
 - ✅ Create/edit metadata, category, card editing/deletion/reordering, publish/unpublish UI builds.
 - ✅ SQL RLS restricts writes to authenticated `admin_users` members and rejects ordinary-user access by policy inspection.
-- ✅ Production Supabase schema and private `reading-audio` bucket created.
 - ✅ Administrator authorization hardened to self-visible membership rows; Supabase security advisor reports no findings.
 - ✅ RLS identity checks use initialization plans and administrator command policies do not overlap; no actionable RLS performance warnings remain.
 - 🟡 The owner's Google-linked administrator account is provisioned; the create/upload/preview/publish/open/study/delete-sample integration test remains pending.
@@ -100,7 +99,7 @@ Legend: ✅ passed; 🟡 implemented, external configuration/integration test pe
 - ✅ Google OAuth is enabled and a live Google sign-in created a confirmed Google identity linked to the existing account (verified without exposing its identity on 2026-09-05).
 - ✅ The sole confirmed Google-linked owner account has administrator membership; future users remain ordinary learners by default.
 
-## Reading & Audio
+## retired Reading feature
 
 - ✅ Passage create/save/list/edit/delete code builds with local and cloud repositories.
 - ✅ Browser TTS Play/Pause/Restart/speed and sentence controls build.

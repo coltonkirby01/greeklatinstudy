@@ -96,7 +96,7 @@ export function loadGreekLesson3GrammarDeck() {
         category: card.category,
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 3",
-        notes: "Whole-paradigm chart · model verb παιδεύω",
+        notes: card.category.endsWith("Endings") ? "Ending chart" : "Whole-paradigm chart · model verb παιδεύω",
         metadata: {
           lesson: 3,
           studySource: "grammar-chart",
@@ -108,7 +108,7 @@ export function loadGreekLesson3GrammarDeck() {
         },
       };
     });
-    return { id: "alpha-omega-lesson3-grammar", slug: "greek", title: "Greek Lesson 3 Grammar", eyebrow: "Present active paradigms", description: "Three whole-paradigm chart cards. Each card asks for the named paradigm and reveals the complete chart.", language: "greek", cards, supportsReverse: false, sourceNote: "Groton 3.20–3.22; model verb παιδεύω." } satisfies DeckDefinition;
+    return { id: "alpha-omega-lesson3-grammar", slug: "greek", title: "Greek Lesson 3 Grammar", eyebrow: "Present active paradigms", description: "Six Lesson 3 grammar cards: three ending charts and three model-verb paradigms.", language: "greek", cards, supportsReverse: false, sourceNote: "Groton 3.20–3.22; model verb παιδεύω." } satisfies DeckDefinition;
   });
   return greekLesson3GrammarPromise;
 }
@@ -162,7 +162,7 @@ export function loadGreekLesson4GrammarDeck() {
         },
       };
     });
-    return { id: "alpha-omega-lesson4-grammar", slug: "greek", title: "Greek Lesson 4 Grammar", eyebrow: "First-declension feminine nouns · definite article", description: "Four model-noun paradigms from §4.29 plus singular and plural feminine definite-article cards from §4.30.", language: "greek", cards, supportsReverse: false, sourceNote: "Groton 4.29–4.30." } satisfies DeckDefinition;
+    return { id: "alpha-omega-lesson4-grammar", slug: "greek", title: "Greek Lesson 4 Grammar", eyebrow: "First-declension feminine nouns · definite article", description: "Eight Lesson 4 grammar cards: two first-declension ending charts, four model-noun paradigms, and two feminine definite-article cards.", language: "greek", cards, supportsReverse: false, sourceNote: "Groton 4.29–4.30." } satisfies DeckDefinition;
   });
   return greekLesson4GrammarPromise;
 }

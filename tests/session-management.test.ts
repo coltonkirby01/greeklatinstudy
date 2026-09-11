@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createEnvelope, createModeState, presentCard, recordReview } from "../src/features/study/engine";
 import { mergeProgressEnvelopes } from "../src/features/study/progress-repository";
-import { automaticManagedSessionName, collectManagedSessions, deleteReviewsFromEnvelope, deleteSessionFromEnvelope, displayManagedSessionName, renameReviewsInEnvelope, renameSessionInEnvelope, sessionCustomNameFromReviews } from "../src/features/study/session-management";
+import { automaticManagedSessionName, builtinSessionId, collectManagedSessions, deleteReviewsFromEnvelope, deleteSessionFromEnvelope, displayManagedSessionName, managedSessionsForLanguage, renameReviewsInEnvelope, renameSessionInEnvelope, sessionCustomNameFromReviews } from "../src/features/study/session-management";
 import type { StudyCard } from "../src/features/study/types";
 
 const cards: StudyCard[] = [
@@ -34,6 +34,21 @@ function envelopeWithLegacyReview() {
 }
 
 describe("session management", () => {
+  it("always exposes permanent Learner and Reviewer sessions for both languages", () => {
+    expect(managedSessionsForLanguage({}, "Greek").map((session) => [session.id, displayManagedSessionName(session), session.builtin])).toEqual([
+      [builtinSessionId("Greek", "learner"), "Learner", true],
+      [builtinSessionId("Greek", "reviewer"), "Reviewer", true],
+    ]);
+    expect(managedSessionsForLanguage({}, "Latin").map((session) => displayManagedSessionName(session))).toEqual(["Learner", "Reviewer"]);
+  });
+
+  it("does not rename or delete permanent session types", () => {
+    const envelope = envelopeWithTwoSessions();
+    const id = builtinSessionId("Latin", "learner");
+    expect(renameSessionInEnvelope(envelope, id, "Custom").changed).toBe(false);
+    expect(deleteSessionFromEnvelope(envelope, id).changed).toBe(false);
+  });
+
   it("collects explicit ranked sessions from stored review history", () => {
     const sessions = collectManagedSessions({ "dickinson-latin-core": envelopeWithTwoSessions() });
     expect(sessions.map((session) => session.id).sort()).toEqual(["session-a", "session-b"]);

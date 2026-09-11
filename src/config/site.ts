@@ -1,4 +1,4 @@
-export type CourseId = "greek" | "latin" | "reading";
+export type CourseId = "greek" | "latin";
 
 type CourseSourceLink = {
   label: string;
@@ -15,7 +15,6 @@ export const primaryNavLinks = [
   { label: "Greek", href: "/greek" },
   { label: "Latin", href: "/latin" },
   { label: "Stats", href: "/stats" },
-  { label: "Reading", href: "/reading" },
 ] as const;
 
 export const homeCourses = [
@@ -40,10 +39,10 @@ export const homeCourses = [
     visual: "latin",
     count: "",
     eyebrow: "Latin",
-    title: "Dickinson Vocabulary · Henle Grammer",
+    title: "Dickinson Vocabulary · Henle Grammar",
     titleLinks: [
       { label: "Dickinson Vocabulary", href: "https://dcc.dickinson.edu/latin-core-list1" },
-      { label: "Henle Grammer", href: "https://www.scribd.com/document/550308631/Henle-Latin-Grammar" },
+      { label: "Henle Grammar", href: "https://www.scribd.com/document/550308631/Henle-Latin-Grammar" },
     ],
     description: "",
     sourceLinks: [
@@ -51,18 +50,6 @@ export const homeCourses = [
     ],
     href: "/latin",
     linkLabel: "Study Latin",
-  },
-  {
-    id: "reading",
-    visual: "reading",
-    count: "Greek & Latin",
-    eyebrow: "Reading & Audio",
-    title: "Follow a passage word by word",
-    titleLinks: [] as CourseTitleLink[],
-    description: "Save readings, attach audio, navigate sentences, and use timing-based highlighting.",
-    sourceLinks: [] as CourseSourceLink[],
-    href: "/reading",
-    linkLabel: "Open readings",
   },
 ] as const satisfies ReadonlyArray<{
   id: CourseId;

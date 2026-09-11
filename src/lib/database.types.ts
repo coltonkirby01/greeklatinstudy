@@ -159,54 +159,6 @@ export type Database = {
         }
         Relationships: []
       }
-      readings: {
-        Row: {
-          audio_path: string | null
-          audio_provider: string
-          created_at: string
-          id: string
-          language: string
-          playback_rate: number
-          pronunciation_system: string
-          sentence_segments: Json
-          text: string
-          title: string
-          updated_at: string
-          user_id: string
-          word_timings: Json
-        }
-        Insert: {
-          audio_path?: string | null
-          audio_provider?: string
-          created_at?: string
-          id?: string
-          language: string
-          playback_rate?: number
-          pronunciation_system?: string
-          sentence_segments?: Json
-          text: string
-          title: string
-          updated_at?: string
-          user_id: string
-          word_timings?: Json
-        }
-        Update: {
-          audio_path?: string | null
-          audio_provider?: string
-          created_at?: string
-          id?: string
-          language?: string
-          playback_rate?: number
-          pronunciation_system?: string
-          sentence_segments?: Json
-          text?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-          word_timings?: Json
-        }
-        Relationships: []
-      }
       review_events: {
         Row: {
           card_id: string

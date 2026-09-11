@@ -300,6 +300,19 @@ export function LatinPage() {
     setParadigmCards(checked ? null : new Set());
   }
 
+  function selectAllCards() {
+    setMaterials(new Set<Material>(["vocabulary", "active-indicative-paradigms", "passive-indicative-paradigms"]));
+    setVocabularyParts(null);
+    setParadigmCards(null);
+  }
+
+  function deselectAllCards() {
+    setMaterials(new Set());
+    setVocabularyParts(new Set());
+    setParadigmCards(new Set());
+    setIncludeSavedCards(false);
+  }
+
   const paradigmError = activeParadigmError ?? passiveParadigmError;
 
   return (
@@ -315,7 +328,7 @@ export function LatinPage() {
         summary={`${selectedCards.length.toLocaleString()} cards in the current pool`}
         detail="Choose Latin vocabulary, grammar paradigms, Saved Cards, or any combination of them."
       >
-        <FilterSection title="Saved cards" description="Cards you save with the card button or S shortcut are private to your account or this guest browser.">
+        <FilterSection title="Quick select" description="Cards you save with the card button or S shortcut are private to your account or this guest browser." onAll={selectAllCards} onNone={deselectAllCards}>
           <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={setIncludeSavedCards} hint="Your saved Latin cards" />
         </FilterSection>
 
@@ -377,8 +390,8 @@ export function LatinPage() {
         </FilterDisclosure>
 
         <FilterDisclosure
-          title="Grammer (Henle)"
-          ariaLabel="Grammer Henle"
+          title="Grammar (Henle)"
+          ariaLabel="Grammar Henle"
           count={allParadigmIds.length || 36}
           summary={`${grammarSelectedCount} of ${allParadigmIds.length || 36} paradigms selected`}
           checked={grammarChecked}

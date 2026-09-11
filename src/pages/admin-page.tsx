@@ -2,7 +2,6 @@ import { ArrowDown, ArrowUp, FileSpreadsheet, Pencil, Plus, Trash2 } from "lucid
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../features/auth/auth-context";
-import { ElevenLabsUsagePanel } from "../features/admin/elevenlabs-usage-panel";
 import {
   addCategory,
   createDeck,
@@ -157,7 +156,6 @@ function AdminWorkspace() {
       </div>
       {message && <div className="success-alert">{message}</div>}
       {error && <div className="inline-alert">{error}</div>}
-      <ElevenLabsUsagePanel />
       <div className="admin-grid">
         <aside className="admin-sidebar panel-surface">
           <h2>Decks</h2>

@@ -171,36 +171,3 @@ using (
   )
 );
 
-drop policy if exists "users read their own reading audio" on storage.objects;
-drop policy if exists "users upload their own reading audio" on storage.objects;
-drop policy if exists "users update their own reading audio" on storage.objects;
-drop policy if exists "users delete their own reading audio" on storage.objects;
-
-create policy "users read their own reading audio"
-on storage.objects for select to authenticated
-using (
-  bucket_id = 'reading-audio'
-  and (storage.foldername(name))[1] = (select auth.uid())::text
-);
-create policy "users upload their own reading audio"
-on storage.objects for insert to authenticated
-with check (
-  bucket_id = 'reading-audio'
-  and (storage.foldername(name))[1] = (select auth.uid())::text
-);
-create policy "users update their own reading audio"
-on storage.objects for update to authenticated
-using (
-  bucket_id = 'reading-audio'
-  and (storage.foldername(name))[1] = (select auth.uid())::text
-)
-with check (
-  bucket_id = 'reading-audio'
-  and (storage.foldername(name))[1] = (select auth.uid())::text
-);
-create policy "users delete their own reading audio"
-on storage.objects for delete to authenticated
-using (
-  bucket_id = 'reading-audio'
-  and (storage.foldername(name))[1] = (select auth.uid())::text
-);

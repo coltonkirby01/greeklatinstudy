@@ -6,7 +6,7 @@ import { createEnvelope, createModeState, directionalCopy, getCardProgress, mayb
 import { deleteReviewEvent, loadLocalEnvelope, loadProgressEnvelope, mergeProgressEnvelopes, saveProgressEnvelope, upsertReviewEvent } from "./progress-repository";
 import { savedCardRef } from "./saved-cards";
 import { intrinsicCardDifficulty } from "./scoring";
-import { collectManagedSessions, displayManagedSessionName, sessionDeckIdsForLanguage, type ManagedSession } from "./session-management";
+import { builtinSessionId, displayManagedSessionName, managedSessionsForLanguage, sessionDeckIdsForLanguage, type BuiltinSessionKind, type ManagedSession } from "./session-management";
 import { autoReviewDefaults, sessionProgressSummary } from "./session-review";
 import "./study-gate.css";
 import { StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
@@ -29,7 +29,8 @@ type SyncStatus = "loading" | "local" | "syncing" | "cloud" | "error";
 type SessionMeta = { id: string; startedAt: number; name?: string };
 type WarmupMeta = SessionMeta & { remaining: number; total: number };
 const WARMUP_CARDS = 5;
-const makeSession = (): SessionMeta => ({ id: crypto.randomUUID(), startedAt: Date.now() });
+const makeCustomSession = (): SessionMeta => ({ id: crypto.randomUUID(), startedAt: Date.now() });
+const makeBuiltinSession = (language: "Greek" | "Latin", kind: BuiltinSessionKind): SessionMeta => ({ id: builtinSessionId(language, kind), startedAt: Date.now(), name: kind === "learner" ? "Learner" : "Reviewer" });
 
 const PropsDefaults = { forward: "Forward", reverse: "Reverse" } as const;
 
@@ -72,7 +73,7 @@ function sessionLabel(session: ManagedSession) { return displayManagedSessionNam
 
 export function mostRecentResumableSession(sessions: readonly ManagedSession[]) {
   return [...sessions]
-    .filter((session) => !session.inferred)
+    .filter((session) => !session.inferred && session.reviews > 0)
     .sort((a, b) => b.lastReviewedAt - a.lastReviewedAt || b.startedAt - a.startedAt)[0] ?? null;
 }
 
@@ -112,6 +113,7 @@ function avoidRecentlyPresentedCandidates(candidates: Candidate[], modeFor: (sou
 
 export function MultiSourceStudySession({ deck, sources, direction, onDirectionChange, directionLabels = PropsDefaults, resetKey, resumeSession, renderFront, renderBack, priorityPrompt, savedCardRefs, onToggleSavedCard }: Props) {
   const { user } = useAuth();
+  const sessionLanguage: "Greek" | "Latin" = deck.language === "greek" ? "Greek" : "Latin";
   const [envelopes, setEnvelopes] = useState<Record<string, DeckProgressEnvelope>>({});
   const envelopesRef = useRef<Record<string, DeckProgressEnvelope>>({});
   const persistQueue = useRef<Promise<void>>(Promise.resolve());
@@ -124,15 +126,14 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   const [capturedTimeMs, setCapturedTimeMs] = useState<number | null>(null), [lastTransaction, setLastTransaction] = useState<MixedReviewTransaction | null>(null), [editingTransaction, setEditingTransaction] = useState<MixedReviewTransaction | null>(null);
   const [, setSyncStatus] = useState<SyncStatus>("loading"), [notice, setNotice] = useState<string | null>(() => resumeSession ? "Continuing the selected past session. Your long-term memory and adaptive priorities are unchanged." : null);
   const [backtracking, setBacktracking] = useState(false), [startGateOpen, setStartGateOpen] = useState(true);
-  const [session, setSession] = useState<SessionMeta>(() => resumeSession ?? makeSession());
+  const [session, setSession] = useState<SessionMeta>(() => resumeSession ?? makeBuiltinSession(sessionLanguage, "learner"));
   const [warmup, setWarmup] = useState<WarmupMeta | null>(null);
   const sessionChoiceInitialized = useRef(Boolean(resumeSession));
 
-  const sessionLanguage: "Greek" | "Latin" = deck.language === "greek" ? "Greek" : "Latin";
   const sessionDeckIds = useMemo(() => sessionDeckIdsForLanguage(sessionLanguage), [sessionLanguage]);
   const deckIdsKey = useMemo(() => [...new Set([...sessionDeckIds, ...sources.map((source) => source.deck.id)])].sort().join("|"), [sessionDeckIds, sources]);
   const selectionSignature = useMemo(() => `${resetKey}::${sources.map((source) => `${source.id}:${source.studyKey}:${source.cards.length}`).join("|")}`, [resetKey, sources]);
-  const sessionCatalog = useMemo(() => collectManagedSessions(envelopes).filter((item) => item.language === sessionLanguage), [envelopes, sessionLanguage]);
+  const sessionCatalog = useMemo(() => managedSessionsForLanguage(envelopes, sessionLanguage), [envelopes, sessionLanguage]);
   const currentManagedSession = useMemo(() => sessionCatalog.find((item) => !item.inferred && item.id === session.id) ?? null, [session.id, sessionCatalog]);
   const currentSessionName = useMemo(() => currentSessionDisplayName(
     sessionLanguage,
@@ -158,8 +159,8 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
       setNotice(`The previous session was deleted. Continuing ${sessionLabel(latest)} instead.`);
       return;
     }
-    setSession(makeSession());
-    setNotice("The previous session was deleted. A new session will begin with your next saved review.");
+    setSession(makeBuiltinSession(sessionLanguage, "learner"));
+    setNotice("The previous session was deleted. Continuing the permanent Learner session instead.");
   // clearResumeUrl is stable browser plumbing and intentionally omitted.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [envelopes, ready, session.id, sessionCatalog]);
@@ -388,20 +389,20 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     if (!previous) return;
     sessionChoiceInitialized.current = true;
     clearResumeUrl();
-    setWarmup(null); setSession({ id: previous.id, startedAt: previous.startedAt, name: previous.name }); setLastTransaction(null); resetUi(); setStartGateOpen(true);
+    setWarmup(null); setSession({ id: previous.id, startedAt: previous.startedAt || Date.now(), name: previous.builtin ? sessionLabel(previous) : previous.name }); setLastTransaction(null); resetUi(); setStartGateOpen(true);
     setNotice(`Continuing ${sessionLabel(previous)}. Adaptive review still uses your full long-term history.`);
   }
   function startNewSession() {
     sessionChoiceInitialized.current = true;
     clearResumeUrl();
-    setWarmup(null); setSession(makeSession()); setLastTransaction(null); resetUi(); setStartGateOpen(true);
+    setWarmup(null); setSession(makeCustomSession()); setLastTransaction(null); resetUi(); setStartGateOpen(true);
     const selected = chooseNext(current);
     if (selected) present(selected);
     setNotice("New session started. Card priorities still use your full long-term history.");
   }
   function startWarmup() {
     if (!current) return;
-    const meta = { ...makeSession(), remaining: WARMUP_CARDS, total: WARMUP_CARDS };
+    const meta = { ...makeCustomSession(), remaining: WARMUP_CARDS, total: WARMUP_CARDS };
     setWarmup(meta); setLastTransaction(null); resetUi(); setStartGateOpen(false);
     const selected = chooseNext(current, "adaptive", true);
     if (selected) present(selected);
@@ -485,7 +486,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   const showingAnswer = revealed && !reviewFront;
   const gated = startGateOpen && !revealed && !editingTransaction;
   const sessionControlValue = "__current__";
-  const selectableSessions = sessionCatalog.filter((item) => item.id !== session.id);
+  const selectableSessions = sessionCatalog.filter((item) => item.id !== session.id).sort((a, b) => Number(Boolean(b.builtin)) - Number(Boolean(a.builtin)) || b.lastReviewedAt - a.lastReviewedAt);
   const displayedTimer = timerDigits(capturedTimeMs ?? timer.elapsedMs);
   const timerToggleDisabled = revealed || Boolean(editingTransaction) || !currentState;
   const front = <><span className="card-side">Question</span>{renderFront ? renderFront(current.card, copy, current.source) : <span className="study-prompt">{copy.prompt}</span>}</>;
@@ -507,7 +508,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
         <div className="toolbar-control-group">
           {onDirectionChange && <div className="segmented-control" aria-label="Study direction">{(["forward", "reverse"] as StudyDirection[]).map((value) => <button key={value} type="button" aria-pressed={direction === value} onClick={() => onDirectionChange(value)}>{directionLabels[value]}</button>)}</div>}
           <label className="compact-select-label"><span className="sr-only">Card order</span><select value={selectionMode} onChange={(event) => changeOrder(event.target.value as SelectionMode)}><option value="adaptive">Adaptive review</option><option value="sequential">Sequential</option></select></label>
-          <label className="compact-select-label"><span className="sr-only">Study session</span><select value={sessionControlValue} disabled={Boolean(editingTransaction)} onChange={(event) => { const value = event.target.value; if (value === "__new__") startNewSession(); else if (value !== "__current__") continueSession(value); }}><option value="__current__">{currentSessionName}</option><option value="__new__">Start new session</option>{selectableSessions.map((item) => <option key={item.id} value={item.id} disabled={item.inferred}>{sessionLabel(item)}</option>)}</select></label>
+          <label className="compact-select-label"><span className="sr-only">Study session</span><select value={sessionControlValue} disabled={Boolean(editingTransaction)} onChange={(event) => { const value = event.target.value; if (value === "__new__") startNewSession(); else if (value !== "__current__") continueSession(value); }}><option value="__current__">{currentSessionName}</option><option value="__new__">Start new custom session</option>{selectableSessions.map((item) => <option key={item.id} value={item.id} disabled={item.inferred}>{sessionLabel(item)}</option>)}</select></label>
           <div className="toolbar-timer" aria-label={`Front-card response time ${displayedTimer} seconds`}>
             <span className="toolbar-timer-value">{displayedTimer}</span>
             <button type="button" className="toolbar-timer-toggle" data-study-control="timer" onClick={() => setStartGateOpen((open) => !open)} disabled={timerToggleDisabled} aria-label={startGateOpen ? "Play timer" : "Pause timer"} title={startGateOpen ? "Play timer" : "Pause timer"}>{startGateOpen ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}</button>
