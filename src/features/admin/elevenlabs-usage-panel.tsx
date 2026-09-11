@@ -1,7 +1,6 @@
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
-import "./elevenlabs-usage-panel.css";
 
 type ElevenLabsUsage = {
   tier: string;
@@ -68,16 +67,16 @@ export function ElevenLabsUsagePanel() {
       {error && <div className="inline-alert">{error}</div>}
       {!error && !usage && <p className="form-help">Loading ElevenLabs usage…</p>}
       {usage && (
-        <div className="usage-summary-grid">
-          <div><span>Plan</span><strong>{planLabel(usage.tier)}</strong></div>
-          <div><span>Used</span><strong>{numberFormatter.format(usage.creditsUsed)}</strong></div>
-          <div><span>Remaining</span><strong>{numberFormatter.format(usage.creditsRemaining)}</strong></div>
-          <div><span>Current limit</span><strong>{numberFormatter.format(usage.creditsLimit)}</strong></div>
-          <div><span>Used</span><strong>{usage.percentUsed.toFixed(1)}%</strong></div>
-          <div><span>Next reset</span><strong>{resetLabel(usage.nextResetUnix)}</strong></div>
+        <div className="card-form">
+          <div><span className="form-help">Plan</span><strong>{planLabel(usage.tier)}</strong></div>
+          <div><span className="form-help">Used</span><strong>{numberFormatter.format(usage.creditsUsed)}</strong></div>
+          <div><span className="form-help">Remaining</span><strong>{numberFormatter.format(usage.creditsRemaining)}</strong></div>
+          <div><span className="form-help">Current limit</span><strong>{numberFormatter.format(usage.creditsLimit)}</strong></div>
+          <div><span className="form-help">Used</span><strong>{usage.percentUsed.toFixed(1)}%</strong></div>
+          <div><span className="form-help">Next reset</span><strong>{resetLabel(usage.nextResetUnix)}</strong></div>
           <div className="wide-field">
             <progress max={Math.max(1, usage.creditsLimit)} value={Math.min(usage.creditsUsed, Math.max(1, usage.creditsLimit))} aria-label={`${usage.percentUsed.toFixed(1)} percent of ElevenLabs usage consumed`} />
-            <span className="form-help">Status: {planLabel(usage.status)} · refreshed {new Date(usage.updatedAt).toLocaleString()}</span>
+            <p className="form-help">Status: {planLabel(usage.status)} · refreshed {new Date(usage.updatedAt).toLocaleString()}</p>
           </div>
         </div>
       )}
