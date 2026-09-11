@@ -33,6 +33,8 @@ const keys = {
   presentActiveInfinitive: "lesson3-present-active-infinitive",
   presentActiveImperative: "lesson3-present-active-imperative",
   lesson4Vocabulary: "lesson4-vocabulary",
+  firstDeclensionEndingsSingular: "lesson4-first-declension-endings-singular",
+  firstDeclensionEndingsPlural: "lesson4-first-declension-endings-plural",
   firstDeclensionThea: "lesson4-first-declension-thea",
   firstDeclensionHesychia: "lesson4-first-declension-hesychia",
   firstDeclensionChora: "lesson4-first-declension-chora",
@@ -47,7 +49,7 @@ const alphabetKeys = [keys.uppercase, keys.lowercase] as const;
 const lesson2Keys = [keys.accents] as const;
 const lesson3GrammarKeys = [keys.presentActiveIndicative, keys.presentActiveInfinitive, keys.presentActiveImperative] as const;
 const lesson3Keys = [keys.lesson3Vocabulary, ...lesson3GrammarKeys] as const;
-const lesson4GrammarKeys = [keys.firstDeclensionThea, keys.firstDeclensionHesychia, keys.firstDeclensionChora, keys.firstDeclensionSkene, keys.feminineArticleSingular, keys.feminineArticlePlural] as const;
+const lesson4GrammarKeys = [keys.firstDeclensionEndingsSingular, keys.firstDeclensionEndingsPlural, keys.firstDeclensionThea, keys.firstDeclensionHesychia, keys.firstDeclensionChora, keys.firstDeclensionSkene, keys.feminineArticleSingular, keys.feminineArticlePlural] as const;
 const lesson4Keys = [keys.lesson4Vocabulary, ...lesson4GrammarKeys] as const;
 const allVocabularyKeys = [keys.lesson3Vocabulary, keys.lesson4Vocabulary] as const;
 const allGrammarKeys = [...lesson1Keys, ...lesson2Keys, ...lesson3GrammarKeys, ...lesson4GrammarKeys] as const;
@@ -59,6 +61,8 @@ const lesson3GrammarCategoryByKey = new Map<string, string>([
 ]);
 
 const lesson4GrammarCategoryByKey = new Map<string, string>([
+  [keys.firstDeclensionEndingsSingular, "First Declension Feminine Endings — Singular"],
+  [keys.firstDeclensionEndingsPlural, "First Declension Feminine Endings — Plural"],
   [keys.firstDeclensionThea, "First Declension Feminine Nouns — θεά"],
   [keys.firstDeclensionHesychia, "First Declension Feminine Nouns — ἡσυχίᾱ"],
   [keys.firstDeclensionChora, "First Declension Feminine Nouns — χώρᾱ"],
@@ -102,9 +106,11 @@ function sourceRef(card: StudyCard) {
 
 function GreekParadigm({ card }: { card: StudyCard }) {
   const columns = chartColumns(card), rows = chartRows(card);
+  const lesson = Number(card.metadata?.lesson ?? 0);
+  const firstColumnLabel = lesson === 3 ? (columns.length === 1 ? "Form" : "Person") : "Case";
   return <div className="chart-scroll">
     <table className="henle-chart">
-      <thead><tr><th scope="col">{columns.length === 1 ? "Form" : "Case"}</th>{columns.map((column) => <th scope="col" key={column}>{column}</th>)}</tr></thead>
+      <thead><tr><th scope="col">{firstColumnLabel}</th>{columns.map((column) => <th scope="col" key={column}>{column}</th>)}</tr></thead>
       <tbody>{rows.map((row) => <tr key={row.label}><th scope="row">{row.label}</th>{row.cells.map((cell, index) => <td key={`${row.label}-${columns[index] ?? index}`}><strong className="greek-front compact-greek">{cell}</strong></td>)}</tr>)}</tbody>
     </table>
     {sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}
