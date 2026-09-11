@@ -224,8 +224,7 @@ export function LatinPage() {
     cards: selectedCards,
     supportsReverse: true,
   }), [selectedCards]);
-  const savedSelectionKey = includeSavedCards ? [...savedCards.refs].sort().join(",") : "off";
-  const resetKey = `${direction}|${[...materials].sort().join(",")}|v:${selectionKey(vocabularyParts)}|p:${selectionKey(paradigmCards)}|saved:${savedSelectionKey}`;
+  const resetKey = `${direction}|${[...materials].sort().join(",")}|v:${selectionKey(vocabularyParts)}|p:${selectionKey(paradigmCards)}|saved:${includeSavedCards ? "on" : "off"}`;
 
   function toggleMaterial(material: Material, checked: boolean) {
     setMaterials((current) => {
@@ -311,12 +310,9 @@ export function LatinPage() {
       {!user && <div className="guest-banner"><span>You are studying as a guest. Progress stays on this device.</span><Link to="/account">Sign in to sync</Link></div>}
       {(vocabularyError || paradigmError || savedCards.error) && <div className="inline-alert">{vocabularyError ?? paradigmError ?? savedCards.error}</div>}
 
-      <StudyFilterMenu
-        summary={`${selectedCards.length.toLocaleString()} cards in the current pool`}
-        detail="Choose Latin vocabulary, grammar paradigms, Saved Cards, or any combination of them."
-      >
-        <FilterSection title="Saved cards" description="Cards you save with the card button or S shortcut are private to your account or this guest browser.">
-          <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={setIncludeSavedCards} hint="Your saved Latin cards" />
+      <StudyFilterMenu summary={`${selectedCards.length.toLocaleString()} cards in the current pool`}>
+        <FilterSection title="Saved cards">
+          <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={setIncludeSavedCards} hint="Cards you save with the card button or S shortcut are private to your account or this guest browser." />
         </FilterSection>
 
         <FilterDisclosure
