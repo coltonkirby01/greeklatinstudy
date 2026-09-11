@@ -5,7 +5,7 @@ import { loadProgressEnvelope, saveProgressEnvelope } from "./progress-repositor
 
 export type SavedCardLanguage = "greek" | "latin";
 
-const savedDeckId = (language: SavedCardLanguage) => `user-saved-cards-${language}`;
+const savedDeckId = (language: SavedCardLanguage, user: User | null) => user ? `user-saved-cards-${language}:${user.id}` : `guest-saved-cards-${language}`;
 const savedFilterKey = (language: SavedCardLanguage) => `greeklatinstudy:${language}:include-saved-cards:v1`;
 
 export function savedCardRef(deckId: string, cardId: string) {
@@ -23,12 +23,12 @@ export function saveIncludeSavedCards(language: SavedCardLanguage, selected: boo
 }
 
 async function loadSavedCardRefs(language: SavedCardLanguage, user: User | null) {
-  const loaded = await loadProgressEnvelope(savedDeckId(language), user);
+  const loaded = await loadProgressEnvelope(savedDeckId(language, user), user);
   return new Set(loaded.envelope?.savedCardRefs ?? []);
 }
 
 async function persistSavedCardRefs(language: SavedCardLanguage, user: User | null, refs: ReadonlySet<string>) {
-  const deckId = savedDeckId(language);
+  const deckId = savedDeckId(language, user);
   const loaded = await loadProgressEnvelope(deckId, user);
   const current = loaded.envelope ?? createEnvelope(deckId);
   const now = Date.now();
