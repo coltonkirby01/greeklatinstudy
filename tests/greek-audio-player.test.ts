@@ -16,11 +16,12 @@ describe("Greek study audio player", () => {
     expect(source).not.toContain("download=");
   });
 
-  it("keeps Space assigned to study navigation even after the audio button has focus", () => {
-    expect(source).toContain("onKeyDownCapture={preventMediaSpace}");
-    expect(source).toContain("onKeyUpCapture={preventMediaSpace}");
-    expect(source).toContain('if (event.key === " ") event.preventDefault();');
-    expect(source).toContain("Space exclusively assigned to the study");
+  it("keeps Space and Enter assigned to study controls after the audio button has focus", () => {
+    expect(source).toContain("onKeyDownCapture={preventReservedStudyKeys}");
+    expect(source).toContain("onKeyUpCapture={preventReservedStudyKeys}");
+    expect(source).toContain('if (event.key === " " || event.key === "Enter") event.preventDefault();');
+    expect(source).toContain("Enter assigned only");
+    expect(source).toContain("A remains the sole keyboard shortcut for this audio");
     expect(sessionSource).toContain('const controlsTarget = Boolean(target?.closest(".session-toolbar, .study-start-card"));');
     expect(sessionSource).not.toContain('closest("[data-study-control]');
   });
