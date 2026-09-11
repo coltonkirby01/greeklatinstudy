@@ -25,6 +25,17 @@ function paradigm(id: string, label: string, forms: readonly string[]): Lesson3C
   };
 }
 
+function endingChart(id: string, label: string, columns: readonly (readonly string[])[]): Lesson3CourseAudioAsset {
+  const forms = columns.flat();
+  const spokenColumns = columns.map((column) => column.map((form) => greekToElevenLabsIpa(form)).filter(Boolean).join(" "));
+  return {
+    id,
+    label,
+    canonicalIpa: greekToClassicalIpa(forms.join(", ")),
+    ttsText: spokenColumns.filter(Boolean).join(" [pause] "),
+  };
+}
+
 /** Paradigms and endings are spoken vertically: singular first, then plural. */
 export const lesson3CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
   paradigm("lesson3-chart-present-active-indicative", "Present Active Indicative", [
@@ -42,19 +53,13 @@ export const lesson3CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
     "παιδεύ-ετε",
     "παιδευ-όντων",
   ]),
-  paradigm("lesson3-chart-present-active-indicative-endings", "Present Active Indicative Endings", [
-    "-ω",
-    "-εις",
-    "-ει",
-    "-ομεν",
-    "-ετε",
-    "-ουσι(ν)",
+  endingChart("lesson3-chart-present-active-indicative-endings", "Present Active Indicative Endings", [
+    ["-ω", "-εις", "-ει"],
+    ["-ομεν", "-ετε", "-ουσι(ν)"],
   ]),
-  paradigm("lesson3-chart-present-active-infinitive-endings", "Present Active Infinitive Ending", ["-ειν"]),
-  paradigm("lesson3-chart-present-active-imperative-endings", "Present Active Imperative Endings", [
-    "-ε",
-    "-έτω",
-    "-ετε",
-    "-όντων",
+  endingChart("lesson3-chart-present-active-infinitive-endings", "Present Active Infinitive Ending", [["-ειν"]]),
+  endingChart("lesson3-chart-present-active-imperative-endings", "Present Active Imperative Endings", [
+    ["-ε", "-έτω"],
+    ["-ετε", "-όντων"],
   ]),
 ] as const;

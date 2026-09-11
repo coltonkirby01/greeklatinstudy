@@ -11,6 +11,17 @@ function paradigm(id: string, label: string, forms: readonly string[]): Lesson3C
   };
 }
 
+function endingChart(id: string, label: string, columns: readonly (readonly string[])[]): Lesson3CourseAudioAsset {
+  const forms = columns.flat();
+  const spokenColumns = columns.map((column) => column.map((form) => greekToElevenLabsIpa(form)).filter(Boolean).join(" "));
+  return {
+    id,
+    label,
+    canonicalIpa: greekToClassicalIpa(forms.join(", ")),
+    ttsText: spokenColumns.filter(Boolean).join(" [pause] "),
+  };
+}
+
 export const lesson4VocabularyAudio: Readonly<Record<string, { label: string; greek: string }>> = {
   "lesson4-v1": { label: "πέμπω", greek: "πέμπω" },
   "lesson4-v2": { label: "ἀγορά", greek: "ἀγορά, ἀγορᾶς, ἡ" },
@@ -27,13 +38,13 @@ export const lesson4VocabularyAudio: Readonly<Record<string, { label: string; gr
 
 /** Endings and paradigms are spoken vertically: singular first, then plural. */
 export const lesson4CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
-  paradigm("lesson4-chart-first-declension-endings-alpha", "First Declension Feminine Endings — α-type", [
-    "-ᾱ", "-ᾱς", "-ᾳ", "-ᾱν", "-ᾱ",
-    "-αι", "-ων", "-αις", "-ᾱς", "-αι",
+  endingChart("lesson4-chart-first-declension-endings-alpha", "First Declension Feminine Endings — α-type", [
+    ["-ᾱ", "-ᾱς", "-ᾳ", "-ᾱν", "-ᾱ"],
+    ["-αι", "-ων", "-αις", "-ᾱς", "-αι"],
   ]),
-  paradigm("lesson4-chart-first-declension-endings-eta", "First Declension Feminine Endings — η-type", [
-    "-η", "-ης", "-ῃ", "-ην", "-η",
-    "-αι", "-ων", "-αις", "-ᾱς", "-αι",
+  endingChart("lesson4-chart-first-declension-endings-eta", "First Declension Feminine Endings — η-type", [
+    ["-η", "-ης", "-ῃ", "-ην", "-η"],
+    ["-αι", "-ων", "-αις", "-ᾱς", "-αι"],
   ]),
   paradigm("lesson4-chart-first-declension-thea", "First Declension Feminine Nouns — θεά", [
     "θε-ά", "θε-ᾶς", "θε-ᾷ", "θε-άν", "θε-ά",

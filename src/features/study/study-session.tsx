@@ -86,7 +86,7 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
     if (!current || revealed || editingTransaction || startGateOpen) return;
     setBacktracking(false); setReviewFront(false);
     const responseTimeMs = timer.capture();
-    const suggested = autoReviewDefaults(responseTimeMs, modeState ? getCardProgress(modeState, current.id).reviews : 0);
+    const suggested = autoReviewDefaults(responseTimeMs, modeState ? getCardProgress(modeState, current.id) : undefined);
     setCapturedTimeMs(responseTimeMs); setResult(suggested.result); setDifficulty(suggested.difficulty); setRevealed(true);
   }
   function toggleReviewFace() { if (revealed) setReviewFront((value) => !value); }
@@ -201,6 +201,6 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
       <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} />
       <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
     </section>
-    <StudySidebar copy={copy} direction={direction} stats={stats} initialReviewed={sessionProgress.initialReviewed} initialTotal={sessionProgress.initialTotal} initialPercent={sessionProgress.initialPercent} priority={priority} priorityPrompt={priorityPrompt} />
+    <StudySidebar copy={copy} direction={direction} stats={stats} priority={priority} priorityPrompt={priorityPrompt} />
   </div>;
 }

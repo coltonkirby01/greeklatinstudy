@@ -3,19 +3,27 @@ import type { CardProgress, ReviewDifficulty, ReviewResult, StudyStats } from ".
 
 export const EASY_RECALL_LIMIT_MS = 3_000;
 export const HARD_RECALL_START_MS = 10_000;
-export const AUTO_WRONG_REVIEW_COUNT = 7;
+export const INITIAL_AUTO_WRONG_REVIEWS = 3;
+export const RECENT_AUTO_GRADE_WINDOW = 3;
 
 export type AutoReviewDefaults = { result: ReviewResult; difficulty: ReviewDifficulty };
 
 /**
- * Suggested grade from active front-side recall time. The first seven saved
- * reviews of a card in the current study mode/direction default to Wrong;
- * review eight and later default to Right. Recall time only chooses the default
- * difficulty. The user can override either correctness or difficulty before saving.
+ * Correctness defaults are personal learning-state suggestions. A card defaults
+ * to Wrong for its first three saved reviews in the current study mode/direction.
+ * Beginning with attempt four, the majority result from the three most recent
+ * saved reviews wins. Recall time continues to choose only the default difficulty.
  */
-export function autoReviewDefaults(responseTimeMs: number, priorReviews = 0): AutoReviewDefaults {
+export function autoReviewResult(progress?: Pick<CardProgress, "reviews" | "history"> | null): ReviewResult {
+  if (!progress || progress.reviews < INITIAL_AUTO_WRONG_REVIEWS || progress.history.length < RECENT_AUTO_GRADE_WINDOW) return "wrong";
+  const recent = progress.history.slice(-RECENT_AUTO_GRADE_WINDOW);
+  const right = recent.filter((review) => review.result === "right").length;
+  return right >= 2 ? "right" : "wrong";
+}
+
+export function autoReviewDefaults(responseTimeMs: number, progress?: Pick<CardProgress, "reviews" | "history"> | null): AutoReviewDefaults {
   const elapsed = normalizeResponseTime(responseTimeMs);
-  const result: ReviewResult = priorReviews < AUTO_WRONG_REVIEW_COUNT ? "wrong" : "right";
+  const result = autoReviewResult(progress);
   if (elapsed < EASY_RECALL_LIMIT_MS) return { result, difficulty: "easy" };
   if (elapsed < HARD_RECALL_START_MS) return { result, difficulty: "medium" };
   return { result, difficulty: "hard" };

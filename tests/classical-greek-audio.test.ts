@@ -115,6 +115,20 @@ describe("Classical Greek course audio", () => {
     expect(greekToElevenLabsIpa("παιδεύω")).toContain("ˈ");
   });
 
+  it("puts ending-chart pauses only between vertical columns", () => {
+    const lesson3Indicative = resolveBuiltinGreekAsset("lesson3-chart-present-active-indicative-endings");
+    const lesson3Imperative = resolveBuiltinGreekAsset("lesson3-chart-present-active-imperative-endings");
+    const lesson4Alpha = resolveBuiltinGreekAsset("lesson4-chart-first-declension-endings-alpha");
+    const lesson4Eta = resolveBuiltinGreekAsset("lesson4-chart-first-declension-endings-eta");
+    for (const asset of [lesson3Indicative, lesson3Imperative, lesson4Alpha, lesson4Eta]) {
+      expect(asset?.ttsText.match(/\[pause\]/gu)).toHaveLength(1);
+      const columns = asset?.ttsText.split(" [pause] ") ?? [];
+      expect(columns).toHaveLength(2);
+      expect(columns.every((column) => !column.includes(","))).toBe(true);
+    }
+    expect(resolveBuiltinGreekAsset("lesson3-chart-present-active-infinitive-endings")?.ttsText).not.toContain("[pause]");
+  });
+
   it("never pronounces parenthetical material or morphology dashes", () => {
     expect(stripUnpronouncedGreekNotation("παιδεύ-ουσι(ν)")).toBe("παιδεύουσι");
     expect(greekToElevenLabsIpa("παιδεύ-ουσι(ν)")).not.toContain("n/");

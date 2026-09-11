@@ -91,13 +91,10 @@ export function StudyRatingControls({ revealed, result, difficulty, editing, onR
   </div>;
 }
 
-export function StudySidebar({ copy, direction, stats, initialReviewed, initialTotal, initialPercent, priority, priorityPrompt, cardCopy }: {
+export function StudySidebar({ copy, direction, stats, priority, priorityPrompt, cardCopy }: {
   copy: DirectionalCardCopy;
   direction: StudyDirection;
   stats: StudyStats;
-  initialReviewed: number;
-  initialTotal: number;
-  initialPercent: number;
   priority: Priority;
   priorityPrompt?: (card: StudyCard, copy: DirectionalCardCopy) => ReactNode;
   cardCopy?: (card: StudyCard, direction: StudyDirection) => DirectionalCardCopy;
@@ -106,8 +103,7 @@ export function StudySidebar({ copy, direction, stats, initialReviewed, initialT
     <style>{sharedStudyPolishCss}</style>
     <section className="panel-surface stats-panel">
       <div className="sidebar-heading"><div><p className="eyebrow">Current session</p><h2>Progress · {copy.sideLabel}</h2></div><Gauge /></div>
-      <div className="stats-grid"><div className="stat-tile"><span>Available</span><strong>{stats.available}</strong></div><div className="stat-tile"><span>Reviewed</span><strong>{stats.reviewed}</strong></div><div className="stat-tile"><span>Accuracy</span><strong>{percent(stats.accuracy)}</strong></div><div className="stat-tile"><span>Ever wrong</span><strong>{stats.everWrong}</strong></div><div className="stat-tile"><span>Marked hard</span><strong>{stats.markedHard}</strong></div><div className="stat-tile"><span>Avg. time</span><strong>{formatResponseTime(stats.averageResponseTimeMs)}</strong></div><div className="stat-tile"><span>Right once</span><strong>{stats.mastered}</strong></div><div className="stat-tile"><span>Best streak</span><strong>{stats.bestStreak}</strong></div></div>
-      <div className="progress-block"><div className="progress-label"><span>Initial review · {initialReviewed}/{initialTotal}</span><strong>{Math.round(initialPercent)}%</strong></div><div className="progress-track" role="progressbar" aria-label="Initial review of selected cards" aria-valuenow={initialPercent} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${initialPercent}%` }} /></div></div>
+      <div className="stats-grid"><div className="stat-tile"><span>Reviews</span><strong>{stats.totalReviews}</strong></div><div className="stat-tile"><span>Reviewed</span><strong>{stats.reviewed}</strong></div><div className="stat-tile"><span>Accuracy</span><strong>{percent(stats.accuracy)}</strong></div><div className="stat-tile"><span>Ever wrong</span><strong>{stats.everWrong}</strong></div><div className="stat-tile"><span>Marked hard</span><strong>{stats.markedHard}</strong></div><div className="stat-tile"><span>Avg. time</span><strong>{formatResponseTime(stats.averageResponseTimeMs)}</strong></div><div className="stat-tile"><span>Right once</span><strong>{stats.mastered}</strong></div><div className="stat-tile"><span>Best streak</span><strong>{stats.bestStreak}</strong></div></div>
       <Link className="small-outline-button session-stats-link" to="/stats">Stats</Link>
     </section>
     <section className="panel-surface priority-panel">
