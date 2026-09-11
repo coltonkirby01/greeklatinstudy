@@ -57,9 +57,8 @@ export function pickNextCard(cards: StudyCard[], state: StudyModeState, selectio
 }
 
 export function presentCard(state: StudyModeState, card: StudyCard, now = Date.now()) {
-  const next = structuredClone(state), item = getCardProgress(next, card.id);
-  item.presented += 1; item.lastPresentedAt = now; next.cards[card.id] = item; next.currentCardId = card.id;
-  next.reviewSequence = [...next.reviewSequence, card.id].slice(-24); next.updatedAt = now; return next;
+  const next = structuredClone(state);
+  next.currentCardId = card.id; next.updatedAt = now; return next;
 }
 
 function scheduleAfterReview(item: CardProgress, result: ReviewResult, difficulty: ReviewDifficulty, now: number) {
@@ -73,13 +72,14 @@ type ReviewInput = { id: string; result: ReviewResult; difficulty: ReviewDifficu
 
 export function recordReview(state: StudyModeState, card: StudyCard, review: ReviewInput) {
   const reviewedAt = review.reviewedAt ?? Date.now(), next = structuredClone(state), item = getCardProgress(next, card.id), responseTimeMs = normalizeResponseTime(review.responseTimeMs);
+  item.presented += 1; item.lastPresentedAt = reviewedAt;
   item.reviews += 1; item[review.result] += 1; item[review.difficulty] += 1; if (review.result === "right") item.initialMastered = true;
   scheduleAfterReview(item, review.result, review.difficulty, reviewedAt);
   item.responseTimeTotalMs += responseTimeMs; item.responseTimeCount += 1; item.lastResponseTimeMs = responseTimeMs;
   item.intervalMs = Math.max(30_000, item.intervalMs * responseTimeIntervalFactor(responseTimeMs)); item.dueAt = reviewedAt + item.intervalMs;
   item.lastReviewedAt = reviewedAt; item.lastResult = review.result; item.lastDifficulty = review.difficulty;
   item.history = [...item.history, { id: review.id, reviewedAt, result: review.result, difficulty: review.difficulty, responseTimeMs, intervalMs: Math.round(item.intervalMs), strength: Number(item.strength.toFixed(4)), sessionId: review.sessionId, sessionStartedAt: review.sessionStartedAt, sessionName: review.sessionName, activityKind: review.activityKind ?? "study" }].slice(-250);
-  next.cards[card.id] = item; next.totalReviews += 1; if (review.result === "right") next.rightReviews += 1; else next.wrongReviews += 1; next.updatedAt = reviewedAt; return next;
+  next.cards[card.id] = item; next.reviewSequence = [...next.reviewSequence, card.id].slice(-24); next.totalReviews += 1; if (review.result === "right") next.rightReviews += 1; else next.wrongReviews += 1; next.updatedAt = reviewedAt; return next;
 }
 
 export function maybeUnlockNextBatch(state: StudyModeState, cards: StudyCard[], staged?: StagedIntroduction, now = Date.now()) {
