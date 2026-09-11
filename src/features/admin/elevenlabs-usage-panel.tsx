@@ -1,6 +1,7 @@
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import "./elevenlabs-usage-panel.css";
 
 type ElevenLabsUsage = {
   tier: string;
