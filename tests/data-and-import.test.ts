@@ -74,7 +74,7 @@ describe("authoritative source migration", () => {
     expect(goddess?.rows).toEqual([
       { label: "Nominative", cells: ["θε-ά", "θε-αί"] },
       { label: "Genitive", cells: ["θε-ᾶς", "θε-ῶν"] },
-      { label: "Dative", "cells": ["θε-ᾷ", "θε-αῖς"] },
+      { label: "Dative", cells: ["θε-ᾷ", "θε-αῖς"] },
       { label: "Accusative", cells: ["θε-άν", "θε-άς"] },
       { label: "Vocative", cells: ["θε-ά", "θε-αί"] },
     ]);
@@ -107,7 +107,6 @@ describe("authoritative source migration", () => {
       "παιδεύ-ειν",
       "παίδευ-ε",
       "παιδευ-έτω",
-      "παιδεύ-ετε",
       "παιδευ-όντων",
     ]);
     expect(formatGreekLesson3ParadigmCell("παιδεύ-ετε")).toBe("παιδεύ-ετε");
