@@ -1,0 +1,45 @@
+name: Wire ElevenLabs usage panel
+on:
+  push:
+    branches: [chatgpt/elevenlabs-usage-panel]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/elevenlabs-usage-panel
+      - shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/pages/admin-page.tsx')
+          s = p.read_text()
+          old_import = 'import { useAuth } from "../features/auth/auth-context";\n'
+          new_import = old_import + 'import { ElevenLabsUsagePanel } from "../features/admin/elevenlabs-usage-panel";\n'
+          if s.count(old_import) != 1:
+              raise SystemExit('admin auth import anchor missing')
+          s = s.replace(old_import, new_import, 1)
+
+          old_body = '      {message && <div className="success-alert">{message}</div>}\n      {error && <div className="inline-alert">{error}</div>}\n      <div className="admin-grid">'
+          new_body = '      {message && <div className="success-alert">{message}</div>}\n      {error && <div className="inline-alert">{error}</div>}\n      <ElevenLabsUsagePanel />\n      <div className="admin-grid">'
+          if s.count(old_body) != 1:
+              raise SystemExit('admin panel anchor missing')
+          p.write_text(s.replace(old_body, new_body, 1))
+
+          rules = Path('.github/copilot-instructions.md')
+          r = rules.read_text()
+          note = '- ElevenLabs subscription usage is administrator-only. Keep the API key exclusively in Supabase Edge Function secrets; never expose it to browser code. The Admin usage panel may show only sanitized plan/credit/reset fields, and the database snapshot must remain readable only through `admin_users`-gated RLS.\n'
+          if note not in r:
+              rules.write_text(r + '\n' + note)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/admin-page.tsx .github/copilot-instructions.md
+          git diff --cached --check
+          git commit -m "Show ElevenLabs usage to administrators"
+          git push origin HEAD:chatgpt/elevenlabs-usage-panel
