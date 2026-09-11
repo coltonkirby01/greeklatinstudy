@@ -7,27 +7,6 @@
   z-index: 30;
 }
 
-.study-toolbar {
-  width: 100%;
-}
-
-.toolbar-control-group {
-  width: 100%;
-  display: grid;
-  grid-template-columns: max-content minmax(145px, 0.8fr) minmax(220px, 1.45fr) max-content;
-  gap: 0.6rem;
-  align-items: stretch;
-}
-
-.toolbar-control-group > * {
-  min-width: 0;
-}
-
-.compact-select-label,
-.compact-select-label select {
-  width: 100%;
-}
-
 .study-start-gate {
   position: absolute;
   inset: 0;
@@ -91,55 +70,6 @@
   font-weight: 700;
 }
 
-.flashcard-scene {
-  position: relative;
-}
-
-.flashcard-card-controls {
-  position: absolute;
-  top: 0.7rem;
-  right: 0.7rem;
-  left: 0.7rem;
-  z-index: 12;
-  display: flex;
-  gap: 0.55rem;
-  align-items: flex-start;
-  justify-content: space-between;
-  pointer-events: none;
-}
-
-.flashcard-card-controls[hidden] {
-  display: none;
-}
-
-.card-overlay-actions {
-  display: flex;
-  gap: 0.45rem;
-  align-items: center;
-  pointer-events: auto;
-}
-
-.card-overlay-button {
-  min-height: 34px;
-  padding: 0.38rem 0.55rem;
-  border-radius: 0.55rem;
-  background: color-mix(in srgb, var(--panel) 94%, transparent);
-  box-shadow: 0 3px 12px color-mix(in srgb, var(--foreground) 8%, transparent);
-  backdrop-filter: blur(6px);
-  font-size: 0.75rem;
-}
-
-.card-overlay-button svg {
-  width: 0.9rem;
-  height: 0.9rem;
-}
-
-.save-card-button[aria-pressed="true"] {
-  border-color: color-mix(in srgb, var(--burgundy) 58%, var(--border));
-  color: var(--burgundy);
-  background: color-mix(in srgb, var(--burgundy) 10%, var(--panel));
-}
-
 .flashcard-face { justify-content: safe center; }
 
 /* Greek Lesson 3 chart cells must remain table-sized. The general Greek
@@ -148,27 +78,4 @@
 .henle-chart .greek-front.compact-greek {
   font-size: clamp(1.35rem, 3vw, 2rem);
   line-height: 1.2;
-}
-
-@media (max-width: 840px) {
-  .toolbar-control-group {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 480px) {
-  .toolbar-control-group {
-    grid-template-columns: 1fr;
-  }
-
-  .flashcard-card-controls {
-    top: 0.45rem;
-    right: 0.45rem;
-    left: 0.45rem;
-  }
-
-  .card-overlay-button {
-    padding: 0.32rem 0.42rem;
-    font-size: 0.7rem;
-  }
 }
