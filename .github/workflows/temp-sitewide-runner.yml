@@ -72,13 +72,24 @@ jobs:
               raise SystemExit('Could not place sessionLanguage declaration')
           v = v.replace(needle, needle + declaration, 1)
           p.write_text(v)
+
+          p = Path('src/pages/home-page.tsx')
+          v = p.read_text()
+          v = v.replace('ArrowRight, BookOpenText, Cloud, ExternalLink, Repeat2', 'ArrowRight, Cloud, ExternalLink, Repeat2')
+          v = re.sub(r'\n  reading: <span className="course-icon"><BookOpenText /></span>,', '', v)
+          v = v.replace('Forward, reverse, whole-chart, reading, and imported-deck progress can sync to your account.', 'Forward, reverse, whole-chart, session, and saved-card progress can sync to your account.')
+          p.write_text(v)
           POSTFIX
           rm -f .github/workflows/temp-sitewide-cleanup.yml .github/workflows/temp-sitewide-runner.yml
       - name: Audit removed-feature references
         shell: bash
         run: |
           set -euo pipefail
-          ! rg -n 'ElevenLabsUsagePanel|elevenlabs-usage|loadReadingPage|/reading|features/reading|Progress backup & migration|Portable by design|Active recall · adaptive review · reading aloud' src public README.md AGENTS.md docs supabase --glob '!supabase/migrations/0007_remove_retired_reading_and_usage.sql' --glob '!supabase/migrations/0006_elevenlabs_usage_snapshot.sql'
+          if grep -RInE 'ElevenLabsUsagePanel|elevenlabs-usage|loadReadingPage|/reading|features/reading|reading-audio|saved readings|saved passage|Progress backup & migration|Portable by design|Active recall · adaptive review · reading aloud' src public README.md AGENTS.md docs supabase \
+            --exclude='0007_remove_retired_reading_and_usage.sql' --exclude='0006_elevenlabs_usage_snapshot.sql'; then
+            echo 'Found stale removed-feature references' >&2
+            exit 1
+          fi
       - name: Install dependencies
         run: npm ci
       - name: High-severity dependency audit
