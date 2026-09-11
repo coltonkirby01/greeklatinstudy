@@ -125,6 +125,7 @@ describe("authoritative source migration", () => {
       "παιδεύειν",
       "παίδευε",
       "παιδευέτω",
+      "παιδεύετε",
       "παιδευόντων",
     ].map(formatGreekLesson3ParadigmCell)).toEqual([
       "παιδεύ-ω",
