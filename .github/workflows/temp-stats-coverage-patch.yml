@@ -1,0 +1,67 @@
+name: Patch study stats coverage
+on:
+  push:
+    branches: [chatgpt/rolling-auto-grade]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/rolling-auto-grade
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          def rep(path, old, new):
+              p=Path(path); s=p.read_text()
+              if old not in s: raise SystemExit(f'missing in {path}: {old[:80]}')
+              p.write_text(s.replace(old,new,1))
+
+          rep('src/features/study/session-management.ts',
+              '  Greek: ["greek-i", "alpha-omega-lesson3-vocab", "alpha-omega-lesson3-grammar"],\n  Latin: ["dickinson-latin-core", "henle-part1-forms"],',
+              '  Greek: ["greek-i", "alpha-omega-lesson3-vocab", "alpha-omega-lesson3-grammar", "alpha-omega-lesson4-vocab", "alpha-omega-lesson4-grammar"],\n  Latin: ["dickinson-latin-core", "latin-active-indicative-paradigms", "latin-passive-indicative-paradigms"],')
+          rep('src/features/study/session-management.ts',
+              '  if (deckId === "alpha-omega-lesson3-grammar") return "Lesson 3 Grammar";\n  if (deckId === "dickinson-latin-core") return "Dickinson Vocabulary";\n  if (deckId === "henle-part1-forms") return studyKey.startsWith("chart") ? "Henle Whole Charts" : "Henle Grammar Forms";',
+              '  if (deckId === "alpha-omega-lesson3-grammar") return "Lesson 3 Grammar";\n  if (deckId === "alpha-omega-lesson4-vocab") return "Lesson 4 Vocabulary";\n  if (deckId === "alpha-omega-lesson4-grammar") return "Lesson 4 Grammar";\n  if (deckId === "dickinson-latin-core") return "Dickinson Vocabulary";\n  if (deckId === "latin-active-indicative-paradigms") return "Active Indicative Paradigms";\n  if (deckId === "latin-passive-indicative-paradigms") return "Passive Indicative Paradigms";')
+
+          rep('src/pages/stats-page.tsx',
+              'import { useMemo, useState, type ReactNode } from "react";\nimport { Link } from "react-router-dom";\nimport { loadGreekDeck, loadGreekLesson3GrammarDeck, loadGreekLesson3VocabularyDeck, loadLatinDeck } from "../data/builtin-decks";',
+              'import { useMemo, useState, type ReactNode } from "react";\nimport { Link, useSearchParams } from "react-router-dom";\nimport { loadGreekDeck, loadGreekLesson3GrammarDeck, loadGreekLesson3VocabularyDeck, loadGreekLesson4GrammarDeck, loadGreekLesson4VocabularyDeck, loadLatinDeck } from "../data/builtin-decks";')
+          rep('src/pages/stats-page.tsx',
+              '  const { user } = useAuth();\n  const [selectedSessions, setSelectedSessions] = useState<Set<string> | null>(null);',
+              '  const { user } = useAuth();\n  const [searchParams] = useSearchParams();\n  const requestedSessionId = searchParams.get("session");\n  const [selectedSessions, setSelectedSessions] = useState<Set<string> | null>(() => requestedSessionId ? new Set([requestedSessionId]) : null);')
+          rep('src/pages/stats-page.tsx',
+              '    const [greekFoundation, greekVocabulary, greekGrammar, latinVocabulary, activeParadigms, passiveParadigms] = await Promise.all([\n      loadGreekDeck(),\n      loadGreekLesson3VocabularyDeck(),\n      loadGreekLesson3GrammarDeck(),\n      loadLatinDeck(),',
+              '    const [greekFoundation, greekVocabulary, greekGrammar, greekLesson4Vocabulary, greekLesson4Grammar, latinVocabulary, activeParadigms, passiveParadigms] = await Promise.all([\n      loadGreekDeck(),\n      loadGreekLesson3VocabularyDeck(),\n      loadGreekLesson3GrammarDeck(),\n      loadGreekLesson4VocabularyDeck(),\n      loadGreekLesson4GrammarDeck(),\n      loadLatinDeck(),')
+          rep('src/pages/stats-page.tsx',
+              '      { language: "Greek", source: "Lesson 3 Grammar", mode: "Reverse", direction: "reverse", deck: greekGrammar, cards: greekGrammar.cards, studyKey: "reverse" },\n      { language: "Latin", source: "Dickinson Vocabulary", mode: "Forward", direction: "forward", deck: latinVocabulary, cards: latinVocabulary.cards, studyKey: "forward" },',
+              '      { language: "Greek", source: "Lesson 4 Vocabulary", mode: "Forward", direction: "forward", deck: greekLesson4Vocabulary, cards: greekLesson4Vocabulary.cards, studyKey: "forward" },\n      { language: "Greek", source: "Lesson 4 Vocabulary", mode: "Reverse", direction: "reverse", deck: greekLesson4Vocabulary, cards: greekLesson4Vocabulary.cards, studyKey: "reverse" },\n      { language: "Greek", source: "Lesson 4 Grammar", mode: "Forward", direction: "forward", deck: greekLesson4Grammar, cards: greekLesson4Grammar.cards, studyKey: "forward" },\n      { language: "Latin", source: "Dickinson Vocabulary", mode: "Forward", direction: "forward", deck: latinVocabulary, cards: latinVocabulary.cards, studyKey: "forward" },')
+          rep('src/pages/stats-page.tsx',
+              '      { language: "Latin", source: "Active Indicative Paradigms", mode: "Charts", direction: "forward", deck: activeParadigms, cards: activeParadigms.cards, studyKey: "chart" },\n      { language: "Latin", source: "Passive Indicative Paradigms", mode: "Charts", direction: "forward", deck: passiveParadigms, cards: passiveParadigms.cards, studyKey: "chart" },',
+              '      { language: "Latin", source: "Active Indicative Paradigms", mode: "Charts", direction: "forward", deck: activeParadigms, cards: activeParadigms.cards, studyKey: "chart" },\n      { language: "Latin", source: "Active Indicative Paradigms", mode: "Reverse", direction: "reverse", deck: activeParadigms, cards: activeParadigms.cards, studyKey: "reverse" },\n      { language: "Latin", source: "Passive Indicative Paradigms", mode: "Charts", direction: "forward", deck: passiveParadigms, cards: passiveParadigms.cards, studyKey: "chart" },\n      { language: "Latin", source: "Passive Indicative Paradigms", mode: "Reverse", direction: "reverse", deck: passiveParadigms, cards: passiveParadigms.cards, studyKey: "reverse" },')
+
+          rep('src/features/study/study-session-ui.tsx',
+              'export function StudySidebar({ copy, direction, stats, priority, priorityPrompt, cardCopy }: {\n  copy: DirectionalCardCopy;\n  direction: StudyDirection;\n  stats: StudyStats;\n  priority: Priority;',
+              'export function StudySidebar({ copy, direction, stats, sessionId, priority, priorityPrompt, cardCopy }: {\n  copy: DirectionalCardCopy;\n  direction: StudyDirection;\n  stats: StudyStats;\n  sessionId?: string;\n  priority: Priority;')
+          rep('src/features/study/study-session-ui.tsx',
+              '<Link className="small-outline-button session-stats-link" to="/stats">Stats</Link>',
+              '<Link className="small-outline-button session-stats-link" to={sessionId ? `/stats?session=${encodeURIComponent(sessionId)}` : "/stats"}>Stats</Link>')
+          rep('src/features/study/multi-source-study-session.tsx',
+              '<StudySidebar copy={copy} direction={direction} stats={stats} priority={priority}',
+              '<StudySidebar copy={copy} direction={direction} stats={stats} sessionId={session.id} priority={priority}')
+
+          p=Path('.github/copilot-instructions.md'); s=p.read_text(); anchor='- The **Current session** sidebar must summarize the session selected in the card-app session selector across that session\'s loaded Greek/Latin envelopes, independent of the currently visible card filters. Keep it aligned with the Stats page\'s session scope.\n'
+          rule='- Stats/session coverage is mandatory for both languages. Adding cards to an existing Greek or Latin deck automatically belongs in Stats because the full deck is analyzed. Whenever a new built-in Greek/Latin deck or study direction is added, update both `SESSION_DECKS` in `session-management.ts` and the Stats source list in `stats-page.tsx` in the same change; never ship cards that can generate reviews but are absent from Stats/session selection.\n'
+          if rule not in s:
+              if anchor not in s: raise SystemExit('copilot anchor missing')
+              p.write_text(s.replace(anchor,anchor+rule,1))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/features/study/session-management.ts src/pages/stats-page.tsx src/features/study/study-session-ui.tsx src/features/study/multi-source-study-session.tsx .github/copilot-instructions.md
+          git diff --cached --check
+          git commit -m "Keep Greek and Latin session stats complete"
+          git push origin HEAD:chatgpt/rolling-auto-grade
