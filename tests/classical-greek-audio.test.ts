@@ -12,6 +12,7 @@ import {
   LESSON3_PRONUNCIATION_SYSTEM,
   lesson3CourseAudioAssets,
 } from "../supabase/functions/course-audio/lesson3-assets";
+import { lesson4CourseAudioAssets } from "../supabase/functions/course-audio/lesson4-assets";
 
 type IdCard = { id: string };
 
@@ -20,16 +21,20 @@ function withoutPitchMarks(ipa: string) {
 }
 
 describe("Classical Greek course audio", () => {
-  it("defines one permanent audio asset for every active Lesson 3 grammar chart", () => {
-    const grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as IdCard[];
-    expect(lesson3CourseAudioAssets.map((asset) => asset.id).sort()).toEqual(grammar.map((card) => card.id).sort());
+  it("defines one permanent audio asset for every active whole-paradigm grammar chart", () => {
+    const lesson3Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as IdCard[];
+    const lesson4Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson4-grammar.json", "utf8")) as IdCard[];
+    expect(lesson3CourseAudioAssets.map((asset) => asset.id).sort()).toEqual(lesson3Grammar.map((card) => card.id).sort());
+    expect(lesson4CourseAudioAssets.map((asset) => asset.id).sort()).toEqual(lesson4Grammar.map((card) => card.id).sort());
   });
 
-  it("covers every current built-in Greek card, including non-phonetic symbol cards", () => {
+  it("covers every current built-in Greek card, including Lesson 4 and non-phonetic symbol cards", () => {
     const foundation = JSON.parse(fs.readFileSync("public/data/greek-cards.json", "utf8")) as IdCard[];
-    const vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson3-vocab.json", "utf8")) as IdCard[];
-    const grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as IdCard[];
-    for (const card of [...foundation, ...vocabulary, ...grammar]) {
+    const lesson3Vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson3-vocab.json", "utf8")) as IdCard[];
+    const lesson3Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as IdCard[];
+    const lesson4Vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson4-vocab.json", "utf8")) as IdCard[];
+    const lesson4Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson4-grammar.json", "utf8")) as IdCard[];
+    for (const card of [...foundation, ...lesson3Vocabulary, ...lesson3Grammar, ...lesson4Vocabulary, ...lesson4Grammar]) {
       expect(resolveBuiltinGreekAsset(card.id), card.id).not.toBeNull();
     }
     expect(resolveBuiltinGreekAsset("punct-4")?.pronunciationSystem).toContain("non-phonetic");
@@ -42,11 +47,11 @@ describe("Classical Greek course audio", () => {
     expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("Smyth");
     expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("Open University");
     expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("University of Victoria");
-    for (const asset of lesson3CourseAudioAssets) {
+    for (const asset of [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets]) {
       expect(asset.canonicalIpa).toMatch(/^\/.*\/$/u);
       expect(asset.ttsText).toMatch(/^\/.*\/$/u);
       expect(asset.canonicalIpa).not.toContain("ˈ");
-      expect(asset.ttsText).not.toContain("παιδεύ-");
+      expect(asset.ttsText).not.toContain("-");
     }
   });
 
