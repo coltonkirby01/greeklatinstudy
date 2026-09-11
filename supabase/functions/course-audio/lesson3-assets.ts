@@ -27,21 +27,6 @@ function paradigm(id: string, label: string, forms: readonly string[]): Lesson3C
 
 /** Paradigms and endings are spoken vertically: singular first, then plural. */
 export const lesson3CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
-  paradigm("lesson3-chart-present-active-indicative-endings", "Present Active Indicative Endings", [
-    "-ω",
-    "-εις",
-    "-ει",
-    "-ομεν",
-    "-ετε",
-    "-ουσι(ν)",
-  ]),
-  paradigm("lesson3-chart-present-active-infinitive-endings", "Present Active Infinitive Ending", ["-ειν"]),
-  paradigm("lesson3-chart-present-active-imperative-endings", "Present Active Imperative Endings", [
-    "-ε",
-    "-έτω",
-    "-ετε",
-    "-όντων",
-  ]),
   paradigm("lesson3-chart-present-active-indicative", "Present Active Indicative", [
     "παιδεύ-ω",
     "παιδεύ-εις",
@@ -56,5 +41,20 @@ export const lesson3CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
     "παιδευ-έτω",
     "παιδεύ-ετε",
     "παιδευ-όντων",
+  ]),
+  paradigm("lesson3-chart-present-active-indicative-endings", "Present Active Indicative Endings", [
+    "-ω",
+    "-εις",
+    "-ει",
+    "-ομεν",
+    "-ετε",
+    "-ουσι(ν)",
+  ]),
+  paradigm("lesson3-chart-present-active-infinitive-endings", "Present Active Infinitive Ending", ["-ειν"]),
+  paradigm("lesson3-chart-present-active-imperative-endings", "Present Active Imperative Endings", [
+    "-ε",
+    "-έτω",
+    "-ετε",
+    "-όντων",
   ]),
 ] as const;
