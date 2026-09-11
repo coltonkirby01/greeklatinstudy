@@ -1,30 +1,30 @@
 [
   {
-    "id": "lesson4-chart-first-declension-endings-singular",
-    "category": "First Declension Feminine Endings — Singular",
-    "prompt": "First Declension Feminine Endings — Singular",
+    "id": "lesson4-chart-first-declension-endings-alpha",
+    "category": "First Declension Feminine Endings — α-type",
+    "prompt": "First Declension Feminine Endings — α-type",
     "source_ref": "Groton 4.29",
-    "columns": ["α-type", "η-type"],
+    "columns": ["Singular", "Plural"],
     "rows": [
-      { "label": "Nominative", "cells": ["-ᾱ", "-η"] },
-      { "label": "Genitive", "cells": ["-ᾱς", "-ης"] },
-      { "label": "Dative", "cells": ["-ᾳ", "-ῃ"] },
-      { "label": "Accusative", "cells": ["-ᾱν", "-ην"] },
-      { "label": "Vocative", "cells": ["-ᾱ", "-η"] }
+      { "label": "Nominative", "cells": ["-ᾱ", "-αι"] },
+      { "label": "Genitive", "cells": ["-ᾱς", "-ων"] },
+      { "label": "Dative", "cells": ["-ᾳ", "-αις"] },
+      { "label": "Accusative", "cells": ["-ᾱν", "-ᾱς"] },
+      { "label": "Vocative", "cells": ["-ᾱ", "-αι"] }
     ]
   },
   {
-    "id": "lesson4-chart-first-declension-endings-plural",
-    "category": "First Declension Feminine Endings — Plural",
-    "prompt": "First Declension Feminine Endings — Plural",
+    "id": "lesson4-chart-first-declension-endings-eta",
+    "category": "First Declension Feminine Endings — η-type",
+    "prompt": "First Declension Feminine Endings — η-type",
     "source_ref": "Groton 4.29",
-    "columns": ["Ending"],
+    "columns": ["Singular", "Plural"],
     "rows": [
-      { "label": "Nominative", "cells": ["-αι"] },
-      { "label": "Genitive", "cells": ["-ων"] },
-      { "label": "Dative", "cells": ["-αις"] },
-      { "label": "Accusative", "cells": ["-ᾱς"] },
-      { "label": "Vocative", "cells": ["-αι"] }
+      { "label": "Nominative", "cells": ["-η", "-αι"] },
+      { "label": "Genitive", "cells": ["-ης", "-ων"] },
+      { "label": "Dative", "cells": ["-ῃ", "-αις"] },
+      { "label": "Accusative", "cells": ["-ην", "-ᾱς"] },
+      { "label": "Vocative", "cells": ["-η", "-αι"] }
     ]
   },
   {
