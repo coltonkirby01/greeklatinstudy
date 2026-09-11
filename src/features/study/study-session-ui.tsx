@@ -91,10 +91,11 @@ export function StudyRatingControls({ revealed, result, difficulty, editing, onR
   </div>;
 }
 
-export function StudySidebar({ copy, direction, stats, priority, priorityPrompt, cardCopy }: {
+export function StudySidebar({ copy, direction, stats, sessionId, priority, priorityPrompt, cardCopy }: {
   copy: DirectionalCardCopy;
   direction: StudyDirection;
   stats: StudyStats;
+  sessionId?: string;
   priority: Priority;
   priorityPrompt?: (card: StudyCard, copy: DirectionalCardCopy) => ReactNode;
   cardCopy?: (card: StudyCard, direction: StudyDirection) => DirectionalCardCopy;
@@ -104,7 +105,7 @@ export function StudySidebar({ copy, direction, stats, priority, priorityPrompt,
     <section className="panel-surface stats-panel">
       <div className="sidebar-heading"><div><p className="eyebrow">Current session</p><h2>Progress · {copy.sideLabel}</h2></div><Gauge /></div>
       <div className="stats-grid"><div className="stat-tile"><span>Reviews</span><strong>{stats.totalReviews}</strong></div><div className="stat-tile"><span>Reviewed</span><strong>{stats.reviewed}</strong></div><div className="stat-tile"><span>Accuracy</span><strong>{percent(stats.accuracy)}</strong></div><div className="stat-tile"><span>Ever wrong</span><strong>{stats.everWrong}</strong></div><div className="stat-tile"><span>Marked hard</span><strong>{stats.markedHard}</strong></div><div className="stat-tile"><span>Avg. time</span><strong>{formatResponseTime(stats.averageResponseTimeMs)}</strong></div><div className="stat-tile"><span>Right once</span><strong>{stats.mastered}</strong></div><div className="stat-tile"><span>Best streak</span><strong>{stats.bestStreak}</strong></div></div>
-      <Link className="small-outline-button session-stats-link" to="/stats">Stats</Link>
+      <Link className="small-outline-button session-stats-link" to={sessionId ? `/stats?session=${encodeURIComponent(sessionId)}` : "/stats"}>Stats</Link>
     </section>
     <section className="panel-surface priority-panel">
       <div className="sidebar-heading"><div><p className="eyebrow">Prompts only</p><h2>Highest-Priority Review</h2></div><RotateCcw /></div>
