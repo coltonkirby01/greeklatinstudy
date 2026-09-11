@@ -79,6 +79,19 @@ jobs:
           v = re.sub(r'\n  reading: <span className="course-icon"><BookOpenText /></span>,', '', v)
           v = v.replace('Forward, reverse, whole-chart, reading, and imported-deck progress can sync to your account.', 'Forward, reverse, whole-chart, session, and saved-card progress can sync to your account.')
           p.write_text(v)
+
+          p = Path('docs/MAINTENANCE.md')
+          v = p.read_text().replace('- `src/pages/reading-page.tsx` and `src/features/reading/` — retired Reading feature.\n', '')
+          p.write_text(v)
+
+          p = Path('docs/TEST-CHECKLIST.md')
+          v = p.read_text().replace('- ✅ Production Supabase schema and private `reading-audio` bucket created.\n', '')
+          p.write_text(v)
+
+          p = Path('supabase/migrations/0003_optimize_rls_policies.sql')
+          v = p.read_text()
+          v = re.sub(r'\n?drop policy if exists "users read their own reading audio" on storage\.objects;.*\Z', '\n', v, flags=re.S)
+          p.write_text(v)
           POSTFIX
           rm -f .github/workflows/temp-sitewide-cleanup.yml .github/workflows/temp-sitewide-runner.yml
       - name: Audit removed-feature references
