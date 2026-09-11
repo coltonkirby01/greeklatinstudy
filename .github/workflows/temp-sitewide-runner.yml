@@ -23,12 +23,13 @@ jobs:
         run: |
           python <<'EXTRACT'
           from pathlib import Path
-          import textwrap
           source = Path('.github/workflows/temp-sitewide-cleanup.yml').read_text()
           marker = "          python <<'PY'\n"
           start = source.index(marker) + len(marker)
           end = source.index("\n          PY\n", start)
-          Path('/tmp/sitewide_cleanup.py').write_text(textwrap.dedent(source[start:end]))
+          lines = source[start:end].splitlines()
+          script = "\n".join(line[10:] if line.startswith("          ") else line for line in lines) + "\n"
+          Path('/tmp/sitewide_cleanup.py').write_text(script)
           EXTRACT
           python /tmp/sitewide_cleanup.py
           rm -f .github/workflows/temp-sitewide-cleanup.yml .github/workflows/temp-sitewide-runner.yml
