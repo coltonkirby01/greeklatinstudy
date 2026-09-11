@@ -118,18 +118,6 @@ async function isAdmin(request: Request, supabaseUrl: string, projectKey: string
   return rows[0]?.user_id === user.id;
 }
 
-async function recentSnapshot(supabaseUrl: string, key: string) {
-  const url = new URL(`${supabaseUrl}/rest/v1/elevenlabs_usage_snapshot`);
-  url.searchParams.set("id", "eq.current");
-  url.searchParams.set("select", "updated_at");
-  url.searchParams.set("limit", "1");
-  const response = await fetch(url, { headers: { apikey: key } });
-  if (!response.ok) return false;
-  const rows = await response.json() as Array<{ updated_at?: string }>;
-  const updated = rows[0]?.updated_at ? Date.parse(rows[0].updated_at) : 0;
-  return Number.isFinite(updated) && Date.now() - updated < 5 * 60 * 1000;
-}
-
 async function saveSnapshot(supabaseUrl: string, key: string, usage: Usage) {
   const response = await fetch(`${supabaseUrl}/rest/v1/elevenlabs_usage_snapshot?on_conflict=id`, {
     method: "POST",
@@ -186,12 +174,9 @@ Deno.serve(async (request) => {
   if (!apiKey) return json({ error: "ELEVENLABS_API_KEY is not configured." }, 503);
 
   try {
-    const admin = await isAdmin(request, supabaseUrl, projectKey);
-    if (!admin && await recentSnapshot(supabaseUrl, key)) return json({ ok: true, refreshed: false });
-
+    if (!await isAdmin(request, supabaseUrl, projectKey)) return json({ error: "Administrator access required." }, 403);
     const usage = await loadUsage(apiKey);
     await saveSnapshot(supabaseUrl, key, usage);
-    if (!admin) return json({ ok: true, refreshed: true });
     return json({ ok: true, usage });
   } catch (error) {
     if (error instanceof ElevenLabsLookupError) return json({ ok: false, code: error.code, error: error.message });
