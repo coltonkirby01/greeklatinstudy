@@ -41,14 +41,18 @@ export function studyEnterShortcut({ key, shiftKey, revealed, result, typingTarg
 }
 
 export function studyShortcut({ key, startGateOpen, revealed, typingTarget, controlsTarget = false }: ShortcutContext): StudyShortcut {
-  // Text-entry controls must keep normal typing behavior, including spaces.
-  if (typingTarget) return null;
+  const isSpace = key === " " || key === "Spacebar";
+
+  // Genuine text-entry fields keep normal typing behavior. Toolbar selects are
+  // also classified as typing targets by the controllers, but Space must still
+  // belong to the flashcard session after Adaptive/Sequential or Learner/Reviewer
+  // has been clicked. controlsTarget distinguishes those toolbar controls.
+  if (typingTarget && !(isSpace && controlsTarget)) return null;
 
   // Space is always owned by the flashcard session, even if a toolbar button,
-  // timer control, rating control, or other non-text button currently has focus.
+  // select, timer control, rating control, or other non-text control has focus.
   // Returning an action ensures the shared keydown handler calls preventDefault(),
-  // so the browser cannot re-activate the last focused button with Space.
-  const isSpace = key === " " || key === "Spacebar";
+  // so the browser cannot re-activate the last focused control with Space.
   if (isSpace) {
     if (startGateOpen) return { type: "start" };
     if (!revealed) return { type: "reveal" };
