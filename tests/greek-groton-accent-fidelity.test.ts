@@ -104,7 +104,7 @@ describe("Groton acute/grave source fidelity", () => {
   });
 
   it("does not reintroduce artificial stem-ending hyphens into whole paradigms or audio sources", () => {
-    for (const grammarCard of [...lesson3Grammar, ...lesson4Grammar].filter((entry) => !entry.id.endsWith("-endings"))) {
+    for (const grammarCard of [...lesson3Grammar, ...lesson4Grammar].filter((entry) => !entry.id.includes("-endings"))) {
       for (const row of grammarCard.rows) {
         for (const form of row.cells) expect(form, `${grammarCard.id}: ${form}`).not.toContain("-");
       }
