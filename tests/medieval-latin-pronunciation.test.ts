@@ -2,12 +2,14 @@ import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   MEDIEVAL_LATIN_PRONUNCIATION_SYSTEM,
-  MEDIEVAL_LATIN_PROVISIONAL_RULES,
+  MEDIEVAL_LATIN_PROFILE_RULES,
   latinParadigmToElevenLabsIpa,
   latinToElevenLabsIpa,
   latinToMedievalIpa,
   stripUnpronouncedLatinNotation,
 } from "../supabase/functions/course-audio/medieval-latin-ipa";
+
+type ParadigmFile = Array<{ rows: Array<{ cells: string[] }> }>;
 
 describe("normalized Medieval Latin pronunciation foundation", () => {
   it("documents a broad scholastic source policy instead of a narrow national accent", () => {
@@ -35,28 +37,33 @@ describe("normalized Medieval Latin pronunciation foundation", () => {
     expect(latinToMedievalIpa("aud-ītis")).toBe("/au̯ˈditis/");
   });
 
-  it("implements the broad high-confidence medieval changes before regional refinements", () => {
-    expect(latinToMedievalIpa("caelum")).toBe("/ˈkelum/");
+  it("implements the broad high-confidence medieval changes drawn from Rigg", () => {
+    expect(latinToMedievalIpa("caelum")).toBe("/ˈselum/");
     expect(latinToMedievalIpa("poena")).toBe("/ˈpena/");
     expect(latinToMedievalIpa("lyra")).toBe("/ˈlira/");
-    expect(latinToMedievalIpa("gratia")).toBe("/ˈgratsia/");
-    expect(latinToMedievalIpa("ratio")).toBe("/ˈratsio/");
+    expect(latinToMedievalIpa("gratia")).toBe("/ˈgrasia/");
+    expect(latinToMedievalIpa("ratio")).toBe("/ˈrasio/");
     expect(latinToMedievalIpa("mixtio")).toBe("/ˈmikstio/");
+    expect(latinToMedievalIpa("scilicet")).toBe("/ˈsiliset/");
+    expect(latinToMedievalIpa("habet")).toBe("/ˈabet/");
     expect(latinToMedievalIpa("philosophia")).toBe("/filoˈsofia/");
   });
 
-  it("keeps region-sensitive consonants explicitly provisional until the comparative audit", () => {
-    expect(MEDIEVAL_LATIN_PROVISIONAL_RULES).toEqual({
-      frontC: "k",
-      frontG: "g",
-      h: "h",
-      gn: "gn",
+  it("keeps genuinely region-sensitive consonants explicitly provisional", () => {
+    expect(MEDIEVAL_LATIN_PROFILE_RULES).toEqual({
+      frontC: "s",
+      frontSc: "s",
+      tiBeforeVowel: "s+i",
+      h: "silent",
+      frontG: "g (provisional)",
+      gn: "gn (provisional)",
+      qu: "kw (provisional)",
     });
     const policy = fs.readFileSync("docs/MEDIEVAL_LATIN_PRONUNCIATION.md", "utf8");
-    expect(policy).toContain("Rules that require a comparative audit before production generation");
-    expect(policy).toContain("exact realization of `c` before front vowels");
+    expect(policy).toContain("Rules that still require a comparative audit before production generation");
     expect(policy).toContain("exact realization of `g` before front vowels");
     expect(policy).toContain("`gn`");
+    expect(policy).toContain("`qu`");
   });
 
   it("keeps canonical IPA and ElevenLabs input separate even while they currently agree", () => {
@@ -75,5 +82,20 @@ describe("normalized Medieval Latin pronunciation foundation", () => {
       "/ˈlau̯do/ /ˈlau̯das/ /ˈlau̯dat/",
       "/lau̯ˈdamus/ /lau̯ˈdatis/ /ˈlau̯dant/",
     ]);
+  });
+
+  it("can convert every current Latin active/passive paradigm cell without speaking morphology dashes", () => {
+    const files = [
+      "public/data/latin-active-indicative-paradigms.json",
+      "public/data/latin-passive-indicative-paradigms.json",
+    ];
+    for (const path of files) {
+      const paradigms = JSON.parse(fs.readFileSync(path, "utf8")) as ParadigmFile;
+      for (const form of paradigms.flatMap((card) => card.rows.flatMap((row) => row.cells))) {
+        const ipa = latinToMedievalIpa(form);
+        expect(ipa, form).toMatch(/^\/.*\/$/u);
+        expect(ipa, form).not.toContain("-");
+      }
+    }
   });
 });
