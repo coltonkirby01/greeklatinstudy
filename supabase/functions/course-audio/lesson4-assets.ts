@@ -23,15 +23,15 @@ function endingChart(id: string, label: string, columns: readonly (readonly stri
 }
 
 export const lesson4VocabularyAudio: Readonly<Record<string, { label: string; greek: string }>> = {
-  "lesson4-v1": { label: "πέμπω", greek: "πέμπω" },
-  "lesson4-v2": { label: "ἀγορά", greek: "ἀγορά, ἀγορᾶς, ἡ" },
-  "lesson4-v3": { label: "ἐπιστολή", greek: "ἐπιστολή, ἐπιστολῆς, ἡ" },
-  "lesson4-v4": { label: "ἡσυχίᾱ", greek: "ἡσυχίᾱ, ἡσυχίᾱς, ἡ" },
-  "lesson4-v5": { label: "θεά", greek: "θεά, θεᾶς, ἡ" },
-  "lesson4-v6": { label: "σκηνή", greek: "σκηνή, σκηνῆς, ἡ" },
+  "lesson4-v1": { label: "πέμπω", greek: "πέμπω" },
+  "lesson4-v2": { label: "ἀγορᾱ́", greek: "ἀγορᾱ́, ἀγορᾶς, ἡ" },
+  "lesson4-v3": { label: "ἐπιστολή", greek: "ἐπιστολή, ἐπιστολῆς, ἡ" },
+  "lesson4-v4": { label: "ἡσυχίᾱ", greek: "ἡσυχίᾱ, ἡσυχίᾱς, ἡ" },
+  "lesson4-v5": { label: "θεᾱ́", greek: "θεᾱ́, θεᾶς, ἡ" },
+  "lesson4-v6": { label: "σκηνή", greek: "σκηνή, σκηνῆς, ἡ" },
   "lesson4-v7": { label: "χώρᾱ", greek: "χώρᾱ, χώρᾱς, ἡ" },
   "lesson4-v8": { label: "εἰς", greek: "εἰς" },
-  "lesson4-v9": { label: "ἐκ, ἐξ", greek: "ἐκ, ἐξ" },
+  "lesson4-v9": { label: "ἐκ (ἐξ)", greek: "ἐκ, ἐξ" },
   "lesson4-v10": { label: "ἐν", greek: "ἐν" },
   "lesson4-v11": { label: "ὦ", greek: "ὦ" },
 };
