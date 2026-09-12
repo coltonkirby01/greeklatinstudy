@@ -34,11 +34,11 @@
     "source_ref": "Groton 5.34",
     "columns": ["Singular", "Plural"],
     "rows": [
-      { "label": "Nominative", "cells": ["μοῖρα", "μοῖραι"] },
-      { "label": "Genitive", "cells": ["μοίρᾱς", "μοιρῶν"] },
-      { "label": "Dative", "cells": ["μοίρᾳ", "μοίραις"] },
-      { "label": "Accusative", "cells": ["μοῖραν", "μοίρᾱς"] },
-      { "label": "Vocative", "cells": ["μοῖρα", "μοῖραι"] }
+      { "label": "Nominative", "cells": ["μοῖρ - α", "μοῖρ - αι"] },
+      { "label": "Genitive", "cells": ["μοίρ - ᾱς", "μοιρ - ῶν"] },
+      { "label": "Dative", "cells": ["μοίρ - ᾳ", "μοίρ - αις"] },
+      { "label": "Accusative", "cells": ["μοῖρ - αν", "μοίρ - ᾱς"] },
+      { "label": "Vocative", "cells": ["μοῖρ - α", "μοῖρ - αι"] }
     ]
   },
   {
@@ -48,11 +48,11 @@
     "source_ref": "Groton 5.34",
     "columns": ["Singular", "Plural"],
     "rows": [
-      { "label": "Nominative", "cells": ["θάλαττα", "θάλατται"] },
-      { "label": "Genitive", "cells": ["θαλάττης", "θαλαττῶν"] },
-      { "label": "Dative", "cells": ["θαλάττῃ", "θαλάτταις"] },
-      { "label": "Accusative", "cells": ["θάλατταν", "θαλάττᾱς"] },
-      { "label": "Vocative", "cells": ["θάλαττα", "θάλατται"] }
+      { "label": "Nominative", "cells": ["θάλαττ - α", "θάλαττ - αι"] },
+      { "label": "Genitive", "cells": ["θαλάττ - ης", "θαλαττ - ῶν"] },
+      { "label": "Dative", "cells": ["θαλάττ - ῃ", "θαλάττ - αις"] },
+      { "label": "Accusative", "cells": ["θάλαττ - αν", "θαλάττ - ᾱς"] },
+      { "label": "Vocative", "cells": ["θάλαττ - α", "θάλαττ - αι"] }
     ]
   }
 ]

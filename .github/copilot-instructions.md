@@ -11,6 +11,13 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - Run the full tests and production Pages build; do not raise bundle budgets to make a change pass.
 - Before deleting something that looks unused, prove it is not part of persistence migration, source protection, auth/RLS, deployment, audio caching, or future deck administration.
 
+## User-facing behavior guide
+
+- `src/pages/how-site-works.tsx` is the canonical learner-facing explanation of consequential site behavior and appears at the bottom of the Account page.
+- Any change to Adaptive/Sequential selection, first-pass coverage, grading defaults, timing, keyboard controls, session behavior, Initial completion/Initial mastery, staged unlocking, cloud-sync behavior, or other learner-visible study mechanics MUST update this guide in the same change when the explanation is affected.
+- Prefer importing shared implementation constants into the guide instead of duplicating numeric values. Keep the guide useful to learners; do not fill it with implementation trivia.
+- Tests should protect important examples and invariants described in the guide, including the 125% Adaptive initial-coverage rule.
+
 ## Weekly card additions
 
 - Assume new cards will be added regularly. Prefer data-driven updates that require changing source/card data only.
@@ -26,8 +33,10 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - `src/features/study/builtin-study-catalog.ts` is the canonical registry for active built-in Greek/Latin decks, their Stats modes, and session coverage.
 - Adding cards to an existing registered deck automatically belongs in Stats because Stats loads the complete registered deck. Do not maintain a separate Account-page deck list.
 - Preserve stable deck/card IDs when expanding source material so existing cloud progress remains attached.
-- Greek Lesson 3 has three ending cards plus three παιδεύω paradigm cards. Greek Lesson 4 has two first-declension ending cards, four model-noun paradigms, and two feminine definite-article cards.
+- Greek Lesson 3 has three ending cards plus three παιδεύω paradigm cards. Greek Lesson 4 has two first-declension ending cards, four model-noun paradigms, and two feminine definite-article cards. Greek Lesson 5 has two short-alpha first-declension ending cards plus the μοῖρα and θάλαττα paradigms.
 - In Lesson 4, both feminine definite-article cards belong under **Endings**. **Paradigms** contains the four model-noun paradigms.
+- For Greek grammar **paradigm** charts that teach a stem plus ending, display each complete paradigm cell as `stem - ending` with exactly one space on each side of the hyphen. Preserve the source's actual accent, breathing, and quantity marks on the appropriate stem or ending. Ending-only charts continue to use ordinary ending notation such as `-ης` rather than adding the spaced separator.
+- The spaced stem/ending separator is visual morphology, not pronunciation. Greek audio should pronounce the complete form naturally and must not speak the dash.
 
 ## Choose cards
 
@@ -40,19 +49,21 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 ## Sessions
 
 - Every language always exposes two permanent built-in session types: **Learner** and **Reviewer**. Their IDs are deterministic in `session-management.ts`, so they exist for old and new users without provisioning rows.
-- Learner/Reviewer cannot be renamed or deleted. Custom sessions remain renameable/deletable and preserve long-term adaptive evidence when removed from Stats.
+- Learner/Reviewer cannot be renamed or deleted. They are organizational session lanes, not separate users or separate long-term learning memories.
+- Custom sessions remain renameable/deletable and preserve long-term adaptive evidence when removed from Stats.
 - Stats must show Learner and Reviewer as selectable session scopes even before they have reviews.
 - Stats session selection is grouped into two language columns on desktop: **Greek** on the left and **Latin** on the right. Use one heading per column; do not repeat a Greek/Latin label inside each session card.
 
 ## Study controls and grading
 
-- Space = reveal before answer; Save & Next after reveal.
+- Space = Start while the Start gate is open; Reveal before answer; Save & Next after reveal. No other key may dismiss the Start gate.
 - F = flip question/answer after reveal.
 - Enter = toggle Right/Wrong after reveal. R/W are intentionally unassigned.
 - 1/2/3 = Easy/Medium/Hard. S = save/unsave a card. A = Greek audio.
 - Shift+Enter is unassigned.
 - Automatic correctness is per card + study mode/direction: attempts 1–3 default Wrong; from attempt 4 onward use the majority of the three most recent saved results. Difficulty remains time-based (<3s Easy, <10s Medium, otherwise Hard).
 - Back truly undoes/replaces the prior grade; Skip records no grade.
+- Adaptive initial coverage uses `INITIAL_COVERAGE_MULTIPLIER = 1.25` against the current selected/unlocked pool. Repeats may occur early, but all selected cards must be covered by `ceil(pool size × 1.25)` ranked presentations; after full initial coverage, normal Adaptive selection resumes.
 
 ## Greek audio
 

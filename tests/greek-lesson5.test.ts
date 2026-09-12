@@ -45,11 +45,20 @@ describe("Groton Lesson 5", () => {
       ["-α", "-αι"], ["-ης", "-ων"], ["-ῃ", "-αις"], ["-αν", "-ᾱς"], ["-α", "-αι"],
     ]);
     expect(grammar[2].rows.map((row) => row.cells)).toEqual([
-      ["μοῖρα", "μοῖραι"], ["μοίρᾱς", "μοιρῶν"], ["μοίρᾳ", "μοίραις"], ["μοῖραν", "μοίρᾱς"], ["μοῖρα", "μοῖραι"],
+      ["μοῖρ - α", "μοῖρ - αι"], ["μοίρ - ᾱς", "μοιρ - ῶν"], ["μοίρ - ᾳ", "μοίρ - αις"], ["μοῖρ - αν", "μοίρ - ᾱς"], ["μοῖρ - α", "μοῖρ - αι"],
     ]);
     expect(grammar[3].rows.map((row) => row.cells)).toEqual([
-      ["θάλαττα", "θάλατται"], ["θαλάττης", "θαλαττῶν"], ["θαλάττῃ", "θαλάτταις"], ["θάλατταν", "θαλάττᾱς"], ["θάλαττα", "θάλατται"],
+      ["θάλαττ - α", "θάλαττ - αι"], ["θαλάττ - ης", "θαλαττ - ῶν"], ["θαλάττ - ῃ", "θαλάττ - αις"], ["θάλαττ - αν", "θαλάττ - ᾱς"], ["θάλαττ - α", "θάλαττ - αι"],
     ]);
+  });
+
+  it("uses the permanent spaced stem-ending separator only on paradigms", () => {
+    for (const card of grammar.slice(0, 2)) {
+      expect(card.rows.flatMap((row) => row.cells).every((cell) => cell.startsWith("-") && !cell.includes(" - "))).toBe(true);
+    }
+    for (const card of grammar.slice(2)) {
+      expect(card.rows.flatMap((row) => row.cells).every((cell) => cell.includes(" - "))).toBe(true);
+    }
   });
 
   it("keeps Lesson 5 question-side Greek in explicit polytonic encoding", () => {
@@ -63,6 +72,7 @@ describe("Groton Lesson 5", () => {
     for (const asset of lesson5CourseAudioAssets) {
       expect(asset.canonicalIpa).toMatch(/^\/.*\/$/u);
       expect(asset.ttsText).toMatch(/^\/.*\/$/u);
+      expect(asset.ttsText).not.toContain(" - ");
     }
   });
 

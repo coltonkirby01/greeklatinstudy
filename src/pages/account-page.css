@@ -1,4 +1,20 @@
 .account-methods { margin-top: 0.9rem; display: flex; flex-wrap: wrap; gap: 0.55rem; }
 .account-password-form { max-width: 36rem; margin-top: 1rem; }
 .account-password-form .form-submit { justify-self: start; }
-@media (max-width: 620px) { .account-methods { flex-direction: column; } }
+.site-guide { margin-top: 1.25rem; overflow: hidden; }
+.site-guide > summary { cursor: pointer; list-style: none; font-size: 1.15rem; font-weight: 800; padding: 1.05rem 1.2rem; }
+.site-guide > summary::-webkit-details-marker,
+.site-guide-section > summary::-webkit-details-marker { display: none; }
+.site-guide > summary::after,
+.site-guide-section > summary::after { content: "+"; float: right; font-weight: 700; }
+.site-guide[open] > summary::after,
+.site-guide-section[open] > summary::after { content: "−"; }
+.site-guide-body { border-top: 1px solid var(--line); padding: 0.25rem 1.2rem 1.2rem; }
+.site-guide-intro { max-width: 58rem; margin: 1rem 0; color: var(--muted); line-height: 1.65; }
+.site-guide-section { border-top: 1px solid var(--line); }
+.site-guide-section:first-of-type { border-top: 0; }
+.site-guide-section > summary { cursor: pointer; list-style: none; padding: 0.95rem 0; font-weight: 750; }
+.site-guide-section > div { padding: 0 0 1rem; max-width: 60rem; }
+.site-guide-section h3 { margin: 0.8rem 0 0.25rem; font-size: 0.98rem; }
+.site-guide-section p { margin: 0.35rem 0 0.75rem; line-height: 1.65; }
+@media (max-width: 620px) { .account-methods { flex-direction: column; } .site-guide > summary { padding: 1rem; } .site-guide-body { padding-inline: 1rem; } }

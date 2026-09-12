@@ -72,6 +72,20 @@ describe("initial adaptive coverage", () => {
     expect(forced.every((item) => item.id >= 80)).toBe(true);
   });
 
+  it("scales the same rule to a 20-card pool, forcing full coverage by presentation 25", () => {
+    const items = Array.from({ length: 20 }, (_, index) => ({ id: index, progress: progressWith() }));
+    for (let index = 0; index < 16; index += 1) {
+      items[index].progress.history.push(review(`first-${index}`, index + 1, "wrong", "medium", 1_000));
+    }
+    for (let index = 0; index < 5; index += 1) {
+      items[index].progress.history.push(review(`repeat-${index}`, 20 + index, "wrong", "hard", 2_000));
+    }
+
+    const forced = constrainAdaptiveInitialCoverage(items, "session-a", (item) => item.progress);
+    expect(Math.ceil(items.length * INITIAL_COVERAGE_MULTIPLIER)).toBe(25);
+    expect(forced.map((item) => item.id)).toEqual([16, 17, 18, 19]);
+  });
+
   it("returns to the full adaptive pool after every selected card has been seen", () => {
     const items = Array.from({ length: 8 }, (_, index) => ({ id: index, progress: progressWith(review(`r-${index}`, index + 1, index % 2 ? "right" : "wrong", "medium", 1_000)) }));
     expect(constrainAdaptiveInitialCoverage(items, "session-a", (item) => item.progress)).toHaveLength(8);
