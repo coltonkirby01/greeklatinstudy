@@ -158,9 +158,42 @@ export function collectManagedSessions(envelopes: Record<string, DeckProgressEnv
   return sessions.sort((a, b) => b.startedAt - a.startedAt || b.lastReviewedAt - a.lastReviewedAt);
 }
 
+function builtinAliasKind(session: ManagedSession): BuiltinSessionKind | null {
+  if (session.inferred) return null;
+  const name = session.name?.trim().toLowerCase();
+  if (name === "learner") return "learner";
+  if (name === "reviewer") return "reviewer";
+  return null;
+}
+
+function mergeManagedSessionSummaries(current: ManagedSession, incoming: ManagedSession): ManagedSession {
+  const starts = [current.startedAt, incoming.startedAt].filter((value) => value > 0);
+  return {
+    ...current,
+    sources: [...new Set([...current.sources, ...incoming.sources])],
+    startedAt: starts.length ? Math.min(...starts) : 0,
+    lastReviewedAt: Math.max(current.lastReviewedAt, incoming.lastReviewedAt),
+    reviews: current.reviews + incoming.reviews,
+    reviewIds: [...new Set([...(current.reviewIds ?? []), ...(incoming.reviewIds ?? [])])],
+    name: current.name ?? incoming.name,
+    inferred: Boolean(current.inferred && incoming.inferred),
+    builtin: Boolean(current.builtin || incoming.builtin),
+  };
+}
+
 export function managedSessionsForLanguage(envelopes: Record<string, DeckProgressEnvelope | null>, language: "Greek" | "Latin") {
   const existing = collectManagedSessions(envelopes).filter((session) => session.language === language);
-  const byId = new Map(existing.map((session) => [session.id, session]));
+  const byId = new Map<string, ManagedSession>();
+
+  for (const session of existing) {
+    const aliasKind = builtinAliasKind(session);
+    const canonicalId = aliasKind ? builtinSessionId(language, aliasKind) : session.id;
+    const canonicalName = aliasKind ? (aliasKind === "learner" ? "Learner" : "Reviewer") : session.name;
+    const canonical: ManagedSession = { ...session, id: canonicalId, name: canonicalName, builtin: aliasKind ? true : session.builtin };
+    const current = byId.get(canonicalId);
+    byId.set(canonicalId, current ? mergeManagedSessionSummaries(current, canonical) : canonical);
+  }
+
   for (const builtin of builtinManagedSessions(language)) {
     const current = byId.get(builtin.id);
     byId.set(builtin.id, current ? { ...current, name: builtin.name, builtin: true } : builtin);
