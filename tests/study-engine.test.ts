@@ -78,6 +78,17 @@ describe("unified study engine", () => {
     expect(["card-1", "card-2", "card-3", "card-4"]).not.toContain(next?.id);
   });
 
+  it("advances sequential review through the full pool before wrapping", () => {
+    const pool: StudyCard[] = Array.from({ length: 4 }, (_, index) => ({ id: `card-${index + 1}`, deckId: "test", front: `front ${index + 1}`, back: `back ${index + 1}` }));
+    let state = presentCard(createModeState("test", "forward", pool.length, undefined, 1), pool[0], 2);
+    const seen: Array<string | null> = [];
+    for (let index = 0; index < 4; index += 1) {
+      state = skipAndAdvance(state, pool, "sequential");
+      seen.push(state.currentCardId);
+    }
+    expect(seen).toEqual(["card-2", "card-3", "card-4", "card-1"]);
+  });
+
   it("Skip changes cards without logging the skipped card", () => {
     const state = presentCard(createModeState("test", "forward", 2), cards[0], 10);
     const skipped = skipAndAdvance(state, cards, "sequential");
