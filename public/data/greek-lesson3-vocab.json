@@ -1,13 +1,13 @@
 [
-  { "id": "lesson3-v1", "greek": "γράφω", "meaning": "write, draw", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24", "accent_note": "Acute on the penult (γρά-). It does not change to grave because the accent is not on the ultima." },
-  { "id": "lesson3-v2", "greek": "ἐθέλω", "meaning": "(+ infinitive) be willing (to), wish (to)", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24", "accent_note": "Acute on the penult (θέ-). It does not change to grave because the accent is not on the ultima." },
-  { "id": "lesson3-v3", "greek": "θῡ́ω", "meaning": "offer sacrifice, sacrifice, slay", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24", "accent_note": "Acute on the penult (ῡ́). It does not change to grave because the accent is not on the ultima." },
-  { "id": "lesson3-v4", "greek": "κλέπτω", "meaning": "steal", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24", "accent_note": "Acute on the penult (κλέπ-). It does not change to grave because the accent is not on the ultima." },
-  { "id": "lesson3-v5", "greek": "παιδεύω", "meaning": "teach, educate", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24", "accent_note": "Acute on the penult (-δεύ-). It does not change to grave because the accent is not on the ultima." },
-  { "id": "lesson3-v6", "greek": "σπεύδω", "meaning": "(+ infinitive) hasten (to), strive (to), be eager (to)", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24", "accent_note": "Acute on the penult (σπεύ-). It does not change to grave because the accent is not on the ultima." },
-  { "id": "lesson3-v7", "greek": "φυλάττω", "meaning": "stand guard, guard, protect, preserve", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24", "accent_note": "Acute on the penult (-λάτ-). It does not change to grave because the accent is not on the ultima." },
-  { "id": "lesson3-v8", "greek": "μή", "meaning": "not — used with imperative commands", "part_of_speech": "negative adverb", "lesson": 3, "source_ref": "Groton 3.24", "accent_note": "Acute on the ultima in the isolated vocabulary form. In connected text it becomes grave (μὴ) before a following word when there is no intervening punctuation." },
-  { "id": "lesson3-v9", "greek": "οὐ, οὐκ, οὐχ", "meaning": "not — used with the indicative", "part_of_speech": "negative adverb", "lesson": 3, "source_ref": "Groton 3.24", "accent_note": "Groton prints these proclitic vocabulary forms without a written accent." },
-  { "id": "lesson3-v10", "greek": "καί", "meaning": "and; also, even", "part_of_speech": "conjunction/adverb", "lesson": 3, "source_ref": "Groton 3.24", "accent_note": "Acute on the ultima in the isolated vocabulary form. In connected text it becomes grave (καὶ) before a following word when there is no intervening punctuation." },
-  { "id": "lesson3-v11", "greek": "καὶ … καί", "meaning": "both … and", "part_of_speech": "correlative conjunction", "lesson": 3, "source_ref": "Groton 3.24", "accent_note": "Groton prints the first καί with a grave (καὶ) because another word is expected to follow; the second is printed with an acute (καί) in the isolated correlative entry." }
+  { "id": "lesson3-v1", "greek": "γράφω", "meaning": "write, draw", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24" },
+  { "id": "lesson3-v2", "greek": "ἐθέλω", "meaning": "(+ infinitive) be willing (to), wish (to)", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24" },
+  { "id": "lesson3-v3", "greek": "θῡ́ω", "meaning": "offer sacrifice, sacrifice, slay", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24" },
+  { "id": "lesson3-v4", "greek": "κλέπτω", "meaning": "steal", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24" },
+  { "id": "lesson3-v5", "greek": "παιδεύω", "meaning": "teach, educate", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24" },
+  { "id": "lesson3-v6", "greek": "σπεύδω", "meaning": "(+ infinitive) hasten (to), strive (to), be eager (to)", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24" },
+  { "id": "lesson3-v7", "greek": "φυλάττω", "meaning": "stand guard, guard, protect, preserve", "part_of_speech": "verb", "lesson": 3, "source_ref": "Groton 3.24" },
+  { "id": "lesson3-v8", "greek": "μή", "meaning": "not — used with imperative commands", "part_of_speech": "negative adverb", "lesson": 3, "source_ref": "Groton 3.24" },
+  { "id": "lesson3-v9", "greek": "οὐ (οὐκ, οὐχ)", "meaning": "not — used with the indicative", "part_of_speech": "negative adverb", "lesson": 3, "source_ref": "Groton 3.24" },
+  { "id": "lesson3-v10", "greek": "καί", "meaning": "and; also, even", "part_of_speech": "conjunction/adverb", "lesson": 3, "source_ref": "Groton 3.24" },
+  { "id": "lesson3-v11", "greek": "καὶ...καί", "meaning": "both … and", "part_of_speech": "correlative conjunction", "lesson": 3, "source_ref": "Groton 3.24" }
 ]
