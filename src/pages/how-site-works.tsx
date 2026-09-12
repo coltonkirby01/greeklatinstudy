@@ -56,12 +56,16 @@ export function HowSiteWorks() {
         </details>
 
         <details className="site-guide-section">
-          <summary>Learner, Reviewer, and other sessions</summary>
+          <summary>Learner, Reviewer, and custom sessions</summary>
           <div>
             <h3>Permanent sessions</h3>
-            <p>Greek and Latin each have one permanent <strong>Learner</strong> session and one permanent <strong>Reviewer</strong> session. They are session lanes for organizing study history and statistics; they are not separate users, accounts, or separate copies of your learning memory.</p>
+            <p>Greek and Latin each have one permanent <strong>Learner</strong> session and one permanent <strong>Reviewer</strong> session. They are session lanes for organizing study history and statistics; they are not separate users, accounts, or separate copies of your learning memory. These permanent sessions cannot be renamed or deleted.</p>
+            <h3>Create a custom session</h3>
+            <p>You can create additional study sessions whenever you want a separate performance window—for example, a particular homework set, lesson, exam review, or study day. In the Greek or Latin flashcard toolbar, open the <strong>Session</strong> menu and choose <strong>Start new custom session</strong>. The new session immediately starts its own session-level progress and Stats record while continuing to use your existing long-term card memory.</p>
+            <h3>Resume, rename, or delete a custom session</h3>
+            <p>Previous explicit sessions can be resumed from the Session menu, and the Stats page can be used to continue a session as well. Custom sessions can be renamed in Stats so meaningful study periods are easy to recognize. They can also be deleted from Stats; deleting a custom session removes that session grouping and its contribution to Stats, but it does <strong>not</strong> erase the card mastery, scheduling, response-time evidence, or Adaptive learning memory earned while studying it.</p>
             <h3>Shared long-term memory</h3>
-            <p>Changing sessions does not reset a card. Adaptive priority continues to use the card's long-term history, due state, speed, difficulty, and strength. Custom sessions can also be created or resumed so a particular study period can be compared in Stats without splitting the underlying learning record.</p>
+            <p>Changing between Learner, Reviewer, and custom sessions does not reset a card. Adaptive priority continues to use the card's long-term history, due state, speed, difficulty, and strength. Sessions organize and compare study periods without splitting the underlying learning record.</p>
             <h3>Warm-up</h3>
             <p>The optional personalized warm-up uses high-priority selected cards. Warm-up reviews improve long-term card memory and scheduling, but they are excluded from the ranked session's progress and performance statistics.</p>
           </div>
@@ -89,10 +93,24 @@ export function HowSiteWorks() {
         </details>
 
         <details className="site-guide-section">
-          <summary>Progress, Stats, and cloud sync</summary>
+          <summary>Progress and Stats</summary>
           <div>
-            <p>The progress panel beside the cards describes the active ranked session. The Stats page lets you compare broader history and sessions. Long-term adaptive memory persists across sessions.</p>
-            <p>When signed in, progress, sessions, saved cards, timing, and review history synchronize with your private account so the same learning state can continue on another device. Guest study can work locally, but cloud synchronization requires an account.</p>
+            <h3>Progress beside the flashcards</h3>
+            <p>The Progress panel beside the cards describes the <strong>active ranked session</strong>, not your entire lifetime history. It includes reviews, distinct cards reviewed, accuracy, cards ever answered Wrong, cards marked Hard, average response time, cards answered Right at least once, best streak, and the Initial completion / Initial mastery bar.</p>
+            <h3>Choose what Stats analyzes</h3>
+            <p>The <strong>Stats</strong> page analyzes your saved Greek and Latin study history. Its session selector can show <strong>all sessions</strong>, one session by itself, or any combination of sessions. The scores, card analysis, trends, and review history shown below the selector all follow that chosen scope. This makes it possible to compare a custom session with Learner or Reviewer, combine several study periods, or return to your complete history.</p>
+            <h3>What Stats measures</h3>
+            <p>Stats includes overall, Greek, and Latin proficiency; session scores; accuracy and review volume; response time; reviewed-card difficulty; mastery; streak information; and card-level performance. It also uses session history to show changes and trends over time, helping distinguish improvement in accuracy, speed, and performance on more difficult cards.</p>
+            <h3>Sessions in Stats</h3>
+            <p>Each permanent or custom session has its own Stats scope. Custom sessions can be renamed, continued, or deleted there. Learner and Reviewer remain permanent. Session-level Stats are organizational: the site's long-term Adaptive memory continues across all of them unless learning data itself is explicitly changed.</p>
+          </div>
+        </details>
+
+        <details className="site-guide-section">
+          <summary>Accounts and cloud sync</summary>
+          <div>
+            <p>When signed in, progress, sessions, saved cards, timing, and review history synchronize with your private account so the same learning state can continue on another device. Guest study can work locally on the current device, but cloud synchronization requires an account.</p>
+            <p>Signing in does not create separate learning histories for Learner, Reviewer, or custom sessions. Those sessions all belong to the same account and share the same underlying long-term card memory.</p>
           </div>
         </details>
 
