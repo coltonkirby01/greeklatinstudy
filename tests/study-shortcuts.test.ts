@@ -4,10 +4,13 @@ import { studyEnterShortcut, studyShortcut } from "../src/features/study/study-s
 const context = { startGateOpen: false, revealed: false, result: null, difficulty: null, typingTarget: false, controlsTarget: false } as const;
 
 describe("study keyboard shortcuts", () => {
-  it("uses the first non-control key only to start when the gate is open", () => {
+  it("starts from the gate only with Space", () => {
     expect(studyShortcut({ ...context, key: " ", startGateOpen: true })).toEqual({ type: "start" });
-    expect(studyShortcut({ ...context, key: "r", startGateOpen: true, revealed: true })).toEqual({ type: "start" });
-    expect(studyShortcut({ ...context, key: "f", startGateOpen: true, revealed: true })).toEqual({ type: "start" });
+    expect(studyShortcut({ ...context, key: "Spacebar", startGateOpen: true })).toEqual({ type: "start" });
+    expect(studyShortcut({ ...context, key: "r", startGateOpen: true, revealed: true })).toBeNull();
+    expect(studyShortcut({ ...context, key: "f", startGateOpen: true, revealed: true })).toBeNull();
+    expect(studyShortcut({ ...context, key: "1", startGateOpen: true, revealed: true })).toBeNull();
+    expect(studyShortcut({ ...context, key: "Enter", startGateOpen: true, revealed: true })).toBeNull();
   });
 
   it("leaves typing and non-Space toolbar keys alone while the gate is open", () => {
