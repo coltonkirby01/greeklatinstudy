@@ -2,10 +2,13 @@ import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("How this site works guide", () => {
-  it("is present on the Account page for signed-in and signed-out users", () => {
+  it("is present once on Home above the progress/cloud-sync callout", () => {
+    const home = fs.readFileSync("src/pages/home-page.tsx", "utf8");
     const account = fs.readFileSync("src/pages/account-page.tsx", "utf8");
-    expect(account).toContain('import { HowSiteWorks } from "./how-site-works"');
-    expect(account.match(/<HowSiteWorks \/>/g)?.length).toBe(2);
+    expect(home).toContain('import { HowSiteWorks } from "./how-site-works"');
+    expect(home.match(/<HowSiteWorks \/>/g)?.length).toBe(1);
+    expect(home.indexOf("<HowSiteWorks />")).toBeLessThan(home.indexOf('className="sign-in-callout panel-surface"'));
+    expect(account).not.toContain("HowSiteWorks");
   });
 
   it("derives important numerical explanations from study constants", () => {

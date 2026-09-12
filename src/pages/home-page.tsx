@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { homeCourses, type CourseId } from "../config/site";
 import { useAuth } from "../features/auth/auth-context";
 import { preloadRoute } from "../route-preload";
+import { HowSiteWorks } from "./how-site-works";
 import "./home-page.css";
 
 const courseVisuals: Record<CourseId, ReactNode> = {
@@ -44,6 +45,7 @@ export function HomePage() {
     <section className="course-grid">
       {homeCourses.map((course) => <Course key={course.id} {...course} visual={courseVisuals[course.visual]} />)}
     </section>
+    <HowSiteWorks />
     <section className="sign-in-callout panel-surface">
       <div className="callout-icon"><Cloud /></div>
       <div><h2>{user ? "Your progress is connected" : "Keep your place on every device"}</h2><p>{user ? "Forward, reverse, whole-chart, session, and saved-card progress can sync to your account." : "Guest study works immediately on this device. Sign in when cloud accounts are configured to sync everywhere."}</p></div>
