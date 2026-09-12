@@ -15,6 +15,7 @@ export function responseTimeIntervalFactor(responseTimeMs: number) { const secon
 export function responseTimePriorityScore(last: number, total: number, count: number) { if (!count) return 0; const seconds = Math.max(normalizeResponseTime(last), total / count) / 1_000; return seconds <= 4 ? 0 : Math.min(36, Math.log2(seconds / 4) * 9); }
 export function directionalCopy(card: StudyCard, direction: StudyDirection): DirectionalCardCopy { return direction === "reverse" ? { prompt: card.reverseFront ?? card.back, answer: card.reverseBack ?? card.front, sideLabel: "Reverse" } : { prompt: card.front, answer: card.back, sideLabel: "Forward" }; }
 export function cardsAvailableToState(cards: StudyCard[], state: StudyModeState) { return cards.slice(0, Math.min(cards.length, state.unlockedCount)); }
+export function nextSequentialIndex(length: number, currentIndex: number) { if (length <= 0) return -1; return currentIndex >= 0 ? (currentIndex + 1) % length : 0; }
 
 export function priorityScore(card: StudyCard, state: StudyModeState, options: { ignoreRecency?: boolean; now?: number; staged?: StagedIntroduction } = {}) {
   const item = getCardProgress(state, card.id), now = options.now ?? Date.now(); let score = 1;
@@ -47,8 +48,11 @@ function avoidRecentAdaptiveCards(cards: StudyCard[], state: StudyModeState) {
 
 export function pickNextCard(cards: StudyCard[], state: StudyModeState, selectionMode: SelectionMode, options: { excludeCardId?: string; random?: () => number; staged?: StagedIntroduction } = {}) {
   let available = cardsAvailableToState(cards, state); if (!available.length) return null;
+  if (selectionMode === "sequential") {
+    const currentIndex = available.findIndex((card) => card.id === state.currentCardId);
+    return available[nextSequentialIndex(available.length, currentIndex)] ?? null;
+  }
   if (available.length > 1 && options.excludeCardId) available = available.filter((card) => card.id !== options.excludeCardId);
-  if (selectionMode === "sequential") { const index = available.findIndex((card) => card.id === state.currentCardId); return available[(index + 1 + available.length) % available.length]; }
   available = avoidRecentAdaptiveCards(available, state);
   const ranked = available.map((card) => ({ card, score: priorityScore(card, state, { staged: options.staged }) })).sort((a, b) => b.score - a.score).slice(0, Math.min(24, available.length));
   const max = ranked[0].score, weights = ranked.map(({ score }) => Math.exp((score - max) / 11)); let chance = (options.random ?? Math.random)() * weights.reduce((sum, weight) => sum + weight, 0);
