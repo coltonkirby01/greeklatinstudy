@@ -49,6 +49,8 @@ let greekLesson3VocabularyPromise: Promise<DeckDefinition> | null = null;
 let greekLesson3GrammarPromise: Promise<DeckDefinition> | null = null;
 let greekLesson4VocabularyPromise: Promise<DeckDefinition> | null = null;
 let greekLesson4GrammarPromise: Promise<DeckDefinition> | null = null;
+let greekLesson5VocabularyPromise: Promise<DeckDefinition> | null = null;
+let greekLesson5GrammarPromise: Promise<DeckDefinition> | null = null;
 let latinPromise: Promise<DeckDefinition> | null = null;
 
 export function loadGreekDeck() {
@@ -168,6 +170,62 @@ export function loadGreekLesson4GrammarDeck() {
     return { id: "alpha-omega-lesson4-grammar", slug: "greek", title: "Greek Lesson 4 Grammar", eyebrow: "First-declension feminine nouns · definite article", description: "Eight Lesson 4 grammar cards: two first-declension ending charts, four model-noun paradigms, and two feminine definite-article cards.", language: "greek", cards, supportsReverse: false, sourceNote: "Groton 4.29–4.30." } satisfies DeckDefinition;
   });
   return greekLesson4GrammarPromise;
+}
+
+export function loadGreekLesson5VocabularyDeck() {
+  greekLesson5VocabularyPromise ??= fetchText("data/greek-lesson5-vocab.json", "no-store").then((text) => {
+    const source = JSON.parse(text) as GreekVocabularySourceCard[];
+    const cards: StudyCard[] = source.map((card, index) => {
+      const pronunciation = classicalGreekPronunciation(card.greek);
+      const sourceRef = card.source_ref ?? "Groton 5.36";
+      return {
+        id: card.id,
+        deckId: "alpha-omega-lesson5-vocab",
+        front: card.greek,
+        back: card.meaning,
+        reverseFront: card.meaning,
+        reverseBack: card.greek,
+        category: "Lesson 5 Vocabulary",
+        rank: index + 1,
+        source: "From Alpha to Omega, Lesson 5",
+        notes: [card.part_of_speech, `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
+        metadata: { lesson: 5, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, sourceRef },
+      };
+    });
+    return { id: "alpha-omega-lesson5-vocab", slug: "greek", title: "Greek Lesson 5 Vocabulary", eyebrow: "Lesson 5 vocabulary", description: "Ten vocabulary entries from Groton §5.36.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 5.36." } satisfies DeckDefinition;
+  });
+  return greekLesson5VocabularyPromise;
+}
+
+export function loadGreekLesson5GrammarDeck() {
+  greekLesson5GrammarPromise ??= fetchText("data/greek-lesson5-grammar.json", "no-store").then((text) => {
+    const source = JSON.parse(text) as GreekGrammarSourceCard[];
+    const cards: StudyCard[] = source.map((card, index) => {
+      const chartRows = card.rows.map((row) => ({ ...row, cells: [...row.cells] }));
+      const chartKind = card.category.includes("Endings") ? "Ending chart" : "Whole-paradigm chart";
+      return {
+        id: card.id,
+        deckId: "alpha-omega-lesson5-grammar",
+        front: card.prompt,
+        back: card.category,
+        category: card.category,
+        rank: index + 1,
+        source: "From Alpha to Omega, Lesson 5",
+        notes: chartKind,
+        metadata: {
+          lesson: 5,
+          studySource: "grammar-chart",
+          grammarGroup: card.category,
+          chartColumns: card.columns,
+          chartRows,
+          pronunciationText: greekLesson3ParadigmSpeechText(chartRows),
+          sourceRef: card.source_ref ?? "Groton 5.34",
+        },
+      };
+    });
+    return { id: "alpha-omega-lesson5-grammar", slug: "greek", title: "Greek Lesson 5 Grammar", eyebrow: "First-declension feminine nouns · short-alpha subcategories", description: "Four Lesson 5 grammar cards: two short-alpha ending charts and the μοῖρα and θάλαττα paradigms.", language: "greek", cards, supportsReverse: false, sourceNote: "Groton 5.34." } satisfies DeckDefinition;
+  });
+  return greekLesson5GrammarPromise;
 }
 
 export function loadLatinDeck() {
