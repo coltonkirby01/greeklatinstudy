@@ -100,15 +100,22 @@ function markFirstSegment(value: string, mark: string) {
 }
 
 function accentNucleus(nucleus: string, marks: Set<string>, mode: AccentMode, syllables: number) {
-  const accented = marks.has(acute) || marks.has(circumflex);
-  if (!accented) return nucleus;
-  if (mode === "tts") return syllables > 1 ? `ˈ${nucleus}` : nucleus;
+  const hasAcute = marks.has(acute);
+  const hasGrave = marks.has(grave);
+  const hasCircumflex = marks.has(circumflex);
+  if (!hasAcute && !hasGrave && !hasCircumflex) return nucleus;
+
+  // Groton §2.12–14 treats grave as a real pitch distinction: either a downward
+  // glide or the absence of the upward glide signaled by acute. Preserve that
+  // distinction in canonical IPA. ElevenLabs has no deterministic Ancient-Greek
+  // pitch control, so grave remains deliberately unstressed in the TTS approximation.
+  if (mode === "tts") return !hasGrave && syllables > 1 ? `ˈ${nucleus}` : nucleus;
 
   const morae = splitMorae(nucleus);
-  if (!morae) return markFirstSegment(nucleus, acute);
+  if (!morae) return markFirstSegment(nucleus, hasGrave ? grave : acute);
   const [first, second] = morae;
-  if (marks.has(circumflex)) return `${markFirstSegment(first, acute)}${markFirstSegment(second, grave)}`;
-  return `${first}${markFirstSegment(second, acute)}`;
+  if (hasCircumflex) return `${markFirstSegment(first, acute)}${markFirstSegment(second, grave)}`;
+  return `${first}${markFirstSegment(second, hasGrave ? grave : acute)}`;
 }
 
 function countSyllables(input: Unit[]) {
