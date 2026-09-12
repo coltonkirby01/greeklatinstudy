@@ -55,10 +55,12 @@ export function studyShortcut({ key, startGateOpen, revealed, typingTarget, cont
     return { type: "save" };
   }
 
+  // While the start gate is open, no other key may dismiss it. The user must
+  // click the on-screen Start control or press Space.
+  if (startGateOpen) return null;
+
   // Non-Space shortcuts do not override toolbar/start-card controls.
   if (controlsTarget) return null;
-  // Outside those controls, the gate owns the first keypress. It must never leak through.
-  if (startGateOpen) return { type: "start" };
   if (!revealed) return null;
 
   const normalized = key.toLowerCase();
