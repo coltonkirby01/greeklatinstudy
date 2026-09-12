@@ -3,10 +3,10 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/auth-context";
-import { cardsAvailableToState, createEnvelope, createModeState, directionalCopy, ensureCurrentCard, formatResponseTime, getCardProgress, highestPriorityCards, maybeUnlockNextBatch, pickNextCard, presentCard, priorityScore, recordReview, reviewAndAdvance, skipAndAdvance } from "./engine";
+import { cardsAvailableToState, createEnvelope, createModeState, directionalCopy, ensureCurrentCard, formatResponseTime, getCardProgress, highestPriorityCards, maybeUnlockNextBatch, pickNextCard, presentCard, priorityScore, recordReview, reviewAndAdvance } from "./engine";
 import { deleteReviewEvent, loadProgressEnvelope, saveProgressEnvelope, upsertReviewEvent } from "./progress-repository";
 import { intrinsicCardDifficulty } from "./scoring";
-import { autoReviewDefaults, sessionProgressSummary } from "./session-review";
+import { autoReviewDefaults, constrainAdaptiveInitialCoverage, sessionProgressSummary } from "./session-review";
 import "./study-gate.css";
 import { StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
 import { studyShortcut } from "./study-shortcuts";
@@ -81,6 +81,11 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
   const priority = useMemo(() => modeState ? highestPriorityCards(cards, modeState, deck.staged, 5) : [], [cards, deck.staged, modeState]);
   const copy = current ? directionalCopy(current, direction) : null;
 
+  function pickSessionCard(state: StudyModeState, mode: SelectionMode, excludeCardId?: string, sessionId = session.id) {
+    const available = cardsAvailableToState(cards, state);
+    const pool = mode === "adaptive" ? constrainAdaptiveInitialCoverage(available, sessionId, (card) => getCardProgress(state, card.id)) : available;
+    return pickNextCard(pool, state, mode, { excludeCardId, staged: deck.staged });
+  }
   function resetUi() { setRevealed(false); setReviewFront(false); setBacktracking(false); setResult(null); setDifficulty(null); setCapturedTimeMs(null); setEditingTransaction(null); }
   function reveal() {
     if (!current || revealed || editingTransaction || startGateOpen) return;
@@ -90,11 +95,12 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
     setCapturedTimeMs(responseTimeMs); setResult(suggested.result); setDifficulty(suggested.difficulty); setRevealed(true);
   }
   function toggleReviewFace() { if (revealed) setReviewFront((value) => !value); }
-  function changeOrder(next: SelectionMode) { setSelectionMode(next); if (!modeState || !current) return; const selected = warmup ? pickWarmupCard(modeState, current.id) : pickNextCard(cards, modeState, next, { excludeCardId: current.id, staged: deck.staged }); if (selected) { resetUi(); setStartGateOpen(true); saveMode(presentCard(modeState, selected)); } }
-  function skip() { if (!modeState || editingTransaction) return; resetUi(); const next = warmup ? pickWarmupCard(modeState, current?.id) : null; if (next) saveMode(presentCard(modeState, next)); else saveMode(skipAndAdvance(modeState, cards, selectionMode, deck.staged)); }
+  function changeOrder(next: SelectionMode) { setSelectionMode(next); if (!modeState || !current) return; const selected = warmup ? pickWarmupCard(modeState, current.id) : pickSessionCard(modeState, next, current.id); if (selected) { resetUi(); setStartGateOpen(true); saveMode(presentCard(modeState, selected)); } }
+  function skip() { if (!modeState || editingTransaction) return; resetUi(); const selected = warmup ? pickWarmupCard(modeState, current?.id) : pickSessionCard(modeState, selectionMode, current?.id); if (selected) saveMode(presentCard(modeState, selected)); }
   function startNewSession() {
     if (!modeState) return;
-    setWarmup(null); setSession(makeSession()); setLastTransaction(null); resetUi(); setStartGateOpen(true);
+    const nextSession = makeSession();
+    setWarmup(null); setSession(nextSession); setLastTransaction(null); resetUi(); setStartGateOpen(true);
     const selected = pickNextCard(cards, modeState, selectionMode, { excludeCardId: current?.id, staged: deck.staged });
     if (selected) saveMode(presentCard(modeState, selected));
     setNotice("New session started. Your long-term mastery and adaptive priorities were preserved.");
@@ -147,6 +153,10 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
 
     const applied = reviewAndAdvance(source, cards, selectionMode, { id: reviewId, result, difficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, activityKind }, deck.staged);
     let next = applied.state;
+    if (selectionMode === "adaptive" && activityKind === "study") {
+      const selected = pickSessionCard(next, selectionMode, current.id, sessionId);
+      if (selected) next = presentCard(next, selected, reviewedAt);
+    }
     if (editingTransaction?.activityKind === "warmup" && warmup) {
       const selected = pickWarmupCard(next, current.id);
       if (selected) next = presentCard(next, selected, reviewedAt);
@@ -201,6 +211,6 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
       <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} />
       <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
     </section>
-    <StudySidebar copy={copy} direction={direction} stats={stats} priority={priority} priorityPrompt={priorityPrompt} />
+    <StudySidebar copy={copy} direction={direction} stats={stats} sessionId={session.id} initialProgress={{ reviewed: sessionProgress.initialReviewed, total: sessionProgress.initialTotal, percent: sessionProgress.initialPercent, mastered: sessionProgress.initialMastered, masteryPercent: sessionProgress.initialMasteryPercent }} priority={priority} priorityPrompt={priorityPrompt} />
   </div>;
 }
