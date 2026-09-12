@@ -5,17 +5,17 @@ import { lesson4CourseAudioAssets, lesson4VocabularyAudio } from "./lesson4-asse
 export type GreekCourseAudioAsset = Lesson3CourseAudioAsset & { pronunciationSystem?: string };
 
 const lesson3Vocabulary: Record<string, { label: string; greek: string }> = {
-  "lesson3-v1": { label: "γράφω", greek: "γράφω" },
-  "lesson3-v2": { label: "ἐθέλω", greek: "ἐθέλω" },
+  "lesson3-v1": { label: "γράφω", greek: "γράφω" },
+  "lesson3-v2": { label: "ἐθέλω", greek: "ἐθέλω" },
   "lesson3-v3": { label: "θῡ́ω", greek: "θῡ́ω" },
-  "lesson3-v4": { label: "κλέπτω", greek: "κλέπτω" },
-  "lesson3-v5": { label: "παιδεύω", greek: "παιδεύω" },
-  "lesson3-v6": { label: "σπεύδω", greek: "σπεύδω" },
-  "lesson3-v7": { label: "φυλάττω", greek: "φυλάττω" },
-  "lesson3-v8": { label: "μή", greek: "μή" },
-  "lesson3-v9": { label: "οὐ, οὐκ, οὐχ", greek: "οὐ, οὐκ, οὐχ" },
-  "lesson3-v10": { label: "καί", greek: "καί" },
-  "lesson3-v11": { label: "καὶ … καί", greek: "καὶ … καί" },
+  "lesson3-v4": { label: "κλέπτω", greek: "κλέπτω" },
+  "lesson3-v5": { label: "παιδεύω", greek: "παιδεύω" },
+  "lesson3-v6": { label: "σπεύδω", greek: "σπεύδω" },
+  "lesson3-v7": { label: "φυλάττω", greek: "φυλάττω" },
+  "lesson3-v8": { label: "μή", greek: "μή" },
+  "lesson3-v9": { label: "οὐ (οὐκ, οὐχ)", greek: "οὐ, οὐκ, οὐχ" },
+  "lesson3-v10": { label: "καί", greek: "καί" },
+  "lesson3-v11": { label: "καὶ...καί", greek: "καὶ...καί" },
 };
 
 // Isolated sound demonstrations use the same segmental choices as the course's
