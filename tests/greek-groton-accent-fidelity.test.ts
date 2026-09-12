@@ -38,16 +38,15 @@ describe("Groton acute/grave source fidelity", () => {
   const lesson3Grammar = grammar("public/data/greek-lesson3-grammar.json");
   const lesson4Grammar = grammar("public/data/greek-lesson4-grammar.json");
 
-  it("keeps isolated ultima accents acute but the first correlative καί grave", () => {
-    // Groton §3.24: vocabulary quoted out of context keeps an acute on the ultima.
-    expect(card(lesson3, "lesson3-v10").greek).toBe("καί");
-    // Groton explicitly prints the first correlative with grave because another word follows.
-    expect(card(lesson3, "lesson3-v11").greek).toBe("καὶ … καί");
+  it("keeps Groton's printed vocabulary acute/grave forms exactly", () => {
+    expect(card(lesson3, "lesson3-v4").greek).toBe("κλέπτω");
+    expect(card(lesson3, "lesson3-v10").greek).toBe("καί");
+    expect(card(lesson3, "lesson3-v11").greek).toBe("καὶ...καί");
 
-    expect(card(lesson4, "lesson4-v2").greek).toBe("ἀγορά, -ᾶς, ἡ");
-    expect(card(lesson4, "lesson4-v3").greek).toBe("ἐπιστολή, -ῆς, ἡ");
-    expect(card(lesson4, "lesson4-v5").greek).toBe("θεά, -ᾶς, ἡ");
-    expect(card(lesson4, "lesson4-v6").greek).toBe("σκηνή, -ῆς, ἡ");
+    expect(card(lesson4, "lesson4-v2").greek).toBe("ἀγορᾱ́, -ᾶς, ἡ");
+    expect(card(lesson4, "lesson4-v3").greek).toBe("ἐπιστολή, -ῆς, ἡ");
+    expect(card(lesson4, "lesson4-v5").greek).toBe("θεᾱ́, -ᾶς, ἡ");
+    expect(card(lesson4, "lesson4-v6").greek).toBe("σκηνή, -ῆς, ἡ");
   });
 
   it("matches Groton's complete Lesson 3 παιδεύω paradigms and accents", () => {
