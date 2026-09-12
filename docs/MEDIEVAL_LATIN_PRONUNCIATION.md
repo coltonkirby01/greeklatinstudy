@@ -38,6 +38,8 @@ Avoid or soften a feature when:
 - the evidence changes substantially by century or locality;
 - adopting it would make ordinary Latin unnecessarily difficult to recognize outside that one tradition.
 
+Rigg explicitly warns that medieval Latin pronunciation had diverged so far regionally that only broad phonemic contrasts can be reconstructed with confidence. That warning is part of the design: the site should normalize rather than pretend to reproduce one local speaker exactly.
+
 ## Phase-one high-confidence rules
 
 These are safe enough to encode before paid audio generation:
@@ -47,25 +49,26 @@ These are safe enough to encode before paid audio generation:
 - **Classical vowel length is not maintained as a phonemic long/short contrast in the normalized medieval output.** Written macrons remain valuable on the card and may help determine inherited stress, but the audio does not exaggerate Classical quantity.
 - **`y` is normalized toward `i`**, reflecting the widespread medieval interchange noted by Rigg.
 - **Consonantal `v` is /v/** rather than the Classical /w/. This makes the result recognizably post-Classical while remaining broadly intelligible.
-- **`ti` before another vowel may be affricated (`/tsi/`) except after `s`, `t`, or `x`.** Rigg’s nearly pan-European `-ti-` / `-ci-` spelling interchange is direct evidence that the sequence had converged phonetically in medieval usage.
+- **`c` before `e`, `i`, `y`, `ae`, or `oe` is normalized to /s/.** Rigg says this assibilation occurred in many countries, especially the Romance-speaking regions and England. This broad value also fits the French/Parisian scholastic center of gravity without forcing a narrowly modern Italianate `/tʃ/` pronunciation.
+- **`sc` before those same front vowels is normalized to /s/.** Rigg explicitly treats it as similarly assibilated.
+- **`ti` before another vowel is normalized to `si` except after `s`, `t`, or `x`.** Rigg identifies `ci` for Classical `ti` before vowels as a widespread medieval spelling, direct evidence that the two sequences converged in ordinary pronunciation. This profile therefore aligns the sound with the normalized front-`c` value rather than introducing an unrelated modern convention.
+- **Initial and internal `h` is normally silent.** Rigg records both widespread loss of `h` and hypercorrect addition of `h`, showing that it had weak phonological status in much medieval usage.
 - **Greek aspirate spellings are normalized conservatively:** `ph → /f/`, `th → /t/`, `ch → /k/` unless a later source-specific exception is deliberately added.
 - **Inherited Latin stress remains the organizing baseline.** The penult receives stress when heavy; otherwise stress falls on the antepenult. Macrons on the authoritative grammar data may be used to identify a historically heavy penult even though the actual Medieval Latin audio does not preserve phonemic vowel length.
 - **Written double consonants remain audibly distinct in the canonical representation where practical.** Regional weakening varied; preserving the written distinction is the more transferable teaching choice.
 
-## Rules that require a comparative audit before production generation
+## Rules that still require a comparative audit before production generation
 
 Do not generate the full Latin grammar cache until these have been checked against Stotz and the regional evidence:
 
-- exact realization of `c` before front vowels (`/ts/`, `/tʃ/`, or a normalized compromise);
-- exact realization of `g` before front vowels;
-- `sc` before front vowels;
-- `gn` (Rigg explicitly notes regional variation and changed his own view on this point);
-- the preferred treatment of `h` in the normalized profile;
+- exact realization of `g` before front vowels; Rigg explicitly gives different values in different countries;
+- `gn`; Rigg explicitly notes regional variation and records different spellings in Italy versus England;
+- whether `qu` should always remain `/kw/` in the normalized scholastic profile;
 - fine vowel qualities (`e/ɛ`, `o/ɔ`) and whether any positional distinctions are pedagogically useful;
 - consonantal `i/j` in ambiguous orthographies;
-- whether `qu` should always remain `/kw/` in the normalized scholastic profile.
+- whether any common final-consonant devoicing or cluster simplification should be included without harming broad intelligibility.
 
-Until that audit is complete, the engine should choose conservative, recognizable values for these variable sequences and tests should make that provisional status obvious.
+Until that audit is complete, the engine deliberately keeps conservative, recognizable values for these variable sequences and tests mark their status as provisional.
 
 ## ElevenLabs and Supabase architecture
 
