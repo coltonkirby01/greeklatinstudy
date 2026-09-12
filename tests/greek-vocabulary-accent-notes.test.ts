@@ -12,49 +12,56 @@ function cards(path: string) {
   return JSON.parse(fs.readFileSync(path, "utf8")) as VocabularyCard[];
 }
 
-function card(source: VocabularyCard[], id: string) {
+function byId(source: VocabularyCard[], id: string) {
   const found = source.find((entry) => entry.id === id);
   if (!found) throw new Error(`Missing vocabulary card ${id}.`);
   return found;
 }
 
-describe("Groton vocabulary accent notes", () => {
+describe("Groton vocabulary front-form fidelity", () => {
   const lesson3 = cards("public/data/greek-lesson3-vocab.json");
   const lesson4 = cards("public/data/greek-lesson4-vocab.json");
 
-  it("gives every Lesson 3–4 vocabulary card a Groton reference and explicit accent note", () => {
+  it("uses the printed Lesson 3 forms on the question side", () => {
+    expect(lesson3.map((entry) => entry.greek)).toEqual([
+      "γράφω",
+      "ἐθέλω",
+      "θῡ́ω",
+      "κλέπτω",
+      "παιδεύω",
+      "σπεύδω",
+      "φυλάττω",
+      "μή",
+      "οὐ (οὐκ, οὐχ)",
+      "καί",
+      "καὶ...καί",
+    ]);
+  });
+
+  it("locks κλέπτω to Groton's polytonic acute form", () => {
+    expect(byId(lesson3, "lesson3-v4").greek).toBe("κλέπτω");
+  });
+
+  it("uses the printed Lesson 4 forms on the question side", () => {
+    expect(lesson4.map((entry) => entry.greek)).toEqual([
+      "πέμπω",
+      "ἀγορᾱ́, -ᾶς, ἡ",
+      "ἐπιστολή, -ῆς, ἡ",
+      "ἡσυχίᾱ, -ᾱς, ἡ",
+      "θεᾱ́, -ᾶς, ἡ",
+      "σκηνή, -ῆς, ἡ",
+      "χώρᾱ, -ᾱς, ἡ",
+      "εἰς",
+      "ἐκ (ἐξ)",
+      "ἐν",
+      "ὦ",
+    ]);
+  });
+
+  it("keeps Groton references but no longer adds accent-rationale copy to vocabulary cards", () => {
     for (const entry of [...lesson3, ...lesson4]) {
       expect(entry.source_ref, entry.id).toMatch(/^Groton /);
-      expect(entry.accent_note?.trim().length, entry.id).toBeGreaterThan(10);
+      expect(entry.accent_note, entry.id).toBeUndefined();
     }
-  });
-
-  it("explicitly identifies κλέπτω as acute on the penult and not subject to grave substitution", () => {
-    const klepto = card(lesson3, "lesson3-v4");
-    expect(klepto.greek).toBe("κλέπτω");
-    expect(klepto.accent_note).toContain("Acute on the penult");
-    expect(klepto.accent_note).toContain("does not change to grave");
-    expect(klepto.source_ref).toBe("Groton 3.24");
-  });
-
-  it("distinguishes isolated ultima acute from contextual grave where Groton requires it", () => {
-    expect(card(lesson3, "lesson3-v8").accent_note).toContain("μὴ");
-    expect(card(lesson3, "lesson3-v10").accent_note).toContain("καὶ");
-    expect(card(lesson3, "lesson3-v11").accent_note).toContain("grave");
-    expect(card(lesson3, "lesson3-v11").accent_note).toContain("acute");
-    expect(card(lesson4, "lesson4-v2").accent_note).toContain("ἀγορὰ");
-    expect(card(lesson4, "lesson4-v5").accent_note).toContain("θεὰ");
-  });
-
-  it("labels circumflex and unaccented vocabulary entries explicitly", () => {
-    expect(card(lesson4, "lesson4-v11").accent_note).toContain("Circumflex");
-    expect(card(lesson4, "lesson4-v8").accent_note).toContain("without a written accent");
-    expect(card(lesson4, "lesson4-v9").accent_note).toContain("without a written accent");
-  });
-
-  it("maps accent notes into the UI-facing card notes and metadata", () => {
-    const loader = fs.readFileSync("src/data/builtin-decks.ts", "utf8");
-    expect(loader).toContain('card.accent_note ? `Accent: ${card.accent_note}` : ""');
-    expect(loader).toContain("accentNote: card.accent_note");
   });
 });
