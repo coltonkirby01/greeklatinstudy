@@ -4,6 +4,7 @@
     "category": "First Declension Feminine Endings — α-type",
     "prompt": "First Declension Feminine Endings — α-type",
     "source_ref": "Groton 4.29",
+    "accent_note": "Groton §4.29: noun accent is persistent on the complete form. If an accent falls on the ultima in the genitive or dative, singular or plural, it is circumflex; the genitive plural is accented on the ultima.",
     "columns": ["Singular", "Plural"],
     "rows": [
       { "label": "Nominative", "cells": ["-ᾱ", "-αι"] },
@@ -18,6 +19,7 @@
     "category": "First Declension Feminine Endings — η-type",
     "prompt": "First Declension Feminine Endings — η-type",
     "source_ref": "Groton 4.29",
+    "accent_note": "Groton §4.29: noun accent is persistent on the complete form. If an accent falls on the ultima in the genitive or dative, singular or plural, it is circumflex; the genitive plural is accented on the ultima.",
     "columns": ["Singular", "Plural"],
     "rows": [
       { "label": "Nominative", "cells": ["-η", "-αι"] },
@@ -32,13 +34,14 @@
     "category": "First Declension Feminine Nouns — θεά",
     "prompt": "First Declension Feminine Nouns — θεά",
     "source_ref": "Groton 4.29",
+    "accent_note": "Groton §4.29: persistent accent, with circumflex on accented genitive/dative ultima; isolated paradigm forms retain the printed acute where applicable.",
     "columns": ["Singular", "Plural"],
     "rows": [
-      { "label": "Nominative", "cells": ["θε-ά", "θε-αί"] },
-      { "label": "Genitive", "cells": ["θε-ᾶς", "θε-ῶν"] },
-      { "label": "Dative", "cells": ["θε-ᾷ", "θε-αῖς"] },
-      { "label": "Accusative", "cells": ["θε-άν", "θε-άς"] },
-      { "label": "Vocative", "cells": ["θε-ά", "θε-αί"] }
+      { "label": "Nominative", "cells": ["θεά", "θεαί"] },
+      { "label": "Genitive", "cells": ["θεᾶς", "θεῶν"] },
+      { "label": "Dative", "cells": ["θεᾷ", "θεαῖς"] },
+      { "label": "Accusative", "cells": ["θεάν", "θεάς"] },
+      { "label": "Vocative", "cells": ["θεά", "θεαί"] }
     ]
   },
   {
@@ -46,13 +49,14 @@
     "category": "First Declension Feminine Nouns — ἡσυχίᾱ",
     "prompt": "First Declension Feminine Nouns — ἡσυχίᾱ",
     "source_ref": "Groton 4.29",
+    "accent_note": "Groton §4.29: persistent accent; isolated paradigm forms retain the printed acute where applicable, and the genitive plural is accented on the ultima.",
     "columns": ["Singular", "Plural"],
     "rows": [
-      { "label": "Nominative", "cells": ["ἡσυχί-ᾱ", "ἡσυχί-αι"] },
-      { "label": "Genitive", "cells": ["ἡσυχί-ᾱς", "ἡσυχι-ῶν"] },
-      { "label": "Dative", "cells": ["ἡσυχί-ᾳ", "ἡσυχί-αις"] },
-      { "label": "Accusative", "cells": ["ἡσυχί-ᾱν", "ἡσυχί-ᾱς"] },
-      { "label": "Vocative", "cells": ["ἡσυχί-ᾱ", "ἡσυχί-αι"] }
+      { "label": "Nominative", "cells": ["ἡσυχίᾱ", "ἡσυχίαι"] },
+      { "label": "Genitive", "cells": ["ἡσυχίᾱς", "ἡσυχιῶν"] },
+      { "label": "Dative", "cells": ["ἡσυχίᾳ", "ἡσυχίαις"] },
+      { "label": "Accusative", "cells": ["ἡσυχίᾱν", "ἡσυχίᾱς"] },
+      { "label": "Vocative", "cells": ["ἡσυχίᾱ", "ἡσυχίαι"] }
     ]
   },
   {
@@ -60,13 +64,14 @@
     "category": "First Declension Feminine Nouns — χώρᾱ",
     "prompt": "First Declension Feminine Nouns — χώρᾱ",
     "source_ref": "Groton 4.29",
+    "accent_note": "Groton §4.29: persistent accent; the position and type of accent in each isolated paradigm form are shown exactly on the form.",
     "columns": ["Singular", "Plural"],
     "rows": [
-      { "label": "Nominative", "cells": ["χώρ-ᾱ", "χῶρ-αι"] },
-      { "label": "Genitive", "cells": ["χώρ-ᾱς", "χωρ-ῶν"] },
-      { "label": "Dative", "cells": ["χώρ-ᾳ", "χώρ-αις"] },
-      { "label": "Accusative", "cells": ["χώρ-ᾱν", "χώρ-ᾱς"] },
-      { "label": "Vocative", "cells": ["χώρ-ᾱ", "χῶρ-αι"] }
+      { "label": "Nominative", "cells": ["χώρᾱ", "χῶραι"] },
+      { "label": "Genitive", "cells": ["χώρᾱς", "χωρῶν"] },
+      { "label": "Dative", "cells": ["χώρᾳ", "χώραις"] },
+      { "label": "Accusative", "cells": ["χώρᾱν", "χώρᾱς"] },
+      { "label": "Vocative", "cells": ["χώρᾱ", "χῶραι"] }
     ]
   },
   {
@@ -74,13 +79,14 @@
     "category": "First Declension Feminine Nouns — σκηνή",
     "prompt": "First Declension Feminine Nouns — σκηνή",
     "source_ref": "Groton 4.29",
+    "accent_note": "Groton §4.29: persistent accent, with circumflex on accented genitive/dative ultima; isolated paradigm forms retain the printed acute where applicable.",
     "columns": ["Singular", "Plural"],
     "rows": [
-      { "label": "Nominative", "cells": ["σκην-ή", "σκην-αί"] },
-      { "label": "Genitive", "cells": ["σκην-ῆς", "σκην-ῶν"] },
-      { "label": "Dative", "cells": ["σκην-ῇ", "σκην-αῖς"] },
-      { "label": "Accusative", "cells": ["σκην-ήν", "σκην-άς"] },
-      { "label": "Vocative", "cells": ["σκην-ή", "σκην-αί"] }
+      { "label": "Nominative", "cells": ["σκηνή", "σκηναί"] },
+      { "label": "Genitive", "cells": ["σκηνῆς", "σκηνῶν"] },
+      { "label": "Dative", "cells": ["σκηνῇ", "σκηναῖς"] },
+      { "label": "Accusative", "cells": ["σκηνήν", "σκηνάς"] },
+      { "label": "Vocative", "cells": ["σκηνή", "σκηναί"] }
     ]
   },
   {
@@ -88,6 +94,7 @@
     "category": "Feminine Definite Article — Singular",
     "prompt": "Feminine Definite Article — Singular",
     "source_ref": "Groton 4.30",
+    "accent_note": "Groton §4.30 isolated forms: ἡ, τῆς, τῇ, τήν. Final acute is printed acute in an isolated paradigm; in connected text it becomes grave before a following word without intervening punctuation.",
     "columns": ["Greek"],
     "rows": [
       { "label": "Nominative", "cells": ["ἡ"] },
@@ -101,6 +108,7 @@
     "category": "Feminine Definite Article — Plural",
     "prompt": "Feminine Definite Article — Plural",
     "source_ref": "Groton 4.30",
+    "accent_note": "Groton §4.30 isolated forms: αἱ, τῶν, ταῖς, τάς. Final acute is printed acute in an isolated paradigm; in connected text it becomes grave before a following word without intervening punctuation.",
     "columns": ["Greek"],
     "rows": [
       { "label": "Nominative", "cells": ["αἱ"] },

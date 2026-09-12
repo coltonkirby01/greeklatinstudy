@@ -63,19 +63,19 @@ describe("authoritative source migration", () => {
     const indicative = greekLesson3Grammar.find((card) => card.category === "Present Active Indicative");
     expect(indicative?.columns).toEqual(["Singular", "Plural"]);
     expect(indicative?.rows).toEqual([
-      { label: "1st person", cells: ["παιδεύ-ω", "παιδεύ-ομεν"] },
-      { label: "2nd person", cells: ["παιδεύ-εις", "παιδεύ-ετε"] },
-      { label: "3rd person", cells: ["παιδεύ-ει", "παιδεύ-ουσι(ν)"] },
+      { label: "1st person", cells: ["παιδεύω", "παιδεύομεν"] },
+      { label: "2nd person", cells: ["παιδεύεις", "παιδεύετε"] },
+      { label: "3rd person", cells: ["παιδεύει", "παιδεύουσι(ν)"] },
     ]);
 
     const infinitive = greekLesson3Grammar.find((card) => card.category === "Present Active Infinitive");
-    expect(infinitive?.rows).toEqual([{ label: "Present Active Infinitive", cells: ["παιδεύ-ειν"] }]);
+    expect(infinitive?.rows).toEqual([{ label: "Present Active Infinitive", cells: ["παιδεύειν"] }]);
 
     const imperative = greekLesson3Grammar.find((card) => card.category === "Present Active Imperative");
     expect(imperative?.columns).toEqual(["Singular", "Plural"]);
     expect(imperative?.rows).toEqual([
-      { label: "2nd person", cells: ["παίδευ-ε", "παιδεύ-ετε"] },
-      { label: "3rd person", cells: ["παιδευ-έτω", "παιδευ-όντων"] },
+      { label: "2nd person", cells: ["παίδευε", "παιδεύετε"] },
+      { label: "3rd person", cells: ["παιδευέτω", "παιδευόντων"] },
     ]);
 
     const alphaEndings = greekLesson4Grammar.find((card) => card.id === "lesson4-chart-first-declension-endings-alpha");
@@ -101,21 +101,21 @@ describe("authoritative source migration", () => {
     const goddess = greekLesson4Grammar.find((card) => card.id === "lesson4-chart-first-declension-thea");
     expect(goddess?.columns).toEqual(["Singular", "Plural"]);
     expect(goddess?.rows).toEqual([
-      { label: "Nominative", cells: ["θε-ά", "θε-αί"] },
-      { label: "Genitive", cells: ["θε-ᾶς", "θε-ῶν"] },
-      { label: "Dative", cells: ["θε-ᾷ", "θε-αῖς"] },
-      { label: "Accusative", cells: ["θε-άν", "θε-άς"] },
-      { label: "Vocative", cells: ["θε-ά", "θε-αί"] },
+      { label: "Nominative", cells: ["θεά", "θεαί"] },
+      { label: "Genitive", cells: ["θεᾶς", "θεῶν"] },
+      { label: "Dative", cells: ["θεᾷ", "θεαῖς"] },
+      { label: "Accusative", cells: ["θεάν", "θεάς"] },
+      { label: "Vocative", cells: ["θεά", "θεαί"] },
     ]);
     for (const card of greekLesson4Grammar.slice(2, 6)) {
-      expect(card.rows.flatMap((row) => row.cells).every((form) => form.includes("-")), card.id).toBe(true);
+      expect(card.rows.flatMap((row) => row.cells).every((form) => !form.includes("-")), card.id).toBe(true);
     }
 
     expect(latin).toHaveLength(997);
   });
 
-  it("adds the stem-ending dash to undashed Lesson 3 forms for all three paradigms", () => {
-    expect([
+  it("preserves Groton's complete Lesson 3 forms without artificial stem-ending dashes", () => {
+    const forms = [
       "παιδεύω",
       "παιδεύομεν",
       "παιδεύεις",
@@ -127,33 +127,23 @@ describe("authoritative source migration", () => {
       "παιδευέτω",
       "παιδεύετε",
       "παιδευόντων",
-    ].map(formatGreekLesson3ParadigmCell)).toEqual([
-      "παιδεύ-ω",
-      "παιδεύ-ομεν",
-      "παιδεύ-εις",
-      "παιδεύ-ετε",
-      "παιδεύ-ει",
-      "παιδεύ-ουσι(ν)",
-      "παιδεύ-ειν",
-      "παίδευ-ε",
-      "παιδευ-έτω",
-      "παιδεύ-ετε",
-      "παιδευ-όντων",
-    ]);
+    ];
+    expect(forms.map(formatGreekLesson3ParadigmCell)).toEqual(forms);
     expect(formatGreekLesson3ParadigmCell("παιδεύ-ετε")).toBe("παιδεύ-ετε");
   });
 
   it("builds paradigm speech vertically and omits visual dashes and parenthetical letters", () => {
     expect(greekLesson3ParadigmSpeechText([
-      { cells: ["παιδεύ-ω", "παιδεύ-ομεν"] },
-      { cells: ["παιδεύ-εις", "παιδεύ-ετε"] },
-      { cells: ["παιδεύ-ει", "παιδεύ-ουσι(ν)"] },
+      { cells: ["παιδεύω", "παιδεύομεν"] },
+      { cells: ["παιδεύεις", "παιδεύετε"] },
+      { cells: ["παιδεύει", "παιδεύουσι(ν)"] },
     ])).toBe("παιδεύω, παιδεύεις, παιδεύει, παιδεύομεν, παιδεύετε, παιδεύουσι");
-    expect(greekLesson3ParadigmSpeechText([{ cells: ["παιδεύ-ειν"] }])).toBe("παιδεύειν");
+    expect(greekLesson3ParadigmSpeechText([{ cells: ["παιδεύειν"] }])).toBe("παιδεύειν");
     expect(greekLesson3ParadigmSpeechText([
-      { cells: ["παίδευ-ε", "παιδεύ-ετε"] },
-      { cells: ["παιδευ-έτω", "παιδευ-όντων"] },
+      { cells: ["παίδευε", "παιδεύετε"] },
+      { cells: ["παιδευέτω", "παιδευόντων"] },
     ])).toBe("παίδευε, παιδευέτω, παιδεύετε, παιδευόντων");
+    expect(greekLesson3ParadigmSpeechText([{ cells: ["λύ-ω"] }])).toBe("λύω");
   });
 });
 

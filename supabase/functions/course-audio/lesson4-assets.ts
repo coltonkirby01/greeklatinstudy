@@ -47,20 +47,20 @@ export const lesson4CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
     ["-αι", "-ων", "-αις", "-ᾱς", "-αι"],
   ]),
   paradigm("lesson4-chart-first-declension-thea", "First Declension Feminine Nouns — θεά", [
-    "θε-ά", "θε-ᾶς", "θε-ᾷ", "θε-άν", "θε-ά",
-    "θε-αί", "θε-ῶν", "θε-αῖς", "θε-άς", "θε-αί",
+    "θεά", "θεᾶς", "θεᾷ", "θεάν", "θεά",
+    "θεαί", "θεῶν", "θεαῖς", "θεάς", "θεαί",
   ]),
   paradigm("lesson4-chart-first-declension-hesychia", "First Declension Feminine Nouns — ἡσυχίᾱ", [
-    "ἡσυχί-ᾱ", "ἡσυχί-ᾱς", "ἡσυχί-ᾳ", "ἡσυχί-ᾱν", "ἡσυχί-ᾱ",
-    "ἡσυχί-αι", "ἡσυχι-ῶν", "ἡσυχί-αις", "ἡσυχί-ᾱς", "ἡσυχί-αι",
+    "ἡσυχίᾱ", "ἡσυχίᾱς", "ἡσυχίᾳ", "ἡσυχίᾱν", "ἡσυχίᾱ",
+    "ἡσυχίαι", "ἡσυχιῶν", "ἡσυχίαις", "ἡσυχίᾱς", "ἡσυχίαι",
   ]),
   paradigm("lesson4-chart-first-declension-chora", "First Declension Feminine Nouns — χώρᾱ", [
-    "χώρ-ᾱ", "χώρ-ᾱς", "χώρ-ᾳ", "χώρ-ᾱν", "χώρ-ᾱ",
-    "χῶρ-αι", "χωρ-ῶν", "χώρ-αις", "χώρ-ᾱς", "χῶρ-αι",
+    "χώρᾱ", "χώρᾱς", "χώρᾳ", "χώρᾱν", "χώρᾱ",
+    "χῶραι", "χωρῶν", "χώραις", "χώρᾱς", "χῶραι",
   ]),
   paradigm("lesson4-chart-first-declension-skene", "First Declension Feminine Nouns — σκηνή", [
-    "σκην-ή", "σκην-ῆς", "σκην-ῇ", "σκην-ήν", "σκην-ή",
-    "σκην-αί", "σκην-ῶν", "σκην-αῖς", "σκην-άς", "σκην-αί",
+    "σκηνή", "σκηνῆς", "σκηνῇ", "σκηνήν", "σκηνή",
+    "σκηναί", "σκηνῶν", "σκηναῖς", "σκηνάς", "σκηναί",
   ]),
   paradigm("lesson4-chart-definite-article-feminine-singular", "Feminine Definite Article — Singular", [
     "ἡ", "τῆς", "τῇ", "τήν",

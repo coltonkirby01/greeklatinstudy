@@ -4,6 +4,7 @@
     "category": "Present Active Indicative Endings",
     "prompt": "Present Active Indicative Endings",
     "source_ref": "Groton 3.20",
+    "accent_note": "Groton §3.20: finite forms have recessive accent. Model forms: παιδεύω, παιδεύεις, παιδεύει, παιδεύομεν, παιδεύετε, παιδεύουσι(ν).",
     "columns": ["Singular", "Plural"],
     "rows": [
       { "label": "1st person", "cells": ["-ω", "-ομεν"] },
@@ -16,6 +17,7 @@
     "category": "Present Active Infinitive Endings",
     "prompt": "Present Active Infinitive Ending",
     "source_ref": "Groton 3.21",
+    "accent_note": "Groton §3.21 model form: παιδεύειν, with acute accent as shown.",
     "columns": ["Ending"],
     "rows": [
       { "label": "Present Active Infinitive", "cells": ["-ειν"] }
@@ -26,6 +28,7 @@
     "category": "Present Active Imperative Endings",
     "prompt": "Present Active Imperative Endings",
     "source_ref": "Groton 3.22",
+    "accent_note": "Groton §3.22: finite imperative forms have recessive accent. Model forms: παίδευε, παιδευέτω, παιδεύετε, παιδευόντων.",
     "columns": ["Singular", "Plural"],
     "rows": [
       { "label": "2nd person", "cells": ["-ε", "-ετε"] },
@@ -37,11 +40,12 @@
     "category": "Present Active Indicative",
     "prompt": "Present Active Indicative — παιδεύω",
     "source_ref": "Groton 3.20",
+    "accent_note": "Groton §3.20: finite forms have recessive accent; the isolated paradigm is accented exactly as shown.",
     "columns": ["Singular", "Plural"],
     "rows": [
-      { "label": "1st person", "cells": ["παιδεύ-ω", "παιδεύ-ομεν"] },
-      { "label": "2nd person", "cells": ["παιδεύ-εις", "παιδεύ-ετε"] },
-      { "label": "3rd person", "cells": ["παιδεύ-ει", "παιδεύ-ουσι(ν)"] }
+      { "label": "1st person", "cells": ["παιδεύω", "παιδεύομεν"] },
+      { "label": "2nd person", "cells": ["παιδεύεις", "παιδεύετε"] },
+      { "label": "3rd person", "cells": ["παιδεύει", "παιδεύουσι(ν)"] }
     ]
   },
   {
@@ -49,9 +53,10 @@
     "category": "Present Active Infinitive",
     "prompt": "Present Active Infinitive — παιδεύω",
     "source_ref": "Groton 3.21",
+    "accent_note": "Groton §3.21 model form: παιδεύειν, with acute accent as shown.",
     "columns": ["Greek"],
     "rows": [
-      { "label": "Present Active Infinitive", "cells": ["παιδεύ-ειν"] }
+      { "label": "Present Active Infinitive", "cells": ["παιδεύειν"] }
     ]
   },
   {
@@ -59,10 +64,11 @@
     "category": "Present Active Imperative",
     "prompt": "Present Active Imperative — παιδεύω",
     "source_ref": "Groton 3.22",
+    "accent_note": "Groton §3.22: finite imperative forms have recessive accent; the isolated paradigm is παίδευε, παιδευέτω, παιδεύετε, παιδευόντων.",
     "columns": ["Singular", "Plural"],
     "rows": [
-      { "label": "2nd person", "cells": ["παίδευ-ε", "παιδεύ-ετε"] },
-      { "label": "3rd person", "cells": ["παιδευ-έτω", "παιδευ-όντων"] }
+      { "label": "2nd person", "cells": ["παίδευε", "παιδεύετε"] },
+      { "label": "3rd person", "cells": ["παιδευέτω", "παιδευόντων"] }
     ]
   }
 ]
