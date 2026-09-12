@@ -5,6 +5,7 @@ export const EASY_RECALL_LIMIT_MS = 3_000;
 export const HARD_RECALL_START_MS = 10_000;
 export const INITIAL_AUTO_WRONG_REVIEWS = 3;
 export const RECENT_AUTO_GRADE_WINDOW = 3;
+export const INITIAL_COVERAGE_MULTIPLIER = 1.25;
 
 export type AutoReviewDefaults = { result: ReviewResult; difficulty: ReviewDifficulty };
 
@@ -29,12 +30,35 @@ export function autoReviewDefaults(responseTimeMs: number, progress?: Pick<CardP
   return { result, difficulty: "hard" };
 }
 
+function rankedSessionReviews(progress: CardProgress, sessionId: string) {
+  return progress.history.filter((review) => review.sessionId === sessionId && (review.activityKind ?? "study") === "study" && !review.statsExcluded);
+}
+
+/**
+ * During the first adaptive pass, repeats are allowed but may use at most 25%
+ * extra presentations. Once the remaining 125%-budget slots equal the number
+ * of unseen selected cards, only unseen cards are eligible until coverage is
+ * complete. After every selected card has one ranked review in the session,
+ * the normal adaptive pool is returned unchanged.
+ */
+export function constrainAdaptiveInitialCoverage<T>(items: readonly T[], sessionId: string, progressFor: (item: T) => CardProgress): T[] {
+  if (!items.length) return [];
+  const unseen = items.filter((item) => rankedSessionReviews(progressFor(item), sessionId).length === 0);
+  if (!unseen.length) return [...items];
+  const presentations = items.reduce((sum, item) => sum + rankedSessionReviews(progressFor(item), sessionId).length, 0);
+  const maximumInitialPresentations = Math.ceil(items.length * INITIAL_COVERAGE_MULTIPLIER);
+  const remainingBudget = Math.max(0, maximumInitialPresentations - presentations);
+  return remainingBudget <= unseen.length ? unseen : [...items];
+}
+
 export type SessionProgressItem = { progress: CardProgress };
 export type SessionProgressSummary = {
   stats: StudyStats;
   initialReviewed: number;
   initialTotal: number;
   initialPercent: number;
+  initialMastered: number;
+  initialMasteryPercent: number;
 };
 
 /**
@@ -95,6 +119,7 @@ export function sessionProgressSummary(items: readonly SessionProgressItem[], se
 
   const initialTotal = items.length;
   const initialPercent = initialTotal ? reviewed / initialTotal * 100 : 0;
+  const initialMasteryPercent = initialTotal ? rightOnce / initialTotal * 100 : 0;
   return {
     stats: {
       available: initialTotal,
@@ -110,5 +135,7 @@ export function sessionProgressSummary(items: readonly SessionProgressItem[], se
     initialReviewed: reviewed,
     initialTotal,
     initialPercent,
+    initialMastered: rightOnce,
+    initialMasteryPercent,
   };
 }
