@@ -10,9 +10,8 @@ describe("study keyboard shortcuts", () => {
     expect(studyShortcut({ ...context, key: "f", startGateOpen: true, revealed: true })).toEqual({ type: "start" });
   });
 
-  it("leaves form and toolbar controls usable while the gate is open", () => {
+  it("leaves typing and non-Space toolbar keys alone while the gate is open", () => {
     expect(studyShortcut({ ...context, key: "ArrowDown", startGateOpen: true, typingTarget: true })).toBeNull();
-    expect(studyShortcut({ ...context, key: " ", startGateOpen: true, controlsTarget: true })).toBeNull();
     expect(studyShortcut({ ...context, key: "Enter", startGateOpen: true, controlsTarget: true })).toBeNull();
   });
 
@@ -21,10 +20,17 @@ describe("study keyboard shortcuts", () => {
     expect(studyShortcut({ ...context, key: "f", revealed: true, typingTarget: true })).toBeNull();
   });
 
-  it("uses Space to reveal on the front and waits for a correctness grade before saving", () => {
+  it("uses Space to reveal on the front and Save & Next on the answer", () => {
     expect(studyShortcut({ ...context, key: " " })).toEqual({ type: "reveal" });
-    expect(studyShortcut({ ...context, key: " ", revealed: true })).toBeNull();
+    expect(studyShortcut({ ...context, key: " ", revealed: true })).toEqual({ type: "save" });
     expect(studyShortcut({ ...context, key: " ", revealed: true, result: "right" })).toEqual({ type: "save" });
+    expect(studyShortcut({ ...context, key: "Spacebar", revealed: true, result: "right" })).toEqual({ type: "save" });
+  });
+
+  it("Space overrides the last focused non-text control instead of activating it", () => {
+    expect(studyShortcut({ ...context, key: " ", controlsTarget: true })).toEqual({ type: "reveal" });
+    expect(studyShortcut({ ...context, key: " ", startGateOpen: true, controlsTarget: true })).toEqual({ type: "start" });
+    expect(studyShortcut({ ...context, key: " ", revealed: true, result: "right", controlsTarget: true })).toEqual({ type: "save" });
   });
 
   it("maps F to flip and 1/2/3 to difficulty only after reveal", () => {

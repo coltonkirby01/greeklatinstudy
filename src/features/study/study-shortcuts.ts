@@ -40,12 +40,25 @@ export function studyEnterShortcut({ key, shiftKey, revealed, result, typingTarg
   return { type: "result", value: result === "wrong" ? "right" : "wrong" };
 }
 
-export function studyShortcut({ key, startGateOpen, revealed, result, typingTarget, controlsTarget = false }: ShortcutContext): StudyShortcut {
-  // Toolbar/select controls keep their normal keyboard behavior while the timer gate is open.
-  if (typingTarget || controlsTarget) return null;
+export function studyShortcut({ key, startGateOpen, revealed, typingTarget, controlsTarget = false }: ShortcutContext): StudyShortcut {
+  // Text-entry controls must keep normal typing behavior, including spaces.
+  if (typingTarget) return null;
+
+  // Space is always owned by the flashcard session, even if a toolbar button,
+  // timer control, rating control, or other non-text button currently has focus.
+  // Returning an action ensures the shared keydown handler calls preventDefault(),
+  // so the browser cannot re-activate the last focused button with Space.
+  const isSpace = key === " " || key === "Spacebar";
+  if (isSpace) {
+    if (startGateOpen) return { type: "start" };
+    if (!revealed) return { type: "reveal" };
+    return { type: "save" };
+  }
+
+  // Non-Space shortcuts do not override toolbar/start-card controls.
+  if (controlsTarget) return null;
   // Outside those controls, the gate owns the first keypress. It must never leak through.
   if (startGateOpen) return { type: "start" };
-  if (key === " " && !revealed) return { type: "reveal" };
   if (!revealed) return null;
 
   const normalized = key.toLowerCase();
@@ -54,6 +67,5 @@ export function studyShortcut({ key, startGateOpen, revealed, result, typingTarg
   if (key === "2") return { type: "difficulty", value: "medium" };
   if (key === "3") return { type: "difficulty", value: "hard" };
   // Plain Enter is handled by studyEnterShortcut in StudyRatingControls.
-  if (key === " " && result) return { type: "save" };
   return null;
 }
