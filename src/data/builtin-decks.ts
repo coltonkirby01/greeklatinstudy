@@ -4,18 +4,15 @@ import { classicalGreekPronunciation } from "../features/greek/greek-pronunciati
 type GreekSourceCard = { id: string; category: string; front: string; back_title: string; back: string };
 type GreekVocabularySourceCard = { id: string; greek: string; meaning: string; part_of_speech: string; lesson: number; source_ref?: string };
 type GreekGrammarChartRow = { label: string; cells: string[] };
-type GreekGrammarSourceCard = { id: string; category: string; prompt: string; columns: string[]; rows: GreekGrammarChartRow[]; source_ref?: string };
+type GreekGrammarSourceCard = { id: string; category: string; prompt: string; columns: string[]; rows: GreekGrammarChartRow[]; source_ref?: string; accent_note?: string };
 type LatinSourceCard = { id: string; headword: string; definition: string; partOfSpeech: string; semanticGroup: string; frequencyRank: number; deckPosition: number };
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
 async function fetchText(path: string, cache: RequestCache = "force-cache") { const response = await fetch(assetUrl(path), { cache }); if (!response.ok) throw new Error(`Could not load ${path}.`); return response.text(); }
 
-const greekLesson3Endings = ["ουσι(ν)", "ομεν", "όντων", "ετε", "εις", "ειν", "έτω", "ω", "ει", "ε"] as const;
-
+// Groton's paradigms are displayed as complete accented forms. Keep this export
+// for compatibility with existing tests/imports, but do not insert artificial
+// stem-ending hyphens into source-faithful Greek forms.
 export function formatGreekLesson3ParadigmCell(value: string) {
-  if (value.includes("-")) return value;
-  for (const ending of greekLesson3Endings) {
-    if (value.endsWith(ending) && value.length > ending.length) return `${value.slice(0, -ending.length)}-${ending}`;
-  }
   return value;
 }
 
@@ -88,6 +85,7 @@ export function loadGreekLesson3GrammarDeck() {
     const cards: StudyCard[] = source.map((card, index) => {
       const chartRows = card.rows.map((row) => ({ ...row, cells: row.cells.map(formatGreekLesson3ParadigmCell) }));
       const sourceRef = card.category === "Present Active Indicative" ? "Groton 3.20" : card.category === "Present Active Infinitive" ? "Groton 3.21" : "Groton 3.22";
+      const chartKind = card.category.endsWith("Endings") ? "Ending chart" : "Whole-paradigm chart · model verb παιδεύω";
       return {
         id: card.id,
         deckId: "alpha-omega-lesson3-grammar",
@@ -96,7 +94,7 @@ export function loadGreekLesson3GrammarDeck() {
         category: card.category,
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 3",
-        notes: card.category.endsWith("Endings") ? "Ending chart" : "Whole-paradigm chart · model verb παιδεύω",
+        notes: [chartKind, card.accent_note].filter(Boolean).join(" · "),
         metadata: {
           lesson: 3,
           studySource: "grammar-chart",
@@ -142,6 +140,7 @@ export function loadGreekLesson4GrammarDeck() {
     const source = JSON.parse(text) as GreekGrammarSourceCard[];
     const cards: StudyCard[] = source.map((card, index) => {
       const chartRows = card.rows.map((row) => ({ ...row, cells: [...row.cells] }));
+      const chartKind = card.category.endsWith("Endings") ? "Ending chart" : "Whole-paradigm chart";
       return {
         id: card.id,
         deckId: "alpha-omega-lesson4-grammar",
@@ -150,7 +149,7 @@ export function loadGreekLesson4GrammarDeck() {
         category: card.category,
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 4",
-        notes: "Whole-paradigm chart",
+        notes: [chartKind, card.accent_note].filter(Boolean).join(" · "),
         metadata: {
           lesson: 4,
           studySource: "grammar-chart",
