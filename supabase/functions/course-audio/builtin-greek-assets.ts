@@ -1,6 +1,7 @@
 import { greekToClassicalIpa, greekToElevenLabsIpa } from "./greek-ipa.ts";
 import { lesson3CourseAudioAssets, type Lesson3CourseAudioAsset } from "./lesson3-assets.ts";
 import { lesson4CourseAudioAssets, lesson4VocabularyAudio } from "./lesson4-assets.ts";
+import { lesson5CourseAudioAssets, lesson5VocabularyAudio } from "./lesson5-assets.ts";
 
 export type GreekCourseAudioAsset = Lesson3CourseAudioAsset & { pronunciationSystem?: string };
 
@@ -59,10 +60,10 @@ const symbolLabels: Record<string, { label: string; text: string }> = {
 };
 
 export function resolveBuiltinGreekAsset(assetId: string): GreekCourseAudioAsset | null {
-  const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets].find((asset) => asset.id === assetId);
+  const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets, ...lesson5CourseAudioAssets].find((asset) => asset.id === assetId);
   if (paradigm) return paradigm;
 
-  const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId];
+  const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId];
   if (vocabulary) {
     const canonicalIpa = greekToClassicalIpa(vocabulary.greek);
     const ttsText = greekToElevenLabsIpa(vocabulary.greek);
