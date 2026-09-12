@@ -36,6 +36,12 @@ describe("study keyboard shortcuts", () => {
     expect(studyShortcut({ ...context, key: " ", revealed: true, result: "right", controlsTarget: true })).toEqual({ type: "save" });
   });
 
+  it("Space overrides focused toolbar selects such as Adaptive/Sequential and Learner/Reviewer", () => {
+    expect(studyShortcut({ ...context, key: " ", typingTarget: true, controlsTarget: true })).toEqual({ type: "reveal" });
+    expect(studyShortcut({ ...context, key: " ", startGateOpen: true, typingTarget: true, controlsTarget: true })).toEqual({ type: "start" });
+    expect(studyShortcut({ ...context, key: " ", revealed: true, result: "right", typingTarget: true, controlsTarget: true })).toEqual({ type: "save" });
+  });
+
   it("maps F to flip and 1/2/3 to difficulty only after reveal", () => {
     expect(studyShortcut({ ...context, key: "f" })).toBeNull();
     expect(studyShortcut({ ...context, key: "f", revealed: true })).toEqual({ type: "flip" });
