@@ -5,6 +5,7 @@ import {
   INITIAL_COVERAGE_MULTIPLIER,
   RECENT_AUTO_GRADE_WINDOW,
 } from "../features/study/session-review";
+import "./how-site-works.css";
 
 const coveragePercent = Math.round(INITIAL_COVERAGE_MULTIPLIER * 100);
 const easySeconds = EASY_RECALL_LIMIT_MS / 1_000;
