@@ -7,7 +7,7 @@ import { deleteReviewEvent, loadLocalEnvelope, loadProgressEnvelope, mergeProgre
 import { savedCardRef } from "./saved-cards";
 import { intrinsicCardDifficulty } from "./scoring";
 import { builtinSessionId, displayManagedSessionName, managedSessionsForLanguage, sessionDeckIdsForLanguage, type BuiltinSessionKind, type ManagedSession } from "./session-management";
-import { autoReviewDefaults, sessionProgressSummary } from "./session-review";
+import { autoReviewDefaults, constrainAdaptiveInitialCoverage, sessionProgressSummary } from "./session-review";
 import "./study-gate.css";
 import { StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
 import { studyShortcut } from "./study-shortcuts";
@@ -275,6 +275,9 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
       const currentIndex = current ? candidates.findIndex((candidate) => candidateKey(candidate) === candidateKey(current)) : -1;
       return candidates[nextSequentialIndex(candidates.length, currentIndex)] ?? null;
     }
+    if (mode === "adaptive" && !personalized) {
+      candidates = constrainAdaptiveInitialCoverage(candidates, session.id, (candidate) => getCardProgress(modeFor(candidate.source), candidate.card.id));
+    }
     if (exclude && candidates.length > 1) candidates = candidates.filter((candidate) => candidateKey(candidate) !== candidateKey(exclude));
     if (mode !== "sequential") {
       const activeSourceIds = [...new Set(candidates.map((candidate) => candidate.source.id))];
@@ -518,6 +521,6 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
       <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} frontControls={frontControls} />
       <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
     </section>
-    <StudySidebar copy={copy} direction={direction} stats={stats} sessionId={session.id} initialProgress={{ reviewed: sessionProgress.initialReviewed, total: sessionProgress.initialTotal, percent: sessionProgress.initialPercent }} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
+    <StudySidebar copy={copy} direction={direction} stats={stats} sessionId={session.id} initialProgress={{ reviewed: sessionProgress.initialReviewed, total: sessionProgress.initialTotal, percent: sessionProgress.initialPercent, mastered: sessionProgress.initialMastered, masteryPercent: sessionProgress.initialMasteryPercent }} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
   </div>;
 }
