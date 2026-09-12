@@ -1,0 +1,58 @@
+[
+  {
+    "id": "lesson5-chart-first-declension-endings-short-alpha-as",
+    "category": "First Declension Feminine Endings — short α, genitive -ᾱς",
+    "prompt": "First Declension Feminine Endings — short α, genitive -ᾱς",
+    "source_ref": "Groton 5.34",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["-α", "-αι"] },
+      { "label": "Genitive", "cells": ["-ᾱς", "-ων"] },
+      { "label": "Dative", "cells": ["-ᾳ", "-αις"] },
+      { "label": "Accusative", "cells": ["-αν", "-ᾱς"] },
+      { "label": "Vocative", "cells": ["-α", "-αι"] }
+    ]
+  },
+  {
+    "id": "lesson5-chart-first-declension-endings-short-alpha-eta",
+    "category": "First Declension Feminine Endings — short α, genitive -ης",
+    "prompt": "First Declension Feminine Endings — short α, genitive -ης",
+    "source_ref": "Groton 5.34",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["-α", "-αι"] },
+      { "label": "Genitive", "cells": ["-ης", "-ων"] },
+      { "label": "Dative", "cells": ["-ῃ", "-αις"] },
+      { "label": "Accusative", "cells": ["-αν", "-ᾱς"] },
+      { "label": "Vocative", "cells": ["-α", "-αι"] }
+    ]
+  },
+  {
+    "id": "lesson5-chart-first-declension-moira",
+    "category": "First Declension Feminine Nouns — μοῖρα",
+    "prompt": "First Declension Feminine Nouns — μοῖρα",
+    "source_ref": "Groton 5.34",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["μοῖρα", "μοῖραι"] },
+      { "label": "Genitive", "cells": ["μοίρᾱς", "μοιρῶν"] },
+      { "label": "Dative", "cells": ["μοίρᾳ", "μοίραις"] },
+      { "label": "Accusative", "cells": ["μοῖραν", "μοίρᾱς"] },
+      { "label": "Vocative", "cells": ["μοῖρα", "μοῖραι"] }
+    ]
+  },
+  {
+    "id": "lesson5-chart-first-declension-thalatta",
+    "category": "First Declension Feminine Nouns — θάλαττα",
+    "prompt": "First Declension Feminine Nouns — θάλαττα",
+    "source_ref": "Groton 5.34",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["θάλαττα", "θάλατται"] },
+      { "label": "Genitive", "cells": ["θαλάττης", "θαλαττῶν"] },
+      { "label": "Dative", "cells": ["θαλάττῃ", "θαλάτταις"] },
+      { "label": "Accusative", "cells": ["θάλατταν", "θαλάττᾱς"] },
+      { "label": "Vocative", "cells": ["θάλαττα", "θάλατται"] }
+    ]
+  }
+]
