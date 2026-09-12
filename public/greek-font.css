@@ -1,0 +1,7 @@
+/* Greek study text needs visibly directional polytonic accents.
+   Noto Serif renders acute and grave as distinct opposing diagonal marks. */
+body .greek-front,
+body .course-glyph {
+  font-family: "Noto Serif", "Palatino Linotype", "Book Antiqua", "Times New Roman", serif;
+  font-variant-ligatures: normal;
+}
