@@ -1,6 +1,11 @@
 /* Greek study text needs visibly directional polytonic accents.
-   Noto Serif renders acute and grave as distinct opposing diagonal marks. */
+   Noto Serif renders acute and grave as distinct opposing diagonal marks.
+   Keep every Greek study surface on this font so future cards inherit it. */
 body .greek-front,
+body .greek-script,
+body .greek-answer-title,
+body .greek-answer-copy,
+body .priority-script,
 body .course-glyph {
   font-family: "Noto Serif", "Palatino Linotype", "Book Antiqua", "Times New Roman", serif;
   font-variant-ligatures: normal;

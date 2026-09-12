@@ -11,7 +11,7 @@ describe("published Greek deck audio prewarming", () => {
   });
 
   it("warms imported and individually edited cards for already-published Greek decks", () => {
-    expect(service).toContain('await prewarmDeckIfPublishedGreek(deck as Pick<CloudDeck, "id" | "language" | "published">, loaded);');
-    expect(service).toContain('await prewarmDeckIfPublishedGreek(deck as Pick<CloudDeck, "id" | "language" | "published">, [saved]);');
+    expect(service).toContain('await prewarmDeckIfPublishedGreek(deck, loaded);');
+    expect(service).toContain('await prewarmDeckIfPublishedGreek(deck, [saved]);');
   });
 });
