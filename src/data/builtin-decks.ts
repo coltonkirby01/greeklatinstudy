@@ -56,7 +56,7 @@ export function loadGreekDeck() {
 }
 
 export function loadGreekLesson3VocabularyDeck() {
-  greekLesson3VocabularyPromise ??= fetchText("data/greek-lesson3-vocab.json").then((text) => {
+  greekLesson3VocabularyPromise ??= fetchText("data/greek-lesson3-vocab.json", "no-store").then((text) => {
     const source = JSON.parse(text) as GreekVocabularySourceCard[];
     const cards: StudyCard[] = source.map((card, index) => {
       const pronunciation = classicalGreekPronunciation(card.greek);
@@ -114,7 +114,7 @@ export function loadGreekLesson3GrammarDeck() {
 }
 
 export function loadGreekLesson4VocabularyDeck() {
-  greekLesson4VocabularyPromise ??= fetchText("data/greek-lesson4-vocab.json").then((text) => {
+  greekLesson4VocabularyPromise ??= fetchText("data/greek-lesson4-vocab.json", "no-store").then((text) => {
     const source = JSON.parse(text) as GreekVocabularySourceCard[];
     const cards: StudyCard[] = source.map((card, index) => {
       const pronunciation = classicalGreekPronunciation(card.greek);
@@ -171,5 +171,5 @@ export function loadGreekLesson4GrammarDeck() {
 }
 
 export function loadLatinDeck() {
-  latinPromise ??= fetchText("data/dickinson-latin-core.csv").then((text) => { const source = latinRowsToCards(parseCsv(text)); const cards: StudyCard[] = source.map((card) => { const definition = card.definition || (card.headword.trim() === "fore" ? "to be; to be going to be (future infinitive of sum)" : "No English gloss is supplied in the source."); return { id: card.id, deckId: "dickinson-latin-core", front: card.headword, back: definition, reverseFront: definition, reverseBack: card.headword, category: card.partOfSpeech || "Vocabulary", rank: card.frequencyRank, source: "Dickinson College Commentaries Latin Core Vocabulary", notes: [card.partOfSpeech, card.semanticGroup].filter(Boolean).join(" · "), metadata: { partOfSpeech: card.partOfSpeech, semanticGroup: card.semanticGroup, frequencyRank: card.frequencyRank, deckPosition: card.deckPosition } }; }); return { id: "dickinson-latin-core", slug: "latin", title: "Dickinson Latin Core Vocabulary", eyebrow: "Frequency-ranked adaptive review", description: "Begin with the 100 most frequent entries, then unlock 25 at a time while earlier vocabulary continues long-term review.", language: "latin", cards, supportsReverse: true, staged: { initialCount: 100, batchSize: 25 }, sourceNote: `All ${cards.length} supplied Dickinson entries are included.` } satisfies DeckDefinition; }); return latinPromise;
+  latinPromise ??= fetchText("data/dickinson-latin-core.csv").then((text) => { const source = latinRowsToCards(parseCsv(fs.readFileSync("public/data/dickinson-latin-core.csv", "utf8"))); const cards: StudyCard[] = source.map((card) => { const definition = card.definition || (card.headword.trim() === "fore" ? "to be; to be going to be (future infinitive of sum)" : "No English gloss is supplied in the source."); return { id: card.id, deckId: "dickinson-latin-core", front: card.headword, back: definition, reverseFront: definition, reverseBack: card.headword, category: card.partOfSpeech || "Vocabulary", rank: card.frequencyRank, source: "Dickinson College Commentaries Latin Core Vocabulary", notes: [card.partOfSpeech, card.semanticGroup].filter(Boolean).join(" · "), metadata: { partOfSpeech: card.partOfSpeech, semanticGroup: card.semanticGroup, frequencyRank: card.frequencyRank, deckPosition: card.deckPosition } }; }); return { id: "dickinson-latin-core", slug: "latin", title: "Dickinson Latin Core Vocabulary", eyebrow: "Frequency-ranked adaptive review", description: "Begin with the 100 most frequent entries, then unlock 25 at a time while earlier vocabulary continues long-term review.", language: "latin", cards, supportsReverse: true, staged: { initialCount: 100, batchSize: 25 }, sourceNote: `All ${cards.length} supplied Dickinson entries are included.` } satisfies DeckDefinition; }); return latinPromise;
 }
