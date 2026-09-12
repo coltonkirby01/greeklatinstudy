@@ -1,5 +1,6 @@
 import { supabase } from "../../lib/supabase";
 import type { Json } from "../../lib/database.types";
+import { normalizeGreekCardValue, normalizeGreekDisplayAccents } from "../greek/greek-orthography";
 import type { DeckDefinition, StudyCard } from "../study/types";
 
 export type CloudDeck = { id: string; slug: string; title: string; description: string; subject: string; language: "greek" | "latin" | "other"; supports_reverse: boolean; published: boolean; staged_config: { enabled?: boolean; initialCount?: number; batchSize?: number } | null; created_at: string; updated_at: string };
@@ -9,6 +10,38 @@ function client() { if (!supabase) throw new Error("Connect Supabase before usin
 export async function listPublishedDecks() { const { data, error } = await client().from("decks").select("*").eq("published", true).order("title"); if (error) throw error; return (data ?? []) as CloudDeck[]; }
 export async function listAdminDecks() { const { data, error } = await client().from("decks").select("*").order("updated_at", { ascending: false }); if (error) throw error; return (data ?? []) as CloudDeck[]; }
 export async function createDeck(input: { title: string; slug: string; description: string; subject: string; language: CloudDeck["language"]; supportsReverse: boolean }) { const { data, error } = await client().from("decks").insert({ title: input.title, slug: input.slug, description: input.description, subject: input.subject, language: input.language, supports_reverse: input.supportsReverse }).select("*").single(); if (error) throw error; return data as CloudDeck; }
+
+function normalizeGreekImportCard(card: ImportCard): ImportCard {
+  return {
+    ...card,
+    front: normalizeGreekDisplayAccents(card.front),
+    back: normalizeGreekDisplayAccents(card.back),
+    category: normalizeGreekDisplayAccents(card.category),
+    source: normalizeGreekDisplayAccents(card.source),
+    notes: normalizeGreekDisplayAccents(card.notes),
+    reversePrompt: normalizeGreekDisplayAccents(card.reversePrompt),
+    metadata: card.metadata ? normalizeGreekCardValue(card.metadata) : undefined,
+  };
+}
+
+function normalizeGreekCloudCard(card: CloudCard): CloudCard {
+  return {
+    ...card,
+    front: normalizeGreekDisplayAccents(card.front),
+    back: normalizeGreekDisplayAccents(card.back),
+    category: card.category === null ? null : normalizeGreekDisplayAccents(card.category),
+    source: card.source === null ? null : normalizeGreekDisplayAccents(card.source),
+    notes: card.notes === null ? null : normalizeGreekDisplayAccents(card.notes),
+    reverse_prompt: card.reverse_prompt === null ? null : normalizeGreekDisplayAccents(card.reverse_prompt),
+    metadata: card.metadata ? normalizeGreekCardValue(card.metadata) as Json : null,
+  };
+}
+
+async function deckWriteContext(deckId: string) {
+  const { data, error } = await client().from("decks").select("id,language,published").eq("id", deckId).single();
+  if (error) throw error;
+  return data as Pick<CloudDeck, "id" | "language" | "published">;
+}
 
 /**
  * Pre-generates shared audio for published Greek cloud cards. The Edge Function
@@ -51,7 +84,8 @@ export async function updateDeck(deckId: string, changes: Partial<CloudDeck>) {
 
 export async function loadCards(deckId: string) { const rows: CloudCard[] = []; for (let start = 0; ; start += 1_000) { const { data, error } = await client().from("cards").select("*").eq("deck_id", deckId).order("position").range(start, start + 999); if (error) throw error; const page = (data ?? []) as CloudCard[]; rows.push(...page); if (page.length < 1_000) break; } return rows; }
 export async function loadPublishedDeck(slug: string) {
-  const { data, error } = await client().from("decks").select("*").eq("slug", slug).eq("published", true).single(); if (error) throw error; const deck = data as CloudDeck, rows = await loadCards(deck.id);
+  const { data, error } = await client().from("decks").select("*").eq("slug", slug).eq("published", true).single(); if (error) throw error; const deck = data as CloudDeck, storedRows = await loadCards(deck.id);
+  const rows = deck.language === "greek" ? storedRows.map(normalizeGreekCloudCard) : storedRows;
   const cards: StudyCard[] = rows.map((card) => {
     const metadata = card.metadata && typeof card.metadata === "object" && !Array.isArray(card.metadata) ? card.metadata : {};
     return { id: card.stable_key || card.id, deckId: `custom:${deck.id}`, front: card.front, back: card.back, reverseFront: card.reverse_prompt || card.back, reverseBack: card.front, category: card.category || "Cards", rank: card.rank ?? card.position, source: card.source ?? undefined, notes: card.notes ?? undefined, metadata: { cloudCardId: card.id, position: card.position, ...metadata } };
@@ -59,32 +93,41 @@ export async function loadPublishedDeck(slug: string) {
   return { cloud: deck, definition: { id: `custom:${deck.id}`, slug: deck.slug, title: deck.title, eyebrow: deck.subject || "Imported deck", description: deck.description, language: deck.language, cards, supportsReverse: deck.supports_reverse, staged: deck.staged_config?.enabled ? { initialCount: deck.staged_config.initialCount ?? 100, batchSize: deck.staged_config.batchSize ?? 25 } : undefined } satisfies DeckDefinition };
 }
 export async function importCards(deckId: string, cards: ImportCard[], replace: boolean) {
+  const deck = await deckWriteContext(deckId);
+  const preparedCards = deck.language === "greek" ? cards.map(normalizeGreekImportCard) : cards;
   if (replace) { const { error } = await client().from("cards").delete().eq("deck_id", deckId); if (error) throw error; }
   const existing = replace ? 0 : (await loadCards(deckId)).length;
-  const rows = cards.map((card, index) => ({ deck_id: deckId, stable_key: `${existing + index + 1}-${slugify(card.front).slice(0, 48) || "card"}`, front: card.front, back: card.back, category: card.category || null, rank: card.rank, source: card.source || null, notes: card.notes || null, reverse_prompt: card.reversePrompt || null, metadata: (card.metadata ?? null) as Json, position: existing + index + 1 }));
+  const rows = preparedCards.map((card, index) => ({ deck_id: deckId, stable_key: `${existing + index + 1}-${slugify(card.front).slice(0, 48) || "card"}`, front: card.front, back: card.back, category: card.category || null, rank: card.rank, source: card.source || null, notes: card.notes || null, reverse_prompt: card.reversePrompt || null, metadata: (card.metadata ?? null) as Json, position: existing + index + 1 }));
   for (let index = 0; index < rows.length; index += 400) { const { error } = await client().from("cards").insert(rows.slice(index, index + 400)); if (error) throw error; }
   const loaded = await loadCards(deckId);
-  const { data: deck, error: deckError } = await client().from("decks").select("id,language,published").eq("id", deckId).single();
-  if (deckError) throw deckError;
-  await prewarmDeckIfPublishedGreek(deck as Pick<CloudDeck, "id" | "language" | "published">, loaded);
+  await prewarmDeckIfPublishedGreek(deck, loaded);
   return loaded;
 }
 export async function saveCard(card: Partial<CloudCard> & { deck_id: string; front: string; back: string }) {
+  const deck = await deckWriteContext(card.deck_id);
+  const prepared = deck.language === "greek" ? {
+    ...card,
+    front: normalizeGreekDisplayAccents(card.front),
+    back: normalizeGreekDisplayAccents(card.back),
+    category: card.category === undefined || card.category === null ? card.category : normalizeGreekDisplayAccents(card.category),
+    source: card.source === undefined || card.source === null ? card.source : normalizeGreekDisplayAccents(card.source),
+    notes: card.notes === undefined || card.notes === null ? card.notes : normalizeGreekDisplayAccents(card.notes),
+    reverse_prompt: card.reverse_prompt === undefined || card.reverse_prompt === null ? card.reverse_prompt : normalizeGreekDisplayAccents(card.reverse_prompt),
+    metadata: card.metadata ? normalizeGreekCardValue(card.metadata) as Json : card.metadata,
+  } : card;
   let saved: CloudCard;
-  if (card.id) {
-    const { id, ...changes } = card;
+  if (prepared.id) {
+    const { id, ...changes } = prepared;
     const { data, error } = await client().from("cards").update(changes).eq("id", id).select("*").single();
     if (error) throw error;
     saved = data as CloudCard;
   } else {
-    const current = await loadCards(card.deck_id);
-    const { data, error } = await client().from("cards").insert({ ...card, stable_key: card.stable_key || `${current.length + 1}-${slugify(card.front).slice(0, 48) || "card"}`, position: card.position || current.length + 1 }).select("*").single();
+    const current = await loadCards(prepared.deck_id);
+    const { data, error } = await client().from("cards").insert({ ...prepared, stable_key: prepared.stable_key || `${current.length + 1}-${slugify(prepared.front).slice(0, 48) || "card"}`, position: prepared.position || current.length + 1 }).select("*").single();
     if (error) throw error;
     saved = data as CloudCard;
   }
-  const { data: deck, error: deckError } = await client().from("decks").select("id,language,published").eq("id", card.deck_id).single();
-  if (deckError) throw deckError;
-  await prewarmDeckIfPublishedGreek(deck as Pick<CloudDeck, "id" | "language" | "published">, [saved]);
+  await prewarmDeckIfPublishedGreek(deck, [saved]);
   return saved;
 }
 export async function deleteCard(cardId: string) { const { error } = await client().from("cards").delete().eq("id", cardId); if (error) throw error; }
