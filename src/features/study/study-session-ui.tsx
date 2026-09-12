@@ -7,7 +7,7 @@ import { studyEnterShortcut } from "./study-shortcuts";
 import type { CardProgress, DirectionalCardCopy, ReviewDifficulty, ReviewResult, StudyCard, StudyDirection, StudyStats } from "./types";
 
 type Priority = Array<{ card: StudyCard; progress: CardProgress; score: number }>;
-type InitialProgress = { reviewed: number; total: number; percent: number };
+type InitialProgress = { reviewed: number; total: number; percent: number; mastered: number; masteryPercent: number };
 
 function percent(value: number | null) { return value === null ? "—" : `${(value * 100).toFixed(value >= 0.995 ? 0 : 1)}%`; }
 
@@ -23,7 +23,7 @@ export function StudyStartGate({ onStart, onWarmup }: { onStart: () => void; onW
         <button type="button" className="primary-button study-start-button" onClick={onStart}>Start</button>
         {onWarmup && <button type="button" className="small-outline-button study-warmup-button" onClick={onWarmup}>Personalized warm-up · 5 cards</button>}
       </div>
-      <span>or press any key outside the study controls to begin</span>
+      <span>or press the space bar to begin</span>
     </div>
   </div>;
 }
@@ -102,15 +102,20 @@ export function StudySidebar({ copy, direction, stats, sessionId, initialProgres
   priorityPrompt?: (card: StudyCard, copy: DirectionalCardCopy) => ReactNode;
   cardCopy?: (card: StudyCard, direction: StudyDirection) => DirectionalCardCopy;
 }) {
-  const completion = Math.max(0, Math.min(100, initialProgress?.percent ?? 0));
+  const completionDone = Boolean(initialProgress && initialProgress.total > 0 && initialProgress.reviewed >= initialProgress.total);
+  const activeCount = completionDone ? initialProgress?.mastered ?? 0 : initialProgress?.reviewed ?? 0;
+  const activePercent = Math.max(0, Math.min(100, completionDone ? initialProgress?.masteryPercent ?? 0 : initialProgress?.percent ?? 0));
+  const progressLabel = completionDone ? "Initial mastery" : "Initial completion";
+  const progressAria = completionDone ? "Initial mastery of selected session cards" : "Initial completion of selected session cards";
+  const progressNote = completionDone ? "of selected cards answered Right at least once this session" : "of selected cards reviewed this session";
   return <aside className="study-sidebar">
     <style>{sharedStudyPolishCss}</style>
     <section className="panel-surface stats-panel">
       <div className="sidebar-heading"><div><p className="eyebrow">Current session</p><h2>Progress · {copy.sideLabel}</h2></div><Gauge /></div>
       {initialProgress && <div className="initial-completion">
-        <div className="initial-completion-heading"><span>Initial completion</span><strong>{initialProgress.reviewed} / {initialProgress.total}</strong></div>
-        <div className="initial-completion-track" role="progressbar" aria-label="Initial completion of selected session cards" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(completion)}><span className="initial-completion-fill" style={{ width: `${completion}%` }} /></div>
-        <span className="initial-completion-note">{completion.toFixed(completion >= 99.95 ? 0 : 1)}% of selected cards reviewed this session</span>
+        <div className="initial-completion-heading"><span>{progressLabel}</span><strong>{activeCount} / {initialProgress.total}</strong></div>
+        <div className="initial-completion-track" role="progressbar" aria-label={progressAria} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(activePercent)}><span className="initial-completion-fill" style={{ width: `${activePercent}%` }} /></div>
+        <span className="initial-completion-note">{activePercent.toFixed(activePercent >= 99.95 ? 0 : 1)}% {progressNote}</span>
       </div>}
       <div className="stats-grid"><div className="stat-tile"><span>Reviews</span><strong>{stats.totalReviews}</strong></div><div className="stat-tile"><span>Reviewed</span><strong>{stats.reviewed}</strong></div><div className="stat-tile"><span>Accuracy</span><strong>{percent(stats.accuracy)}</strong></div><div className="stat-tile"><span>Ever wrong</span><strong>{stats.everWrong}</strong></div><div className="stat-tile"><span>Marked hard</span><strong>{stats.markedHard}</strong></div><div className="stat-tile"><span>Avg. time</span><strong>{formatResponseTime(stats.averageResponseTimeMs)}</strong></div><div className="stat-tile"><span>Right once</span><strong>{stats.mastered}</strong></div><div className="stat-tile"><span>Best streak</span><strong>{stats.bestStreak}</strong></div></div>
       <Link className="small-outline-button session-stats-link" to={sessionId ? `/stats?session=${encodeURIComponent(sessionId)}` : "/stats"}>Stats</Link>
