@@ -2,7 +2,7 @@ import type { DeckDefinition, StudyCard } from "../features/study/types";
 import { classicalGreekPronunciation } from "../features/greek/greek-pronunciation";
 
 type GreekSourceCard = { id: string; category: string; front: string; back_title: string; back: string };
-type GreekVocabularySourceCard = { id: string; greek: string; meaning: string; part_of_speech: string; lesson: number; source_ref?: string };
+type GreekVocabularySourceCard = { id: string; greek: string; meaning: string; part_of_speech: string; lesson: number; source_ref?: string; accent_note?: string };
 type GreekGrammarChartRow = { label: string; cells: string[] };
 type GreekGrammarSourceCard = { id: string; category: string; prompt: string; columns: string[]; rows: GreekGrammarChartRow[]; source_ref?: string; accent_note?: string };
 type LatinSourceCard = { id: string; headword: string; definition: string; partOfSpeech: string; semanticGroup: string; frequencyRank: number; deckPosition: number };
@@ -60,6 +60,7 @@ export function loadGreekLesson3VocabularyDeck() {
     const source = JSON.parse(text) as GreekVocabularySourceCard[];
     const cards: StudyCard[] = source.map((card, index) => {
       const pronunciation = classicalGreekPronunciation(card.greek);
+      const sourceRef = card.source_ref ?? "Groton 3.24";
       return {
         id: card.id,
         deckId: "alpha-omega-lesson3-vocab",
@@ -70,8 +71,8 @@ export function loadGreekLesson3VocabularyDeck() {
         category: "Lesson 3 Vocabulary",
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 3",
-        notes: `${card.part_of_speech} · Pronunciation: ${pronunciation}`,
-        metadata: { lesson: card.lesson, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, sourceRef: card.source_ref ?? "Groton 3.24" },
+        notes: [card.part_of_speech, card.accent_note ? `Accent: ${card.accent_note}` : "", `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
+        metadata: { lesson: card.lesson, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, accentNote: card.accent_note, sourceRef },
       };
     });
     return { id: "alpha-omega-lesson3-vocab", slug: "greek", title: "Greek Lesson 3 Vocabulary", eyebrow: "Lesson 3 vocabulary", description: "Eleven vocabulary entries supplied for Lesson 3, tracked separately from grammar forms.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 3.24." } satisfies DeckDefinition;
@@ -102,6 +103,7 @@ export function loadGreekLesson3GrammarDeck() {
           chartColumns: card.columns,
           chartRows,
           pronunciationText: greekLesson3ParadigmSpeechText(chartRows),
+          accentNote: card.accent_note,
           sourceRef: card.source_ref ?? sourceRef,
         },
       };
@@ -116,6 +118,7 @@ export function loadGreekLesson4VocabularyDeck() {
     const source = JSON.parse(text) as GreekVocabularySourceCard[];
     const cards: StudyCard[] = source.map((card, index) => {
       const pronunciation = classicalGreekPronunciation(card.greek);
+      const sourceRef = card.source_ref ?? "Groton 4.32";
       return {
         id: card.id,
         deckId: "alpha-omega-lesson4-vocab",
@@ -126,8 +129,8 @@ export function loadGreekLesson4VocabularyDeck() {
         category: "Lesson 4 Vocabulary",
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 4",
-        notes: `${card.part_of_speech} · Pronunciation: ${pronunciation}`,
-        metadata: { lesson: 4, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, sourceRef: card.source_ref ?? "Groton 4.32" },
+        notes: [card.part_of_speech, card.accent_note ? `Accent: ${card.accent_note}` : "", `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
+        metadata: { lesson: 4, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, accentNote: card.accent_note, sourceRef },
       };
     });
     return { id: "alpha-omega-lesson4-vocab", slug: "greek", title: "Greek Lesson 4 Vocabulary", eyebrow: "Lesson 4 vocabulary", description: "Lesson 4 vocabulary from Groton §4.32.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 4.32." } satisfies DeckDefinition;
@@ -157,6 +160,7 @@ export function loadGreekLesson4GrammarDeck() {
           chartColumns: card.columns,
           chartRows,
           pronunciationText: greekLesson3ParadigmSpeechText(chartRows),
+          accentNote: card.accent_note,
           sourceRef: card.source_ref ?? "Groton 4.29",
         },
       };
