@@ -2,7 +2,7 @@ import { ArrowLeft, Bookmark, Pause, Play, SkipForward } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../auth/auth-context";
-import { createEnvelope, createModeState, directionalCopy, getCardProgress, maybeUnlockNextBatch, presentCard, priorityScore, recordReview } from "./engine";
+import { createEnvelope, createModeState, directionalCopy, getCardProgress, maybeUnlockNextBatch, nextSequentialIndex, presentCard, priorityScore, recordReview } from "./engine";
 import { deleteReviewEvent, loadLocalEnvelope, loadProgressEnvelope, mergeProgressEnvelopes, saveProgressEnvelope, upsertReviewEvent } from "./progress-repository";
 import { savedCardRef } from "./saved-cards";
 import { intrinsicCardDifficulty } from "./scoring";
@@ -271,6 +271,10 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   function chooseNext(exclude?: Candidate | null, mode: SelectionMode = selectionMode, personalized = false) {
     let candidates = allCandidates();
     if (!candidates.length) return null;
+    if (mode === "sequential" && !personalized) {
+      const currentIndex = current ? candidates.findIndex((candidate) => candidateKey(candidate) === candidateKey(current)) : -1;
+      return candidates[nextSequentialIndex(candidates.length, currentIndex)] ?? null;
+    }
     if (exclude && candidates.length > 1) candidates = candidates.filter((candidate) => candidateKey(candidate) !== candidateKey(exclude));
     if (mode !== "sequential") {
       const activeSourceIds = [...new Set(candidates.map((candidate) => candidate.source.id))];
@@ -282,11 +286,6 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
       const reviewed = candidates.filter((candidate) => getCardProgress(modeFor(candidate.source), candidate.card.id).reviews > 0);
       const pool = reviewed.length ? reviewed : candidates;
       return [...pool].sort((a, b) => personalizedScore(b) - personalizedScore(a))[0] ?? null;
-    }
-    if (mode === "sequential") {
-      if (!current) return candidates[0];
-      const index = candidates.findIndex((candidate) => candidateKey(candidate) === candidateKey(current));
-      return candidates[(index + 1 + candidates.length) % candidates.length];
     }
     const ranked = candidates.map((candidate) => ({ candidate, score: priorityScore(candidate.card, modeFor(candidate.source)) })).sort((a, b) => b.score - a.score).slice(0, Math.min(24, candidates.length));
     const max = ranked[0].score, weights = ranked.map(({ score }) => Math.exp((score - max) / 11));
@@ -347,9 +346,9 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   }, [envelopes, sources]);
   const visibleCandidates = useMemo(() => sources.flatMap((source) => { const state = states.get(source.id); return state ? availableCards(source, state).map((card) => ({ source, card })) : []; }), [sources, states]);
   const sessionProgress = useMemo(() => {
-  const items = Object.values(envelopes).flatMap((envelope) => Object.values(envelope.modes).flatMap((mode) => Object.values(mode.cards).map((progress) => ({ progress }))));
-  return sessionProgressSummary(items, session.id);
-}, [envelopes, session.id]);
+    const items = visibleCandidates.map(({ source, card }) => ({ progress: getCardProgress(states.get(source.id) ?? modeFor(source), card.id) }));
+    return sessionProgressSummary(items, session.id);
+  }, [modeFor, session.id, states, visibleCandidates]);
   const stats = sessionProgress.stats;
   const priority = useMemo(() => visibleCandidates.map(({ source, card }) => ({ card, progress: getCardProgress(states.get(source.id) ?? modeFor(source), card.id), score: priorityScore(card, states.get(source.id) ?? modeFor(source), { ignoreRecency: true }) })).sort((a, b) => b.score - a.score).slice(0, 5), [modeFor, states, visibleCandidates]);
   const sourceByCard = useMemo(() => new Map(sources.flatMap((source) => source.cards.map((card) => [`${card.deckId}:${card.id}`, source] as const))), [sources]);
@@ -519,6 +518,6 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
       <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} frontControls={frontControls} />
       <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
     </section>
-    <StudySidebar copy={copy} direction={direction} stats={stats} sessionId={session.id} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
+    <StudySidebar copy={copy} direction={direction} stats={stats} sessionId={session.id} initialProgress={{ reviewed: sessionProgress.initialReviewed, total: sessionProgress.initialTotal, percent: sessionProgress.initialPercent }} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
   </div>;
 }
