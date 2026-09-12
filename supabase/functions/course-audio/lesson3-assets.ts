@@ -39,19 +39,19 @@ function endingChart(id: string, label: string, columns: readonly (readonly stri
 /** Paradigms and endings are spoken vertically: singular first, then plural. */
 export const lesson3CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
   paradigm("lesson3-chart-present-active-indicative", "Present Active Indicative", [
-    "παιδεύ-ω",
-    "παιδεύ-εις",
-    "παιδεύ-ει",
-    "παιδεύ-ομεν",
-    "παιδεύ-ετε",
-    "παιδεύ-ουσι(ν)",
+    "παιδεύω",
+    "παιδεύεις",
+    "παιδεύει",
+    "παιδεύομεν",
+    "παιδεύετε",
+    "παιδεύουσι(ν)",
   ]),
-  paradigm("lesson3-chart-present-active-infinitive", "Present Active Infinitive", ["παιδεύ-ειν"]),
+  paradigm("lesson3-chart-present-active-infinitive", "Present Active Infinitive", ["παιδεύειν"]),
   paradigm("lesson3-chart-present-active-imperative", "Present Active Imperative", [
-    "παίδευ-ε",
-    "παιδευ-έτω",
-    "παιδεύ-ετε",
-    "παιδευ-όντων",
+    "παίδευε",
+    "παιδευέτω",
+    "παιδεύετε",
+    "παιδευόντων",
   ]),
   endingChart("lesson3-chart-present-active-indicative-endings", "Present Active Indicative Endings", [
     ["-ω", "-εις", "-ει"],
