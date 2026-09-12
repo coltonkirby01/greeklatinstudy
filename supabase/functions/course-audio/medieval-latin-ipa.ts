@@ -11,7 +11,7 @@ const LONG_VOWELS: Record<string, string> = {
 };
 const SIMPLE_VOWELS = new Set(["a", "ā", "e", "ē", "i", "ī", "o", "ō", "u", "ū", "y", "ȳ"]);
 const DIPHTHONGS = new Set(["ae", "oe", "au"]);
-const CONSONANT_DIGRAPHS = new Set(["ph", "th", "ch", "qu"]);
+const CONSONANT_DIGRAPHS = new Set(["ph", "th", "ch", "qu", "sc"]);
 
 type LatinUnit = {
   raw: string;
@@ -122,20 +122,25 @@ function unitIpa(units: readonly LatinUnit[], index: number) {
     case "th": return "t";
     case "ch": return "k";
     case "qu": return "kw";
+    case "sc": return isFrontVowel(next) ? "s" : "sk";
     case "v": return "v";
     case "j": return "j";
+    case "h": return "";
     case "x": return "ks";
     case "z": return "dz";
     case "c":
-      // Provisional conservative value until the Stotz/regional audit settles
-      // the normalized front-vowel realization (/ts/ vs /tʃ/ and related sc).
-      return "k";
+      // Rigg notes /s/ before e/i in many countries, especially the Romance
+      // areas and England. This is the broad normalized value; it deliberately
+      // avoids the narrower modern Italianate /tʃ/ default.
+      return isFrontVowel(next) ? "s" : "k";
     case "g":
-      // Front-vowel g varied regionally. Keep /g/ in the phase-one corpus
-      // rather than prematurely hard-code a narrowly French/Italian value.
+      // Rigg explicitly gives different medieval front-g values by region.
+      // Keep /g/ until the Stotz/Copeman comparison settles a broad default.
       return "g";
     case "t":
-      if (next?.raw === "i" && afterNext?.vowel && !["s", "t", "x"].includes(previous)) return "ts";
+      // Widespread medieval ti/ci interchange before vowels indicates
+      // convergence with assibilated c. Preserve the traditional exceptions.
+      if (next?.raw === "i" && afterNext?.vowel && !["s", "t", "x"].includes(previous)) return "s";
       return "t";
     default:
       return unit.raw;
@@ -182,9 +187,12 @@ export function latinParadigmToElevenLabsIpa(columns: readonly (readonly string[
 }
 
 /** Exposed for tests/documentation while the variable-rule audit is underway. */
-export const MEDIEVAL_LATIN_PROVISIONAL_RULES = {
-  frontC: "k",
-  frontG: "g",
-  h: "h",
-  gn: "gn",
+export const MEDIEVAL_LATIN_PROFILE_RULES = {
+  frontC: "s",
+  frontSc: "s",
+  tiBeforeVowel: "s+i",
+  h: "silent",
+  frontG: "g (provisional)",
+  gn: "gn (provisional)",
+  qu: "kw (provisional)",
 } as const;
