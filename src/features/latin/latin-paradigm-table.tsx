@@ -1,3 +1,4 @@
+import { MedievalLatinAudio } from "./medieval-latin-audio";
 import type { StudyCard } from "../study/types";
 
 type LatinChartRow = { label: string; cells: string[] };
@@ -22,19 +23,22 @@ export function LatinParadigmTable({ card, revealed }: { card: StudyCard; reveal
   const columns = chartColumns(card);
   const rows = chartRows(card);
 
-  return <div className="chart-scroll">
-    <table className="henle-chart">
-      <thead>
-        <tr><th scope="col">Person</th>{columns.map((column) => <th scope="col" key={column}>{column}</th>)}</tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => <tr key={row.label}>
-          <th scope="row">{row.label}</th>
-          {row.cells.map((cell, index) => <td key={`${row.label}-${columns[index] ?? index}`}>
-            {revealed ? <strong className="latin-front compact-latin">{cell}</strong> : <span aria-hidden="true">—</span>}
-          </td>)}
-        </tr>)}
-      </tbody>
-    </table>
-  </div>;
+  return <>
+    <div className="chart-scroll">
+      <table className="henle-chart">
+        <thead>
+          <tr><th scope="col">Person</th>{columns.map((column) => <th scope="col" key={column}>{column}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => <tr key={row.label}>
+            <th scope="row">{row.label}</th>
+            {row.cells.map((cell, index) => <td key={`${row.label}-${columns[index] ?? index}`}>
+              {revealed ? <strong className="latin-front compact-latin">{cell}</strong> : <span aria-hidden="true">—</span>}
+            </td>)}
+          </tr>)}
+        </tbody>
+      </table>
+    </div>
+    {revealed && <MedievalLatinAudio assetId={card.id} label={card.front} />}
+  </>;
 }

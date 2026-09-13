@@ -1,4 +1,5 @@
 import { resolveBuiltinGreekAsset, type GreekCourseAudioAsset } from "./builtin-greek-assets.ts";
+import { resolveBuiltinLatinAsset, type LatinCourseAudioAsset } from "./builtin-latin-assets.ts";
 import { containsGreek, greekToClassicalIpa, greekToElevenLabsIpa, stripUnpronouncedGreekNotation } from "./greek-ipa.ts";
 import {
   DEFAULT_ELEVENLABS_VOICE_ID,
@@ -13,6 +14,15 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+type CourseAudioAsset = {
+  id: string;
+  label: string;
+  canonicalIpa?: string;
+  ttsText: string;
+  pronunciationSystem?: string;
+  language: "greek" | "latin";
 };
 
 function json(body: unknown, status = 200) {
@@ -142,7 +152,7 @@ function greekTextFromCloudCard(card: CloudCardRow, pronunciationText?: string) 
   return "";
 }
 
-async function resolveCloudGreekAsset(supabaseUrl: string, serviceKey: string, cloudCardId: string): Promise<GreekCourseAudioAsset | null> {
+async function resolveCloudGreekAsset(supabaseUrl: string, serviceKey: string, cloudCardId: string): Promise<CourseAudioAsset | null> {
   const url = new URL(`${supabaseUrl}/rest/v1/cards`);
   url.searchParams.set("id", `eq.${cloudCardId}`);
   url.searchParams.set("select", "id,front,back,reverse_prompt,metadata,decks!inner(title,language,published)");
@@ -164,7 +174,15 @@ async function resolveCloudGreekAsset(supabaseUrl: string, serviceKey: string, c
     canonicalIpa,
     ttsText,
     pronunciationSystem: overrides.pronunciationSystem,
+    language: "greek",
   } : null;
+}
+
+function resolveBuiltinCourseAsset(assetId: string): CourseAudioAsset | null {
+  const greek = resolveBuiltinGreekAsset(assetId);
+  if (greek) return { ...greek, language: "greek" };
+  const latin = resolveBuiltinLatinAsset(assetId);
+  return latin ? { ...latin, language: "latin" } : null;
 }
 
 async function inspectAudio(supabaseUrl: string, serviceKey: string, assetId: string) {
@@ -201,11 +219,26 @@ async function saveAudioRow(supabaseUrl: string, serviceKey: string, payload: Re
   if (!response.ok) throw new Error(`Could not store course audio: ${await response.text()}`);
 }
 
-async function ensureAsset(asset: GreekCourseAudioAsset, context: { apiKey: string; voiceId: string; supabaseUrl: string; serviceKey: string }) {
-  const { apiKey, voiceId, supabaseUrl, serviceKey } = context;
+async function ensureAsset(asset: CourseAudioAsset, context: {
+  apiKey: string;
+  greekVoiceId: string;
+  latinVoiceId: string;
+  allowLatinGeneration: boolean;
+  supabaseUrl: string;
+  serviceKey: string;
+}) {
+  const { apiKey, greekVoiceId, latinVoiceId, allowLatinGeneration, supabaseUrl, serviceKey } = context;
   const pronunciationSystem = asset.pronunciationSystem ?? LESSON3_PRONUNCIATION_SYSTEM;
   const canonical = asset.canonicalIpa ? ` Canonical IPA: ${asset.canonicalIpa}.` : "";
-  const sourceNote = `${asset.label}. ${pronunciationSystem}.${canonical} ElevenLabs input: ${asset.ttsText}`;
+  const voiceId = asset.language === "latin" ? latinVoiceId : greekVoiceId;
+
+  // Preserve the exact historical Greek signature so existing cache rows remain
+  // valid. Latin is new, so its signature can safely record model + voice from
+  // the beginning without causing a Greek cache regeneration.
+  const latinEngine = asset.language === "latin" && voiceId
+    ? ` ElevenLabs model: ${LESSON3_AUDIO_MODEL}; voice: ${voiceId}.`
+    : "";
+  const sourceNote = `${asset.label}. ${pronunciationSystem}.${canonical} ElevenLabs input: ${asset.ttsText}${latinEngine}`;
   const existing = await inspectAudio(supabaseUrl, serviceKey, asset.id);
 
   if (existing && existing.source_note === sourceNote) {
@@ -223,6 +256,13 @@ async function ensureAsset(asset: GreekCourseAudioAsset, context: { apiKey: stri
       });
       return { id: asset.id, status: "migrated" as const, storagePath: uploaded.path };
     }
+  }
+
+  if (asset.language === "latin" && !allowLatinGeneration) {
+    return { id: asset.id, status: "generation-disabled" as const };
+  }
+  if (asset.language === "latin" && !voiceId) {
+    throw new Error("Medieval Latin generation is not configured. Set ELEVENLABS_MEDIEVAL_LATIN_VOICE_ID only after the voice has been auditioned and approved.");
   }
 
   const elevenLabsResponse = await fetch(
@@ -265,36 +305,53 @@ Deno.serve(async (request) => {
   if (!isAllowedPublicCaller(request)) return json({ error: "Invalid project API key." }, 401);
 
   const apiKey = Deno.env.get("ELEVENLABS_API_KEY")?.trim();
-  const voiceId = Deno.env.get("ELEVENLABS_CLASSICAL_GREEK_VOICE_ID")?.trim() || DEFAULT_ELEVENLABS_VOICE_ID;
+  const greekVoiceId = Deno.env.get("ELEVENLABS_CLASSICAL_GREEK_VOICE_ID")?.trim() || DEFAULT_ELEVENLABS_VOICE_ID;
+  const latinVoiceId = Deno.env.get("ELEVENLABS_MEDIEVAL_LATIN_VOICE_ID")?.trim() || "";
   const supabaseUrl = Deno.env.get("SUPABASE_URL")?.trim();
   const serviceKey = adminApiKey();
   if (!apiKey) return json({ error: "ELEVENLABS_API_KEY is not configured." }, 503);
   if (!supabaseUrl || !serviceKey) return json({ error: "Supabase service credentials are unavailable." }, 500);
 
-  let body: { assetId?: string; assetIds?: string[]; cloudCardId?: string } = {};
+  let body: { assetId?: string; assetIds?: string[]; cloudCardId?: string; allowGeneration?: boolean } = {};
   try { body = await request.json(); } catch { /* old clients sent an empty body */ }
 
   try {
-    const assets: GreekCourseAudioAsset[] = [];
+    const assets: CourseAudioAsset[] = [];
     if (body.cloudCardId) {
       const cloudAsset = await resolveCloudGreekAsset(supabaseUrl, serviceKey, body.cloudCardId);
       if (cloudAsset) assets.push(cloudAsset);
     } else if (Array.isArray(body.assetIds) && body.assetIds.length) {
       for (const id of [...new Set(body.assetIds)].slice(0, 8)) {
-        const builtin = resolveBuiltinGreekAsset(id);
+        const builtin = resolveBuiltinCourseAsset(id);
         if (builtin) assets.push(builtin);
       }
     } else if (body.assetId) {
-      const builtin = resolveBuiltinGreekAsset(body.assetId);
+      const builtin = resolveBuiltinCourseAsset(body.assetId);
       if (builtin) assets.push(builtin);
     } else {
-      assets.push(...lesson3CourseAudioAssets);
+      assets.push(...lesson3CourseAudioAssets.map((asset: GreekCourseAudioAsset) => ({ ...asset, language: "greek" as const })));
     }
-    if (!assets.length) return json({ error: "No pronounceable or instructional Greek audio is defined for this card." }, 404);
+    if (!assets.length) return json({ error: "No pronounceable or instructional course audio is defined for this card." }, 404);
 
     const results = [];
-    for (const asset of assets) results.push(await ensureAsset(asset, { apiKey, voiceId, supabaseUrl, serviceKey }));
-    return json({ ok: true, pronunciationSystem: LESSON3_PRONUNCIATION_SYSTEM, model: LESSON3_AUDIO_MODEL, voiceId, results });
+    for (const asset of assets) {
+      results.push(await ensureAsset(asset, {
+        apiKey,
+        greekVoiceId,
+        latinVoiceId,
+        allowLatinGeneration: body.allowGeneration === true,
+        supabaseUrl,
+        serviceKey,
+      }));
+    }
+    const primary = assets[0];
+    return json({
+      ok: true,
+      pronunciationSystem: primary?.pronunciationSystem ?? LESSON3_PRONUNCIATION_SYSTEM,
+      model: LESSON3_AUDIO_MODEL,
+      voiceId: primary?.language === "latin" ? latinVoiceId : greekVoiceId,
+      results,
+    });
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : String(error) }, 502);
   }

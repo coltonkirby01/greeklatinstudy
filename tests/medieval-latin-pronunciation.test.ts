@@ -49,21 +49,24 @@ describe("normalized Medieval Latin pronunciation foundation", () => {
     expect(latinToMedievalIpa("philosophia")).toBe("/filoˈsofia/");
   });
 
-  it("keeps genuinely region-sensitive consonants explicitly provisional", () => {
+  it("uses conservative normalized values where medieval regional evidence diverges", () => {
     expect(MEDIEVAL_LATIN_PROFILE_RULES).toEqual({
       frontC: "s",
       frontSc: "s",
       tiBeforeVowel: "s+i",
       h: "silent",
-      frontG: "g (provisional)",
-      gn: "gn (provisional)",
-      qu: "kw (provisional)",
+      consonantalV: "v",
+      consonantalI: "j",
+      frontG: "g (normalized conservative choice)",
+      gn: "gn (normalized conservative choice)",
+      qu: "kw (normalized conservative choice)",
+      vowelQuantity: "not phonemic; macrons retained for inherited stress",
     });
-    const policy = fs.readFileSync("docs/MEDIEVAL_LATIN_PRONUNCIATION.md", "utf8");
-    expect(policy).toContain("Rules that still require a comparative audit before production generation");
-    expect(policy).toContain("exact realization of `g` before front vowels");
-    expect(policy).toContain("`gn`");
-    expect(policy).toContain("`qu`");
+    expect(latinToMedievalIpa("iudicium")).toBe("/juˈdisium/");
+    expect(latinToMedievalIpa("maior")).toBe("/ˈmajor/");
+    expect(latinToMedievalIpa("generatio")).toBe("/geneˈrasio/");
+    expect(latinToMedievalIpa("agnus")).toBe("/ˈagnus/");
+    expect(latinToMedievalIpa("quaestio")).toContain("kw");
   });
 
   it("keeps canonical IPA and ElevenLabs input separate even while they currently agree", () => {

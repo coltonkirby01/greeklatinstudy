@@ -26,73 +26,71 @@ Useful public reference pages used when establishing this policy:
 
 The goal is not “the exact accent of a Paris master in 1270.” Medieval Latin was pronounced differently in different places. The goal is a historically informed common denominator suitable for scholastic study.
 
-Prefer a pronunciation feature when:
+Prefer a pronunciation feature when Rigg or Stotz treats the development as widespread, when several regional reconstructions point in the same direction, and when the result preserves the written word clearly enough to transfer to other Latin pronunciation systems. Avoid strongly local features when the evidence changes sharply by century or region or when adopting them would make ordinary Latin unnecessarily difficult to recognize elsewhere.
 
-- Rigg or Stotz treats the development as widespread rather than narrowly local;
-- several regional reconstructions point in the same direction;
-- it preserves the identity of the written Latin word clearly enough for transfer to other Latin pronunciation systems.
+Rigg explicitly warns that medieval Latin pronunciation had diverged considerably by region. That warning is part of the design: the site normalizes rather than pretending to reproduce one local speaker exactly.
 
-Avoid or soften a feature when:
+## Normalized production profile
 
-- it is strongly regional;
-- the evidence changes substantially by century or locality;
-- adopting it would make ordinary Latin unnecessarily difficult to recognize outside that one tradition.
-
-Rigg explicitly warns that medieval Latin pronunciation had diverged so far regionally that only broad phonemic contrasts can be reconstructed with confidence. That warning is part of the design: the site should normalize rather than pretend to reproduce one local speaker exactly.
-
-## Phase-one high-confidence rules
-
-These are safe enough to encode before paid audio generation:
+These are the stable rules for the site's broad Medieval Latin profile:
 
 - **Instructional morphology is not spoken.** A card such as `laud-āmus` is pronounced as the complete word `laudāmus`; a stem/ending hyphen is visual only.
 - **`ae` and `oe` are monophthongized to an e-quality vowel.** Rigg identifies this as one of the changes that became nearly universal across medieval Europe.
-- **Classical vowel length is not maintained as a phonemic long/short contrast in the normalized medieval output.** Written macrons remain valuable on the card and may help determine inherited stress, but the audio does not exaggerate Classical quantity.
-- **`y` is normalized toward `i`**, reflecting the widespread medieval interchange noted by Rigg.
-- **Consonantal `v` is /v/** rather than the Classical /w/. This makes the result recognizably post-Classical while remaining broadly intelligible.
-- **`c` before `e`, `i`, `y`, `ae`, or `oe` is normalized to /s/.** Rigg says this assibilation occurred in many countries, especially the Romance-speaking regions and England. This broad value also fits the French/Parisian scholastic center of gravity without forcing a narrowly modern Italianate `/tʃ/` pronunciation.
-- **`sc` before those same front vowels is normalized to /s/.** Rigg explicitly treats it as similarly assibilated.
-- **`ti` before another vowel is normalized to `si` except after `s`, `t`, or `x`.** Rigg identifies `ci` for Classical `ti` before vowels as a widespread medieval spelling, direct evidence that the two sequences converged in ordinary pronunciation. This profile therefore aligns the sound with the normalized front-`c` value rather than introducing an unrelated modern convention.
-- **Initial and internal `h` is normally silent.** Rigg records both widespread loss of `h` and hypercorrect addition of `h`, showing that it had weak phonological status in much medieval usage.
-- **Greek aspirate spellings are normalized conservatively:** `ph → /f/`, `th → /t/`, `ch → /k/` unless a later source-specific exception is deliberately added.
-- **Inherited Latin stress remains the organizing baseline.** The penult receives stress when heavy; otherwise stress falls on the antepenult. Macrons on the authoritative grammar data may be used to identify a historically heavy penult even though the actual Medieval Latin audio does not preserve phonemic vowel length.
-- **Written double consonants remain audibly distinct in the canonical representation where practical.** Regional weakening varied; preserving the written distinction is the more transferable teaching choice.
+- **Classical vowel length is not maintained as a phonemic long/short contrast in the audio.** Written macrons remain on the card and may help determine inherited stress, but the recording does not exaggerate Classical quantity.
+- **`y` is normalized toward `i`**, reflecting widespread medieval interchange.
+- **Consonantal `v` is /v/** rather than Classical /w/.
+- **Consonantal `i` is represented as /j/** where the spelling clearly functions as a consonant, including ordinary initial or intervocalic environments such as `iudicium` and `maior`.
+- **`c` before `e`, `i`, `y`, `ae`, or `oe` is normalized to /s/.** Rigg says this assibilation occurred in many countries, especially Romance-speaking regions and England. The broad value also suits the French/Parisian scholastic center of gravity without forcing modern Italianate `/tʃ/`.
+- **`sc` before those same front vowels is normalized to /s/**; Rigg treats it as similarly assibilated.
+- **`ti` before another vowel is normalized to `si` except after `s`, `t`, or `x`.** Widespread medieval `ti`/`ci` spelling interchange supports convergence with assibilated `c`.
+- **Initial and internal `h` is normally silent.** Rigg records widespread loss and hypercorrect addition of `h`, showing its weak phonological status in much medieval usage.
+- **Greek aspirate spellings are normalized conservatively:** `ph → /f/`, `th → /t/`, `ch → /k/`.
+- **Inherited Latin stress remains the baseline.** The penult receives stress when heavy; otherwise stress falls on the antepenult. Macrons in authoritative grammar data may identify a historically heavy penult even though vowel quantity is not phonemic in the Medieval Latin audio.
+- **Written double consonants remain distinct in the canonical representation where practical.** Preserving them is the more transferable teaching choice.
 
-## Rules that still require a comparative audit before production generation
+## Conservative choices where the medieval evidence varies
 
-Do not generate the full Latin grammar cache until these have been checked against Stotz and the regional evidence:
+Some features do not have one credible pan-medieval realization. The site therefore makes explicit pedagogical normalizations rather than pretending that one regional form was universal:
 
-- exact realization of `g` before front vowels; Rigg explicitly gives different values in different countries;
-- `gn`; Rigg explicitly notes regional variation and records different spellings in Italy versus England;
-- whether `qu` should always remain `/kw/` in the normalized scholastic profile;
-- fine vowel qualities (`e/ɛ`, `o/ɔ`) and whether any positional distinctions are pedagogically useful;
-- consonantal `i/j` in ambiguous orthographies;
-- whether any common final-consonant devoicing or cluster simplification should be included without harming broad intelligibility.
+- **`g` before front vowels remains /g/.** Medieval front-`g` values varied sharply by region. Keeping /g/ is a spelling-transparent, recognizable compromise for a broad scholastic learner.
+- **`gn` remains /gn/.** Rigg explicitly notes regional variation. The site does not impose an Italianate palatal or another local realization.
+- **`qu` remains /kw/.** This preserves the familiar written sequence and transfers well across Latin traditions.
+- **Fine `e/ɛ` and `o/ɔ` distinctions are not systematically imposed.** They vary too much for the value they would add to this broad teaching profile.
+- **No general final-consonant devoicing or regional cluster simplification is imposed.** Those changes are too local for the site's intended common denominator.
 
-Until that audit is complete, the engine deliberately keeps conservative, recognizable values for these variable sequences and tests mark their status as provisional.
+These are normalization choices, not claims that every medieval theologian or philosopher pronounced the forms this way.
 
 ## ElevenLabs and Supabase architecture
 
-Use the existing `course-audio` architecture rather than creating an unrelated Latin audio service:
+Use the existing `course-audio` architecture rather than creating an unrelated Latin service:
 
 1. Reconstruct the complete spoken Latin form from the instructional card display.
 2. Convert it deterministically to canonical normalized Medieval Latin IPA.
-3. Convert that representation to an ElevenLabs v3 input. Eleven v3 supports IPA directly; the generated recording remains an approximation and must be audited with the chosen voice.
-4. Include pronunciation system, canonical IPA, TTS input, model, and voice in the cache signature.
-5. Store generated MP3s in the existing Supabase `course-audio` Storage bucket and metadata in `course_audio_assets`.
-6. Reuse an existing matching cache entry. A replay must never spend new ElevenLabs credits.
-7. For paradigm cards, pronounce the **singular column vertically first**, then one pause, then the **plural column vertically**, matching the established Greek grammar-audio behavior.
+3. Convert that representation to an ElevenLabs v3 input. The generated recording remains a practical approximation and must be audited with the chosen voice.
+4. Store generated MP3s in the existing Supabase `course-audio` Storage bucket and metadata in `course_audio_assets`.
+5. Reuse an existing matching cache entry. Replaying a cached recording must never spend new ElevenLabs credits.
+6. For paradigm cards, pronounce the **singular column vertically first**, then one pause, then the **plural column vertically**, matching the established Greek grammar-audio behavior.
+7. Use a dedicated Latin voice configured as `ELEVENLABS_MEDIEVAL_LATIN_VOICE_ID`; do not silently fall back to the Greek voice.
 
-Do not pre-generate or regenerate paid Latin audio merely because this pronunciation code changes. First run the representative pronunciation corpus, listen to samples, settle the variable rules and voice, and only then generate the full cache with explicit user approval.
+The current 24 active-indicative and 12 passive-indicative paradigm cards have stable Latin audio definitions, for **36 total paradigm assets**.
 
-## Representative pre-generation corpus
+## Paid-generation safeguard
 
-Before generating the full grammar deck, audit a compact corpus containing both current paradigm forms and scholastic vocabulary:
+Latin study is cache-only until the user explicitly approves generation. The learner-facing Latin audio component queries Supabase for an existing cached MP3 and **does not call the generation Edge Function**.
+
+The Edge Function also requires an explicit `allowGeneration: true` request before a missing or changed Latin asset may call ElevenLabs. This is intentionally separate from Greek's existing on-demand behavior. Do not add Latin IDs to an automatic prewarm workflow without explicit user approval.
+
+Before the first paid generation, audition a small representative set and choose the dedicated Latin voice. Only after that sample is approved should the complete 36-card grammar cache be generated.
+
+## Representative audition corpus
+
+The first sample should contain current paradigm forms plus common scholastic vocabulary, for example:
 
 - `laudō`, `laudāmus`, `laudābimus`
 - `moneō`, `monēmus`
 - `mittimus`, `mittuntur`
 - `audiō`, `audītis`
 - `gratia`, `scientia`, `quaestio`, `essentia`, `substantia`
-- `philosophia`, `intellectus`, `voluntas`, `ecclesia`
+- `philosophia`, `intellectus`, `voluntas`, `ecclesia`, `iudicium`
 
-The grammar forms verify stress, morphology stripping, consonant doubling, diphthongs, and the four conjugations. The scholastic terms expose the consonant sequences that need the strongest historical audit before production generation.
+The grammar forms verify stress, morphology stripping, consonant doubling, diphthongs, and the four conjugations. The scholastic terms exercise the medieval consonant rules most relevant to theology and philosophy.
