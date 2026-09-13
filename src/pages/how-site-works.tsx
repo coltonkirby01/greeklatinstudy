@@ -15,9 +15,10 @@ const hardSeconds = HARD_RECALL_START_MS / 1_000;
  * User-facing explanation of consequential study behavior.
  *
  * MAINTENANCE INVARIANT: when an agent changes study/session/timer/grading/
- * progress behavior in a way a learner would notice, update this guide in the
- * same change. Keep implementation-linked numbers sourced from shared constants
- * rather than duplicating them here whenever practical.
+ * progress or pronunciation/audio behavior in a way a learner would notice,
+ * update this guide in the same change. Keep implementation-linked numbers
+ * sourced from shared constants rather than duplicating them here whenever
+ * practical.
  */
 export function HowSiteWorks() {
   return (
@@ -116,10 +117,14 @@ export function HowSiteWorks() {
         </details>
 
         <details className="site-guide-section">
-          <summary>Greek pronunciation and audio</summary>
+          <summary>Greek and Latin pronunciation/audio</summary>
           <div>
-            <p>Greek cards preserve the written accents and other orthographic marks supplied by the course source. The pronunciation layer keeps a Classical Attic pronunciation representation, including the distinction among acute, grave, and circumflex accents.</p>
-            <p>Generated card audio is shared and cached in Supabase so replaying an existing recording does not spend new generation credits. ElevenLabs is used as a practical speech approximation; its audio cannot reproduce reconstructed Ancient Greek pitch accent with complete phonetic precision.</p>
+            <h3>Greek</h3>
+            <p>Greek cards preserve the written accents and other orthographic marks supplied by the course source. The pronunciation layer keeps a Classical Attic pronunciation representation, including the distinction among acute, grave, and circumflex accents. ElevenLabs is a practical speech approximation and cannot reproduce reconstructed Ancient Greek pitch accent with complete phonetic precision.</p>
+            <h3>Latin</h3>
+            <p>Latin grammar paradigms use a broad, normalized <strong>Medieval Latin</strong> pronunciation designed for scholastic theology, philosophy, and general medieval reading. It is informed principally by Rigg and Stotz rather than tied to one narrow regional accent. Stem/ending dashes are visual teaching marks and are not spoken. Macrons remain on the cards and help preserve inherited stress where useful, but the Medieval Latin audio does not treat Classical vowel length as a phonemic contrast.</p>
+            <h3>Shared audio cache</h3>
+            <p>Generated Greek and Latin card audio is stored in the shared Supabase cache. Replaying an existing recording uses that cached MP3 and does not spend new generation credits. The audio button uses <strong>A</strong> as its keyboard shortcut when an audio recording is available for the visible card.</p>
           </div>
         </details>
       </div>
