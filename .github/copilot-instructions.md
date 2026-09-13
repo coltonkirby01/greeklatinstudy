@@ -13,8 +13,8 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 
 ## User-facing behavior guide
 
-- `src/pages/how-site-works.tsx` is the canonical learner-facing explanation of consequential site behavior and appears at the bottom of the Account page.
-- Any change to Adaptive/Sequential selection, first-pass coverage, grading defaults, timing, keyboard controls, session behavior, Initial completion/Initial mastery, staged unlocking, cloud-sync behavior, or other learner-visible study mechanics MUST update this guide in the same change when the explanation is affected.
+- `src/pages/how-site-works.tsx` is the canonical learner-facing explanation of consequential site behavior and appears on the Home page directly above the progress/cloud-sync callout.
+- Any change to Adaptive/Sequential selection, first-pass coverage, grading defaults, timing, keyboard controls, session behavior, Initial completion/Initial mastery, staged unlocking, cloud-sync behavior, pronunciation/audio behavior, or other learner-visible study mechanics MUST update this guide in the same change when the explanation is affected.
 - Prefer importing shared implementation constants into the guide instead of duplicating numeric values. Keep the guide useful to learners; do not fill it with implementation trivia.
 - Tests should protect important examples and invariants described in the guide, including the 125% Adaptive initial-coverage rule.
 
@@ -59,7 +59,7 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - Space = Start while the Start gate is open; Reveal before answer; Save & Next after reveal. No other key may dismiss the Start gate.
 - F = flip question/answer after reveal.
 - Enter = toggle Right/Wrong after reveal. R/W are intentionally unassigned.
-- 1/2/3 = Easy/Medium/Hard. S = save/unsave a card. A = Greek audio.
+- 1/2/3 = Easy/Medium/Hard. S = save/unsave a card. A = audio on Greek or Latin cards where audio exists.
 - Shift+Enter is unassigned.
 - Automatic correctness is per card + study mode/direction: attempts 1–3 default Wrong; from attempt 4 onward use the majority of the three most recent saved results. Difficulty remains time-based (<3s Easy, <10s Medium, otherwise Hard).
 - Back truly undoes/replaces the prior grade; Skip records no grade.
@@ -70,6 +70,18 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - Playback uses cached Supabase Storage audio when available; replaying cached audio must not spend ElevenLabs generation credits.
 - For ending-only chart audio, read each vertical column continuously and put exactly one `[pause]` between columns.
 - Keep ElevenLabs API keys server-side only.
+
+## Medieval Latin audio
+
+- `docs/MEDIEVAL_LATIN_PRONUNCIATION.md` is the pronunciation-source and normalization contract. The learner-facing label is **Medieval Latin**; do not silently replace it with Classical or modern ecclesiastical Latin.
+- The profile is deliberately broad scholastic Medieval Latin: Rigg and Stotz lead, regional reconstructions are comparative controls, and Allen is only the Classical baseline for recognizability.
+- Latin paradigm audio must reconstruct and pronounce the complete word; morphology dashes such as `laud-āmus` are visual only and must never be spoken.
+- Latin paradigm audio is ordered vertically: singular column first, exactly one `[pause]`, then plural column.
+- `src/features/latin/medieval-latin-audio.tsx` is intentionally **cache-only** until the user explicitly approves paid generation. It may read `course_audio_assets`/Supabase Storage but must not call the generation Edge Function merely because a learner opens a card.
+- `course-audio` requires `allowGeneration: true` before a missing/changed Latin asset may call ElevenLabs. Preserve that safeguard unless the user explicitly changes the policy.
+- Use a dedicated `ELEVENLABS_MEDIEVAL_LATIN_VOICE_ID`; never silently fall back to the Greek voice for Latin generation.
+- Do not add Latin asset IDs to an automatic prewarm workflow without explicit user approval. Replays of cached Latin MP3s must never spend new ElevenLabs credits.
+- When new built-in Latin grammar paradigm cards are added, give them stable audio definitions in `supabase/functions/course-audio/builtin-latin-assets.ts` and extend regression coverage in the same change.
 
 ## Removed features
 
