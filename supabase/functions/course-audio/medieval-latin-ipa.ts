@@ -35,12 +35,29 @@ export function stripUnpronouncedLatinNotation(text: string) {
     .trim();
 }
 
+function plainVowelCharacter(value: string | undefined) {
+  return Boolean(value && SIMPLE_VOWELS.has(value));
+}
+
+function consonantalI(chars: readonly string[], index: number) {
+  if (chars[index] !== "i") return false;
+  const previous = chars[index - 1];
+  const next = chars[index + 1];
+  if (!plainVowelCharacter(next)) return false;
+  return index === 0 || plainVowelCharacter(previous);
+}
+
 function unitsForWord(rawWord: string): LatinUnit[] {
   const word = stripUnpronouncedLatinNotation(rawWord).toLocaleLowerCase("la");
   const chars = Array.from(word);
   const units: LatinUnit[] = [];
 
   for (let index = 0; index < chars.length; index += 1) {
+    if (consonantalI(chars, index)) {
+      units.push({ raw: "j", vowel: false, long: false, diphthong: false });
+      continue;
+    }
+
     const pair = `${chars[index] ?? ""}${chars[index + 1] ?? ""}`;
     if (DIPHTHONGS.has(pair)) {
       units.push({ raw: pair, vowel: true, long: false, diphthong: true });
@@ -69,6 +86,11 @@ function nucleusIndices(units: readonly LatinUnit[]) {
   return units.flatMap((unit, index) => unit.vowel ? [index] : []);
 }
 
+function consonantWeight(unit: LatinUnit) {
+  if (unit.vowel) return 0;
+  return unit.raw === "x" || unit.raw === "z" ? 2 : 1;
+}
+
 function stressNucleusPosition(units: readonly LatinUnit[], nuclei: readonly number[]) {
   if (nuclei.length <= 1) return 0;
   if (nuclei.length === 2) return 0;
@@ -77,7 +99,9 @@ function stressNucleusPosition(units: readonly LatinUnit[], nuclei: readonly num
   const penultIndex = nuclei[penultPosition];
   const finalIndex = nuclei[penultPosition + 1];
   const penult = units[penultIndex];
-  const consonantsAfterPenult = units.slice(penultIndex + 1, finalIndex).filter((unit) => !unit.vowel).length;
+  const consonantsAfterPenult = units
+    .slice(penultIndex + 1, finalIndex)
+    .reduce((sum, unit) => sum + consonantWeight(unit), 0);
   const heavy = penult.long || penult.diphthong || consonantsAfterPenult >= 2;
   return heavy ? penultPosition : penultPosition - 1;
 }
@@ -129,17 +153,18 @@ function unitIpa(units: readonly LatinUnit[], index: number) {
     case "x": return "ks";
     case "z": return "dz";
     case "c":
-      // Rigg notes /s/ before e/i in many countries, especially the Romance
-      // areas and England. This is the broad normalized value; it deliberately
-      // avoids the narrower modern Italianate /tʃ/ default.
+      // Rigg notes /s/ before e/i in many countries, especially Romance areas
+      // and England. It is the broad normalized value here, avoiding a narrow
+      // modern Italianate /tʃ/ default while remaining highly recognizable.
       return isFrontVowel(next) ? "s" : "k";
     case "g":
-      // Rigg explicitly gives different medieval front-g values by region.
-      // Keep /g/ until the Stotz/Copeman comparison settles a broad default.
+      // Front-vowel g varied sharply by region. A spelling-transparent /g/ is
+      // our deliberate broad compromise, not a claim of one medieval norm.
       return "g";
     case "t":
-      // Widespread medieval ti/ci interchange before vowels indicates
-      // convergence with assibilated c. Preserve the traditional exceptions.
+      // Rigg's widespread medieval ti/ci interchange before vowels supports
+      // assibilation. Use /s/ in the normalized profile, preserving the usual
+      // exceptions after s, t, or x.
       if (next?.raw === "i" && afterNext?.vowel && !["s", "t", "x"].includes(previous)) return "s";
       return "t";
     default:
@@ -186,13 +211,20 @@ export function latinParadigmToElevenLabsIpa(columns: readonly (readonly string[
   return columns.map(latinParadigmColumnToElevenLabsIpa).filter(Boolean).join(" [pause] ");
 }
 
-/** Exposed for tests/documentation while the variable-rule audit is underway. */
+/**
+ * Stable normalized choices for the learner-facing Medieval Latin profile.
+ * Some are historical common denominators; others are intentionally
+ * conservative where Rigg/Stotz and the regional evidence show divergence.
+ */
 export const MEDIEVAL_LATIN_PROFILE_RULES = {
   frontC: "s",
   frontSc: "s",
   tiBeforeVowel: "s+i",
   h: "silent",
-  frontG: "g (provisional)",
-  gn: "gn (provisional)",
-  qu: "kw (provisional)",
+  consonantalV: "v",
+  consonantalI: "j",
+  frontG: "g (normalized conservative choice)",
+  gn: "gn (normalized conservative choice)",
+  qu: "kw (normalized conservative choice)",
+  vowelQuantity: "not phonemic; macrons retained for inherited stress",
 } as const;
