@@ -13,6 +13,21 @@ const SIMPLE_VOWELS = new Set(["a", "ā", "e", "ē", "i", "ī", "o", "ō", "u", 
 const DIPHTHONGS = new Set(["ae", "oe", "au"]);
 const CONSONANT_DIGRAPHS = new Set(["ph", "th", "ch", "qu", "sc"]);
 
+/**
+ * Permanent pacing invariant for Latin paradigm audio.
+ *
+ * Eleven v3 can otherwise accelerate through a short paradigm column, which
+ * makes the singular forms noticeably faster than the plural forms with some
+ * voices. Every individual form therefore receives the same short pause, and
+ * the singular/plural boundary receives one longer pause. Keep this shared
+ * helper as the source of truth for current and future paradigm cards rather
+ * than hand-authoring timing in individual assets.
+ *
+ * See docs/MEDIEVAL_LATIN_AUDIO_PACING.md.
+ */
+export const MEDIEVAL_LATIN_FORM_PAUSE = "[short pause]";
+export const MEDIEVAL_LATIN_COLUMN_PAUSE = "[pause]";
+
 type LatinUnit = {
   raw: string;
   vowel: boolean;
@@ -204,11 +219,17 @@ export function latinToElevenLabsIpa(text: string) {
 }
 
 export function latinParadigmColumnToElevenLabsIpa(forms: readonly string[]) {
-  return forms.map(latinToElevenLabsIpa).filter(Boolean).join(" ");
+  return forms
+    .map(latinToElevenLabsIpa)
+    .filter(Boolean)
+    .join(` ${MEDIEVAL_LATIN_FORM_PAUSE} `);
 }
 
 export function latinParadigmToElevenLabsIpa(columns: readonly (readonly string[])[]) {
-  return columns.map(latinParadigmColumnToElevenLabsIpa).filter(Boolean).join(" [pause] ");
+  return columns
+    .map(latinParadigmColumnToElevenLabsIpa)
+    .filter(Boolean)
+    .join(` ${MEDIEVAL_LATIN_COLUMN_PAUSE} `);
 }
 
 /**
