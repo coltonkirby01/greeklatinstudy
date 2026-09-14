@@ -16,16 +16,18 @@ const CONSONANT_DIGRAPHS = new Set(["ph", "th", "ch", "qu", "sc"]);
 /**
  * Permanent pacing invariant for Latin paradigm audio.
  *
- * Eleven v3 can otherwise accelerate through a short paradigm column, which
- * makes the singular forms noticeably faster than the plural forms with some
- * voices. Every individual form therefore receives the same short pause, and
- * the singular/plural boundary receives one longer pause. Keep this shared
- * helper as the source of truth for current and future paradigm cards rather
- * than hand-authoring timing in individual assets.
+ * Eleven v3 can otherwise accelerate through a short paradigm column, while
+ * explicit `[short pause]` tags make the spacing between individual forms a
+ * little too long for the desired slightly brisk teaching pace. Monolithic
+ * fallback input therefore uses ordinary comma punctuation between forms and
+ * one explicit longer pause between singular and plural.
  *
- * See docs/MEDIEVAL_LATIN_AUDIO_PACING.md.
+ * New production paradigm audio should synthesize each form independently and
+ * let the player control inter-form timing. This prevents v3 from compressing
+ * repeated stems such as laud-, mon-, mitt-, or aud-. See
+ * docs/MEDIEVAL_LATIN_AUDIO_PACING.md.
  */
-export const MEDIEVAL_LATIN_FORM_PAUSE = "[short pause]";
+export const MEDIEVAL_LATIN_FORM_SEPARATOR = ",";
 export const MEDIEVAL_LATIN_COLUMN_PAUSE = "[pause]";
 
 type LatinUnit = {
@@ -167,19 +169,9 @@ function unitIpa(units: readonly LatinUnit[], index: number) {
     case "h": return "";
     case "x": return "ks";
     case "z": return "dz";
-    case "c":
-      // Rigg notes /s/ before e/i in many countries, especially Romance areas
-      // and England. It is the broad normalized value here, avoiding a narrow
-      // modern Italianate /tʃ/ default while remaining highly recognizable.
-      return isFrontVowel(next) ? "s" : "k";
-    case "g":
-      // Front-vowel g varied sharply by region. A spelling-transparent /g/ is
-      // our deliberate broad compromise, not a claim of one medieval norm.
-      return "g";
+    case "c": return isFrontVowel(next) ? "s" : "k";
+    case "g": return "g";
     case "t":
-      // Rigg's widespread medieval ti/ci interchange before vowels supports
-      // assibilation. Use /s/ in the normalized profile, preserving the usual
-      // exceptions after s, t, or x.
       if (next?.raw === "i" && afterNext?.vowel && !["s", "t", "x"].includes(previous)) return "s";
       return "t";
     default:
@@ -209,22 +201,23 @@ export function latinToMedievalIpa(text: string) {
   return ipa ? `/${ipa}/` : "";
 }
 
-/**
- * Eleven v3 accepts IPA directly. Keep this separate from canonical IPA so
- * voice/model-specific compromises can be introduced later without rewriting
- * the scholarly representation.
- */
+/** Eleven v3 native IPA input for one spoken Latin form. */
 export function latinToElevenLabsIpa(text: string) {
   return latinToMedievalIpa(text);
 }
 
+/**
+ * Monolithic fallback only. New paradigm generation should synthesize each
+ * form independently so repeated stems cannot be elided by Eleven v3.
+ */
 export function latinParadigmColumnToElevenLabsIpa(forms: readonly string[]) {
   return forms
     .map(latinToElevenLabsIpa)
     .filter(Boolean)
-    .join(` ${MEDIEVAL_LATIN_FORM_PAUSE} `);
+    .join(`${MEDIEVAL_LATIN_FORM_SEPARATOR} `);
 }
 
+/** Monolithic fallback only; see the segmented-generation policy above. */
 export function latinParadigmToElevenLabsIpa(columns: readonly (readonly string[])[]) {
   return columns
     .map(latinParadigmColumnToElevenLabsIpa)
@@ -232,11 +225,6 @@ export function latinParadigmToElevenLabsIpa(columns: readonly (readonly string[
     .join(` ${MEDIEVAL_LATIN_COLUMN_PAUSE} `);
 }
 
-/**
- * Stable normalized choices for the learner-facing Medieval Latin profile.
- * Some are historical common denominators; others are intentionally
- * conservative where Rigg/Stotz and the regional evidence show divergence.
- */
 export const MEDIEVAL_LATIN_PROFILE_RULES = {
   frontC: "s",
   frontSc: "s",

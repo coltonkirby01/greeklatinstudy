@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   MEDIEVAL_LATIN_COLUMN_PAUSE,
-  MEDIEVAL_LATIN_FORM_PAUSE,
+  MEDIEVAL_LATIN_FORM_SEPARATOR,
   MEDIEVAL_LATIN_PRONUNCIATION_SYSTEM,
   MEDIEVAL_LATIN_PROFILE_RULES,
   latinParadigmToElevenLabsIpa,
@@ -77,23 +77,36 @@ describe("normalized Medieval Latin pronunciation foundation", () => {
     expect(latinToElevenLabsIpa("laud-āmus")).not.toContain("-");
   });
 
-  it("keeps paradigm pacing even within columns and longer between singular and plural", () => {
+  it("keeps monolithic fallback pacing brisk and requires segmented production generation", () => {
     const pacingPolicy = fs.readFileSync("docs/MEDIEVAL_LATIN_AUDIO_PACING.md", "utf8");
     expect(pacingPolicy).toContain("slightly brisk");
+    expect(pacingPolicy).toContain("synthesize each form independently");
     expect(pacingPolicy).toContain("future Latin paradigm cards");
-    expect(MEDIEVAL_LATIN_FORM_PAUSE).toBe("[short pause]");
+    expect(MEDIEVAL_LATIN_FORM_SEPARATOR).toBe(",");
     expect(MEDIEVAL_LATIN_COLUMN_PAUSE).toBe("[pause]");
 
     const tts = latinParadigmToElevenLabsIpa([
       ["laud-ō", "laud-ās", "laud-at"],
       ["laud-āmus", "laud-ātis", "laud-ant"],
     ]);
-    expect(tts.match(/\[short pause\]/gu)).toHaveLength(4);
-    expect(tts.match(/(?<!short )\[pause\]/gu)).toHaveLength(1);
+    expect(tts).not.toContain("[short pause]");
+    expect(tts.match(/,/gu)).toHaveLength(4);
+    expect(tts.match(/\[pause\]/gu)).toHaveLength(1);
     expect(tts.split(" [pause] ")).toEqual([
-      "/ˈlau̯do/ [short pause] /ˈlau̯das/ [short pause] /ˈlau̯dat/",
-      "/lau̯ˈdamus/ [short pause] /lau̯ˈdatis/ [short pause] /ˈlau̯dant/",
+      "/ˈlau̯do/, /ˈlau̯das/, /ˈlau̯dat/",
+      "/lau̯ˈdamus/, /lau̯ˈdatis/, /ˈlau̯dant/",
     ]);
+  });
+
+  it("preserves full stems in plural forms before any TTS request", () => {
+    expect(latinToElevenLabsIpa("laud-āmur")).toBe("/lau̯ˈdamur/");
+    expect(latinToElevenLabsIpa("laud-āminī")).toBe("/lau̯ˈdamini/");
+    expect(latinToElevenLabsIpa("mon-ēmur")).toBe("/moˈnemur/");
+    expect(latinToElevenLabsIpa("mon-ēminī")).toBe("/moˈnemini/");
+    expect(latinToElevenLabsIpa("mitt-imur")).toBe("/ˈmittimur/");
+    expect(latinToElevenLabsIpa("mitt-iminī")).toBe("/mitˈtimini/");
+    expect(latinToElevenLabsIpa("aud-īmur")).toBe("/au̯ˈdimur/");
+    expect(latinToElevenLabsIpa("aud-īminī")).toBe("/au̯ˈdimini/");
   });
 
   it("can convert every current Latin active/passive paradigm cell without speaking morphology dashes", () => {
