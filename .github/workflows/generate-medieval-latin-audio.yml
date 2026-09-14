@@ -1,0 +1,81 @@
+name: Generate approved Medieval Latin audio
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  generate-latin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Generate and cache all approved Medieval Latin paradigms
+        env:
+          SUPABASE_URL: https://wqgvpgmudouftyhnvvpr.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_s4DGueytgij3zvSce1D1hQ_jtEf1X1e
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(
+            latin-active-indicative-present-1st
+            latin-active-indicative-present-2nd
+            latin-active-indicative-present-3rd
+            latin-active-indicative-present-4th
+            latin-active-indicative-imperfect-1st
+            latin-active-indicative-imperfect-2nd
+            latin-active-indicative-imperfect-3rd
+            latin-active-indicative-imperfect-4th
+            latin-active-indicative-future-1st
+            latin-active-indicative-future-2nd
+            latin-active-indicative-future-3rd
+            latin-active-indicative-future-4th
+            latin-active-indicative-perfect-1st
+            latin-active-indicative-perfect-2nd
+            latin-active-indicative-perfect-3rd
+            latin-active-indicative-perfect-4th
+            latin-active-indicative-pluperfect-1st
+            latin-active-indicative-pluperfect-2nd
+            latin-active-indicative-pluperfect-3rd
+            latin-active-indicative-pluperfect-4th
+            latin-active-indicative-future-perfect-1st
+            latin-active-indicative-future-perfect-2nd
+            latin-active-indicative-future-perfect-3rd
+            latin-active-indicative-future-perfect-4th
+            latin-passive-indicative-present-1st
+            latin-passive-indicative-present-2nd
+            latin-passive-indicative-present-3rd
+            latin-passive-indicative-present-4th
+            latin-passive-indicative-imperfect-1st
+            latin-passive-indicative-imperfect-2nd
+            latin-passive-indicative-imperfect-3rd
+            latin-passive-indicative-imperfect-4th
+            latin-passive-indicative-future-1st
+            latin-passive-indicative-future-2nd
+            latin-passive-indicative-future-3rd
+            latin-passive-indicative-future-4th
+          )
+
+          echo "Generating ${#ids[@]} approved Medieval Latin audio assets"
+          for id in "${ids[@]}"; do
+            success=0
+            for attempt in 1 2 3; do
+              status=$(curl --silent --show-error --output /tmp/course-audio-response.json --write-out '%{http_code}' \
+                --request POST "$SUPABASE_URL/functions/v1/course-audio" \
+                --header "apikey: $SUPABASE_PUBLISHABLE_KEY" \
+                --header 'Content-Type: application/json' \
+                --data "{\"assetId\":\"$id\",\"allowGeneration\":true}")
+              if [[ "$status" == "200" ]]; then
+                echo "$id: ready"
+                success=1
+                break
+              fi
+              echo "$id: attempt $attempt failed with HTTP $status"
+              cat /tmp/course-audio-response.json
+              echo
+              sleep $((attempt * 2))
+            done
+            if [[ "$success" != "1" ]]; then
+              echo "Failed to generate $id after 3 attempts" >&2
+              exit 1
+            fi
+          done
