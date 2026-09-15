@@ -40,6 +40,15 @@ describe("How this site works guide", () => {
     expect(guide).toContain("press <strong>D</strong>");
     expect(guide).toContain("the current card stays visible and the Start gate does not reopen");
     expect(guide).toContain("Space to Save &amp; Next");
+    expect(guide).toContain("selecting any parent heading that contains the card restores all cards beneath that parent");
+    expect(guide).toContain("There is no separate deselected-card list");
+    const greek = fs.readFileSync("src/pages/greek-page.tsx", "utf8");
+    const latin = fs.readFileSync("src/pages/latin-page.tsx", "utf8");
+    expect(greek).not.toContain('title="Individually deselected"');
+    expect(latin).not.toContain('title="Individually deselected"');
+    expect(greek).toContain("function changeGroups");
+    expect(greek).toContain("groupSelectionState");
+    expect(latin).toContain("function changeSavedCards");
     expect(guide).toContain("does not erase saved reviews, mastery, scheduling, Stats, or long-term Adaptive memory");
   });
 

@@ -184,20 +184,20 @@ export function GreekPage() {
   useEffect(() => { saveGreekFilterSelection(selected); }, [selected]);
   useEffect(() => { saveIncludeSavedCards("greek", includeSavedCards); }, [includeSavedCards]);
 
-  const lesson1State = groupState(selected, lesson1Keys);
-  const alphabetState = groupState(selected, alphabetKeys);
-  const lesson2State = groupState(selected, lesson2Keys);
-  const lesson3State = groupState(selected, lesson3Keys);
-  const lesson3EndingsState = groupState(selected, lesson3EndingsKeys);
-  const lesson3ParadigmState = groupState(selected, lesson3ParadigmKeys);
-  const lesson4State = groupState(selected, lesson4Keys);
-  const lesson4EndingsState = groupState(selected, lesson4EndingsKeys);
-  const lesson4ParadigmState = groupState(selected, lesson4ParadigmKeys);
-  const lesson5State = groupState(selected, lesson5Keys);
-  const lesson5EndingsState = groupState(selected, lesson5EndingsKeys);
-  const lesson5ParadigmState = groupState(selected, lesson5ParadigmKeys);
-  const vocabularyState = groupState(selected, allVocabularyKeys);
-  const grammarState = groupState(selected, allGrammarKeys);
+  const lesson1State = groupSelectionState( lesson1Keys);
+  const alphabetState = groupSelectionState( alphabetKeys);
+  const lesson2State = groupSelectionState( lesson2Keys);
+  const lesson3State = groupSelectionState( lesson3Keys);
+  const lesson3EndingsState = groupSelectionState( lesson3EndingsKeys);
+  const lesson3ParadigmState = groupSelectionState( lesson3ParadigmKeys);
+  const lesson4State = groupSelectionState( lesson4Keys);
+  const lesson4EndingsState = groupSelectionState( lesson4EndingsKeys);
+  const lesson4ParadigmState = groupSelectionState( lesson4ParadigmKeys);
+  const lesson5State = groupSelectionState( lesson5Keys);
+  const lesson5EndingsState = groupSelectionState( lesson5EndingsKeys);
+  const lesson5ParadigmState = groupSelectionState( lesson5ParadigmKeys);
+  const vocabularyState = groupSelectionState( allVocabularyKeys);
+  const grammarState = groupSelectionState( allGrammarKeys);
 
   const foundationCards = useMemo(() => decks?.foundation.cards.filter((card) => {
     if (excludedCards.refs.has(savedCardRef(decks.foundation.id, card.id))) return false;
@@ -234,13 +234,6 @@ export function GreekPage() {
       .filter((ref) => savedCards.refs.has(ref)).length;
   }, [decks, savedCards.refs]);
 
-  const excludedEntries = useMemo(() => {
-    if (!decks) return [];
-    return [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar, decks.lesson4Vocabulary, decks.lesson4Grammar, decks.lesson5Vocabulary, decks.lesson5Grammar]
-      .flatMap((sourceDeck) => sourceDeck.cards
-        .filter((card) => excludedCards.refs.has(savedCardRef(sourceDeck.id, card.id)))
-        .map((card) => ({ deckId: sourceDeck.id, cardId: card.id, label: card.front, source: sourceDeck.title })));
-  }, [decks, excludedCards.refs]);
 
   const sources = useMemo(() => {
     if (!decks) return [];
@@ -313,6 +306,37 @@ export function GreekPage() {
     return null;
   }
 
+  function cardsForGroupKeys(values: readonly string[]) {
+    if (!decks) return [];
+    const allowed = new Set(values);
+    const sourceDecks = [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar, decks.lesson4Vocabulary, decks.lesson4Grammar, decks.lesson5Vocabulary, decks.lesson5Grammar];
+    return sourceDecks.flatMap((sourceDeck) => sourceDeck.cards.flatMap((card) => {
+      const key = groupKeyForCard(sourceDeck, card);
+      return key && allowed.has(key) ? [{ deckId: sourceDeck.id, cardId: card.id }] : [];
+    }));
+  }
+
+  function groupSelectionState(values: readonly string[]) {
+    const base = groupState(selected, values);
+    const hasExcluded = cardsForGroupKeys(values).some(({ deckId, cardId }) => excludedCards.isExcluded(deckId, cardId));
+    return { ...base, checked: base.checked && !hasExcluded, mixed: base.mixed || (base.checked && hasExcluded) };
+  }
+
+  function changeGroups(values: readonly string[], checked: boolean) {
+    setSelected((current) => updateSet(current, values, checked));
+    if (checked) excludedCards.setMany(cardsForGroupKeys(values), false);
+  }
+
+  function changeSavedCards(checked: boolean) {
+    setIncludeSavedCards(checked);
+    if (!checked || !decks) return;
+    const sourceDecks = [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar, decks.lesson4Vocabulary, decks.lesson4Grammar, decks.lesson5Vocabulary, decks.lesson5Grammar];
+    const refs = sourceDecks.flatMap((sourceDeck) => sourceDeck.cards
+      .filter((card) => savedCards.refs.has(savedCardRef(sourceDeck.id, card.id)))
+      .map((card) => ({ deckId: sourceDeck.id, cardId: card.id })));
+    excludedCards.setMany(refs, false);
+  }
+
   function exactCardSelected(sourceDeck: DeckDefinition, card: StudyCard) {
     const key = groupKeyForCard(sourceDeck, card);
     return Boolean(key && selected.has(key) && !excludedCards.isExcluded(sourceDeck.id, card.id));
@@ -364,83 +388,80 @@ export function GreekPage() {
 
     {decks && <StudyFilterMenu summary={`${selectedCards.length} cards in the current pool`}>
       <FilterSection title="Quick select" onAll={() => { setSelected(new Set(allKeys)); excludedCards.clear(); }} onNone={() => { setSelected(new Set()); setIncludeSavedCards(false); }}>
-        <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={setIncludeSavedCards} hint={savedHint} />
-        <FilterCheckbox label="All Vocabulary" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onChange={(checked) => setSelected((current) => updateSet(current, allVocabularyKeys, checked))} />
-        <FilterCheckbox label="All Grammar" checked={grammarState.checked} mixed={grammarState.mixed} onChange={(checked) => setSelected((current) => updateSet(current, allGrammarKeys, checked))} />
+        <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={changeSavedCards} hint={savedHint} />
+        <FilterCheckbox label="All Vocabulary" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onChange={(checked) => changeGroups(allVocabularyKeys, checked)} />
+        <FilterCheckbox label="All Grammar" checked={grammarState.checked} mixed={grammarState.mixed} onChange={(checked) => changeGroups(allGrammarKeys, checked)} />
       </FilterSection>
 
-      {excludedEntries.length > 0 && <FilterSection title="Individually deselected" description="Cards removed with Deselect card or the D shortcut. Check a card here to restore it to its selected group.">
-        {excludedEntries.map((entry) => <FilterCheckbox key={savedCardRef(entry.deckId, entry.cardId)} label={`${entry.label} · ${entry.source}`} checked={false} onChange={(checked) => { if (checked) excludedCards.restore(entry.deckId, entry.cardId); }} />)}
-      </FilterSection>}
 
-      <FilterDisclosure title="Lesson 1" summary={`${lesson1State.selectedCount} of ${lesson1Keys.length} groups selected`} checked={lesson1State.checked} mixed={lesson1State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson1Keys, checked))}>
-        <FilterDisclosure title="Alphabet" summary={`${alphabetState.selectedCount} of ${alphabetKeys.length} cases selected`} count={countFoundation(categories.uppercase) + countFoundation(categories.lowercase)} nested checked={alphabetState.checked} mixed={alphabetState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, alphabetKeys, checked))}>
+      <FilterDisclosure title="Lesson 1" summary={`${lesson1State.selectedCount} of ${lesson1Keys.length} groups selected`} checked={lesson1State.checked} mixed={lesson1State.mixed} onCheckedChange={(checked) => changeGroups(lesson1Keys, checked)}>
+        <FilterDisclosure title="Alphabet" summary={`${alphabetState.selectedCount} of ${alphabetKeys.length} cases selected`} count={countFoundation(categories.uppercase) + countFoundation(categories.lowercase)} nested checked={alphabetState.checked} mixed={alphabetState.mixed} onCheckedChange={(checked) => changeGroups(alphabetKeys, checked)}>
           <FilterSection title="Letter case">
-            <FilterCheckbox label="Uppercase" count={countFoundation(categories.uppercase)} checked={selected.has(keys.uppercase)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.uppercase], checked))} />
-            <FilterCheckbox label="Lowercase" count={countFoundation(categories.lowercase)} checked={selected.has(keys.lowercase)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.lowercase], checked))} />
+            <FilterCheckbox label="Uppercase" count={countFoundation(categories.uppercase)} checked={groupSelectionState([keys.uppercase]).checked} mixed={groupSelectionState([keys.uppercase]).mixed} onChange={(checked) => changeGroups([keys.uppercase], checked)} />
+            <FilterCheckbox label="Lowercase" count={countFoundation(categories.lowercase)} checked={groupSelectionState([keys.lowercase]).checked} mixed={groupSelectionState([keys.lowercase]).mixed} onChange={(checked) => changeGroups([keys.lowercase], checked)} />
           </FilterSection>
         </FilterDisclosure>
-        <FilterCheckbox label="Punctuation" count={countFoundation(categories.punctuation)} checked={selected.has(keys.punctuation)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.punctuation], checked))} />
+        <FilterCheckbox label="Punctuation" count={countFoundation(categories.punctuation)} checked={groupSelectionState([keys.punctuation]).checked} mixed={groupSelectionState([keys.punctuation]).mixed} onChange={(checked) => changeGroups([keys.punctuation], checked)} />
       </FilterDisclosure>
 
-      <FilterDisclosure title="Lesson 2" summary={`${lesson2State.selectedCount} of ${lesson2Keys.length} groups selected`} checked={lesson2State.checked} mixed={lesson2State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson2Keys, checked))}>
-        <FilterCheckbox label="Accent marks" count={countFoundation(categories.accents)} checked={selected.has(keys.accents)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.accents], checked))} />
+      <FilterDisclosure title="Lesson 2" summary={`${lesson2State.selectedCount} of ${lesson2Keys.length} groups selected`} checked={lesson2State.checked} mixed={lesson2State.mixed} onCheckedChange={(checked) => changeGroups(lesson2Keys, checked)}>
+        <FilterCheckbox label="Accent marks" count={countFoundation(categories.accents)} checked={groupSelectionState([keys.accents]).checked} mixed={groupSelectionState([keys.accents]).mixed} onChange={(checked) => changeGroups([keys.accents], checked)} />
       </FilterDisclosure>
 
-      <FilterDisclosure title="Lesson 3" summary={`${lesson3State.selectedCount} of ${lesson3Keys.length} groups selected`} checked={lesson3State.checked} mixed={lesson3State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson3Keys, checked))}>
-        <FilterDisclosure title="Vocabulary" summary="11 entries" count={decks.lesson3Vocabulary.cards.length} nested checked={selected.has(keys.lesson3Vocabulary)} onCheckedChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson3Vocabulary], checked))}>
-          <FilterCheckbox label="All Lesson 3 vocabulary" count={decks.lesson3Vocabulary.cards.length} checked={selected.has(keys.lesson3Vocabulary)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson3Vocabulary], checked))} />
+      <FilterDisclosure title="Lesson 3" summary={`${lesson3State.selectedCount} of ${lesson3Keys.length} groups selected`} checked={lesson3State.checked} mixed={lesson3State.mixed} onCheckedChange={(checked) => changeGroups(lesson3Keys, checked)}>
+        <FilterDisclosure title="Vocabulary" summary="11 entries" count={decks.lesson3Vocabulary.cards.length} nested checked={groupSelectionState([keys.lesson3Vocabulary]).checked} mixed={groupSelectionState([keys.lesson3Vocabulary]).mixed} onCheckedChange={(checked) => changeGroups([keys.lesson3Vocabulary], checked)}>
+          <FilterCheckbox label="All Lesson 3 vocabulary" count={decks.lesson3Vocabulary.cards.length} checked={groupSelectionState([keys.lesson3Vocabulary]).checked} mixed={groupSelectionState([keys.lesson3Vocabulary]).mixed} onChange={(checked) => changeGroups([keys.lesson3Vocabulary], checked)} />
         </FilterDisclosure>
 
-        <FilterDisclosure title="Endings" summary={`${lesson3EndingsState.selectedCount} of ${lesson3EndingsKeys.length} selected`} count={lesson3EndingsKeys.length} nested checked={lesson3EndingsState.checked} mixed={lesson3EndingsState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson3EndingsKeys, checked))}>
-          <FilterCheckbox label="Present Active Indicative Endings" count={countLesson3Grammar("Present Active Indicative Endings")} checked={selected.has(keys.presentActiveIndicativeEndings)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveIndicativeEndings], checked))} />
-          <FilterCheckbox label="Present Active Infinitive Ending" count={countLesson3Grammar("Present Active Infinitive Endings")} checked={selected.has(keys.presentActiveInfinitiveEndings)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveInfinitiveEndings], checked))} />
-          <FilterCheckbox label="Present Active Imperative Endings" count={countLesson3Grammar("Present Active Imperative Endings")} checked={selected.has(keys.presentActiveImperativeEndings)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveImperativeEndings], checked))} />
+        <FilterDisclosure title="Endings" summary={`${lesson3EndingsState.selectedCount} of ${lesson3EndingsKeys.length} selected`} count={lesson3EndingsKeys.length} nested checked={lesson3EndingsState.checked} mixed={lesson3EndingsState.mixed} onCheckedChange={(checked) => changeGroups(lesson3EndingsKeys, checked)}>
+          <FilterCheckbox label="Present Active Indicative Endings" count={countLesson3Grammar("Present Active Indicative Endings")} checked={groupSelectionState([keys.presentActiveIndicativeEndings]).checked} mixed={groupSelectionState([keys.presentActiveIndicativeEndings]).mixed} onChange={(checked) => changeGroups([keys.presentActiveIndicativeEndings], checked)} />
+          <FilterCheckbox label="Present Active Infinitive Ending" count={countLesson3Grammar("Present Active Infinitive Endings")} checked={groupSelectionState([keys.presentActiveInfinitiveEndings]).checked} mixed={groupSelectionState([keys.presentActiveInfinitiveEndings]).mixed} onChange={(checked) => changeGroups([keys.presentActiveInfinitiveEndings], checked)} />
+          <FilterCheckbox label="Present Active Imperative Endings" count={countLesson3Grammar("Present Active Imperative Endings")} checked={groupSelectionState([keys.presentActiveImperativeEndings]).checked} mixed={groupSelectionState([keys.presentActiveImperativeEndings]).mixed} onChange={(checked) => changeGroups([keys.presentActiveImperativeEndings], checked)} />
         </FilterDisclosure>
 
-        <FilterDisclosure title="Paradigms" summary={`${lesson3ParadigmState.selectedCount} of ${lesson3ParadigmKeys.length} selected`} count={lesson3ParadigmKeys.length} nested checked={lesson3ParadigmState.checked} mixed={lesson3ParadigmState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson3ParadigmKeys, checked))}>
-          <FilterCheckbox label="Present Active Indicative — παιδεύω" count={countLesson3Grammar("Present Active Indicative")} checked={selected.has(keys.presentActiveIndicative)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveIndicative], checked))} />
-          <FilterCheckbox label="Present Active Infinitive — παιδεύω" count={countLesson3Grammar("Present Active Infinitive")} checked={selected.has(keys.presentActiveInfinitive)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveInfinitive], checked))} />
-          <FilterCheckbox label="Present Active Imperative — παιδεύω" count={countLesson3Grammar("Present Active Imperative")} checked={selected.has(keys.presentActiveImperative)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.presentActiveImperative], checked))} />
+        <FilterDisclosure title="Paradigms" summary={`${lesson3ParadigmState.selectedCount} of ${lesson3ParadigmKeys.length} selected`} count={lesson3ParadigmKeys.length} nested checked={lesson3ParadigmState.checked} mixed={lesson3ParadigmState.mixed} onCheckedChange={(checked) => changeGroups(lesson3ParadigmKeys, checked)}>
+          <FilterCheckbox label="Present Active Indicative — παιδεύω" count={countLesson3Grammar("Present Active Indicative")} checked={groupSelectionState([keys.presentActiveIndicative]).checked} mixed={groupSelectionState([keys.presentActiveIndicative]).mixed} onChange={(checked) => changeGroups([keys.presentActiveIndicative], checked)} />
+          <FilterCheckbox label="Present Active Infinitive — παιδεύω" count={countLesson3Grammar("Present Active Infinitive")} checked={groupSelectionState([keys.presentActiveInfinitive]).checked} mixed={groupSelectionState([keys.presentActiveInfinitive]).mixed} onChange={(checked) => changeGroups([keys.presentActiveInfinitive], checked)} />
+          <FilterCheckbox label="Present Active Imperative — παιδεύω" count={countLesson3Grammar("Present Active Imperative")} checked={groupSelectionState([keys.presentActiveImperative]).checked} mixed={groupSelectionState([keys.presentActiveImperative]).mixed} onChange={(checked) => changeGroups([keys.presentActiveImperative], checked)} />
         </FilterDisclosure>
       </FilterDisclosure>
 
-      <FilterDisclosure title="Lesson 4" summary={`${lesson4State.selectedCount} of ${lesson4Keys.length} groups selected`} checked={lesson4State.checked} mixed={lesson4State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson4Keys, checked))}>
-        <FilterDisclosure title="Vocabulary" summary={`${decks.lesson4Vocabulary.cards.length} entries`} count={decks.lesson4Vocabulary.cards.length} nested checked={selected.has(keys.lesson4Vocabulary)} onCheckedChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson4Vocabulary], checked))}>
-          <FilterCheckbox label="All Lesson 4 vocabulary" count={decks.lesson4Vocabulary.cards.length} checked={selected.has(keys.lesson4Vocabulary)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson4Vocabulary], checked))} />
+      <FilterDisclosure title="Lesson 4" summary={`${lesson4State.selectedCount} of ${lesson4Keys.length} groups selected`} checked={lesson4State.checked} mixed={lesson4State.mixed} onCheckedChange={(checked) => changeGroups(lesson4Keys, checked)}>
+        <FilterDisclosure title="Vocabulary" summary={`${decks.lesson4Vocabulary.cards.length} entries`} count={decks.lesson4Vocabulary.cards.length} nested checked={groupSelectionState([keys.lesson4Vocabulary]).checked} mixed={groupSelectionState([keys.lesson4Vocabulary]).mixed} onCheckedChange={(checked) => changeGroups([keys.lesson4Vocabulary], checked)}>
+          <FilterCheckbox label="All Lesson 4 vocabulary" count={decks.lesson4Vocabulary.cards.length} checked={groupSelectionState([keys.lesson4Vocabulary]).checked} mixed={groupSelectionState([keys.lesson4Vocabulary]).mixed} onChange={(checked) => changeGroups([keys.lesson4Vocabulary], checked)} />
         </FilterDisclosure>
 
-        <FilterDisclosure title="Endings" summary={`${lesson4EndingsState.selectedCount} of ${lesson4EndingsKeys.length} selected`} count={lesson4EndingsKeys.length} nested checked={lesson4EndingsState.checked} mixed={lesson4EndingsState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson4EndingsKeys, checked))}>
+        <FilterDisclosure title="Endings" summary={`${lesson4EndingsState.selectedCount} of ${lesson4EndingsKeys.length} selected`} count={lesson4EndingsKeys.length} nested checked={lesson4EndingsState.checked} mixed={lesson4EndingsState.mixed} onCheckedChange={(checked) => changeGroups(lesson4EndingsKeys, checked)}>
           {lesson4EndingsKeys.map((key) => {
             const category = lesson4GrammarCategoryByKey.get(key)!;
-            return <FilterCheckbox key={key} label={category} count={countLesson4Grammar(category)} checked={selected.has(key)} onChange={(checked) => setSelected((current) => updateSet(current, [key], checked))} />;
+            return <FilterCheckbox key={key} label={category} count={countLesson4Grammar(category)} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
           })}
         </FilterDisclosure>
 
-        <FilterDisclosure title="Paradigms" summary={`${lesson4ParadigmState.selectedCount} of ${lesson4ParadigmKeys.length} selected`} count={lesson4ParadigmKeys.length} nested checked={lesson4ParadigmState.checked} mixed={lesson4ParadigmState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson4ParadigmKeys, checked))}>
+        <FilterDisclosure title="Paradigms" summary={`${lesson4ParadigmState.selectedCount} of ${lesson4ParadigmKeys.length} selected`} count={lesson4ParadigmKeys.length} nested checked={lesson4ParadigmState.checked} mixed={lesson4ParadigmState.mixed} onCheckedChange={(checked) => changeGroups(lesson4ParadigmKeys, checked)}>
           {lesson4ParadigmKeys.map((key) => {
             const category = lesson4GrammarCategoryByKey.get(key)!;
-            return <FilterCheckbox key={key} label={category} count={countLesson4Grammar(category)} checked={selected.has(key)} onChange={(checked) => setSelected((current) => updateSet(current, [key], checked))} />;
+            return <FilterCheckbox key={key} label={category} count={countLesson4Grammar(category)} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
           })}
         </FilterDisclosure>
       </FilterDisclosure>
 
-      <FilterDisclosure title="Lesson 5" summary={`${lesson5State.selectedCount} of ${lesson5Keys.length} groups selected`} checked={lesson5State.checked} mixed={lesson5State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson5Keys, checked))}>
-        <FilterDisclosure title="Vocabulary" summary={`${decks.lesson5Vocabulary.cards.length} entries`} count={decks.lesson5Vocabulary.cards.length} nested checked={selected.has(keys.lesson5Vocabulary)} onCheckedChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson5Vocabulary], checked))}>
-          <FilterCheckbox label="All Lesson 5 vocabulary" count={decks.lesson5Vocabulary.cards.length} checked={selected.has(keys.lesson5Vocabulary)} onChange={(checked) => setSelected((current) => updateSet(current, [keys.lesson5Vocabulary], checked))} />
+      <FilterDisclosure title="Lesson 5" summary={`${lesson5State.selectedCount} of ${lesson5Keys.length} groups selected`} checked={lesson5State.checked} mixed={lesson5State.mixed} onCheckedChange={(checked) => changeGroups(lesson5Keys, checked)}>
+        <FilterDisclosure title="Vocabulary" summary={`${decks.lesson5Vocabulary.cards.length} entries`} count={decks.lesson5Vocabulary.cards.length} nested checked={groupSelectionState([keys.lesson5Vocabulary]).checked} mixed={groupSelectionState([keys.lesson5Vocabulary]).mixed} onCheckedChange={(checked) => changeGroups([keys.lesson5Vocabulary], checked)}>
+          <FilterCheckbox label="All Lesson 5 vocabulary" count={decks.lesson5Vocabulary.cards.length} checked={groupSelectionState([keys.lesson5Vocabulary]).checked} mixed={groupSelectionState([keys.lesson5Vocabulary]).mixed} onChange={(checked) => changeGroups([keys.lesson5Vocabulary], checked)} />
         </FilterDisclosure>
 
-        <FilterDisclosure title="Endings" summary={`${lesson5EndingsState.selectedCount} of ${lesson5EndingsKeys.length} selected`} count={lesson5EndingsKeys.length} nested checked={lesson5EndingsState.checked} mixed={lesson5EndingsState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson5EndingsKeys, checked))}>
+        <FilterDisclosure title="Endings" summary={`${lesson5EndingsState.selectedCount} of ${lesson5EndingsKeys.length} selected`} count={lesson5EndingsKeys.length} nested checked={lesson5EndingsState.checked} mixed={lesson5EndingsState.mixed} onCheckedChange={(checked) => changeGroups(lesson5EndingsKeys, checked)}>
           {lesson5EndingsKeys.map((key) => {
             const category = lesson5GrammarCategoryByKey.get(key)!;
-            return <FilterCheckbox key={key} label={category} count={countLesson5Grammar(category)} checked={selected.has(key)} onChange={(checked) => setSelected((current) => updateSet(current, [key], checked))} />;
+            return <FilterCheckbox key={key} label={category} count={countLesson5Grammar(category)} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
           })}
         </FilterDisclosure>
 
-        <FilterDisclosure title="Paradigms" summary={`${lesson5ParadigmState.selectedCount} of ${lesson5ParadigmKeys.length} selected`} count={lesson5ParadigmKeys.length} nested checked={lesson5ParadigmState.checked} mixed={lesson5ParadigmState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson5ParadigmKeys, checked))}>
+        <FilterDisclosure title="Paradigms" summary={`${lesson5ParadigmState.selectedCount} of ${lesson5ParadigmKeys.length} selected`} count={lesson5ParadigmKeys.length} nested checked={lesson5ParadigmState.checked} mixed={lesson5ParadigmState.mixed} onCheckedChange={(checked) => changeGroups(lesson5ParadigmKeys, checked)}>
           {lesson5ParadigmKeys.map((key) => {
             const category = lesson5GrammarCategoryByKey.get(key)!;
-            return <FilterCheckbox key={key} label={category} count={countLesson5Grammar(category)} checked={selected.has(key)} onChange={(checked) => setSelected((current) => updateSet(current, [key], checked))} />;
+            return <FilterCheckbox key={key} label={category} count={countLesson5Grammar(category)} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
           })}
         </FilterDisclosure>
       </FilterDisclosure>
