@@ -5,6 +5,7 @@ import { loadLatinActiveIndicativeParadigmsDeck } from "../data/latin-active-ind
 import { loadLatinPassiveIndicativeParadigmsDeck } from "../data/latin-passive-indicative-paradigms";
 import { useAuth } from "../features/auth/auth-context";
 import { LatinParadigmTable } from "../features/latin/latin-paradigm-table";
+import { useCardExclusions } from "../features/study/card-exclusions";
 import { loadLatinFilterPreferences, saveLatinFilterPreferences, type LatinMaterial } from "../features/study/filter-preferences";
 import { matchesVocabularyCard, vocabularyFamily, type OptionalSelection } from "../features/study/latin-study-filters";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
@@ -119,6 +120,7 @@ export function LatinPage() {
   const { value: passiveParadigmDeck, error: passiveParadigmError } = useAsync(loadLatinPassiveIndicativeParadigmsDeck, []);
   const { user } = useAuth();
   const savedCards = useSavedCards("latin", user);
+  const excludedCards = useCardExclusions("latin");
   const [searchParams] = useSearchParams();
   const [initialFilters] = useState(loadLatinFilterPreferences);
   const [direction, setDirection] = useState<StudyDirection>("forward");
@@ -172,14 +174,21 @@ export function LatinPage() {
   const grammarChecked = activeParadigmState.checked && passiveParadigmState.checked;
   const grammarMixed = (activeParadigmsActive || passiveParadigmsActive) && (!grammarChecked || activeParadigmState.mixed || passiveParadigmState.mixed);
 
-  const vocabularyCards = useMemo(() => vocabularyDeck?.cards.filter((card) => matchesVocabularyCard(card, vocabularyParts)) ?? [], [vocabularyDeck, vocabularyParts]);
-  const activeParadigmStudyCards = useMemo(() => activeParadigmDeck?.cards.filter((card) => selected(paradigmCards, card.id)) ?? [], [activeParadigmDeck, paradigmCards]);
-  const passiveParadigmStudyCards = useMemo(() => passiveParadigmDeck?.cards.filter((card) => selected(paradigmCards, card.id)) ?? [], [paradigmCards, passiveParadigmDeck]);
+  const vocabularyCards = useMemo(() => vocabularyDeck?.cards.filter((card) => matchesVocabularyCard(card, vocabularyParts) && !excludedCards.refs.has(savedCardRef(vocabularyDeck.id, card.id))) ?? [], [excludedCards.refs, vocabularyDeck, vocabularyParts]);
+  const activeParadigmStudyCards = useMemo(() => activeParadigmDeck?.cards.filter((card) => selected(paradigmCards, card.id) && !excludedCards.refs.has(savedCardRef(activeParadigmDeck.id, card.id))) ?? [], [activeParadigmDeck, excludedCards.refs, paradigmCards]);
+  const passiveParadigmStudyCards = useMemo(() => passiveParadigmDeck?.cards.filter((card) => selected(paradigmCards, card.id) && !excludedCards.refs.has(savedCardRef(passiveParadigmDeck.id, card.id))) ?? [], [excludedCards.refs, paradigmCards, passiveParadigmDeck]);
 
   const savedCardCount = useMemo(() => {
     const decks = [vocabularyDeck, activeParadigmDeck, passiveParadigmDeck].filter((item): item is DeckDefinition => Boolean(item));
     return decks.flatMap((sourceDeck) => sourceDeck.cards.map((card) => savedCardRef(sourceDeck.id, card.id))).filter((ref) => savedCards.refs.has(ref)).length;
   }, [activeParadigmDeck, passiveParadigmDeck, savedCards.refs, vocabularyDeck]);
+
+  const excludedEntries = useMemo(() => {
+    const decks = [vocabularyDeck, activeParadigmDeck, passiveParadigmDeck].filter((item): item is DeckDefinition => Boolean(item));
+    return decks.flatMap((sourceDeck) => sourceDeck.cards
+      .filter((card) => excludedCards.refs.has(savedCardRef(sourceDeck.id, card.id)))
+      .map((card) => ({ deckId: sourceDeck.id, cardId: card.id, label: card.front, source: sourceDeck.title })));
+  }, [activeParadigmDeck, excludedCards.refs, passiveParadigmDeck, vocabularyDeck]);
 
   const sources = useMemo(() => {
     const next: StudySourceDefinition[] = [];
@@ -200,7 +209,7 @@ export function LatinPage() {
         if (!sourceDeck) return;
         const cards = sourceDeck.cards.filter((card) => {
           const ref = savedCardRef(sourceDeck.id, card.id);
-          return savedCards.refs.has(ref) && !alreadySelected.has(ref);
+          return savedCards.refs.has(ref) && !excludedCards.refs.has(ref) && !alreadySelected.has(ref);
         });
         if (!cards.length) return;
         next.push({ id, label: "Saved Cards", deck: sourceDeck, cards, studyKey, direction });
@@ -211,7 +220,7 @@ export function LatinPage() {
       appendSaved("saved-passive-indicative-paradigms", passiveParadigmDeck, paradigmStudyKey);
     }
     return next;
-  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, direction, includeSavedCards, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, savedCards.refs, vocabularyActive, vocabularyCards, vocabularyDeck]);
+  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, direction, excludedCards.refs, includeSavedCards, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, savedCards.refs, vocabularyActive, vocabularyCards, vocabularyDeck]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
   const virtualDeck = useMemo<DeckDefinition>(() => ({
@@ -225,7 +234,7 @@ export function LatinPage() {
     supportsReverse: true,
   }), [selectedCards]);
   const savedSelectionKey = includeSavedCards ? [...savedCards.refs].sort().join(",") : "off";
-  const resetKey = `${direction}|${[...materials].sort().join(",")}|v:${selectionKey(vocabularyParts)}|p:${selectionKey(paradigmCards)}|saved:${savedSelectionKey}`;
+  const resetKey = `${direction}|${[...materials].sort().join(",")}|v:${selectionKey(vocabularyParts)}|p:${selectionKey(paradigmCards)}|saved:${savedSelectionKey}|excluded:${excludedCards.signature}`;
 
   function toggleMaterial(material: Material, checked: boolean) {
     setMaterials((current) => {
@@ -304,6 +313,7 @@ export function LatinPage() {
     setMaterials(new Set<Material>(["vocabulary", "active-indicative-paradigms", "passive-indicative-paradigms"]));
     setVocabularyParts(null);
     setParadigmCards(null);
+    excludedCards.clear();
   }
 
   function deselectAllCards() {
@@ -331,6 +341,10 @@ export function LatinPage() {
         <FilterSection title="Quick select" description="Cards you save with the card button or S shortcut are private to your account or this guest browser." onAll={selectAllCards} onNone={deselectAllCards}>
           <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={setIncludeSavedCards} hint="Your saved Latin cards" />
         </FilterSection>
+
+        {excludedEntries.length > 0 && <FilterSection title="Individually deselected" description="Cards removed with Deselect card or the D shortcut. Check a card here to restore it to its selected group.">
+          {excludedEntries.map((entry) => <FilterCheckbox key={savedCardRef(entry.deckId, entry.cardId)} label={`${entry.label} · ${entry.source}`} checked={false} onChange={(checked) => { if (checked) excludedCards.restore(entry.deckId, entry.cardId); }} />)}
+        </FilterSection>}
 
         <FilterDisclosure
           title="Latin (Dickinson)"
@@ -434,6 +448,7 @@ export function LatinPage() {
           resumeSession={resumeSession}
           savedCardRefs={savedCards.refs}
           onToggleSavedCard={savedCards.toggleSaved}
+          onDeselectCard={excludedCards.exclude}
           cardMeta={(card, source) => source.deck.id === vocabularyDeck.id
             ? `Entry ${Number(card.metadata?.deckPosition ?? 0)} of ${vocabularyDeck.cards.length} · Dickinson rank ${card.rank}`
             : `${card.category ?? "Indicative paradigm"} · whole paradigm`}
