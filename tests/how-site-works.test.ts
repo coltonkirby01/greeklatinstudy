@@ -37,7 +37,7 @@ describe("How this site works guide", () => {
     const guide = fs.readFileSync("src/pages/how-site-works.tsx", "utf8");
     expect(guide).toContain("Every built-in card can also be selected or deselected individually");
     expect(guide).toContain("10-card ranges");
-    expect(guide).toContain("Press <strong>D</strong>");
+    expect(guide).toContain("press <strong>D</strong>");
     expect(guide).toContain("the current card stays visible and the Start gate does not reopen");
     expect(guide).toContain("Space to Save &amp; Next");
     expect(guide).toContain("does not erase saved reviews, mastery, scheduling, Stats, or long-term Adaptive memory");
