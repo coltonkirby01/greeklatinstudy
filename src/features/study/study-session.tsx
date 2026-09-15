@@ -7,6 +7,7 @@ import { cardsAvailableToState, createEnvelope, createModeState, directionalCopy
 import { deleteReviewEvent, loadProgressEnvelope, saveProgressEnvelope, upsertReviewEvent } from "./progress-repository";
 import { intrinsicCardDifficulty } from "./scoring";
 import { autoReviewDefaults, constrainAdaptiveInitialCoverage, sessionProgressSummary } from "./session-review";
+import { emptyShuffleCycle, nextShuffleKey } from "./shuffle-cycle";
 import "./study-gate.css";
 import { StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
 import { studyShortcut } from "./study-shortcuts";
@@ -25,6 +26,7 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
   const [envelope, setEnvelope] = useState<DeckProgressEnvelope | null>(null);
   const envelopeRef = useRef<DeckProgressEnvelope | null>(null);
   const persistQueue = useRef<Promise<void>>(Promise.resolve());
+  const shuffleCycleRef = useRef(emptyShuffleCycle());
   const [selectionMode, setSelectionMode] = useState<SelectionMode>("adaptive");
   const [revealed, setRevealed] = useState(false), [reviewFront, setReviewFront] = useState(false), [result, setResult] = useState<ReviewResult | null>(null), [difficulty, setDifficulty] = useState<ReviewDifficulty | null>(null);
   const [capturedTimeMs, setCapturedTimeMs] = useState<number | null>(null), [lastTransaction, setLastTransaction] = useState<ReviewTransaction | null>(null), [editingTransaction, setEditingTransaction] = useState<ReviewTransaction | null>(null);
@@ -66,7 +68,9 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
   const cardSignature = useMemo(() => cards.map((card) => card.id).join("|"), [cards]);
   useEffect(() => {
     const currentEnvelope = envelopeRef.current;
-    if (!currentEnvelope) return; const existing = currentEnvelope.modes[studyKey] ?? createModeState(deck.id, studyKey, deck.cards.length, deck.staged); let ready = existing;
+    if (!currentEnvelope) return;
+    shuffleCycleRef.current = emptyShuffleCycle();
+    const existing = currentEnvelope.modes[studyKey] ?? createModeState(deck.id, studyKey, deck.cards.length, deck.staged); let ready = existing;
     if (!cards.some((card) => card.id === existing.currentCardId)) { const selected = pickNextCard(cards, existing, selectionMode, { staged: deck.staged }); if (selected) ready = presentCard(existing, selected); }
     if (ready !== existing || !currentEnvelope.modes[studyKey]) saveMode(ready);
     if (lastStudyKey.current !== studyKey) { lastStudyKey.current = studyKey; setLastTransaction(null); setEditingTransaction(null); setWarmup(null); setRevealed(false); setReviewFront(false); setResult(null); setDifficulty(null); setCapturedTimeMs(null); setStartGateOpen(true); }
@@ -83,6 +87,12 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
 
   function pickSessionCard(state: StudyModeState, mode: SelectionMode, excludeCardId?: string, sessionId = session.id) {
     const available = cardsAvailableToState(cards, state);
+    if (mode === "shuffle") {
+      const byId = new Map(available.map((card) => [card.id, card]));
+      const next = nextShuffleKey([...byId.keys()], shuffleCycleRef.current, { avoidKey: excludeCardId });
+      shuffleCycleRef.current = next.state;
+      return next.key ? byId.get(next.key) ?? null : null;
+    }
     const pool = mode === "adaptive" ? constrainAdaptiveInitialCoverage(available, sessionId, (card) => getCardProgress(state, card.id)) : available;
     return pickNextCard(pool, state, mode, { excludeCardId, staged: deck.staged });
   }
@@ -95,13 +105,19 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
     setCapturedTimeMs(responseTimeMs); setResult(suggested.result); setDifficulty(suggested.difficulty); setRevealed(true);
   }
   function toggleReviewFace() { if (revealed) setReviewFront((value) => !value); }
-  function changeOrder(next: SelectionMode) { setSelectionMode(next); if (!modeState || !current) return; const selected = warmup ? pickWarmupCard(modeState, current.id) : pickSessionCard(modeState, next, current.id); if (selected) { resetUi(); setStartGateOpen(true); saveMode(presentCard(modeState, selected)); } }
+  function changeOrder(next: SelectionMode) {
+    setSelectionMode(next);
+    shuffleCycleRef.current = emptyShuffleCycle();
+    if (!modeState || !current) return;
+    const selected = warmup ? pickWarmupCard(modeState, current.id) : pickSessionCard(modeState, next, current.id);
+    if (selected) { resetUi(); setStartGateOpen(true); saveMode(presentCard(modeState, selected)); }
+  }
   function skip() { if (!modeState || editingTransaction) return; resetUi(); const selected = warmup ? pickWarmupCard(modeState, current?.id) : pickSessionCard(modeState, selectionMode, current?.id); if (selected) saveMode(presentCard(modeState, selected)); }
   function startNewSession() {
     if (!modeState) return;
     const nextSession = makeSession();
     setWarmup(null); setSession(nextSession); setLastTransaction(null); resetUi(); setStartGateOpen(true);
-    const selected = pickNextCard(cards, modeState, selectionMode, { excludeCardId: current?.id, staged: deck.staged });
+    const selected = pickSessionCard(modeState, selectionMode, current?.id, nextSession.id);
     if (selected) saveMode(presentCard(modeState, selected));
     setNotice("New session started. Your long-term mastery and adaptive priorities were preserved.");
   }
@@ -135,7 +151,7 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
       setLastTransaction(transaction); resetUi();
 
       if (warmup.remaining <= 1) {
-        const selected = pickNextCard(cards, next, selectionMode, { excludeCardId: current.id, staged: deck.staged });
+        const selected = pickSessionCard(next, selectionMode, current.id);
         if (selected) next = presentCard(next, selected, reviewedAt);
         saveMode(next, { review: transaction });
         setWarmup(null); setSession(makeSession()); setStartGateOpen(true);
@@ -151,9 +167,10 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
       return;
     }
 
-    const applied = reviewAndAdvance(source, cards, selectionMode, { id: reviewId, result, difficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, activityKind }, deck.staged);
+    const engineMode: SelectionMode = selectionMode === "shuffle" ? "sequential" : selectionMode;
+    const applied = reviewAndAdvance(source, cards, engineMode, { id: reviewId, result, difficulty, responseTimeMs, reviewedAt, sessionId, sessionStartedAt, activityKind }, deck.staged);
     let next = applied.state;
-    if (selectionMode === "adaptive" && activityKind === "study") {
+    if ((selectionMode === "adaptive" || selectionMode === "shuffle") && activityKind === "study") {
       const selected = pickSessionCard(next, selectionMode, current.id, sessionId);
       if (selected) next = presentCard(next, selected, reviewedAt);
     }
@@ -198,7 +215,7 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
       <div className="study-toolbar session-toolbar">
         <div className="toolbar-control-group">
           {deck.supportsReverse && onDirectionChange && <div className="segmented-control" aria-label="Study direction">{(["forward", "reverse"] as StudyDirection[]).map((value) => <button key={value} type="button" aria-pressed={direction === value} onClick={() => onDirectionChange(value)}>{directionLabels[value]}</button>)}</div>}
-          <label className="compact-select-label"><span className="sr-only">Card order</span><select value={selectionMode} onChange={(event) => changeOrder(event.target.value as SelectionMode)}><option value="adaptive">Adaptive</option><option value="sequential">Sequential</option></select></label>
+          <label className="compact-select-label"><span className="sr-only">Card order</span><select value={selectionMode} onChange={(event) => changeOrder(event.target.value as SelectionMode)}><option value="adaptive">Adaptive</option><option value="sequential">Sequential</option><option value="shuffle">Shuffle</option></select></label>
           <button type="button" className="small-outline-button" onClick={startNewSession} disabled={Boolean(editingTransaction)}>New session</button>
           <button type="button" className="small-outline-button" onClick={() => setStartGateOpen(true)} disabled={revealed || Boolean(editingTransaction) || startGateOpen}>Pause timer</button>
           <Link className="small-outline-button" to="/stats">Stats</Link>

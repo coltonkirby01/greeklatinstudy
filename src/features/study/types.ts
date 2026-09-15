@@ -1,5 +1,5 @@
 export type StudyDirection = "forward" | "reverse";
-export type SelectionMode = "adaptive" | "sequential";
+export type SelectionMode = "adaptive" | "sequential" | "shuffle";
 export type ReviewResult = "right" | "wrong";
 export type ReviewDifficulty = "easy" | "medium" | "hard";
 export type StudyActivityKind = "study" | "warmup";

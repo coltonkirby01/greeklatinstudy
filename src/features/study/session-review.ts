@@ -61,11 +61,9 @@ export type SessionProgressSummary = {
   initialMasteryPercent: number;
 };
 
-/**
- * Builds the sidebar summary from reviews belonging to one ranked session only.
- * Long-term card state remains untouched and continues to drive adaptive review.
- */
-export function sessionProgressSummary(items: readonly SessionProgressItem[], sessionId: string): SessionProgressSummary {
+type ReviewPredicate = (review: CardProgress["history"][number]) => boolean;
+
+function progressSummary(items: readonly SessionProgressItem[], includeReview: ReviewPredicate): SessionProgressSummary {
   let reviewed = 0;
   let everWrong = 0;
   let markedHard = 0;
@@ -83,7 +81,7 @@ export function sessionProgressSummary(items: readonly SessionProgressItem[], se
     let cardRight = false;
 
     for (const review of progress.history) {
-      if (review.sessionId !== sessionId || (review.activityKind ?? "study") !== "study" || review.statsExcluded) continue;
+      if (!includeReview(review)) continue;
       cardReviewed = true;
       if (review.result === "right") {
         cardRight = true;
@@ -138,4 +136,18 @@ export function sessionProgressSummary(items: readonly SessionProgressItem[], se
     initialMastered: rightOnce,
     initialMasteryPercent,
   };
+}
+
+/** Builds the sidebar summary from reviews belonging to one ranked saved session. */
+export function sessionProgressSummary(items: readonly SessionProgressItem[], sessionId: string): SessionProgressSummary {
+  return progressSummary(items, (review) => review.sessionId === sessionId && (review.activityKind ?? "study") === "study" && !review.statsExcluded);
+}
+
+/**
+ * Builds live in-app progress for the current page visit only. A hard reload or
+ * leaving and re-entering the page creates a new visit start time, so this live
+ * progress resets without deleting or rewriting any persisted review history.
+ */
+export function visitProgressSummary(items: readonly SessionProgressItem[], visitStartedAt: number): SessionProgressSummary {
+  return progressSummary(items, (review) => review.reviewedAt >= visitStartedAt && (review.activityKind ?? "study") === "study" && !review.statsExcluded);
 }

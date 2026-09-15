@@ -1,5 +1,6 @@
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
+import type { StudyCard } from "./types";
 import "./study-filter-menu.css";
 
 const savedCardsHint = "Cards you save with the card button or S shortcut are private to your account or this guest browser.";
@@ -81,4 +82,47 @@ export function FilterCheckbox({ label, checked, mixed = false, onChange, count,
     <span className="filter-checkbox-copy"><strong>{label}</strong>{visibleHint && <small>{visibleHint}</small>}</span>
     {typeof count === "number" && <span className="filter-count">{count.toLocaleString()}</span>}
   </label>;
+}
+
+type ExactCardSelectionProps = {
+  cards: readonly StudyCard[];
+  isSelected: (card: StudyCard) => boolean;
+  onCardChange: (card: StudyCard, checked: boolean) => void;
+  onCardsChange?: (cards: readonly StudyCard[], checked: boolean) => void;
+  chunkSize?: number;
+  labelForCard?: (card: StudyCard, index: number) => string;
+  sectionTitle?: string;
+};
+
+function defaultCardLabel(card: StudyCard, index: number) {
+  const rank = typeof card.rank === "number" ? `#${card.rank} · ` : `${index + 1}. `;
+  return `${rank}${card.front}`;
+}
+
+export function ExactCardSelection({ cards, isSelected, onCardChange, onCardsChange, chunkSize, labelForCard = defaultCardLabel, sectionTitle = "Cards" }: ExactCardSelectionProps) {
+  const renderCards = (items: readonly StudyCard[], offset = 0) => <FilterSection title={sectionTitle}>
+    {items.map((card, index) => <FilterCheckbox key={`${card.deckId}:${card.id}`} label={labelForCard(card, offset + index)} checked={isSelected(card)} onChange={(checked) => onCardChange(card, checked)} />)}
+  </FilterSection>;
+
+  if (!chunkSize || cards.length <= chunkSize) return renderCards(cards);
+
+  const chunks: StudyCard[][] = [];
+  for (let index = 0; index < cards.length; index += chunkSize) chunks.push(cards.slice(index, index + chunkSize));
+  return <>{chunks.map((chunk, chunkIndex) => {
+    const start = chunkIndex * chunkSize + 1;
+    const end = start + chunk.length - 1;
+    const selectedCount = chunk.filter(isSelected).length;
+    return <FilterDisclosure
+      key={`${start}-${end}`}
+      title={`${start}–${end}`}
+      summary={`${selectedCount} of ${chunk.length} selected`}
+      count={chunk.length}
+      nested
+      checked={selectedCount === chunk.length}
+      mixed={selectedCount > 0 && selectedCount < chunk.length}
+      onCheckedChange={onCardsChange ? (checked) => onCardsChange(chunk, checked) : undefined}
+    >
+      {renderCards(chunk, start - 1)}
+    </FilterDisclosure>;
+  })}</>;
 }

@@ -21,16 +21,26 @@ describe("How this site works guide", () => {
     expect(guide).toContain("20 selected cards must all appear by card 25");
     expect(guide).toContain("Learner");
     expect(guide).toContain("Reviewer");
-    expect(guide).toContain("Initial completion");
-    expect(guide).toContain("Initial mastery");
+    expect(guide).toContain("Visit completion");
+    expect(guide).toContain("Visit mastery");
+    expect(guide).toContain("hard reload");
   });
 
-  it("documents answer-side individual deselection and restoration", () => {
+  it("documents Shuffle as full-pool random coverage with a fresh next cycle", () => {
     const guide = fs.readFileSync("src/pages/how-site-works.tsx", "utf8");
-    expect(guide).toContain("Deselect card");
-    expect(guide).toContain("Individually deselected");
-    expect(guide).toContain("Press <strong>D</strong>");
-    expect(guide).toContain("without changing its mastery, review history, or scheduling");
+    expect(guide).toContain("Adaptive, Sequential, and Shuffle study");
+    expect(guide).toContain("Every currently selected and available card appears exactly once");
+    expect(guide).toContain("fresh random order");
+  });
+
+  it("documents exact selection and deferred answer-side deselection", () => {
+    const guide = fs.readFileSync("src/pages/how-site-works.tsx", "utf8");
+    expect(guide).toContain("Every built-in card can also be selected or deselected individually");
+    expect(guide).toContain("10-card ranges");
+    expect(guide).toContain("press <strong>D</strong>");
+    expect(guide).toContain("the current card stays visible and the Start gate does not reopen");
+    expect(guide).toContain("Space to Save &amp; Next");
+    expect(guide).toContain("does not erase saved reviews, mastery, scheduling, Stats, or long-term Adaptive memory");
   });
 
   it("explains both pronunciation systems and the shared cache in learner-facing terms", () => {
@@ -48,11 +58,14 @@ describe("How this site works guide", () => {
     expect(instructions).toContain("src/pages/how-site-works.tsx");
     expect(instructions).toContain("Home page directly above the progress/cloud-sync callout");
     expect(instructions).toContain("MUST update this guide in the same change");
+    expect(instructions).toContain("Adaptive/Sequential/Shuffle");
+    expect(instructions).toContain("page-visit Progress");
+    expect(instructions).toContain("10-card ranges");
+    expect(instructions).toContain("D = Deselect card");
+    expect(instructions).toContain("card-exclusions.ts");
     expect(instructions).toContain("stem - ending");
     expect(instructions).toContain("INITIAL_COVERAGE_MULTIPLIER = 1.25");
     expect(instructions).toContain("docs/MEDIEVAL_LATIN_PRONUNCIATION.md");
     expect(instructions).toContain("allowGeneration: true");
-    expect(instructions).toContain("D = Deselect card");
-    expect(instructions).toContain("card-exclusions.ts");
   });
 });

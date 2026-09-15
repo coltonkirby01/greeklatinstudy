@@ -25,10 +25,10 @@ export function HowSiteWorks() {
     <details className="site-guide panel-surface">
       <summary>How this site works</summary>
       <div className="site-guide-body">
-        <p className="site-guide-intro">The study apps keep long-term memory for each card while also tracking the performance of the session you are currently studying. The sections below explain the parts that materially affect what you see and how cards are chosen.</p>
+        <p className="site-guide-intro">The study apps keep long-term memory for each card while also showing live progress for the page visit you are currently studying. The sections below explain the parts that materially affect what you see and how cards are chosen.</p>
 
         <details className="site-guide-section">
-          <summary>Adaptive and Sequential study</summary>
+          <summary>Adaptive, Sequential, and Shuffle study</summary>
           <div>
             <h3>Adaptive</h3>
             <p>Adaptive study gives more attention to cards that need it. Priority is influenced by past Right/Wrong results, Easy/Medium/Hard ratings, response time, recency, current strength, whether a card is due, and whether it has been learned correctly before. Recent cards are also discouraged from repeating immediately when the pool is large enough.</p>
@@ -36,14 +36,16 @@ export function HowSiteWorks() {
             <p>At the beginning of an Adaptive session, difficult cards may repeat, but they cannot crowd out new cards indefinitely. Every currently selected and unlocked card must be seen during the initial pass by no later than {coveragePercent}% of that pool's size, rounded up. For example, 20 selected cards must all appear by card 25. Once every selected card has appeared at least once, this coverage constraint ends and the normal Adaptive algorithm takes over.</p>
             <h3>Sequential</h3>
             <p>Sequential study follows the selected cards in their defined order and wraps to the beginning after the last card. It does not use Adaptive priority to choose the next card.</p>
+            <h3>Shuffle</h3>
+            <p>Shuffle uses the same selected card pool as Sequential but randomizes the order. Every currently selected and available card appears exactly once before a new shuffle cycle begins. After the full pool has been covered, the site creates a fresh random order for the next cycle rather than repeating the same shuffle pattern.</p>
           </div>
         </details>
 
         <details className="site-guide-section">
-          <summary>Initial completion and Initial mastery</summary>
+          <summary>Visit completion and Visit mastery</summary>
           <div>
-            <p>The session progress bar first shows <strong>Initial completion</strong>: the share of the currently selected and unlocked cards reviewed at least once in that ranked session. When every selected card has been seen, the same bar changes to <strong>Initial mastery</strong>.</p>
-            <p>Initial mastery means the share of those selected cards that have received at least one <strong>Right</strong> answer in the session. Changing filters changes the denominator to the cards currently selected; it does not erase earlier learning history.</p>
+            <p>The live progress bar first shows <strong>Visit completion</strong>: the share of the currently selected and unlocked cards reviewed at least once since this Greek or Latin page was loaded. When every selected card has been seen during that page visit, the same bar changes to <strong>Visit mastery</strong>.</p>
+            <p>Visit mastery means the share of those selected cards that have received at least one <strong>Right</strong> answer during the current page visit. A hard reload or leaving and re-entering the study page starts this live progress at zero again. That reset affects only the on-page progress display; it does not erase saved reviews, mastery, scheduling, Stats, or long-term Adaptive memory. Changing filters changes the denominator to the cards currently selected.</p>
           </div>
         </details>
 
@@ -63,13 +65,13 @@ export function HowSiteWorks() {
             <h3>Permanent sessions</h3>
             <p>Greek and Latin each have one permanent <strong>Learner</strong> session and one permanent <strong>Reviewer</strong> session. They are session lanes for organizing study history and statistics; they are not separate users, accounts, or separate copies of your learning memory. These permanent sessions cannot be renamed or deleted.</p>
             <h3>Create a custom session</h3>
-            <p>You can create additional study sessions whenever you want a separate performance window—for example, a particular homework set, lesson, exam review, or study day. In the Greek or Latin flashcard toolbar, open the <strong>Session</strong> menu and choose <strong>Start new custom session</strong>. The new session immediately starts its own session-level progress and Stats record while continuing to use your existing long-term card memory.</p>
+            <p>You can create additional study sessions whenever you want a separate Stats grouping—for example, a particular homework set, lesson, exam review, or study day. In the Greek or Latin flashcard toolbar, open the <strong>Session</strong> menu and choose <strong>Start new custom session</strong>. Persistent session history remains separate from the live page-visit Progress display.</p>
             <h3>Resume, rename, or delete a custom session</h3>
             <p>Previous explicit sessions can be resumed from the Session menu, and the Stats page can be used to continue a session as well. Custom sessions can be renamed in Stats so meaningful study periods are easy to recognize. They can also be deleted from Stats; deleting a custom session removes that session grouping and its contribution to Stats, but it does <strong>not</strong> erase the card mastery, scheduling, response-time evidence, or Adaptive learning memory earned while studying it.</p>
             <h3>Shared long-term memory</h3>
             <p>Changing between Learner, Reviewer, and custom sessions does not reset a card. Adaptive priority continues to use the card's long-term history, due state, speed, difficulty, and strength. Sessions organize and compare study periods without splitting the underlying learning record.</p>
             <h3>Warm-up</h3>
-            <p>The optional personalized warm-up uses high-priority selected cards. Warm-up reviews improve long-term card memory and scheduling, but they are excluded from the ranked session's progress and performance statistics.</p>
+            <p>The optional personalized warm-up uses high-priority selected cards. Warm-up reviews improve long-term card memory and scheduling, but they are excluded from ranked session performance statistics and from the normal live study-progress count.</p>
           </div>
         </details>
 
@@ -79,8 +81,9 @@ export function HowSiteWorks() {
             <h3>Forward and Reverse</h3>
             <p>When a deck supports both directions, Forward and Reverse keep separate review histories, mastery, response times, and scheduling. Success in one direction does not automatically count as success in the other.</p>
             <h3>Selected cards</h3>
-            <p>Filters define the active study pool. They do not delete progress when a category is deselected. Adaptive review, Sequential review, the session progress bar, and Highest-Priority Review are restricted to the material currently selected and available.</p>
-            <p>On the answer side of every built-in Greek and Latin card, <strong>Deselect card</strong> removes that individual card from the active Choose cards pool without changing its mastery, review history, or scheduling. Press <strong>D</strong> for the same action. Individually removed cards appear under <strong>Individually deselected</strong> in Choose cards so they can be restored; <strong>Select all</strong> also restores all individually deselected cards.</p>
+            <p>Filters define the active study pool. They do not delete progress when a category is deselected. Adaptive, Sequential, Shuffle, live page-visit Progress, and Highest-Priority Review are restricted to the material currently selected and available.</p>
+            <p>Every built-in card can also be selected or deselected individually in <strong>Choose cards</strong>. Greek exposes exact cards under its source groupings. Dickinson's larger vocabulary list is divided into 10-card ranges such as <strong>1–10</strong> and <strong>11–20</strong>, which open to the exact individual cards.</p>
+            <p>On the answer side of every built-in Greek and Latin card, press <strong>D</strong> or click <strong>Deselect card</strong> to mark that card for removal. The button changes to <strong>Deselected</strong>, but the current card stays visible and the Start gate does not reopen. When you press Space to Save &amp; Next, the grade is saved, that card is removed from the active Choose cards pool, and study continues directly to the next selected card. The exact checkbox in Choose cards reflects the same individual selection state, so the card can be restored there. <strong>Select all</strong> restores all individually deselected cards.</p>
             <h3>Staged vocabulary</h3>
             <p>Some large vocabulary decks introduce cards in stages. Locked cards stay out of the active pool until the current stage meets its learning requirement; adding grammar or another source to the session does not bypass that lock.</p>
           </div>
@@ -90,7 +93,7 @@ export function HowSiteWorks() {
           <summary>Timer, keyboard, Back, and Skip</summary>
           <div>
             <p>The response timer measures active time on the unrevealed question side. It pauses when the tab or window is hidden or loses focus and stops when the answer is revealed. Returning from an interruption requires the Start gate again.</p>
-            <p>The Start gate begins only when you click Start or press Space. During study, Space reveals the question and, after reveal, saves and advances. Enter toggles Right/Wrong after reveal; 1, 2, and 3 choose Easy, Medium, and Hard; F flips between question and answer. On the visible answer side, D deselects the current card from the active Choose cards pool. S saves or unsaves a card, and A controls audio when audio is available. Text-entry fields keep normal typing behavior.</p>
+            <p>The Start gate begins only when you click Start or press Space. During study, Space reveals the question and, after reveal, saves and advances. Enter toggles Right/Wrong after reveal; 1, 2, and 3 choose Easy, Medium, and Hard; F flips between question and answer. On the visible answer side, D marks or unmarks the current card for deselection on the next Save &amp; Next. S saves or unsaves a card, and A controls audio when audio is available. Text-entry fields keep normal typing behavior.</p>
             <p><strong>Back</strong> truly undoes the preceding saved grade and lets you replace it without double-counting the review. <strong>Skip</strong> advances without recording a grade or improving accuracy.</p>
           </div>
         </details>
@@ -99,7 +102,7 @@ export function HowSiteWorks() {
           <summary>Progress and Stats</summary>
           <div>
             <h3>Progress beside the flashcards</h3>
-            <p>The Progress panel beside the cards describes the <strong>active ranked session</strong>, not your entire lifetime history. It includes reviews, distinct cards reviewed, accuracy, cards ever answered Wrong, cards marked Hard, average response time, cards answered Right at least once, best streak, and the Initial completion / Initial mastery bar.</p>
+            <p>The Progress panel beside the Greek and Latin cards describes the <strong>current page visit</strong>, not your lifetime history and not the full lifetime of the persistent Learner, Reviewer, or custom session. It starts over when the study page is hard-reloaded or re-entered. It includes reviews, distinct cards reviewed, accuracy, cards answered Wrong, cards marked Hard, average response time, cards answered Right at least once, best streak, and the Visit completion / Visit mastery bar for that loaded visit.</p>
             <h3>Choose what Stats analyzes</h3>
             <p>The <strong>Stats</strong> page analyzes your saved Greek and Latin study history. Its session selector can show <strong>all sessions</strong>, one session by itself, or any combination of sessions. The scores, card analysis, trends, and review history shown below the selector all follow that chosen scope. This makes it possible to compare a custom session with Learner or Reviewer, combine several study periods, or return to your complete history.</p>
             <h3>What Stats measures</h3>
