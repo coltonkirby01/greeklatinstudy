@@ -21,8 +21,8 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 ## Weekly card additions
 
 - Assume new cards will be added regularly. Prefer data-driven updates that require changing source/card data only.
-- Adding cards to an **existing registered built-in deck** must automatically flow into Stats, permanent Learner/Reviewer sessions, cloud progress, saved-card handling, and Select all/Deselect all behavior without adding another hand-maintained deck list.
-- Keep stable deck IDs and stable existing card IDs. Give every new card a stable unique ID before release so old cloud progress remains attached.
+- Adding cards to an **existing registered built-in deck** must automatically flow into Stats, permanent Learner/Reviewer sessions, cloud progress, saved-card handling, Select all/Deselect all behavior, and the shared answer-side **Deselect card** control without adding another hand-maintained deck list or card-specific button.
+- Keep stable deck IDs and stable existing card IDs. Give each new card a stable unique ID before release so old cloud progress remains attached.
 - `src/features/study/builtin-study-catalog.ts` is the canonical registry for active built-in Greek/Latin decks, Stats modes, and session coverage. Do not create a parallel registry.
 - A genuinely **new deck or new study direction** must be registered in `BUILTIN_STUDY_DECKS` in the same change that exposes it in the UI. The catalog regression test must pass before merge.
 - If a weekly addition introduces a new filter category/lesson, update the language selector hierarchy so Select all includes it and existing saved filter preferences degrade safely. Never make new cards invisible only because an old explicit selector array was not extended.
@@ -44,6 +44,9 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - Keep selectors concise; hierarchy, checkbox labels, counts, and summaries carry the structure.
 - Parent checkbox selection and disclosure expansion are independent. Mixed states must remain correct.
 - Filter changes narrow the pool only; never delete progress for deselected cards.
+- Every built-in Greek and Latin answer side inherits **Deselect card** from `MultiSourceStudySession`. The action and D shortcut remove only that card from the active selected pool and persist the exclusion separately from progress/mastery.
+- Per-card exclusions are stored through `src/features/study/card-exclusions.ts`. The language Choose cards menu must expose them under **Individually deselected** so a single card can be restored. Top-level **Select all** clears these individual exclusions.
+- Do not implement Deselect card separately in individual deck/card renderers; future cards must receive it through the shared controller by default.
 - Saved Cards is the one selector that may carry its explanatory hint.
 
 ## Sessions
@@ -60,6 +63,7 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - F = flip question/answer after reveal.
 - Enter = toggle Right/Wrong after reveal. R/W are intentionally unassigned.
 - 1/2/3 = Easy/Medium/Hard. S = save/unsave a card. A = audio on Greek or Latin cards where audio exists.
+- D = Deselect card, only while the answer side is visibly showing in the built-in Greek/Latin apps. It must not fire while typing, using toolbar controls, or correcting a prior grade.
 - Shift+Enter is unassigned.
 - Automatic correctness is per card + study mode/direction: attempts 1–3 default Wrong; from attempt 4 onward use the majority of the three most recent saved results. Difficulty remains time-based (<3s Easy, <10s Medium, otherwise Hard).
 - Back truly undoes/replaces the prior grade; Skip records no grade.
