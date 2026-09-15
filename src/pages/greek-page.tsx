@@ -11,6 +11,7 @@ import {
 } from "../data/builtin-decks";
 import { useAuth } from "../features/auth/auth-context";
 import { ClassicalGreekAudio } from "../features/greek/classical-greek-audio";
+import { useCardExclusions } from "../features/study/card-exclusions";
 import { loadGreekFilterSelection, saveGreekFilterSelection } from "../features/study/filter-preferences";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
 import { loadIncludeSavedCards, saveIncludeSavedCards, savedCardRef, useSavedCards } from "../features/study/saved-cards";
@@ -165,6 +166,7 @@ export function GreekPage() {
   }, []);
   const { user } = useAuth();
   const savedCards = useSavedCards("greek", user);
+  const excludedCards = useCardExclusions("greek");
   const [searchParams] = useSearchParams();
   const [direction, setDirection] = useState<StudyDirection>("forward");
   const [selected, setSelected] = useState<Set<string>>(() => loadGreekFilterSelection(allKeys));
@@ -193,28 +195,32 @@ export function GreekPage() {
   const grammarState = groupState(selected, allGrammarKeys);
 
   const foundationCards = useMemo(() => decks?.foundation.cards.filter((card) => {
+    if (excludedCards.refs.has(savedCardRef(decks.foundation.id, card.id))) return false;
     if (card.category === categories.uppercase) return selected.has(keys.uppercase);
     if (card.category === categories.lowercase) return selected.has(keys.lowercase);
     if (card.category === categories.punctuation) return selected.has(keys.punctuation);
     if (card.category === categories.accents) return selected.has(keys.accents);
     return false;
-  }) ?? [], [decks, selected]);
+  }) ?? [], [decks, excludedCards.refs, selected]);
 
-  const lesson3VocabularyCards = useMemo(() => selected.has(keys.lesson3Vocabulary) ? decks?.lesson3Vocabulary.cards ?? [] : [], [decks, selected]);
+  const lesson3VocabularyCards = useMemo(() => selected.has(keys.lesson3Vocabulary) ? decks?.lesson3Vocabulary.cards.filter((card) => !excludedCards.refs.has(savedCardRef(decks.lesson3Vocabulary.id, card.id))) ?? [] : [], [decks, excludedCards.refs, selected]);
   const lesson3GrammarCards = useMemo(() => decks?.lesson3Grammar.cards.filter((card) => {
+    if (excludedCards.refs.has(savedCardRef(decks.lesson3Grammar.id, card.id))) return false;
     for (const [key, category] of lesson3GrammarCategoryByKey) if (card.category === category) return selected.has(key);
     return false;
-  }) ?? [], [decks, selected]);
-  const lesson4VocabularyCards = useMemo(() => selected.has(keys.lesson4Vocabulary) ? decks?.lesson4Vocabulary.cards ?? [] : [], [decks, selected]);
+  }) ?? [], [decks, excludedCards.refs, selected]);
+  const lesson4VocabularyCards = useMemo(() => selected.has(keys.lesson4Vocabulary) ? decks?.lesson4Vocabulary.cards.filter((card) => !excludedCards.refs.has(savedCardRef(decks.lesson4Vocabulary.id, card.id))) ?? [] : [], [decks, excludedCards.refs, selected]);
   const lesson4GrammarCards = useMemo(() => decks?.lesson4Grammar.cards.filter((card) => {
+    if (excludedCards.refs.has(savedCardRef(decks.lesson4Grammar.id, card.id))) return false;
     for (const [key, category] of lesson4GrammarCategoryByKey) if (card.category === category) return selected.has(key);
     return false;
-  }) ?? [], [decks, selected]);
-  const lesson5VocabularyCards = useMemo(() => selected.has(keys.lesson5Vocabulary) ? decks?.lesson5Vocabulary.cards ?? [] : [], [decks, selected]);
+  }) ?? [], [decks, excludedCards.refs, selected]);
+  const lesson5VocabularyCards = useMemo(() => selected.has(keys.lesson5Vocabulary) ? decks?.lesson5Vocabulary.cards.filter((card) => !excludedCards.refs.has(savedCardRef(decks.lesson5Vocabulary.id, card.id))) ?? [] : [], [decks, excludedCards.refs, selected]);
   const lesson5GrammarCards = useMemo(() => decks?.lesson5Grammar.cards.filter((card) => {
+    if (excludedCards.refs.has(savedCardRef(decks.lesson5Grammar.id, card.id))) return false;
     for (const [key, category] of lesson5GrammarCategoryByKey) if (card.category === category) return selected.has(key);
     return false;
-  }) ?? [], [decks, selected]);
+  }) ?? [], [decks, excludedCards.refs, selected]);
 
   const savedCardCount = useMemo(() => {
     if (!decks) return 0;
@@ -222,6 +228,14 @@ export function GreekPage() {
       .flatMap((sourceDeck) => sourceDeck.cards.map((card) => savedCardRef(sourceDeck.id, card.id)))
       .filter((ref) => savedCards.refs.has(ref)).length;
   }, [decks, savedCards.refs]);
+
+  const excludedEntries = useMemo(() => {
+    if (!decks) return [];
+    return [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar, decks.lesson4Vocabulary, decks.lesson4Grammar, decks.lesson5Vocabulary, decks.lesson5Grammar]
+      .flatMap((sourceDeck) => sourceDeck.cards
+        .filter((card) => excludedCards.refs.has(savedCardRef(sourceDeck.id, card.id)))
+        .map((card) => ({ deckId: sourceDeck.id, cardId: card.id, label: card.front, source: sourceDeck.title })));
+  }, [decks, excludedCards.refs]);
 
   const sources = useMemo(() => {
     if (!decks) return [];
@@ -239,7 +253,7 @@ export function GreekPage() {
       const appendSaved = (id: string, sourceDeck: DeckDefinition, studyKey: string, sourceDirection: StudyDirection) => {
         const cards = sourceDeck.cards.filter((card) => {
           const ref = savedCardRef(sourceDeck.id, card.id);
-          return savedCards.refs.has(ref) && !alreadySelected.has(ref);
+          return savedCards.refs.has(ref) && !excludedCards.refs.has(ref) && !alreadySelected.has(ref);
         });
         if (!cards.length) return;
         next.push({ id, label: "Saved Cards", deck: sourceDeck, cards, studyKey, direction: sourceDirection });
@@ -254,7 +268,7 @@ export function GreekPage() {
       appendSaved("saved-lesson5-grammar", decks.lesson5Grammar, "forward", "forward");
     }
     return next;
-  }, [decks, direction, foundationCards, includeSavedCards, lesson3GrammarCards, lesson3VocabularyCards, lesson4GrammarCards, lesson4VocabularyCards, lesson5GrammarCards, lesson5VocabularyCards, savedCards.refs]);
+  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lesson3GrammarCards, lesson3VocabularyCards, lesson4GrammarCards, lesson4VocabularyCards, lesson5GrammarCards, lesson5VocabularyCards, savedCards.refs]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
   const virtualDeck = useMemo<DeckDefinition>(() => ({
@@ -268,7 +282,7 @@ export function GreekPage() {
     supportsReverse: true,
   }), [selectedCards]);
   const savedSelectionKey = includeSavedCards ? [...savedCards.refs].sort().join(",") : "off";
-  const resetKey = `${direction}|${[...selected].sort().join("|")}|saved:${savedSelectionKey}`;
+  const resetKey = `${direction}|${[...selected].sort().join("|")}|saved:${savedSelectionKey}|excluded:${excludedCards.signature}`;
 
   const countFoundation = (category: string) => decks?.foundation.cards.filter((card) => card.category === category).length ?? 0;
   const countLesson3Grammar = (category: string) => decks?.lesson3Grammar.cards.filter((card) => card.category === category).length ?? 0;
@@ -284,11 +298,15 @@ export function GreekPage() {
     {(error || savedCards.error) && <div className="inline-alert">{error ?? savedCards.error}</div>}
 
     {decks && <StudyFilterMenu summary={`${selectedCards.length} cards in the current pool`}>
-      <FilterSection title="Quick select" onAll={() => setSelected(new Set(allKeys))} onNone={() => { setSelected(new Set()); setIncludeSavedCards(false); }}>
+      <FilterSection title="Quick select" onAll={() => { setSelected(new Set(allKeys)); excludedCards.clear(); }} onNone={() => { setSelected(new Set()); setIncludeSavedCards(false); }}>
         <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={setIncludeSavedCards} hint={savedHint} />
         <FilterCheckbox label="All Vocabulary" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onChange={(checked) => setSelected((current) => updateSet(current, allVocabularyKeys, checked))} />
         <FilterCheckbox label="All Grammar" checked={grammarState.checked} mixed={grammarState.mixed} onChange={(checked) => setSelected((current) => updateSet(current, allGrammarKeys, checked))} />
       </FilterSection>
+
+      {excludedEntries.length > 0 && <FilterSection title="Individually deselected" description="Cards removed with Deselect card or the D shortcut. Check a card here to restore it to its selected group.">
+        {excludedEntries.map((entry) => <FilterCheckbox key={savedCardRef(entry.deckId, entry.cardId)} label={`${entry.label} · ${entry.source}`} checked={false} onChange={(checked) => { if (checked) excludedCards.restore(entry.deckId, entry.cardId); }} />)}
+      </FilterSection>}
 
       <FilterDisclosure title="Lesson 1" summary={`${lesson1State.selectedCount} of ${lesson1Keys.length} groups selected`} checked={lesson1State.checked} mixed={lesson1State.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, lesson1Keys, checked))}>
         <FilterDisclosure title="Alphabet" summary={`${alphabetState.selectedCount} of ${alphabetKeys.length} cases selected`} count={countFoundation(categories.uppercase) + countFoundation(categories.lowercase)} nested checked={alphabetState.checked} mixed={alphabetState.mixed} onCheckedChange={(checked) => setSelected((current) => updateSet(current, alphabetKeys, checked))}>
@@ -373,6 +391,7 @@ export function GreekPage() {
       resumeSession={resumeSession}
       savedCardRefs={savedCards.refs}
       onToggleSavedCard={savedCards.toggleSaved}
+      onDeselectCard={excludedCards.exclude}
       cardMeta={(card, source) => source.deck.id === decks.foundation.id ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.deck.id === decks.lesson3Vocabulary.id ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson4Vocabulary.id ? `Lesson 4 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson5Vocabulary.id ? `Lesson 5 vocabulary · ${card.notes ?? ""}` : `Lesson ${Number(card.metadata?.lesson ?? 3)} grammar · ${card.category ?? ""}`}
       renderFront={(card, copy, source) => {
         if (source.deck.id === decks.lesson3Grammar.id || source.deck.id === decks.lesson4Grammar.id || source.deck.id === decks.lesson5Grammar.id) return <span className="study-prompt reverse-text-prompt">{card.front}</span>;
