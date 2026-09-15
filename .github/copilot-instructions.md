@@ -14,18 +14,18 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 ## User-facing behavior guide
 
 - `src/pages/how-site-works.tsx` is the canonical learner-facing explanation of consequential site behavior and appears on the Home page directly above the progress/cloud-sync callout.
-- Any change to Adaptive/Sequential selection, first-pass coverage, grading defaults, timing, keyboard controls, session behavior, Initial completion/Initial mastery, staged unlocking, cloud-sync behavior, pronunciation/audio behavior, or other learner-visible study mechanics MUST update this guide in the same change when the explanation is affected.
+- Any change to Adaptive/Sequential/Shuffle selection, first-pass coverage, grading defaults, timing, keyboard controls, session behavior, page-visit Progress, staged unlocking, cloud-sync behavior, pronunciation/audio behavior, or other learner-visible study mechanics MUST update this guide in the same change when the explanation is affected.
 - Prefer importing shared implementation constants into the guide instead of duplicating numeric values. Keep the guide useful to learners; do not fill it with implementation trivia.
 - Tests should protect important examples and invariants described in the guide, including the 125% Adaptive initial-coverage rule.
 
 ## Weekly card additions
 
 - Assume new cards will be added regularly. Prefer data-driven updates that require changing source/card data only.
-- Adding cards to an **existing registered built-in deck** must automatically flow into Stats, permanent Learner/Reviewer sessions, cloud progress, saved-card handling, Select all/Deselect all behavior, and the shared answer-side **Deselect card** control without adding another hand-maintained deck list or card-specific button.
+- Adding cards to an **existing registered built-in deck** must automatically flow into Stats, permanent Learner/Reviewer sessions, cloud progress, saved-card handling, Select all/Deselect all behavior, exact-card selection, Shuffle, and the shared answer-side **Deselect card** control without adding another hand-maintained deck list or card-specific button.
 - Keep stable deck IDs and stable existing card IDs. Give each new card a stable unique ID before release so old cloud progress remains attached.
 - `src/features/study/builtin-study-catalog.ts` is the canonical registry for active built-in Greek/Latin decks, Stats modes, and session coverage. Do not create a parallel registry.
 - A genuinely **new deck or new study direction** must be registered in `BUILTIN_STUDY_DECKS` in the same change that exposes it in the UI. The catalog regression test must pass before merge.
-- If a weekly addition introduces a new filter category/lesson, update the language selector hierarchy so Select all includes it and existing saved filter preferences degrade safely. Never make new cards invisible only because an old explicit selector array was not extended.
+- If a weekly addition introduces a new filter category/lesson, update the language selector hierarchy so Select all/Deselect all and saved filter preferences handle it safely. Never make new cards invisible only because an old explicit selector array was not extended.
 - Update protected source-count tests only when the source was intentionally expanded. Never regenerate authoritative Greek/Latin/Henle source data from model memory.
 
 ## Built-in cards and Stats/session coverage
@@ -41,11 +41,13 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 ## Choose cards
 
 - Both Greek and Latin Choose cards menus must retain top-level **Select all** and **Deselect all** actions.
+- Every built-in card must be reachable as an exact individual checkbox in the language Choose cards menu. Per-card selection is not a separate temporary UI; it is another view of the same persistent per-card exclusion state used by the answer-side D control.
+- Greek may list exact cards directly under source/deck disclosures. Dickinson is large, so exact Dickinson cards MUST be grouped into nested 10-card ranges (`1–10`, `11–20`, and so on), with each range opening to the ten exact card checkboxes.
 - Keep selectors concise; hierarchy, checkbox labels, counts, and summaries carry the structure.
-- Parent checkbox selection and disclosure expansion are independent. Mixed states must remain correct.
+- Parent checkbox selection and disclosure expansion are independent. Mixed states must remain correct when only some exact cards are selected.
 - Filter changes narrow the pool only; never delete progress for deselected cards.
-- Every built-in Greek and Latin answer side inherits **Deselect card** from `MultiSourceStudySession`. The action and D shortcut remove only that card from the active selected pool and persist the exclusion separately from progress/mastery.
-- Per-card exclusions are stored through `src/features/study/card-exclusions.ts`. The language Choose cards menu must expose them under **Individually deselected** so a single card can be restored. Top-level **Select all** clears these individual exclusions.
+- Every built-in Greek and Latin answer side inherits **Deselect card** from `MultiSourceStudySession`. Pressing D or clicking the button marks the current answer-side card as pending deselection and visually changes the button to **Deselected**. It MUST NOT immediately change cards or reopen the Start gate. The exclusion is committed only when the learner advances with Space/Save & Next, after which the next selected card appears normally without a new Start gate.
+- Per-card exclusions are stored through `src/features/study/card-exclusions.ts`. Exact-card checkboxes and the answer-side D action must read/write that same state. Top-level **Select all** clears individual exclusions.
 - Do not implement Deselect card separately in individual deck/card renderers; future cards must receive it through the shared controller by default.
 - Saved Cards is the one selector that may carry its explanatory hint.
 
@@ -56,14 +58,18 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - Custom sessions remain renameable/deletable and preserve long-term adaptive evidence when removed from Stats.
 - Stats must show Learner and Reviewer as selectable session scopes even before they have reviews.
 - Stats session selection is grouped into two language columns on desktop: **Greek** on the left and **Latin** on the right. Use one heading per column; do not repeat a Greek/Latin label inside each session card.
+- Persistent named/session IDs remain part of Stats and review history, but the live Progress panel in the Greek and Latin apps is **page-visit scoped**. Entering/re-entering the page or performing a hard reload starts live Progress at zero without deleting any historical reviews or mastery. Do not derive that live bar from the permanent Learner/Reviewer/custom session lifetime.
 
 ## Study controls and grading
 
+- Card order exposes **Adaptive**, **Sequential**, and **Shuffle** in the shared study controller.
+- Sequential follows the selected pool in order. Shuffle visits every currently selected/available card exactly once per cycle in randomized order, then creates a fresh permutation for the next cycle. Do not repeat the exact prior permutation when a new cycle begins, and avoid an immediate same-card repeat at the cycle boundary when more than one card exists.
+- Shuffle is equal-coverage random order, not adaptive weighting. Filtering changes the eligible pool and may start a new shuffle cycle; long-term progress is unaffected.
 - Space = Start while the Start gate is open; Reveal before answer; Save & Next after reveal. No other key may dismiss the Start gate.
 - F = flip question/answer after reveal.
 - Enter = toggle Right/Wrong after reveal. R/W are intentionally unassigned.
 - 1/2/3 = Easy/Medium/Hard. S = save/unsave a card. A = audio on Greek or Latin cards where audio exists.
-- D = Deselect card, only while the answer side is visibly showing in the built-in Greek/Latin apps. It must not fire while typing, using toolbar controls, or correcting a prior grade.
+- D = mark/unmark the visible answer-side card for deselection. D must not fire while typing, using toolbar controls, or correcting a prior grade. The actual pool mutation happens on the subsequent Space/Save & Next advance, not on the D keypress itself.
 - Shift+Enter is unassigned.
 - Automatic correctness is per card + study mode/direction: attempts 1–3 default Wrong; from attempt 4 onward use the majority of the three most recent saved results. Difficulty remains time-based (<3s Easy, <10s Medium, otherwise Hard).
 - Back truly undoes/replaces the prior grade; Skip records no grade.
