@@ -15,7 +15,7 @@ import { useCardExclusions } from "../features/study/card-exclusions";
 import { loadGreekFilterSelection, saveGreekFilterSelection } from "../features/study/filter-preferences";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
 import { loadIncludeSavedCards, saveIncludeSavedCards, savedCardRef, useSavedCards } from "../features/study/saved-cards";
-import { FilterCheckbox, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
+import { ExactCardSelection, FilterCheckbox, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
 import type { DeckDefinition, StudyCard, StudyDirection } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
 
@@ -111,6 +111,11 @@ function updateSet(current: Set<string>, values: readonly string[], checked: boo
 function groupState(selected: Set<string>, values: readonly string[]) {
   const selectedCount = values.filter((value) => selected.has(value)).length;
   return { checked: selectedCount === values.length, mixed: selectedCount > 0 && selectedCount < values.length, selectedCount };
+}
+
+function keyForCategory(map: Map<string, string>, category?: string) {
+  if (!category) return null;
+  return [...map.entries()].find(([, value]) => value === category)?.[0] ?? null;
 }
 
 function chartColumns(card: StudyCard) {
@@ -290,6 +295,66 @@ export function GreekPage() {
   const countLesson5Grammar = (category: string) => decks?.lesson5Grammar.cards.filter((card) => card.category === category).length ?? 0;
   const savedHint = "Cards you save with the card button or S shortcut are private to your account or this guest browser.";
 
+  function groupKeyForCard(sourceDeck: DeckDefinition, card: StudyCard) {
+    if (!decks) return null;
+    if (sourceDeck.id === decks.foundation.id) {
+      if (card.category === categories.uppercase) return keys.uppercase;
+      if (card.category === categories.lowercase) return keys.lowercase;
+      if (card.category === categories.punctuation) return keys.punctuation;
+      if (card.category === categories.accents) return keys.accents;
+      return null;
+    }
+    if (sourceDeck.id === decks.lesson3Vocabulary.id) return keys.lesson3Vocabulary;
+    if (sourceDeck.id === decks.lesson4Vocabulary.id) return keys.lesson4Vocabulary;
+    if (sourceDeck.id === decks.lesson5Vocabulary.id) return keys.lesson5Vocabulary;
+    if (sourceDeck.id === decks.lesson3Grammar.id) return keyForCategory(lesson3GrammarCategoryByKey, card.category);
+    if (sourceDeck.id === decks.lesson4Grammar.id) return keyForCategory(lesson4GrammarCategoryByKey, card.category);
+    if (sourceDeck.id === decks.lesson5Grammar.id) return keyForCategory(lesson5GrammarCategoryByKey, card.category);
+    return null;
+  }
+
+  function exactCardSelected(sourceDeck: DeckDefinition, card: StudyCard) {
+    const key = groupKeyForCard(sourceDeck, card);
+    return Boolean(key && selected.has(key) && !excludedCards.isExcluded(sourceDeck.id, card.id));
+  }
+
+  function changeExactCard(sourceDeck: DeckDefinition, card: StudyCard, checked: boolean) {
+    const key = groupKeyForCard(sourceDeck, card);
+    if (!key) return;
+    if (!checked) {
+      excludedCards.exclude(sourceDeck.id, card.id);
+      return;
+    }
+    if (!selected.has(key)) {
+      setSelected((current) => new Set(current).add(key));
+      const groupCards = sourceDeck.cards.filter((item) => groupKeyForCard(sourceDeck, item) === key);
+      excludedCards.setMany(groupCards.map((item) => ({ deckId: sourceDeck.id, cardId: item.id })), true);
+    }
+    excludedCards.restore(sourceDeck.id, card.id);
+  }
+
+  function changeExactDeck(sourceDeck: DeckDefinition, checked: boolean) {
+    const deckKeys = [...new Set(sourceDeck.cards.map((card) => groupKeyForCard(sourceDeck, card)).filter((value): value is string => Boolean(value)))];
+    if (checked) {
+      setSelected((current) => updateSet(current, deckKeys, true));
+      excludedCards.setMany(sourceDeck.cards.map((card) => ({ deckId: sourceDeck.id, cardId: card.id })), false);
+    } else {
+      excludedCards.setMany(sourceDeck.cards.map((card) => ({ deckId: sourceDeck.id, cardId: card.id })), true);
+    }
+  }
+
+  const individualDecks = decks ? [
+    { label: "Lessons 1–2", deck: decks.foundation },
+    { label: "Lesson 3 vocabulary", deck: decks.lesson3Vocabulary },
+    { label: "Lesson 3 grammar", deck: decks.lesson3Grammar },
+    { label: "Lesson 4 vocabulary", deck: decks.lesson4Vocabulary },
+    { label: "Lesson 4 grammar", deck: decks.lesson4Grammar },
+    { label: "Lesson 5 vocabulary", deck: decks.lesson5Vocabulary },
+    { label: "Lesson 5 grammar", deck: decks.lesson5Grammar },
+  ] : [];
+  const allIndividualCardCount = individualDecks.reduce((sum, item) => sum + item.deck.cards.length, 0);
+  const selectedIndividualCardCount = individualDecks.reduce((sum, item) => sum + item.deck.cards.filter((card) => exactCardSelected(item.deck, card)).length, 0);
+
   return <main className="page-shell study-page">
     <div className="study-page-heading">
       <div><h1>Greek</h1></div>
@@ -378,6 +443,15 @@ export function GreekPage() {
             return <FilterCheckbox key={key} label={category} count={countLesson5Grammar(category)} checked={selected.has(key)} onChange={(checked) => setSelected((current) => updateSet(current, [key], checked))} />;
           })}
         </FilterDisclosure>
+      </FilterDisclosure>
+
+      <FilterDisclosure title="Individual cards" summary={`${selectedIndividualCardCount} of ${allIndividualCardCount} selected`} count={allIndividualCardCount} checked={selectedIndividualCardCount === allIndividualCardCount} mixed={selectedIndividualCardCount > 0 && selectedIndividualCardCount < allIndividualCardCount} onCheckedChange={(checked) => individualDecks.forEach(({ deck: sourceDeck }) => changeExactDeck(sourceDeck, checked))}>
+        {individualDecks.map(({ label, deck: sourceDeck }) => {
+          const selectedCount = sourceDeck.cards.filter((card) => exactCardSelected(sourceDeck, card)).length;
+          return <FilterDisclosure key={sourceDeck.id} title={label} summary={`${selectedCount} of ${sourceDeck.cards.length} selected`} count={sourceDeck.cards.length} nested checked={selectedCount === sourceDeck.cards.length} mixed={selectedCount > 0 && selectedCount < sourceDeck.cards.length} onCheckedChange={(checked) => changeExactDeck(sourceDeck, checked)}>
+            <ExactCardSelection cards={sourceDeck.cards} isSelected={(card) => exactCardSelected(sourceDeck, card)} onCardChange={(card, checked) => changeExactCard(sourceDeck, card, checked)} />
+          </FilterDisclosure>;
+        })}
       </FilterDisclosure>
     </StudyFilterMenu>}
 
