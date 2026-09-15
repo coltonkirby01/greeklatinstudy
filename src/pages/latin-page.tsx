@@ -210,12 +210,6 @@ export function LatinPage() {
     return decks.flatMap((sourceDeck) => sourceDeck.cards.map((card) => savedCardRef(sourceDeck.id, card.id))).filter((ref) => savedCards.refs.has(ref)).length;
   }, [activeParadigmDeck, passiveParadigmDeck, savedCards.refs, vocabularyDeck]);
 
-  const excludedEntries = useMemo(() => {
-    const decks = [vocabularyDeck, activeParadigmDeck, passiveParadigmDeck].filter((item): item is DeckDefinition => Boolean(item));
-    return decks.flatMap((sourceDeck) => sourceDeck.cards
-      .filter((card) => excludedCards.refs.has(savedCardRef(sourceDeck.id, card.id)))
-      .map((card) => ({ deckId: sourceDeck.id, cardId: card.id, label: card.front, source: sourceDeck.title })));
-  }, [activeParadigmDeck, excludedCards.refs, passiveParadigmDeck, vocabularyDeck]);
 
   const sources = useMemo(() => {
     const next: StudySourceDefinition[] = [];
@@ -262,6 +256,16 @@ export function LatinPage() {
   }), [selectedCards]);
   const savedSelectionKey = includeSavedCards ? [...savedCards.refs].sort().join(",") : "off";
   const resetKey = `${direction}|${[...materials].sort().join(",")}|v:${selectionKey(vocabularyParts)}|p:${selectionKey(paradigmCards)}|saved:${savedSelectionKey}|excluded:${excludedCards.signature}`;
+
+  function changeSavedCards(checked: boolean) {
+    setIncludeSavedCards(checked);
+    if (!checked) return;
+    const sourceDecks = [vocabularyDeck, activeParadigmDeck, passiveParadigmDeck].filter((item): item is DeckDefinition => Boolean(item));
+    const refs = sourceDecks.flatMap((sourceDeck) => sourceDeck.cards
+      .filter((card) => savedCards.refs.has(savedCardRef(sourceDeck.id, card.id)))
+      .map((card) => ({ deckId: sourceDeck.id, cardId: card.id })));
+    excludedCards.setMany(refs, false);
+  }
 
   function toggleMaterial(material: Material, checked: boolean) {
     setMaterials((current) => {
@@ -413,12 +417,9 @@ export function LatinPage() {
         detail="Choose Latin vocabulary, grammar paradigms, Saved Cards, or any combination of them."
       >
         <FilterSection title="Quick select" description="Cards you save with the card button or S shortcut are private to your account or this guest browser." onAll={selectAllCards} onNone={deselectAllCards}>
-          <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={setIncludeSavedCards} hint="Your saved Latin cards" />
+          <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={changeSavedCards} hint="Your saved Latin cards" />
         </FilterSection>
 
-        {excludedEntries.length > 0 && <FilterSection title="Individually deselected" description="Cards removed with Deselect card or the D shortcut. Check a card here to restore it to its selected group.">
-          {excludedEntries.map((entry) => <FilterCheckbox key={savedCardRef(entry.deckId, entry.cardId)} label={`${entry.label} · ${entry.source}`} checked={false} onChange={(checked) => { if (checked) excludedCards.restore(entry.deckId, entry.cardId); }} />)}
-        </FilterSection>}
 
         <FilterDisclosure
           title="Latin (Dickinson)"

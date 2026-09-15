@@ -44,10 +44,11 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - Every built-in card must be reachable as an exact individual checkbox in the language Choose cards menu. Per-card selection is not a separate temporary UI; it is another view of the same persistent per-card exclusion state used by the answer-side D control.
 - Greek may list exact cards directly under source/deck disclosures. Dickinson is large, so exact Dickinson cards MUST be grouped into nested 10-card ranges (`1–10`, `11–20`, and so on), with each range opening to the ten exact card checkboxes.
 - Keep selectors concise; hierarchy, checkbox labels, counts, and summaries carry the structure.
-- Parent checkbox selection and disclosure expansion are independent. Mixed states must remain correct when only some exact cards are selected.
+- Parent checkbox selection and disclosure expansion are independent. Mixed states must remain correct when only some exact cards are selected, including cards excluded with D.
+- Selecting any parent checkbox MUST restore every per-card exclusion beneath that parent. Reselecting an exact card restores that card only. Do not add a separate **Individually deselected** section; deselected cards remain represented only by their normal exact-card checkbox and parent mixed states.
 - Filter changes narrow the pool only; never delete progress for deselected cards.
 - Every built-in Greek and Latin answer side inherits **Deselect card** from `MultiSourceStudySession`. Pressing D or clicking the button marks the current answer-side card as pending deselection and visually changes the button to **Deselected**. It MUST NOT immediately change cards or reopen the Start gate. The exclusion is committed only when the learner advances with Space/Save & Next, after which the next selected card appears normally without a new Start gate.
-- Per-card exclusions are stored through `src/features/study/card-exclusions.ts`. Exact-card checkboxes and the answer-side D action must read/write that same state. Top-level **Select all** clears individual exclusions.
+- Per-card exclusions are stored through `src/features/study/card-exclusions.ts`. Exact-card checkboxes and the answer-side D action must read/write that same state. Top-level **Select all** and every selected parent scope clear the relevant individual exclusions beneath them.
 - Do not implement Deselect card separately in individual deck/card renderers; future cards must receive it through the shared controller by default.
 - Saved Cards is the one selector that may carry its explanatory hint.
 
