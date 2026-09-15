@@ -69,7 +69,7 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - F = flip question/answer after reveal.
 - Enter = toggle Right/Wrong after reveal. R/W are intentionally unassigned.
 - 1/2/3 = Easy/Medium/Hard. S = save/unsave a card. A = audio on Greek or Latin cards where audio exists.
-- D = mark/unmark the visible answer-side card for deselection. D must not fire while typing, using toolbar controls, or correcting a prior grade. The actual pool mutation happens on the subsequent Space/Save & Next advance, not on the D keypress itself.
+- D = Deselect card: mark/unmark the visible answer-side card for deselection. D must not fire while typing, using toolbar controls, or correcting a prior grade. The actual pool mutation happens on the subsequent Space/Save & Next advance, not on the D keypress itself.
 - Shift+Enter is unassigned.
 - Automatic correctness is per card + study mode/direction: attempts 1–3 default Wrong; from attempt 4 onward use the majority of the three most recent saved results. Difficulty remains time-based (<3s Easy, <10s Medium, otherwise Hard).
 - Back truly undoes/replaces the prior grade; Skip records no grade.
