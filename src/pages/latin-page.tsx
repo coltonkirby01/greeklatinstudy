@@ -10,8 +10,8 @@ import { loadLatinFilterPreferences, saveLatinFilterPreferences, type LatinMater
 import { matchesVocabularyCard, vocabularyFamily, type OptionalSelection } from "../features/study/latin-study-filters";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
 import { loadIncludeSavedCards, saveIncludeSavedCards, savedCardRef, useSavedCards } from "../features/study/saved-cards";
-import { FilterCheckbox, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
-import type { DeckDefinition, StudyDirection } from "../features/study/types";
+import { ExactCardSelection, FilterCheckbox, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
+import type { DeckDefinition, StudyCard, StudyDirection } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
 
 type Material = LatinMaterial;
@@ -43,6 +43,10 @@ function selectionState(selection: OptionalSelection, allValues: readonly string
   };
 }
 
+function vocabularyPart(card: StudyCard) {
+  return String(card.metadata?.partOfSpeech ?? card.category ?? "Vocabulary");
+}
+
 function ParadigmDeckFilters({
   title,
   material,
@@ -51,6 +55,9 @@ function ParadigmDeckFilters({
   active,
   selection,
   allParadigmIds,
+  isExcluded,
+  onRestore,
+  onExclude,
   onDeckChange,
   onValuesChange,
 }: {
@@ -61,11 +68,15 @@ function ParadigmDeckFilters({
   active: boolean;
   selection: OptionalSelection;
   allParadigmIds: readonly string[];
+  isExcluded: (deckId: string, cardId: string) => boolean;
+  onRestore: (deckId: string, cardId: string) => void;
+  onExclude: (deckId: string, cardId: string) => void;
   onDeckChange: (material: Material, ids: readonly string[], checked: boolean) => void;
   onValuesChange: (material: Material, ids: readonly string[], checked: boolean) => void;
 }) {
   const deckIds = deck?.cards.map((card) => card.id) ?? [];
-  const state = selectionState(selection, deckIds, active);
+  const selectedCount = deck?.cards.filter((card) => active && selected(selection, card.id) && !isExcluded(deck.id, card.id)).length ?? 0;
+  const state = { checked: Boolean(deckIds.length && selectedCount === deckIds.length), mixed: selectedCount > 0 && selectedCount < deckIds.length, selectedCount };
 
   return (
     <FilterDisclosure
@@ -81,7 +92,8 @@ function ParadigmDeckFilters({
         const prefix = title.startsWith("Active") ? "Active Indicative" : "Passive Indicative";
         const cards = deck.cards.filter((card) => card.category === `${prefix} — ${tense}`);
         const ids = cards.map((card) => card.id);
-        const tenseState = selectionState(selection, ids, active);
+        const tenseSelectedCount = cards.filter((card) => active && selected(selection, card.id) && !isExcluded(deck.id, card.id)).length;
+        const tenseState = { checked: Boolean(cards.length && tenseSelectedCount === cards.length), mixed: tenseSelectedCount > 0 && tenseSelectedCount < cards.length, selectedCount: tenseSelectedCount };
         return (
           <FilterDisclosure
             key={tense}
@@ -101,8 +113,15 @@ function ParadigmDeckFilters({
                   <FilterCheckbox
                     key={card.id}
                     label={label}
-                    checked={active && selected(selection, card.id)}
-                    onChange={(checked) => onValuesChange(material, [card.id], checked)}
+                    checked={active && selected(selection, card.id) && !isExcluded(deck.id, card.id)}
+                    onChange={(checked) => {
+                      if (checked) {
+                        onValuesChange(material, [card.id], true);
+                        onRestore(deck.id, card.id);
+                      } else {
+                        onExclude(deck.id, card.id);
+                      }
+                    }}
                   />
                 );
               })}
@@ -149,7 +168,7 @@ export function LatinPage() {
     if (!vocabularyDeck) return groups;
     const counts = new Map<string, number>();
     for (const card of vocabularyDeck.cards) {
-      const value = String(card.metadata?.partOfSpeech ?? card.category ?? "Vocabulary");
+      const value = vocabularyPart(card);
       counts.set(value, (counts.get(value) ?? 0) + 1);
     }
     for (const [value, count] of [...counts.entries()].sort(([a], [b]) => a.localeCompare(b))) {
@@ -162,14 +181,22 @@ export function LatinPage() {
   const allVocabularyParts = useMemo(() => [...vocabularyGroups.values()].flat().map((item) => item.value), [vocabularyGroups]);
   const vocabularyActive = materials.has("vocabulary");
   const vocabularyState = selectionState(vocabularyParts, allVocabularyParts, vocabularyActive);
+  const exactVocabularySelectedCount = vocabularyDeck?.cards.filter((card) => vocabularyActive && matchesVocabularyCard(card, vocabularyParts) && !excludedCards.isExcluded(vocabularyDeck.id, card.id)).length ?? 0;
+  const exactVocabularyState = {
+    checked: Boolean(vocabularyDeck?.cards.length && exactVocabularySelectedCount === vocabularyDeck.cards.length),
+    mixed: exactVocabularySelectedCount > 0 && exactVocabularySelectedCount < (vocabularyDeck?.cards.length ?? 0),
+    selectedCount: exactVocabularySelectedCount,
+  };
 
   const activeParadigmIds = useMemo(() => activeParadigmDeck?.cards.map((card) => card.id) ?? [], [activeParadigmDeck]);
   const passiveParadigmIds = useMemo(() => passiveParadigmDeck?.cards.map((card) => card.id) ?? [], [passiveParadigmDeck]);
   const allParadigmIds = useMemo(() => [...activeParadigmIds, ...passiveParadigmIds], [activeParadigmIds, passiveParadigmIds]);
   const activeParadigmsActive = materials.has("active-indicative-paradigms");
   const passiveParadigmsActive = materials.has("passive-indicative-paradigms");
-  const activeParadigmState = selectionState(paradigmCards, activeParadigmIds, activeParadigmsActive);
-  const passiveParadigmState = selectionState(paradigmCards, passiveParadigmIds, passiveParadigmsActive);
+  const activeParadigmSelectedCount = activeParadigmDeck?.cards.filter((card) => activeParadigmsActive && selected(paradigmCards, card.id) && !excludedCards.isExcluded(activeParadigmDeck.id, card.id)).length ?? 0;
+  const passiveParadigmSelectedCount = passiveParadigmDeck?.cards.filter((card) => passiveParadigmsActive && selected(paradigmCards, card.id) && !excludedCards.isExcluded(passiveParadigmDeck.id, card.id)).length ?? 0;
+  const activeParadigmState = { checked: Boolean(activeParadigmIds.length && activeParadigmSelectedCount === activeParadigmIds.length), mixed: activeParadigmSelectedCount > 0 && activeParadigmSelectedCount < activeParadigmIds.length, selectedCount: activeParadigmSelectedCount };
+  const passiveParadigmState = { checked: Boolean(passiveParadigmIds.length && passiveParadigmSelectedCount === passiveParadigmIds.length), mixed: passiveParadigmSelectedCount > 0 && passiveParadigmSelectedCount < passiveParadigmIds.length, selectedCount: passiveParadigmSelectedCount };
   const grammarSelectedCount = activeParadigmState.selectedCount + passiveParadigmState.selectedCount;
   const grammarChecked = activeParadigmState.checked && passiveParadigmState.checked;
   const grammarMixed = (activeParadigmsActive || passiveParadigmsActive) && (!grammarChecked || activeParadigmState.mixed || passiveParadigmState.mixed);
@@ -244,9 +271,16 @@ export function LatinPage() {
     });
   }
 
+  function cardsMatchingVocabularyParts(values: readonly string[]) {
+    if (!vocabularyDeck) return [];
+    const allowed = new Set(values);
+    return vocabularyDeck.cards.filter((card) => allowed.has(vocabularyPart(card)));
+  }
+
   function activateVocabularyOnly(values: readonly string[]) {
     toggleMaterial("vocabulary", true);
     setVocabularyParts(new Set(values));
+    excludedCards.setMany(cardsMatchingVocabularyParts(values).map((card) => ({ deckId: vocabularyDeck!.id, cardId: card.id })), false);
   }
 
   function changeVocabulary(values: readonly string[], checked: boolean) {
@@ -255,6 +289,34 @@ export function LatinPage() {
       return;
     }
     setVocabularyParts((current) => setValues(current, allVocabularyParts, values, checked));
+    if (checked && vocabularyDeck) excludedCards.setMany(cardsMatchingVocabularyParts(values).map((card) => ({ deckId: vocabularyDeck.id, cardId: card.id })), false);
+  }
+
+  function changeDickinsonCards(cards: readonly StudyCard[], checked: boolean) {
+    if (!vocabularyDeck || !cards.length) return;
+    const targetRefs = cards.map((card) => ({ deckId: vocabularyDeck.id, cardId: card.id }));
+    if (!checked) {
+      excludedCards.setMany(targetRefs, true);
+      return;
+    }
+
+    const targetParts = [...new Set(cards.map(vocabularyPart))];
+    if (!vocabularyActive) {
+      setMaterials((current) => new Set(current).add("vocabulary"));
+      setVocabularyParts(null);
+      excludedCards.setMany(vocabularyDeck.cards.map((card) => ({ deckId: vocabularyDeck.id, cardId: card.id })), true);
+      excludedCards.setMany(targetRefs, false);
+      return;
+    }
+
+    const newlyEnabledParts = targetParts.filter((part) => !selected(vocabularyParts, part));
+    if (newlyEnabledParts.length) {
+      setVocabularyParts((current) => setValues(current, allVocabularyParts, newlyEnabledParts, true));
+      const targetIds = new Set(cards.map((card) => card.id));
+      const newlyEnabledOtherCards = vocabularyDeck.cards.filter((card) => newlyEnabledParts.includes(vocabularyPart(card)) && !targetIds.has(card.id));
+      excludedCards.setMany(newlyEnabledOtherCards.map((card) => ({ deckId: vocabularyDeck.id, cardId: card.id })), true);
+    }
+    excludedCards.setMany(targetRefs, false);
   }
 
   function currentlySelectedParadigmIds(current: OptionalSelection) {
@@ -263,6 +325,10 @@ export function LatinPage() {
     if (activeParadigmsActive) activeParadigmIds.forEach((id) => next.add(id));
     if (passiveParadigmsActive) passiveParadigmIds.forEach((id) => next.add(id));
     return next;
+  }
+
+  function paradigmDeckFor(material: Material) {
+    return material === "active-indicative-paradigms" ? activeParadigmDeck : material === "passive-indicative-paradigms" ? passiveParadigmDeck : null;
   }
 
   function changeParadigmDeck(material: Material, ids: readonly string[], checked: boolean) {
@@ -278,6 +344,8 @@ export function LatinPage() {
       ids.forEach((id) => next.delete(id));
       return next;
     });
+    const sourceDeck = paradigmDeckFor(material);
+    if (checked && sourceDeck) excludedCards.setMany(ids.map((cardId) => ({ deckId: sourceDeck.id, cardId })), false);
   }
 
   function changeParadigmValues(material: Material, values: readonly string[], checked: boolean) {
@@ -289,9 +357,11 @@ export function LatinPage() {
         values.forEach((value) => next.add(value));
         return next.size === allParadigmIds.length ? null : next;
       });
-      return;
+    } else {
+      setParadigmCards((current) => setValues(current, allParadigmIds, values, checked));
     }
-    setParadigmCards((current) => setValues(current, allParadigmIds, values, checked));
+    const sourceDeck = paradigmDeckFor(material);
+    if (checked && sourceDeck) excludedCards.setMany(values.map((cardId) => ({ deckId: sourceDeck.id, cardId })), false);
   }
 
   function changeGrammarParent(checked: boolean) {
@@ -307,6 +377,10 @@ export function LatinPage() {
       return next;
     });
     setParadigmCards(checked ? null : new Set());
+    if (checked) {
+      const refs = [activeParadigmDeck, passiveParadigmDeck].filter((item): item is DeckDefinition => Boolean(item)).flatMap((sourceDeck) => sourceDeck.cards.map((card) => ({ deckId: sourceDeck.id, cardId: card.id })));
+      excludedCards.setMany(refs, false);
+    }
   }
 
   function selectAllCards() {
@@ -350,30 +424,33 @@ export function LatinPage() {
           title="Latin (Dickinson)"
           ariaLabel="Latin Dickinson"
           count={vocabularyDeck?.cards.length ?? 997}
-          summary="Frequency-ranked · top 100, then 25-card unlocks"
-          checked={vocabularyState.checked}
-          mixed={vocabularyState.mixed}
+          summary={`${exactVocabularyState.selectedCount} of ${vocabularyDeck?.cards.length ?? 997} cards selected`}
+          checked={exactVocabularyState.checked}
+          mixed={exactVocabularyState.mixed}
           onCheckedChange={(checked) => {
             toggleMaterial("vocabulary", checked);
             setVocabularyParts(checked ? null : new Set());
+            if (checked && vocabularyDeck) excludedCards.setMany(vocabularyDeck.cards.map((card) => ({ deckId: vocabularyDeck.id, cardId: card.id })), false);
           }}
         >
-          {vocabularyDeck && (
+          {vocabularyDeck && <>
             <FilterSection title="Vocabulary categories" description="Choose a category directly, or open a category with multiple subtypes for a narrower selection.">
               {[...vocabularyGroups.entries()].map(([family, items]) => {
                 const values = items.map((item) => item.value);
-                const state = selectionState(vocabularyParts, values, vocabularyActive);
+                const familyCards = vocabularyDeck.cards.filter((card) => values.includes(vocabularyPart(card)));
+                const familySelectedCount = familyCards.filter((card) => vocabularyActive && selected(vocabularyParts, vocabularyPart(card)) && !excludedCards.isExcluded(vocabularyDeck.id, card.id)).length;
+                const state = { checked: Boolean(familyCards.length && familySelectedCount === familyCards.length), mixed: familySelectedCount > 0 && familySelectedCount < familyCards.length, selectedCount: familySelectedCount };
                 const count = items.reduce((sum, item) => sum + item.count, 0);
                 if (items.length === 1) {
                   const item = items[0];
-                  return <FilterCheckbox key={family} label={family} count={count} checked={vocabularyActive && selected(vocabularyParts, item.value)} onChange={(checked) => changeVocabulary([item.value], checked)} />;
+                  return <FilterCheckbox key={family} label={family} count={count} checked={state.checked} mixed={state.mixed} onChange={(checked) => changeVocabulary([item.value], checked)} />;
                 }
                 return (
                   <FilterDisclosure
                     key={family}
                     title={family}
                     count={count}
-                    summary={`${state.selectedCount} of ${values.length} types selected`}
+                    summary={`${state.selectedCount} of ${familyCards.length} cards selected`}
                     checked={state.checked}
                     mixed={state.mixed}
                     onCheckedChange={(checked) => {
@@ -386,21 +463,36 @@ export function LatinPage() {
                     nested
                   >
                     <FilterSection title={family} description={`Choose all ${family.toLowerCase()} vocabulary or only specific types.`}>
-                      {items.map((item) => (
-                        <FilterCheckbox
+                      {items.map((item) => {
+                        const itemCards = vocabularyDeck.cards.filter((card) => vocabularyPart(card) === item.value);
+                        const itemSelectedCount = itemCards.filter((card) => vocabularyActive && selected(vocabularyParts, item.value) && !excludedCards.isExcluded(vocabularyDeck.id, card.id)).length;
+                        return <FilterCheckbox
                           key={item.value}
                           label={item.value.includes(":") ? item.value.split(":").slice(1).join(":").trim() : item.value}
                           count={item.count}
-                          checked={vocabularyActive && selected(vocabularyParts, item.value)}
+                          checked={Boolean(itemCards.length && itemSelectedCount === itemCards.length)}
+                          mixed={itemSelectedCount > 0 && itemSelectedCount < itemCards.length}
                           onChange={(checked) => changeVocabulary([item.value], checked)}
-                        />
-                      ))}
+                        />;
+                      })}
                     </FilterSection>
                   </FilterDisclosure>
                 );
               })}
             </FilterSection>
-          )}
+
+            <FilterDisclosure title="Individual Dickinson cards" summary={`${exactVocabularyState.selectedCount} of ${vocabularyDeck.cards.length} selected`} count={vocabularyDeck.cards.length} nested checked={exactVocabularyState.checked} mixed={exactVocabularyState.mixed} onCheckedChange={(checked) => changeDickinsonCards(vocabularyDeck.cards, checked)}>
+              <ExactCardSelection
+                cards={vocabularyDeck.cards}
+                chunkSize={10}
+                sectionTitle="Exact cards"
+                isSelected={(card) => vocabularyActive && matchesVocabularyCard(card, vocabularyParts) && !excludedCards.isExcluded(vocabularyDeck.id, card.id)}
+                onCardChange={(card, checked) => changeDickinsonCards([card], checked)}
+                onCardsChange={changeDickinsonCards}
+                labelForCard={(card, index) => `${index + 1}. ${card.front}${card.rank ? ` · Dickinson #${card.rank}` : ""}`}
+              />
+            </FilterDisclosure>
+          </>}
         </FilterDisclosure>
 
         <FilterDisclosure
@@ -420,6 +512,9 @@ export function LatinPage() {
             active={activeParadigmsActive}
             selection={paradigmCards}
             allParadigmIds={allParadigmIds}
+            isExcluded={excludedCards.isExcluded}
+            onRestore={excludedCards.restore}
+            onExclude={excludedCards.exclude}
             onDeckChange={changeParadigmDeck}
             onValuesChange={changeParadigmValues}
           />
@@ -431,6 +526,9 @@ export function LatinPage() {
             active={passiveParadigmsActive}
             selection={paradigmCards}
             allParadigmIds={allParadigmIds}
+            isExcluded={excludedCards.isExcluded}
+            onRestore={excludedCards.restore}
+            onExclude={excludedCards.exclude}
             onDeckChange={changeParadigmDeck}
             onValuesChange={changeParadigmValues}
           />
