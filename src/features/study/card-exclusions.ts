@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { savedCardRef } from "./saved-cards";
 
 export type CardExclusionLanguage = "greek" | "latin";
+export type CardSelectionRef = { deckId: string; cardId: string };
 
 type StorageLike = {
   getItem(key: string): string | null;
@@ -52,9 +53,25 @@ export function useCardExclusions(language: CardExclusionLanguage) {
     });
   }, []);
 
+  const setMany = useCallback((cards: readonly CardSelectionRef[], excluded: boolean) => {
+    setRefs((current) => {
+      const next = new Set(current);
+      for (const card of cards) {
+        const ref = savedCardRef(card.deckId, card.cardId);
+        if (excluded) next.add(ref);
+        else next.delete(ref);
+      }
+      return next;
+    });
+  }, []);
+
+  const replace = useCallback((cards: readonly CardSelectionRef[]) => {
+    setRefs(new Set(cards.map((card) => savedCardRef(card.deckId, card.cardId))));
+  }, []);
+
   const clear = useCallback(() => setRefs(new Set()), []);
   const isExcluded = useCallback((deckId: string, cardId: string) => refs.has(savedCardRef(deckId, cardId)), [refs]);
   const signature = useMemo(() => [...refs].sort().join(","), [refs]);
 
-  return { refs, exclude, restore, clear, isExcluded, signature };
+  return { refs, exclude, restore, setMany, replace, clear, isExcluded, signature };
 }
