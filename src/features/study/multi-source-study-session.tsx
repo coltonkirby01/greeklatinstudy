@@ -1,4 +1,4 @@
-import { ArrowLeft, Bookmark, Pause, Play, SkipForward } from "lucide-react";
+import { ArrowLeft, Bookmark, ListMinus, Pause, Play, SkipForward } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../auth/auth-context";
@@ -10,7 +10,7 @@ import { builtinSessionId, displayManagedSessionName, managedSessionsForLanguage
 import { autoReviewDefaults, constrainAdaptiveInitialCoverage, sessionProgressSummary } from "./session-review";
 import "./study-gate.css";
 import { StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate } from "./study-session-ui";
-import { studyShortcut } from "./study-shortcuts";
+import { studyDeselectShortcut, studyShortcut } from "./study-shortcuts";
 import type { DeckDefinition, DeckProgressEnvelope, DirectionalCardCopy, ReviewDifficulty, ReviewResult, ReviewTransaction, SelectionMode, StudyActivityKind, StudyCard, StudyDirection, StudyModeState } from "./types";
 import { useResponseTimer } from "./use-response-timer";
 
@@ -48,6 +48,7 @@ type Props = {
   priorityPrompt?: (card: StudyCard, copy: DirectionalCardCopy) => ReactNode;
   savedCardRefs?: ReadonlySet<string>;
   onToggleSavedCard?: (deckId: string, cardId: string) => void;
+  onDeselectCard?: (deckId: string, cardId: string) => void;
 };
 
 function candidateKey(candidate: Candidate) { return `${candidate.source.id}:${candidate.card.id}`; }
@@ -111,7 +112,7 @@ function avoidRecentlyPresentedCandidates(candidates: Candidate[], modeFor: (sou
   return filtered.length >= 3 ? filtered : candidates;
 }
 
-export function MultiSourceStudySession({ deck, sources, direction, onDirectionChange, directionLabels = PropsDefaults, resetKey, resumeSession, renderFront, renderBack, priorityPrompt, savedCardRefs, onToggleSavedCard }: Props) {
+export function MultiSourceStudySession({ deck, sources, direction, onDirectionChange, directionLabels = PropsDefaults, resetKey, resumeSession, renderFront, renderBack, priorityPrompt, savedCardRefs, onToggleSavedCard, onDeselectCard }: Props) {
   const { user } = useAuth();
   const sessionLanguage: "Greek" | "Latin" = deck.language === "greek" ? "Greek" : "Latin";
   const [envelopes, setEnvelopes] = useState<Record<string, DeckProgressEnvelope>>({});
@@ -380,6 +381,10 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
     savedTogglePendingRef.current = true;
     onToggleSavedCard(current.source.deck.id, current.card.id);
   }
+  function deselectCurrentCard() {
+    if (!current || !onDeselectCard || editingTransaction || !revealed || reviewFront) return;
+    onDeselectCard(current.source.deck.id, current.card.id);
+  }
   function clearResumeUrl() {
     const url = new URL(window.location.href);
     if (!url.searchParams.has("session") && !url.searchParams.has("sessionStartedAt")) return;
@@ -466,6 +471,11 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
       const target = event.target as HTMLElement | null;
       const typingTarget = Boolean(target?.closest("input, textarea, select, [contenteditable='true'], [role='textbox'], [role='listbox']"));
       const controlsTarget = Boolean(target?.closest(".session-toolbar, .study-start-card"));
+      if (onDeselectCard && current && studyDeselectShortcut({ key: event.key, showingAnswer: revealed && !reviewFront, typingTarget, controlsTarget, editing: Boolean(editingTransaction) })) {
+        event.preventDefault();
+        deselectCurrentCard();
+        return;
+      }
       if (!typingTarget && !controlsTarget && event.key.toLowerCase() === "s" && onToggleSavedCard && current) {
         event.preventDefault();
         toggleSavedCard();
@@ -498,6 +508,9 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
       <button type="button" className="small-outline-button card-overlay-button" data-study-control="back" disabled={!lastTransaction} onClick={back}><ArrowLeft /> Back</button>
       <button type="button" className="small-outline-button card-overlay-button" data-study-control="skip" disabled={Boolean(editingTransaction)} onClick={skip}>Skip <SkipForward /></button>
     </div>
+    {onDeselectCard && <div className="card-overlay-actions">
+      <button type="button" className="small-outline-button card-overlay-button deselect-card-button" data-study-control="deselect-card" disabled={Boolean(editingTransaction)} onClick={deselectCurrentCard} title="Deselect this card from the current Choose cards pool (D)"><ListMinus aria-hidden="true" /> Deselect card <kbd>D</kbd></button>
+    </div>}
     {onToggleSavedCard && <div className="card-overlay-actions">
       <button type="button" className="small-outline-button card-overlay-button save-card-button" data-study-control="save-card" aria-pressed={currentSaved} onClick={toggleSavedCard} title="Save or unsave this card (S)"><Bookmark aria-hidden="true" /> {currentSaved ? "Saved" : "Save card"} <kbd>S</kbd></button>
     </div>}

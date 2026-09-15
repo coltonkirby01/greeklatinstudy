@@ -80,6 +80,7 @@ export function HowSiteWorks() {
             <p>When a deck supports both directions, Forward and Reverse keep separate review histories, mastery, response times, and scheduling. Success in one direction does not automatically count as success in the other.</p>
             <h3>Selected cards</h3>
             <p>Filters define the active study pool. They do not delete progress when a category is deselected. Adaptive review, Sequential review, the session progress bar, and Highest-Priority Review are restricted to the material currently selected and available.</p>
+            <p>On the answer side of every built-in Greek and Latin card, <strong>Deselect card</strong> removes that individual card from the active Choose cards pool without changing its mastery, review history, or scheduling. Press <strong>D</strong> for the same action. Individually removed cards appear under <strong>Individually deselected</strong> in Choose cards so they can be restored; <strong>Select all</strong> also restores all individually deselected cards.</p>
             <h3>Staged vocabulary</h3>
             <p>Some large vocabulary decks introduce cards in stages. Locked cards stay out of the active pool until the current stage meets its learning requirement; adding grammar or another source to the session does not bypass that lock.</p>
           </div>
@@ -89,7 +90,7 @@ export function HowSiteWorks() {
           <summary>Timer, keyboard, Back, and Skip</summary>
           <div>
             <p>The response timer measures active time on the unrevealed question side. It pauses when the tab or window is hidden or loses focus and stops when the answer is revealed. Returning from an interruption requires the Start gate again.</p>
-            <p>The Start gate begins only when you click Start or press Space. During study, Space reveals the question and, after reveal, saves and advances. Enter toggles Right/Wrong after reveal; 1, 2, and 3 choose Easy, Medium, and Hard; F flips between question and answer. Text-entry fields keep normal typing behavior.</p>
+            <p>The Start gate begins only when you click Start or press Space. During study, Space reveals the question and, after reveal, saves and advances. Enter toggles Right/Wrong after reveal; 1, 2, and 3 choose Easy, Medium, and Hard; F flips between question and answer. On the visible answer side, D deselects the current card from the active Choose cards pool. S saves or unsaves a card, and A controls audio when audio is available. Text-entry fields keep normal typing behavior.</p>
             <p><strong>Back</strong> truly undoes the preceding saved grade and lets you replace it without double-counting the review. <strong>Skip</strong> advances without recording a grade or improving accuracy.</p>
           </div>
         </details>

@@ -25,6 +25,14 @@ describe("How this site works guide", () => {
     expect(guide).toContain("Initial mastery");
   });
 
+  it("documents answer-side individual deselection and restoration", () => {
+    const guide = fs.readFileSync("src/pages/how-site-works.tsx", "utf8");
+    expect(guide).toContain("Deselect card");
+    expect(guide).toContain("Individually deselected");
+    expect(guide).toContain("Press <strong>D</strong>");
+    expect(guide).toContain("without changing its mastery, review history, or scheduling");
+  });
+
   it("explains both pronunciation systems and the shared cache in learner-facing terms", () => {
     const guide = fs.readFileSync("src/pages/how-site-works.tsx", "utf8");
     expect(guide).toContain("Greek and Latin pronunciation/audio");
@@ -44,5 +52,7 @@ describe("How this site works guide", () => {
     expect(instructions).toContain("INITIAL_COVERAGE_MULTIPLIER = 1.25");
     expect(instructions).toContain("docs/MEDIEVAL_LATIN_PRONUNCIATION.md");
     expect(instructions).toContain("allowGeneration: true");
+    expect(instructions).toContain("D = Deselect card");
+    expect(instructions).toContain("card-exclusions.ts");
   });
 });

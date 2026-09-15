@@ -28,6 +28,14 @@ type EnterShortcutContext = {
   controlsTarget?: boolean;
 };
 
+type DeselectShortcutContext = {
+  key: string;
+  showingAnswer: boolean;
+  typingTarget: boolean;
+  controlsTarget?: boolean;
+  editing?: boolean;
+};
+
 /**
  * Enter is intentionally handled by the shared rating controls so the same
  * behavior applies to every study controller without duplicating key logic.
@@ -38,6 +46,11 @@ type EnterShortcutContext = {
 export function studyEnterShortcut({ key, shiftKey, revealed, result, typingTarget }: EnterShortcutContext): StudyShortcut {
   if (key !== "Enter" || shiftKey || !revealed || typingTarget) return null;
   return { type: "result", value: result === "wrong" ? "right" : "wrong" };
+}
+
+/** D is reserved for the built-in Greek/Latin answer-side Deselect card action. */
+export function studyDeselectShortcut({ key, showingAnswer, typingTarget, controlsTarget = false, editing = false }: DeselectShortcutContext) {
+  return key.toLowerCase() === "d" && showingAnswer && !typingTarget && !controlsTarget && !editing;
 }
 
 export function studyShortcut({ key, startGateOpen, revealed, typingTarget, controlsTarget = false }: ShortcutContext): StudyShortcut {

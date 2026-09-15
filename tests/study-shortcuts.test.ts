@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { studyEnterShortcut, studyShortcut } from "../src/features/study/study-shortcuts";
+import { studyDeselectShortcut, studyEnterShortcut, studyShortcut } from "../src/features/study/study-shortcuts";
 
 const context = { startGateOpen: false, revealed: false, result: null, difficulty: null, typingTarget: false, controlsTarget: false } as const;
 
@@ -49,6 +49,15 @@ describe("study keyboard shortcuts", () => {
     expect(studyShortcut({ ...context, key: "1", revealed: true })).toEqual({ type: "difficulty", value: "easy" });
     expect(studyShortcut({ ...context, key: "2", revealed: true })).toEqual({ type: "difficulty", value: "medium" });
     expect(studyShortcut({ ...context, key: "3", revealed: true })).toEqual({ type: "difficulty", value: "hard" });
+  });
+
+  it("reserves D for answer-side card deselection without hijacking typing or correction", () => {
+    expect(studyDeselectShortcut({ key: "d", showingAnswer: true, typingTarget: false })).toBe(true);
+    expect(studyDeselectShortcut({ key: "D", showingAnswer: true, typingTarget: false })).toBe(true);
+    expect(studyDeselectShortcut({ key: "d", showingAnswer: false, typingTarget: false })).toBe(false);
+    expect(studyDeselectShortcut({ key: "d", showingAnswer: true, typingTarget: true })).toBe(false);
+    expect(studyDeselectShortcut({ key: "d", showingAnswer: true, typingTarget: false, controlsTarget: true })).toBe(false);
+    expect(studyDeselectShortcut({ key: "d", showingAnswer: true, typingTarget: false, editing: true })).toBe(false);
   });
 
   it("does not use R or W as correctness shortcuts", () => {
