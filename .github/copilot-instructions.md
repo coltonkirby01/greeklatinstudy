@@ -82,6 +82,13 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - For ending-only chart audio, read each vertical column continuously and put exactly one `[pause]` between columns.
 - Keep ElevenLabs API keys server-side only.
 
+## Henle adjective paradigms
+
+- `latin-adjective-paradigms` is a first-class registered Latin grammar deck and must continue to inherit the shared exact-card selection, parent restoration, Deselect card, Adaptive/Sequential/Shuffle, session, and Stats behavior.
+- Henle R. 72 (p. 14) supplies the 1st/2nd-declension model `magnus, -a, -um`. Keep masculine, feminine, and neuter on separate cards with stable IDs `latin-adjective-1st-2nd-masculine`, `latin-adjective-1st-2nd-feminine`, and `latin-adjective-1st-2nd-neuter`.
+- Henle R. 78 (p. 16) supplies the 3rd-declension model `gravis, -e`. Keep it on one combined card (`latin-adjective-3rd-gravis`) and show differing neuter forms parenthetically. Preserve accusative singular as `grav-em (grav-e)` and accusative plural as `grav-ēs (grav-ia)`.
+- Adjective charts are case paradigms, so their first table heading is **Case**, not Person. Stem/ending dashes remain visual morphology and follow the shared Latin pronunciation rule that they are never spoken.
+
 ## Medieval Latin audio
 
 - `docs/MEDIEVAL_LATIN_PRONUNCIATION.md` is the pronunciation-source and normalization contract. The learner-facing label is **Medieval Latin**; do not silently replace it with Classical or modern ecclesiastical Latin.
