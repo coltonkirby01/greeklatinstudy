@@ -52,6 +52,8 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - Dickinson retains useful category-level controls while also exposing every exact card under the ten-card range hierarchy. Category checkboxes, range checkboxes, exact-card checkboxes, and Deselect card must stay synchronized through the same exclusion state.
 - Opening a grammar dropdown may load source data, but opening alone must not select the source.
 - Latin grammar filters are hierarchical and composable. Broad sections can be narrowed without erasing the underlying card histories.
+- Henle adjective paradigms live in the registered `latin-adjective-paradigms` deck. Preserve R. 72 / p. 14 as the source for `magnus, -a, -um` and keep its masculine, feminine, and neuter paradigms on three separate cards. Preserve R. 78 / p. 16 as the source for `gravis, -e` and keep that 3rd-declension adjective on one combined card, with differing neuter forms in parentheses; in particular accusative singular is `grav-em (grav-e)` and accusative plural is `grav-ēs (grav-ia)`.
+- The stable adjective card IDs are `latin-adjective-1st-2nd-masculine`, `latin-adjective-1st-2nd-feminine`, `latin-adjective-1st-2nd-neuter`, and `latin-adjective-3rd-gravis`. Do not merge, split, or rename them without an explicit content migration.
 - Where Henle source data is present, preserve authoritative Henle Rule numbers and morphological information supplied by the source.
 - Do not invent a morphological split where the data is ambiguous.
 - Do not reintroduce a separate "How to read this answer" instructional block on Henle cards unless the user explicitly asks for it.

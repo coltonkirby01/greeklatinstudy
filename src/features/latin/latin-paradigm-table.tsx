@@ -22,12 +22,13 @@ function chartRows(card: StudyCard): LatinChartRow[] {
 export function LatinParadigmTable({ card, revealed }: { card: StudyCard; revealed: boolean }) {
   const columns = chartColumns(card);
   const rows = chartRows(card);
+  const rowHeaderLabel = typeof card.metadata?.rowHeaderLabel === "string" ? card.metadata.rowHeaderLabel : "Person";
 
   return <>
     <div className="chart-scroll">
       <table className="henle-chart">
         <thead>
-          <tr><th scope="col">Person</th>{columns.map((column) => <th scope="col" key={column}>{column}</th>)}</tr>
+          <tr><th scope="col">{rowHeaderLabel}</th>{columns.map((column) => <th scope="col" key={column}>{column}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((row) => <tr key={row.label}>
