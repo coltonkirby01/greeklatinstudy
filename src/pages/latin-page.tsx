@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { loadLatinDeck } from "../data/builtin-decks";
 import { loadLatinActiveIndicativeParadigmsDeck } from "../data/latin-active-indicative-paradigms";
+import { loadLatinAdjectiveParadigmsDeck } from "../data/latin-adjective-paradigms";
 import { loadLatinPassiveIndicativeParadigmsDeck } from "../data/latin-passive-indicative-paradigms";
 import { useAuth } from "../features/auth/auth-context";
 import { LatinParadigmTable } from "../features/latin/latin-paradigm-table";
@@ -133,10 +134,113 @@ function ParadigmDeckFilters({
   );
 }
 
+
+function AdjectiveDeckFilters({
+  deck,
+  active,
+  selection,
+  allParadigmIds,
+  isExcluded,
+  onRestore,
+  onExclude,
+  onDeckChange,
+  onValuesChange,
+}: {
+  deck: DeckDefinition | null | undefined;
+  active: boolean;
+  selection: OptionalSelection;
+  allParadigmIds: readonly string[];
+  isExcluded: (deckId: string, cardId: string) => boolean;
+  onRestore: (deckId: string, cardId: string) => void;
+  onExclude: (deckId: string, cardId: string) => void;
+  onDeckChange: (material: Material, ids: readonly string[], checked: boolean) => void;
+  onValuesChange: (material: Material, ids: readonly string[], checked: boolean) => void;
+}) {
+  const material: Material = "adjective-paradigms";
+  const deckIds = deck?.cards.map((card) => card.id) ?? [];
+  const selectedCount = deck?.cards.filter((card) => active && selected(selection, card.id) && !isExcluded(deck.id, card.id)).length ?? 0;
+  const state = {
+    checked: Boolean(deckIds.length && selectedCount === deckIds.length),
+    mixed: selectedCount > 0 && selectedCount < deckIds.length,
+    selectedCount,
+  };
+  const groups = [
+    {
+      title: "1st & 2nd Declension Adjectives",
+      group: "1st & 2nd Declension",
+      countLabel: "genders",
+    },
+    {
+      title: "3rd Declension Adjectives",
+      group: "3rd Declension",
+      countLabel: "cards",
+    },
+  ] as const;
+  const labelById: Record<string, string> = {
+    "latin-adjective-1st-2nd-masculine": "Masculine — magnus, -a, -um",
+    "latin-adjective-1st-2nd-feminine": "Feminine — magnus, -a, -um",
+    "latin-adjective-1st-2nd-neuter": "Neuter — magnus, -a, -um",
+    "latin-adjective-3rd-gravis": "gravis, -e — all genders",
+  };
+
+  return (
+    <FilterDisclosure
+      title="Adjective Paradigms"
+      count={deck?.cards.length ?? 4}
+      summary={`${state.selectedCount} of ${deckIds.length || 4} selected`}
+      nested
+      checked={state.checked}
+      mixed={state.mixed}
+      onCheckedChange={(checked) => onDeckChange(material, deckIds, checked)}
+    >
+      {deck && groups.map(({ title, group, countLabel }) => {
+        const cards = deck.cards.filter((card) => card.metadata?.adjectiveGroup === group);
+        const ids = cards.map((card) => card.id);
+        const groupSelectedCount = cards.filter((card) => active && selected(selection, card.id) && !isExcluded(deck.id, card.id)).length;
+        const groupState = {
+          checked: Boolean(cards.length && groupSelectedCount === cards.length),
+          mixed: groupSelectedCount > 0 && groupSelectedCount < cards.length,
+        };
+        return (
+          <FilterDisclosure
+            key={group}
+            title={title}
+            count={cards.length}
+            summary={`${groupSelectedCount} of ${cards.length} ${countLabel} selected`}
+            nested
+            checked={groupState.checked}
+            mixed={groupState.mixed}
+            onCheckedChange={(checked) => onValuesChange(material, ids, checked)}
+          >
+            <FilterSection title={title}>
+              {cards.map((card) => (
+                <FilterCheckbox
+                  key={card.id}
+                  label={labelById[card.id] ?? card.front.split(" — R.")[0]}
+                  checked={active && selected(selection, card.id) && !isExcluded(deck.id, card.id)}
+                  onChange={(checked) => {
+                    if (checked) {
+                      onValuesChange(material, [card.id], true);
+                      onRestore(deck.id, card.id);
+                    } else {
+                      onExclude(deck.id, card.id);
+                    }
+                  }}
+                />
+              ))}
+            </FilterSection>
+          </FilterDisclosure>
+        );
+      })}
+    </FilterDisclosure>
+  );
+}
+
 export function LatinPage() {
   const { value: vocabularyDeck, error: vocabularyError } = useAsync(loadLatinDeck, []);
   const { value: activeParadigmDeck, error: activeParadigmError } = useAsync(loadLatinActiveIndicativeParadigmsDeck, []);
   const { value: passiveParadigmDeck, error: passiveParadigmError } = useAsync(loadLatinPassiveIndicativeParadigmsDeck, []);
+  const { value: adjectiveParadigmDeck, error: adjectiveParadigmError } = useAsync(loadLatinAdjectiveParadigmsDeck, []);
   const { user } = useAuth();
   const savedCards = useSavedCards("latin", user);
   const excludedCards = useCardExclusions("latin");
@@ -190,25 +294,30 @@ export function LatinPage() {
 
   const activeParadigmIds = useMemo(() => activeParadigmDeck?.cards.map((card) => card.id) ?? [], [activeParadigmDeck]);
   const passiveParadigmIds = useMemo(() => passiveParadigmDeck?.cards.map((card) => card.id) ?? [], [passiveParadigmDeck]);
-  const allParadigmIds = useMemo(() => [...activeParadigmIds, ...passiveParadigmIds], [activeParadigmIds, passiveParadigmIds]);
+  const adjectiveParadigmIds = useMemo(() => adjectiveParadigmDeck?.cards.map((card) => card.id) ?? [], [adjectiveParadigmDeck]);
+  const allParadigmIds = useMemo(() => [...adjectiveParadigmIds, ...activeParadigmIds, ...passiveParadigmIds], [activeParadigmIds, adjectiveParadigmIds, passiveParadigmIds]);
   const activeParadigmsActive = materials.has("active-indicative-paradigms");
   const passiveParadigmsActive = materials.has("passive-indicative-paradigms");
+  const adjectiveParadigmsActive = materials.has("adjective-paradigms");
   const activeParadigmSelectedCount = activeParadigmDeck?.cards.filter((card) => activeParadigmsActive && selected(paradigmCards, card.id) && !excludedCards.isExcluded(activeParadigmDeck.id, card.id)).length ?? 0;
   const passiveParadigmSelectedCount = passiveParadigmDeck?.cards.filter((card) => passiveParadigmsActive && selected(paradigmCards, card.id) && !excludedCards.isExcluded(passiveParadigmDeck.id, card.id)).length ?? 0;
+  const adjectiveParadigmSelectedCount = adjectiveParadigmDeck?.cards.filter((card) => adjectiveParadigmsActive && selected(paradigmCards, card.id) && !excludedCards.isExcluded(adjectiveParadigmDeck.id, card.id)).length ?? 0;
   const activeParadigmState = { checked: Boolean(activeParadigmIds.length && activeParadigmSelectedCount === activeParadigmIds.length), mixed: activeParadigmSelectedCount > 0 && activeParadigmSelectedCount < activeParadigmIds.length, selectedCount: activeParadigmSelectedCount };
   const passiveParadigmState = { checked: Boolean(passiveParadigmIds.length && passiveParadigmSelectedCount === passiveParadigmIds.length), mixed: passiveParadigmSelectedCount > 0 && passiveParadigmSelectedCount < passiveParadigmIds.length, selectedCount: passiveParadigmSelectedCount };
-  const grammarSelectedCount = activeParadigmState.selectedCount + passiveParadigmState.selectedCount;
-  const grammarChecked = activeParadigmState.checked && passiveParadigmState.checked;
-  const grammarMixed = (activeParadigmsActive || passiveParadigmsActive) && (!grammarChecked || activeParadigmState.mixed || passiveParadigmState.mixed);
+  const adjectiveParadigmState = { checked: Boolean(adjectiveParadigmIds.length && adjectiveParadigmSelectedCount === adjectiveParadigmIds.length), mixed: adjectiveParadigmSelectedCount > 0 && adjectiveParadigmSelectedCount < adjectiveParadigmIds.length, selectedCount: adjectiveParadigmSelectedCount };
+  const grammarSelectedCount = adjectiveParadigmState.selectedCount + activeParadigmState.selectedCount + passiveParadigmState.selectedCount;
+  const grammarChecked = adjectiveParadigmState.checked && activeParadigmState.checked && passiveParadigmState.checked;
+  const grammarMixed = (adjectiveParadigmsActive || activeParadigmsActive || passiveParadigmsActive) && (!grammarChecked || adjectiveParadigmState.mixed || activeParadigmState.mixed || passiveParadigmState.mixed);
 
   const vocabularyCards = useMemo(() => vocabularyDeck?.cards.filter((card) => matchesVocabularyCard(card, vocabularyParts) && !excludedCards.refs.has(savedCardRef(vocabularyDeck.id, card.id))) ?? [], [excludedCards.refs, vocabularyDeck, vocabularyParts]);
+  const adjectiveParadigmStudyCards = useMemo(() => adjectiveParadigmDeck?.cards.filter((card) => selected(paradigmCards, card.id) && !excludedCards.refs.has(savedCardRef(adjectiveParadigmDeck.id, card.id))) ?? [], [adjectiveParadigmDeck, excludedCards.refs, paradigmCards]);
   const activeParadigmStudyCards = useMemo(() => activeParadigmDeck?.cards.filter((card) => selected(paradigmCards, card.id) && !excludedCards.refs.has(savedCardRef(activeParadigmDeck.id, card.id))) ?? [], [activeParadigmDeck, excludedCards.refs, paradigmCards]);
   const passiveParadigmStudyCards = useMemo(() => passiveParadigmDeck?.cards.filter((card) => selected(paradigmCards, card.id) && !excludedCards.refs.has(savedCardRef(passiveParadigmDeck.id, card.id))) ?? [], [excludedCards.refs, paradigmCards, passiveParadigmDeck]);
 
   const savedCardCount = useMemo(() => {
-    const decks = [vocabularyDeck, activeParadigmDeck, passiveParadigmDeck].filter((item): item is DeckDefinition => Boolean(item));
+    const decks = [vocabularyDeck, adjectiveParadigmDeck, activeParadigmDeck, passiveParadigmDeck].filter((item): item is DeckDefinition => Boolean(item));
     return decks.flatMap((sourceDeck) => sourceDeck.cards.map((card) => savedCardRef(sourceDeck.id, card.id))).filter((ref) => savedCards.refs.has(ref)).length;
-  }, [activeParadigmDeck, passiveParadigmDeck, savedCards.refs, vocabularyDeck]);
+  }, [activeParadigmDeck, adjectiveParadigmDeck, passiveParadigmDeck, savedCards.refs, vocabularyDeck]);
 
 
   const sources = useMemo(() => {
@@ -216,6 +325,9 @@ export function LatinPage() {
     const paradigmStudyKey = direction === "forward" ? "chart" : "reverse";
     if (vocabularyActive && vocabularyDeck && vocabularyCards.length) {
       next.push({ id: "vocabulary", label: "Dickinson vocabulary", deck: vocabularyDeck, cards: vocabularyCards, studyKey: direction, direction });
+    }
+    if (adjectiveParadigmsActive && adjectiveParadigmDeck && adjectiveParadigmStudyCards.length) {
+      next.push({ id: "adjective-paradigms", label: "Adjective paradigm", deck: adjectiveParadigmDeck, cards: adjectiveParadigmStudyCards, studyKey: paradigmStudyKey, direction });
     }
     if (activeParadigmsActive && activeParadigmDeck && activeParadigmStudyCards.length) {
       next.push({ id: "active-indicative-paradigms", label: "Active indicative paradigm", deck: activeParadigmDeck, cards: activeParadigmStudyCards, studyKey: paradigmStudyKey, direction });
@@ -237,11 +349,12 @@ export function LatinPage() {
         cards.forEach((card) => alreadySelected.add(savedCardRef(sourceDeck.id, card.id)));
       };
       appendSaved("saved-vocabulary", vocabularyDeck, direction);
+      appendSaved("saved-adjective-paradigms", adjectiveParadigmDeck, paradigmStudyKey);
       appendSaved("saved-active-indicative-paradigms", activeParadigmDeck, paradigmStudyKey);
       appendSaved("saved-passive-indicative-paradigms", passiveParadigmDeck, paradigmStudyKey);
     }
     return next;
-  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, direction, excludedCards.refs, includeSavedCards, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, savedCards.refs, vocabularyActive, vocabularyCards, vocabularyDeck]);
+  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, adjectiveParadigmDeck, adjectiveParadigmStudyCards, adjectiveParadigmsActive, direction, excludedCards.refs, includeSavedCards, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, savedCards.refs, vocabularyActive, vocabularyCards, vocabularyDeck]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
   const virtualDeck = useMemo<DeckDefinition>(() => ({
@@ -260,7 +373,7 @@ export function LatinPage() {
   function changeSavedCards(checked: boolean) {
     setIncludeSavedCards(checked);
     if (!checked) return;
-    const sourceDecks = [vocabularyDeck, activeParadigmDeck, passiveParadigmDeck].filter((item): item is DeckDefinition => Boolean(item));
+    const sourceDecks = [vocabularyDeck, adjectiveParadigmDeck, activeParadigmDeck, passiveParadigmDeck].filter((item): item is DeckDefinition => Boolean(item));
     const refs = sourceDecks.flatMap((sourceDeck) => sourceDeck.cards
       .filter((card) => savedCards.refs.has(savedCardRef(sourceDeck.id, card.id)))
       .map((card) => ({ deckId: sourceDeck.id, cardId: card.id })));
@@ -326,13 +439,17 @@ export function LatinPage() {
   function currentlySelectedParadigmIds(current: OptionalSelection) {
     if (current !== null) return new Set(current);
     const next = new Set<string>();
+    if (adjectiveParadigmsActive) adjectiveParadigmIds.forEach((id) => next.add(id));
     if (activeParadigmsActive) activeParadigmIds.forEach((id) => next.add(id));
     if (passiveParadigmsActive) passiveParadigmIds.forEach((id) => next.add(id));
     return next;
   }
 
   function paradigmDeckFor(material: Material) {
-    return material === "active-indicative-paradigms" ? activeParadigmDeck : material === "passive-indicative-paradigms" ? passiveParadigmDeck : null;
+    if (material === "adjective-paradigms") return adjectiveParadigmDeck;
+    if (material === "active-indicative-paradigms") return activeParadigmDeck;
+    if (material === "passive-indicative-paradigms") return passiveParadigmDeck;
+    return null;
   }
 
   function changeParadigmDeck(material: Material, ids: readonly string[], checked: boolean) {
@@ -372,9 +489,11 @@ export function LatinPage() {
     setMaterials((current) => {
       const next = new Set(current);
       if (checked) {
+        next.add("adjective-paradigms");
         next.add("active-indicative-paradigms");
         next.add("passive-indicative-paradigms");
       } else {
+        next.delete("adjective-paradigms");
         next.delete("active-indicative-paradigms");
         next.delete("passive-indicative-paradigms");
       }
@@ -382,13 +501,13 @@ export function LatinPage() {
     });
     setParadigmCards(checked ? null : new Set());
     if (checked) {
-      const refs = [activeParadigmDeck, passiveParadigmDeck].filter((item): item is DeckDefinition => Boolean(item)).flatMap((sourceDeck) => sourceDeck.cards.map((card) => ({ deckId: sourceDeck.id, cardId: card.id })));
+      const refs = [adjectiveParadigmDeck, activeParadigmDeck, passiveParadigmDeck].filter((item): item is DeckDefinition => Boolean(item)).flatMap((sourceDeck) => sourceDeck.cards.map((card) => ({ deckId: sourceDeck.id, cardId: card.id })));
       excludedCards.setMany(refs, false);
     }
   }
 
   function selectAllCards() {
-    setMaterials(new Set<Material>(["vocabulary", "active-indicative-paradigms", "passive-indicative-paradigms"]));
+    setMaterials(new Set<Material>(["vocabulary", "adjective-paradigms", "active-indicative-paradigms", "passive-indicative-paradigms"]));
     setVocabularyParts(null);
     setParadigmCards(null);
     excludedCards.clear();
@@ -401,7 +520,7 @@ export function LatinPage() {
     setIncludeSavedCards(false);
   }
 
-  const paradigmError = activeParadigmError ?? passiveParadigmError;
+  const paradigmError = adjectiveParadigmError ?? activeParadigmError ?? passiveParadigmError;
 
   return (
     <main className="page-shell study-page latin-page">
@@ -499,12 +618,23 @@ export function LatinPage() {
         <FilterDisclosure
           title="Grammar (Henle)"
           ariaLabel="Grammar Henle"
-          count={allParadigmIds.length || 36}
-          summary={`${grammarSelectedCount} of ${allParadigmIds.length || 36} paradigms selected`}
+          count={allParadigmIds.length || 40}
+          summary={`${grammarSelectedCount} of ${allParadigmIds.length || 40} paradigms selected`}
           checked={grammarChecked}
           mixed={grammarMixed}
           onCheckedChange={changeGrammarParent}
         >
+          <AdjectiveDeckFilters
+            deck={adjectiveParadigmDeck}
+            active={adjectiveParadigmsActive}
+            selection={paradigmCards}
+            allParadigmIds={allParadigmIds}
+            isExcluded={excludedCards.isExcluded}
+            onRestore={excludedCards.restore}
+            onExclude={excludedCards.exclude}
+            onDeckChange={changeParadigmDeck}
+            onValuesChange={changeParadigmValues}
+          />
           <ParadigmDeckFilters
             title="Active Indicative Paradigms"
             material="active-indicative-paradigms"
@@ -551,9 +681,9 @@ export function LatinPage() {
           cardMeta={(card, source) => source.deck.id === vocabularyDeck.id
             ? `Entry ${Number(card.metadata?.deckPosition ?? 0)} of ${vocabularyDeck.cards.length} · Dickinson rank ${card.rank}`
             : `${card.category ?? "Indicative paradigm"} · whole paradigm`}
-          priorityPrompt={(card, copy) => String(card.metadata?.studySource).includes("indicative-paradigm") ? (direction === "reverse" ? "Identify the complete paradigm" : `${card.front} · Complete chart`) : copy.prompt}
+          priorityPrompt={(card, copy) => String(card.metadata?.studySource).includes("paradigm") ? (direction === "reverse" ? "Identify the complete paradigm" : `${card.front} · Complete chart`) : copy.prompt}
           renderFront={(card, copy, source) => {
-            const isParadigm = source.deck.id === activeParadigmDeck?.id || source.deck.id === passiveParadigmDeck?.id;
+            const isParadigm = source.deck.id === adjectiveParadigmDeck?.id || source.deck.id === activeParadigmDeck?.id || source.deck.id === passiveParadigmDeck?.id;
             if (isParadigm) {
               if (source.direction === "reverse") return <span className="henle-chart-face"><span className="chart-instruction">Identify this paradigm.</span><LatinParadigmTable card={card} revealed /></span>;
               return <span className="henle-chart-face"><strong className="henle-card-title">{card.front}</strong><span className="chart-instruction">Reconstruct the complete paradigm from memory.</span><LatinParadigmTable card={card} revealed={false} /></span>;
@@ -561,7 +691,7 @@ export function LatinPage() {
             return <span className={source.direction === "forward" ? "latin-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
           }}
           renderBack={(card, copy, source) => {
-            const isParadigm = source.deck.id === activeParadigmDeck?.id || source.deck.id === passiveParadigmDeck?.id;
+            const isParadigm = source.deck.id === adjectiveParadigmDeck?.id || source.deck.id === activeParadigmDeck?.id || source.deck.id === passiveParadigmDeck?.id;
             if (isParadigm) {
               if (source.direction === "reverse") return <span className="answer-block"><strong className="henle-card-title">{card.front}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>;
               return <span className="henle-chart-face"><strong className="henle-card-title">{card.front}</strong><LatinParadigmTable card={card} revealed /></span>;
