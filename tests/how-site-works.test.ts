@@ -57,6 +57,8 @@ describe("How this site works guide", () => {
     expect(guide).toContain("Greek and Latin pronunciation/audio");
     expect(guide).toContain("Classical Attic");
     expect(guide).toContain("Medieval Latin");
+    expect(guide).toContain("magnus, -a, -um");
+    expect(guide).toContain("gravis, -e");
     expect(guide).toContain("Rigg and Stotz");
     expect(guide).toContain("Stem/ending dashes are visual teaching marks and are not spoken");
     expect(guide).toContain("shared Supabase cache");
@@ -74,6 +76,8 @@ describe("How this site works guide", () => {
     expect(instructions).toContain("card-exclusions.ts");
     expect(instructions).toContain("stem - ending");
     expect(instructions).toContain("INITIAL_COVERAGE_MULTIPLIER = 1.25");
+    expect(instructions).toContain("latin-adjective-paradigms");
+    expect(instructions).toContain("grav-em (grav-e)");
     expect(instructions).toContain("docs/MEDIEVAL_LATIN_PRONUNCIATION.md");
     expect(instructions).toContain("allowGeneration: true");
   });
