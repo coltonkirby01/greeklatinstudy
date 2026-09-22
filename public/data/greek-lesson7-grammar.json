@@ -1,0 +1,213 @@
+[
+  {
+    "id": "lesson7-chart-second-declension-masculine-endings",
+    "category": "Second Declension Masculine Endings",
+    "prompt": "Second Declension Masculine Endings",
+    "source_ref": "Groton 7.43, pp. 37–38",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "-ος",
+          "-οι"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-ου",
+          "-ων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-ῳ",
+          "-οις"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-ον",
+          "-ους"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "-ε",
+          "-οι"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson7-chart-second-declension-anthropos",
+    "category": "Second Declension Masculine Nouns — ἄνθρωπος",
+    "prompt": "Second Declension Masculine Nouns — ἄνθρωπος",
+    "source_ref": "Groton 7.43, pp. 37–38",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "ἄνθρωπ - ος",
+          "ἄνθρωπ - οι"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "ἀνθρώπ - ου",
+          "ἀνθρώπ - ων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "ἀνθρώπ - ῳ",
+          "ἀνθρώπ - οις"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "ἄνθρωπ - ον",
+          "ἀνθρώπ - ους"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "ἄνθρωπ - ε",
+          "ἄνθρωπ - οι"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson7-chart-second-declension-potamos",
+    "category": "Second Declension Masculine Nouns — ποταμός",
+    "prompt": "Second Declension Masculine Nouns — ποταμός",
+    "source_ref": "Groton 7.43, pp. 37–38",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "ποταμ - ός",
+          "ποταμ - οί"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "ποταμ - οῦ",
+          "ποταμ - ῶν"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "ποταμ - ῷ",
+          "ποταμ - οῖς"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "ποταμ - όν",
+          "ποταμ - ούς"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "ποταμ - έ",
+          "ποταμ - οί"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson7-chart-definite-article-masculine-singular",
+    "category": "Masculine Definite Article — Singular",
+    "prompt": "Masculine Definite Article — Singular",
+    "source_ref": "Groton 7.44, p. 38",
+    "columns": [
+      "Greek"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "ὁ"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "τοῦ"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "τῷ"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "τόν"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson7-chart-definite-article-masculine-plural",
+    "category": "Masculine Definite Article — Plural",
+    "prompt": "Masculine Definite Article — Plural",
+    "source_ref": "Groton 7.44, p. 38",
+    "columns": [
+      "Greek"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "οἱ"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "τῶν"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "τοῖς"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "τούς"
+        ]
+      }
+    ]
+  }
+]
