@@ -1,0 +1,150 @@
+[
+  {
+    "id": "lesson6-chart-future-active-indicative-endings",
+    "category": "Future Active Indicative Endings",
+    "prompt": "Future Active Indicative Endings",
+    "source_ref": "Groton 6.38, p. 31",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "1st person",
+        "cells": [
+          "-σω",
+          "-σομεν"
+        ]
+      },
+      {
+        "label": "2nd person",
+        "cells": [
+          "-σεις",
+          "-σετε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-σει",
+          "-σουσι(ν)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson6-chart-future-active-infinitive-endings",
+    "category": "Future Active Infinitive Endings",
+    "prompt": "Future Active Infinitive Endings",
+    "source_ref": "Groton 6.39, p. 33",
+    "columns": [
+      "Ending"
+    ],
+    "rows": [
+      {
+        "label": "Future Active Infinitive",
+        "cells": [
+          "-σειν"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson6-chart-future-active-indicative",
+    "category": "Future Active Indicative",
+    "prompt": "Future Active Indicative — παιδεύω",
+    "source_ref": "Groton 6.38, p. 31",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "1st person",
+        "cells": [
+          "παιδεύ - σω",
+          "παιδεύ - σομεν"
+        ]
+      },
+      {
+        "label": "2nd person",
+        "cells": [
+          "παιδεύ - σεις",
+          "παιδεύ - σετε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "παιδεύ - σει",
+          "παιδεύ - σουσι(ν)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson6-chart-future-active-infinitive",
+    "category": "Future Active Infinitive",
+    "prompt": "Future Active Infinitive — παιδεύω",
+    "source_ref": "Groton 6.39, p. 33",
+    "columns": [
+      "Form"
+    ],
+    "rows": [
+      {
+        "label": "Future Active Infinitive",
+        "cells": [
+          "παιδεύ - σειν"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson6-chart-letter-changes",
+    "category": "Letter Changes",
+    "prompt": "Letter Changes",
+    "source_ref": "Groton 6.38, p. 32",
+    "columns": [
+      "Stem + σ",
+      "Result"
+    ],
+    "row_header_label": "Stem type",
+    "rows": [
+      {
+        "label": "Labial",
+        "cells": [
+          "π, β, φ + σ",
+          "ψ"
+        ]
+      },
+      {
+        "label": "Palatal",
+        "cells": [
+          "κ, γ, χ + σ",
+          "ξ"
+        ]
+      },
+      {
+        "label": "Dental",
+        "cells": [
+          "τ, δ, θ + σ",
+          "σ (dental drops)"
+        ]
+      },
+      {
+        "label": "πτ",
+        "cells": [
+          "πτ + σ",
+          "ψ (τ drops)"
+        ]
+      },
+      {
+        "label": "ττ",
+        "cells": [
+          "ττ + σ",
+          "ξ (underlying palatal)"
+        ]
+      }
+    ]
+  }
+]
