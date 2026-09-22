@@ -2,17 +2,19 @@ import { greekToClassicalIpa, greekToElevenLabsIpa } from "./greek-ipa.ts";
 import { lesson3CourseAudioAssets, type Lesson3CourseAudioAsset } from "./lesson3-assets.ts";
 import { lesson4CourseAudioAssets, lesson4VocabularyAudio } from "./lesson4-assets.ts";
 import { lesson5CourseAudioAssets, lesson5VocabularyAudio } from "./lesson5-assets.ts";
+import { lesson6CourseAudioAssets, lesson6VocabularyAudio } from "./lesson6-assets.ts";
+import { lesson7CourseAudioAssets, lesson7VocabularyAudio } from "./lesson7-assets.ts";
 
 export type GreekCourseAudioAsset = Lesson3CourseAudioAsset & { pronunciationSystem?: string };
 
 const lesson3Vocabulary: Record<string, { label: string; greek: string }> = {
-  "lesson3-v1": { label: "γράφω", greek: "γράφω" },
-  "lesson3-v2": { label: "ἐθέλω", greek: "ἐθέλω" },
-  "lesson3-v3": { label: "θῡ́ω", greek: "θῡ́ω" },
-  "lesson3-v4": { label: "κλέπτω", greek: "κλέπτω" },
-  "lesson3-v5": { label: "παιδεύω", greek: "παιδεύω" },
-  "lesson3-v6": { label: "σπεύδω", greek: "σπεύδω" },
-  "lesson3-v7": { label: "φυλάττω", greek: "φυλάττω" },
+  "lesson3-v1": { label: "γράφω, γράψω", greek: "γράφω, γράψω" },
+  "lesson3-v2": { label: "ἐθέλω, ἐθελήσω", greek: "ἐθέλω, ἐθελήσω" },
+  "lesson3-v3": { label: "θῡ́ω, θῡ́σω", greek: "θῡ́ω, θῡ́σω" },
+  "lesson3-v4": { label: "κλέπτω, κλέψω", greek: "κλέπτω, κλέψω" },
+  "lesson3-v5": { label: "παιδεύω, παιδεύσω", greek: "παιδεύω, παιδεύσω" },
+  "lesson3-v6": { label: "σπεύδω, σπεύσω", greek: "σπεύδω, σπεύσω" },
+  "lesson3-v7": { label: "φυλάττω, φυλάξω", greek: "φυλάττω, φυλάξω" },
   "lesson3-v8": { label: "μή", greek: "μή" },
   "lesson3-v9": { label: "οὐ (οὐκ, οὐχ)", greek: "οὐ, οὐκ, οὐχ" },
   "lesson3-v10": { label: "καί", greek: "καί" },
@@ -60,10 +62,10 @@ const symbolLabels: Record<string, { label: string; text: string }> = {
 };
 
 export function resolveBuiltinGreekAsset(assetId: string): GreekCourseAudioAsset | null {
-  const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets, ...lesson5CourseAudioAssets].find((asset) => asset.id === assetId);
+  const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets, ...lesson5CourseAudioAssets, ...lesson6CourseAudioAssets, ...lesson7CourseAudioAssets].find((asset) => asset.id === assetId);
   if (paradigm) return paradigm;
 
-  const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId];
+  const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId] ?? lesson6VocabularyAudio[assetId] ?? lesson7VocabularyAudio[assetId];
   if (vocabulary) {
     const canonicalIpa = greekToClassicalIpa(vocabulary.greek);
     const ttsText = greekToElevenLabsIpa(vocabulary.greek);
