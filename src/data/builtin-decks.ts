@@ -2,9 +2,9 @@ import type { DeckDefinition, StudyCard } from "../features/study/types";
 import { classicalGreekPronunciation } from "../features/greek/greek-pronunciation";
 
 type GreekSourceCard = { id: string; category: string; front: string; back_title: string; back: string };
-type GreekVocabularySourceCard = { id: string; greek: string; meaning: string; part_of_speech: string; lesson: number; source_ref?: string; accent_note?: string };
+type GreekVocabularySourceCard = { id: string; greek: string; meaning: string; part_of_speech: string; lesson: number; source_ref?: string; accent_note?: string; second_principal_part?: string; principal_parts_source_ref?: string; principal_part_note?: string };
 type GreekGrammarChartRow = { label: string; cells: string[] };
-type GreekGrammarSourceCard = { id: string; category: string; prompt: string; columns: string[]; rows: GreekGrammarChartRow[]; source_ref?: string; accent_note?: string };
+type GreekGrammarSourceCard = { id: string; category: string; prompt: string; columns: string[]; rows: GreekGrammarChartRow[]; source_ref?: string; accent_note?: string; row_header_label?: string };
 type LatinSourceCard = { id: string; headword: string; definition: string; partOfSpeech: string; semanticGroup: string; frequencyRank: number; deckPosition: number };
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
 async function fetchText(path: string, cache: RequestCache = "force-cache") { const response = await fetch(assetUrl(path), { cache }); if (!response.ok) throw new Error(`Could not load ${path}.`); return response.text(); }
@@ -51,6 +51,10 @@ let greekLesson4VocabularyPromise: Promise<DeckDefinition> | null = null;
 let greekLesson4GrammarPromise: Promise<DeckDefinition> | null = null;
 let greekLesson5VocabularyPromise: Promise<DeckDefinition> | null = null;
 let greekLesson5GrammarPromise: Promise<DeckDefinition> | null = null;
+let greekLesson6VocabularyPromise: Promise<DeckDefinition> | null = null;
+let greekLesson6GrammarPromise: Promise<DeckDefinition> | null = null;
+let greekLesson7VocabularyPromise: Promise<DeckDefinition> | null = null;
+let greekLesson7GrammarPromise: Promise<DeckDefinition> | null = null;
 let latinPromise: Promise<DeckDefinition> | null = null;
 
 export function loadGreekDeck() {
@@ -61,20 +65,21 @@ export function loadGreekLesson3VocabularyDeck() {
   greekLesson3VocabularyPromise ??= fetchText("data/greek-lesson3-vocab.json", "no-store").then((text) => {
     const source = JSON.parse(text) as GreekVocabularySourceCard[];
     const cards: StudyCard[] = source.map((card, index) => {
-      const pronunciation = classicalGreekPronunciation(card.greek);
+      const visibleGreek = card.second_principal_part ? `${card.greek}, ${card.second_principal_part}` : card.greek;
+      const pronunciation = classicalGreekPronunciation(visibleGreek);
       const sourceRef = card.source_ref ?? "Groton 3.24";
       return {
         id: card.id,
         deckId: "alpha-omega-lesson3-vocab",
-        front: card.greek,
+        front: visibleGreek,
         back: card.meaning,
         reverseFront: card.meaning,
-        reverseBack: card.greek,
+        reverseBack: visibleGreek,
         category: "Lesson 3 Vocabulary",
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 3",
-        notes: [card.part_of_speech, card.accent_note ? `Accent: ${card.accent_note}` : "", `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
-        metadata: { lesson: card.lesson, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, accentNote: card.accent_note, sourceRef },
+        notes: [card.part_of_speech, card.accent_note ? `Accent: ${card.accent_note}` : "", card.principal_part_note ?? "", `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
+        metadata: { lesson: card.lesson, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, audioLabel: card.greek, secondPrincipalPart: card.second_principal_part, principalPartsSourceRef: card.principal_parts_source_ref, accentNote: card.accent_note, sourceRef },
       };
     });
     return { id: "alpha-omega-lesson3-vocab", slug: "greek", title: "Greek Lesson 3 Vocabulary", eyebrow: "Lesson 3 vocabulary", description: "Eleven vocabulary entries supplied for Lesson 3, tracked separately from grammar forms.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 3.24." } satisfies DeckDefinition;
@@ -119,20 +124,21 @@ export function loadGreekLesson4VocabularyDeck() {
   greekLesson4VocabularyPromise ??= fetchText("data/greek-lesson4-vocab.json", "no-store").then((text) => {
     const source = JSON.parse(text) as GreekVocabularySourceCard[];
     const cards: StudyCard[] = source.map((card, index) => {
-      const pronunciation = classicalGreekPronunciation(card.greek);
+      const visibleGreek = card.second_principal_part ? `${card.greek}, ${card.second_principal_part}` : card.greek;
+      const pronunciation = classicalGreekPronunciation(visibleGreek);
       const sourceRef = card.source_ref ?? "Groton 4.32";
       return {
         id: card.id,
         deckId: "alpha-omega-lesson4-vocab",
-        front: card.greek,
+        front: visibleGreek,
         back: card.meaning,
         reverseFront: card.meaning,
-        reverseBack: card.greek,
+        reverseBack: visibleGreek,
         category: "Lesson 4 Vocabulary",
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 4",
-        notes: [card.part_of_speech, card.accent_note ? `Accent: ${card.accent_note}` : "", `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
-        metadata: { lesson: 4, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, accentNote: card.accent_note, sourceRef },
+        notes: [card.part_of_speech, card.accent_note ? `Accent: ${card.accent_note}` : "", card.principal_part_note ?? "", `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
+        metadata: { lesson: 4, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, audioLabel: card.greek, secondPrincipalPart: card.second_principal_part, principalPartsSourceRef: card.principal_parts_source_ref, accentNote: card.accent_note, sourceRef },
       };
     });
     return { id: "alpha-omega-lesson4-vocab", slug: "greek", title: "Greek Lesson 4 Vocabulary", eyebrow: "Lesson 4 vocabulary", description: "Lesson 4 vocabulary from Groton §4.32.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 4.32." } satisfies DeckDefinition;
@@ -176,20 +182,21 @@ export function loadGreekLesson5VocabularyDeck() {
   greekLesson5VocabularyPromise ??= fetchText("data/greek-lesson5-vocab.json", "no-store").then((text) => {
     const source = JSON.parse(text) as GreekVocabularySourceCard[];
     const cards: StudyCard[] = source.map((card, index) => {
-      const pronunciation = classicalGreekPronunciation(card.greek);
+      const visibleGreek = card.second_principal_part ? `${card.greek}, ${card.second_principal_part}` : card.greek;
+      const pronunciation = classicalGreekPronunciation(visibleGreek);
       const sourceRef = card.source_ref ?? "Groton 5.36";
       return {
         id: card.id,
         deckId: "alpha-omega-lesson5-vocab",
-        front: card.greek,
+        front: visibleGreek,
         back: card.meaning,
         reverseFront: card.meaning,
-        reverseBack: card.greek,
+        reverseBack: visibleGreek,
         category: "Lesson 5 Vocabulary",
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 5",
-        notes: [card.part_of_speech, `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
-        metadata: { lesson: 5, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, sourceRef },
+        notes: [card.part_of_speech, card.principal_part_note ?? "", `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
+        metadata: { lesson: 5, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, audioLabel: card.greek, secondPrincipalPart: card.second_principal_part, principalPartsSourceRef: card.principal_parts_source_ref, sourceRef },
       };
     });
     return { id: "alpha-omega-lesson5-vocab", slug: "greek", title: "Greek Lesson 5 Vocabulary", eyebrow: "Lesson 5 vocabulary", description: "Ten vocabulary entries from Groton §5.36.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 5.36." } satisfies DeckDefinition;
@@ -226,6 +233,103 @@ export function loadGreekLesson5GrammarDeck() {
     return { id: "alpha-omega-lesson5-grammar", slug: "greek", title: "Greek Lesson 5 Grammar", eyebrow: "First-declension feminine nouns · short-alpha subcategories", description: "Four Lesson 5 grammar cards: two short-alpha ending charts and the μοῖρα and θάλαττα paradigms.", language: "greek", cards, supportsReverse: false, sourceNote: "Groton 5.34." } satisfies DeckDefinition;
   });
   return greekLesson5GrammarPromise;
+}
+
+
+function loadNewGreekVocabularyDeck(lesson: 6 | 7): Promise<DeckDefinition> {
+  const defaultSourceRef = lesson === 6 ? "Groton 6.40, pp. 33–34" : "Groton 7.47, pp. 39–40";
+  return fetchText(`data/greek-lesson${lesson}-vocab.json`, "no-store").then((text) => {
+    const source = JSON.parse(text) as GreekVocabularySourceCard[];
+    const cards: StudyCard[] = source.map((card, index) => {
+      const pronunciation = classicalGreekPronunciation(card.greek);
+      return {
+        id: card.id,
+        deckId: `alpha-omega-lesson${lesson}-vocab`,
+        front: card.greek,
+        back: card.meaning,
+        reverseFront: card.meaning,
+        reverseBack: card.greek,
+        category: `Lesson ${lesson} Vocabulary`,
+        rank: index + 1,
+        source: `From Alpha to Omega, Lesson ${lesson}`,
+        notes: [card.part_of_speech, card.principal_part_note ?? "", `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
+        metadata: { lesson, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, sourceRef: card.source_ref ?? defaultSourceRef },
+      };
+    });
+    return {
+      id: `alpha-omega-lesson${lesson}-vocab`,
+      slug: "greek",
+      title: `Greek Lesson ${lesson} Vocabulary`,
+      eyebrow: `Lesson ${lesson} vocabulary`,
+      description: `Vocabulary from Groton Lesson ${lesson}, tracked independently of grammar.`,
+      language: "greek",
+      cards,
+      supportsReverse: true,
+      sourceNote: defaultSourceRef,
+    } satisfies DeckDefinition;
+  });
+}
+
+function loadNewGreekGrammarDeck(lesson: 6 | 7): Promise<DeckDefinition> {
+  return fetchText(`data/greek-lesson${lesson}-grammar.json`, "no-store").then((text) => {
+    const source = JSON.parse(text) as GreekGrammarSourceCard[];
+    const cards: StudyCard[] = source.map((card, index) => {
+      const chartRows = card.rows.map((row) => ({ ...row, cells: [...row.cells] }));
+      const isLetterChanges = card.category === "Letter Changes";
+      return {
+        id: card.id,
+        deckId: `alpha-omega-lesson${lesson}-grammar`,
+        front: card.prompt,
+        back: card.category,
+        category: card.category,
+        rank: index + 1,
+        source: `From Alpha to Omega, Lesson ${lesson}`,
+        notes: isLetterChanges ? "Letter-change chart" : card.category.includes("Endings") ? "Ending chart" : "Whole-paradigm chart",
+        metadata: {
+          lesson,
+          studySource: "grammar-chart",
+          grammarGroup: card.category,
+          chartColumns: card.columns,
+          chartRows,
+          rowHeaderLabel: card.row_header_label,
+          pronunciationText: isLetterChanges ? "" : greekLesson3ParadigmSpeechText(chartRows),
+          accentNote: card.accent_note,
+          sourceRef: card.source_ref ?? `Groton, Lesson ${lesson}`,
+        },
+      };
+    });
+    return {
+      id: `alpha-omega-lesson${lesson}-grammar`,
+      slug: "greek",
+      title: `Greek Lesson ${lesson} Grammar`,
+      eyebrow: lesson === 6 ? "Future active indicative · future active infinitive · letter changes" : "Second-declension masculine nouns · masculine definite article",
+      description: lesson === 6 ? "Five lesson 6 cards: future active endings and paradigms, plus Letter Changes." : "Five lesson 7 cards: second-declension masculine endings, two model nouns, and two masculine definite-article charts.",
+      language: "greek",
+      cards,
+      supportsReverse: false,
+      sourceNote: lesson === 6 ? "Groton 6.38–6.39, pp. 31–33." : "Groton 7.43–7.44, pp. 37–38.",
+    } satisfies DeckDefinition;
+  });
+}
+
+export function loadGreekLesson6VocabularyDeck() {
+  greekLesson6VocabularyPromise ??= loadNewGreekVocabularyDeck(6);
+  return greekLesson6VocabularyPromise;
+}
+
+export function loadGreekLesson6GrammarDeck() {
+  greekLesson6GrammarPromise ??= loadNewGreekGrammarDeck(6);
+  return greekLesson6GrammarPromise;
+}
+
+export function loadGreekLesson7VocabularyDeck() {
+  greekLesson7VocabularyPromise ??= loadNewGreekVocabularyDeck(7);
+  return greekLesson7VocabularyPromise;
+}
+
+export function loadGreekLesson7GrammarDeck() {
+  greekLesson7GrammarPromise ??= loadNewGreekGrammarDeck(7);
+  return greekLesson7GrammarPromise;
 }
 
 export function loadLatinDeck() {
