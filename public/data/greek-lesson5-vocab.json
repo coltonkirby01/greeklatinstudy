@@ -1,7 +1,7 @@
 [
-  { "id": "lesson5-v1", "greek": "ἀκούω", "meaning": "(+ genitive or accusative) hear, listen, listen to", "part_of_speech": "verb", "lesson": 5, "source_ref": "Groton 5.36" },
-  { "id": "lesson5-v2", "greek": "βλάπτω", "meaning": "harm, hurt", "part_of_speech": "verb", "lesson": 5, "source_ref": "Groton 5.36" },
-  { "id": "lesson5-v3", "greek": "κελεύω", "meaning": "(with accusative or dative + infinitive) order (to), command (to), urge (to)", "part_of_speech": "verb", "lesson": 5, "source_ref": "Groton 5.36" },
+  { "id": "lesson5-v1", "greek": "ἀκούω, ἀκούσω", "meaning": "(+ genitive or accusative) hear, listen, listen to", "part_of_speech": "verb", "lesson": 5, "source_ref": "Groton 5.36" },
+  { "id": "lesson5-v2", "greek": "βλάπτω, βλάψω", "meaning": "harm, hurt", "part_of_speech": "verb", "lesson": 5, "source_ref": "Groton 5.36" },
+  { "id": "lesson5-v3", "greek": "κελεύω, κελεύσω", "meaning": "(with accusative or dative + infinitive) order (to), command (to), urge (to)", "part_of_speech": "verb", "lesson": 5, "source_ref": "Groton 5.36" },
   { "id": "lesson5-v4", "greek": "δέσποινα, -ης, ἡ", "meaning": "mistress (of the household), lady, Lady (title for a goddess)", "part_of_speech": "noun", "lesson": 5, "source_ref": "Groton 5.36" },
   { "id": "lesson5-v5", "greek": "θάλαττα, -ης, ἡ", "meaning": "sea", "part_of_speech": "noun", "lesson": 5, "source_ref": "Groton 5.36" },
   { "id": "lesson5-v6", "greek": "θεράπαινα, -ης, ἡ", "meaning": "servant (female), maid", "part_of_speech": "noun", "lesson": 5, "source_ref": "Groton 5.36" },

@@ -8,6 +8,10 @@ import {
   loadGreekLesson4VocabularyDeck,
   loadGreekLesson5GrammarDeck,
   loadGreekLesson5VocabularyDeck,
+  loadGreekLesson6GrammarDeck,
+  loadGreekLesson6VocabularyDeck,
+  loadGreekLesson7GrammarDeck,
+  loadGreekLesson7VocabularyDeck,
 } from "../data/builtin-decks";
 import { useAuth } from "../features/auth/auth-context";
 import { ClassicalGreekAudio } from "../features/greek/classical-greek-audio";
@@ -52,6 +56,18 @@ const keys = {
   firstDeclensionEndingsShortAlphaEta: "lesson5-first-declension-endings-short-alpha-eta",
   firstDeclensionMoira: "lesson5-first-declension-moira",
   firstDeclensionThalatta: "lesson5-first-declension-thalatta",
+  lesson6Vocabulary: "lesson6-vocabulary",
+  futureActiveIndicativeEndings: "lesson6-future-active-indicative-endings",
+  futureActiveInfinitiveEndings: "lesson6-future-active-infinitive-endings",
+  futureActiveIndicative: "lesson6-future-active-indicative",
+  futureActiveInfinitive: "lesson6-future-active-infinitive",
+  letterChanges: "lesson6-letter-changes",
+  lesson7Vocabulary: "lesson7-vocabulary",
+  secondDeclensionMasculineEndings: "lesson7-second-declension-masculine-endings",
+  secondDeclensionAnthropos: "lesson7-second-declension-anthropos",
+  secondDeclensionPotamos: "lesson7-second-declension-potamos",
+  masculineArticleSingular: "lesson7-masculine-article-singular",
+  masculineArticlePlural: "lesson7-masculine-article-plural",
 } as const;
 
 const allKeys = Object.values(keys);
@@ -70,8 +86,16 @@ const lesson5EndingsKeys = [keys.firstDeclensionEndingsShortAlphaAs, keys.firstD
 const lesson5ParadigmKeys = [keys.firstDeclensionMoira, keys.firstDeclensionThalatta] as const;
 const lesson5GrammarKeys = [...lesson5EndingsKeys, ...lesson5ParadigmKeys] as const;
 const lesson5Keys = [keys.lesson5Vocabulary, ...lesson5GrammarKeys] as const;
-const allVocabularyKeys = [keys.lesson3Vocabulary, keys.lesson4Vocabulary, keys.lesson5Vocabulary] as const;
-const allGrammarKeys = [...lesson1Keys, ...lesson2Keys, ...lesson3GrammarKeys, ...lesson4GrammarKeys, ...lesson5GrammarKeys] as const;
+const lesson6EndingsKeys = [keys.futureActiveIndicativeEndings, keys.futureActiveInfinitiveEndings] as const;
+const lesson6ParadigmKeys = [keys.futureActiveIndicative, keys.futureActiveInfinitive] as const;
+const lesson6GrammarKeys = [...lesson6EndingsKeys, ...lesson6ParadigmKeys, keys.letterChanges] as const;
+const lesson6Keys = [keys.lesson6Vocabulary, ...lesson6GrammarKeys] as const;
+const lesson7EndingsKeys = [keys.secondDeclensionMasculineEndings, keys.masculineArticleSingular, keys.masculineArticlePlural] as const;
+const lesson7ParadigmKeys = [keys.secondDeclensionAnthropos, keys.secondDeclensionPotamos] as const;
+const lesson7GrammarKeys = [...lesson7EndingsKeys, ...lesson7ParadigmKeys] as const;
+const lesson7Keys = [keys.lesson7Vocabulary, ...lesson7GrammarKeys] as const;
+const allVocabularyKeys = [keys.lesson3Vocabulary, keys.lesson4Vocabulary, keys.lesson5Vocabulary, keys.lesson6Vocabulary, keys.lesson7Vocabulary] as const;
+const allGrammarKeys = [...lesson1Keys, ...lesson2Keys, ...lesson3GrammarKeys, ...lesson4GrammarKeys, ...lesson5GrammarKeys, ...lesson6GrammarKeys, ...lesson7GrammarKeys] as const;
 
 const lesson3GrammarCategoryByKey = new Map<string, string>([
   [keys.presentActiveIndicativeEndings, "Present Active Indicative Endings"],
@@ -98,6 +122,22 @@ const lesson5GrammarCategoryByKey = new Map<string, string>([
   [keys.firstDeclensionEndingsShortAlphaEta, "First Declension Feminine Endings — short α, genitive -ης"],
   [keys.firstDeclensionMoira, "First Declension Feminine Nouns — μοῖρα"],
   [keys.firstDeclensionThalatta, "First Declension Feminine Nouns — θάλαττα"],
+]);
+
+const lesson6GrammarCategoryByKey = new Map<string, string>([
+  [keys.futureActiveIndicativeEndings, "Future Active Indicative Endings"],
+  [keys.futureActiveInfinitiveEndings, "Future Active Infinitive Endings"],
+  [keys.futureActiveIndicative, "Future Active Indicative"],
+  [keys.futureActiveInfinitive, "Future Active Infinitive"],
+  [keys.letterChanges, "Letter Changes"],
+]);
+
+const lesson7GrammarCategoryByKey = new Map<string, string>([
+  [keys.secondDeclensionMasculineEndings, "Second Declension Masculine Endings"],
+  [keys.secondDeclensionAnthropos, "Second Declension Masculine Nouns — ἄνθρωπος"],
+  [keys.secondDeclensionPotamos, "Second Declension Masculine Nouns — ποταμός"],
+  [keys.masculineArticleSingular, "Masculine Definite Article — Singular"],
+  [keys.masculineArticlePlural, "Masculine Definite Article — Plural"],
 ]);
 
 type GreekChartRow = { label: string; cells: string[] };
@@ -141,14 +181,15 @@ function sourceRef(card: StudyCard) {
 function GreekParadigm({ card }: { card: StudyCard }) {
   const columns = chartColumns(card), rows = chartRows(card);
   const lesson = Number(card.metadata?.lesson ?? 0);
-  const firstColumnLabel = lesson === 3 ? (columns.length === 1 ? "Form" : "Person") : "Case";
+  const explicitRowHeader = typeof card.metadata?.rowHeaderLabel === "string" ? card.metadata.rowHeaderLabel : "";
+  const firstColumnLabel = explicitRowHeader || (lesson === 3 || lesson === 6 ? (columns.length === 1 ? "Form" : "Person") : "Case");
   return <div className="chart-scroll">
     <table className="henle-chart">
       <thead><tr><th scope="col">{firstColumnLabel}</th>{columns.map((column) => <th scope="col" key={column}>{column}</th>)}</tr></thead>
       <tbody>{rows.map((row) => <tr key={row.label}><th scope="row">{row.label}</th>{row.cells.map((cell, index) => <td key={`${row.label}-${columns[index] ?? index}`}><strong className="greek-front compact-greek">{cell}</strong></td>)}</tr>)}</tbody>
     </table>
     {sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}
-    <ClassicalGreekAudio assetId={card.id} label={card.category ?? "Greek paradigm"} />
+    {card.metadata?.pronunciationText !== undefined && <ClassicalGreekAudio assetId={card.id} label={card.category ?? "Greek paradigm"} />}
   </div>;
 }
 
@@ -158,7 +199,7 @@ function GreekCardAudio({ card }: { card: StudyCard }) {
 
 export function GreekPage() {
   const { value: decks, error } = useAsync(async () => {
-    const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar] = await Promise.all([
+    const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar] = await Promise.all([
       loadGreekDeck(),
       loadGreekLesson3VocabularyDeck(),
       loadGreekLesson3GrammarDeck(),
@@ -166,8 +207,12 @@ export function GreekPage() {
       loadGreekLesson4GrammarDeck(),
       loadGreekLesson5VocabularyDeck(),
       loadGreekLesson5GrammarDeck(),
+      loadGreekLesson6VocabularyDeck(),
+      loadGreekLesson6GrammarDeck(),
+      loadGreekLesson7VocabularyDeck(),
+      loadGreekLesson7GrammarDeck(),
     ]);
-    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar };
+    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar };
   }, []);
   const { user } = useAuth();
   const savedCards = useSavedCards("greek", user);
@@ -196,6 +241,12 @@ export function GreekPage() {
   const lesson5State = groupSelectionState( lesson5Keys);
   const lesson5EndingsState = groupSelectionState( lesson5EndingsKeys);
   const lesson5ParadigmState = groupSelectionState( lesson5ParadigmKeys);
+  const lesson6State = groupSelectionState( lesson6Keys);
+  const lesson6EndingsState = groupSelectionState( lesson6EndingsKeys);
+  const lesson6ParadigmState = groupSelectionState( lesson6ParadigmKeys);
+  const lesson7State = groupSelectionState( lesson7Keys);
+  const lesson7EndingsState = groupSelectionState( lesson7EndingsKeys);
+  const lesson7ParadigmState = groupSelectionState( lesson7ParadigmKeys);
   const vocabularyState = groupSelectionState( allVocabularyKeys);
   const grammarState = groupSelectionState( allGrammarKeys);
 
@@ -226,10 +277,22 @@ export function GreekPage() {
     for (const [key, category] of lesson5GrammarCategoryByKey) if (card.category === category) return selected.has(key);
     return false;
   }) ?? [], [decks, excludedCards.refs, selected]);
+  const lesson6VocabularyCards = useMemo(() => selected.has(keys.lesson6Vocabulary) ? decks?.lesson6Vocabulary.cards.filter((card) => !excludedCards.refs.has(savedCardRef(decks.lesson6Vocabulary.id, card.id))) ?? [] : [], [decks, excludedCards.refs, selected]);
+  const lesson6GrammarCards = useMemo(() => decks?.lesson6Grammar.cards.filter((card) => {
+    if (excludedCards.refs.has(savedCardRef(decks.lesson6Grammar.id, card.id))) return false;
+    for (const [key, category] of lesson6GrammarCategoryByKey) if (card.category === category) return selected.has(key);
+    return false;
+  }) ?? [], [decks, excludedCards.refs, selected]);
+  const lesson7VocabularyCards = useMemo(() => selected.has(keys.lesson7Vocabulary) ? decks?.lesson7Vocabulary.cards.filter((card) => !excludedCards.refs.has(savedCardRef(decks.lesson7Vocabulary.id, card.id))) ?? [] : [], [decks, excludedCards.refs, selected]);
+  const lesson7GrammarCards = useMemo(() => decks?.lesson7Grammar.cards.filter((card) => {
+    if (excludedCards.refs.has(savedCardRef(decks.lesson7Grammar.id, card.id))) return false;
+    for (const [key, category] of lesson7GrammarCategoryByKey) if (card.category === category) return selected.has(key);
+    return false;
+  }) ?? [], [decks, excludedCards.refs, selected]);
 
   const savedCardCount = useMemo(() => {
     if (!decks) return 0;
-    return [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar, decks.lesson4Vocabulary, decks.lesson4Grammar, decks.lesson5Vocabulary, decks.lesson5Grammar]
+    return [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar, decks.lesson4Vocabulary, decks.lesson4Grammar, decks.lesson5Vocabulary, decks.lesson5Grammar, decks.lesson6Vocabulary, decks.lesson6Grammar, decks.lesson7Vocabulary, decks.lesson7Grammar]
       .flatMap((sourceDeck) => sourceDeck.cards.map((card) => savedCardRef(sourceDeck.id, card.id)))
       .filter((ref) => savedCards.refs.has(ref)).length;
   }, [decks, savedCards.refs]);
@@ -245,6 +308,10 @@ export function GreekPage() {
     if (lesson4GrammarCards.length) next.push({ id: "lesson4-grammar", label: "Lesson 4 grammar charts", deck: decks.lesson4Grammar, cards: lesson4GrammarCards, studyKey: "forward", direction: "forward" });
     if (lesson5VocabularyCards.length) next.push({ id: "lesson5-vocabulary", label: "Lesson 5 vocabulary", deck: decks.lesson5Vocabulary, cards: lesson5VocabularyCards, studyKey: direction, direction });
     if (lesson5GrammarCards.length) next.push({ id: "lesson5-grammar", label: "Lesson 5 grammar charts", deck: decks.lesson5Grammar, cards: lesson5GrammarCards, studyKey: "forward", direction: "forward" });
+    if (lesson6VocabularyCards.length) next.push({ id: "lesson6-vocabulary", label: "Lesson 6 vocabulary", deck: decks.lesson6Vocabulary, cards: lesson6VocabularyCards, studyKey: direction, direction });
+    if (lesson6GrammarCards.length) next.push({ id: "lesson6-grammar", label: "Lesson 6 grammar charts", deck: decks.lesson6Grammar, cards: lesson6GrammarCards, studyKey: "forward", direction: "forward" });
+    if (lesson7VocabularyCards.length) next.push({ id: "lesson7-vocabulary", label: "Lesson 7 vocabulary", deck: decks.lesson7Vocabulary, cards: lesson7VocabularyCards, studyKey: direction, direction });
+    if (lesson7GrammarCards.length) next.push({ id: "lesson7-grammar", label: "Lesson 7 grammar charts", deck: decks.lesson7Grammar, cards: lesson7GrammarCards, studyKey: "forward", direction: "forward" });
 
     if (includeSavedCards) {
       const alreadySelected = new Set(next.flatMap((source) => source.cards.map((card) => savedCardRef(source.deck.id, card.id))));
@@ -264,9 +331,13 @@ export function GreekPage() {
       appendSaved("saved-lesson4-grammar", decks.lesson4Grammar, "forward", "forward");
       appendSaved("saved-lesson5-vocabulary", decks.lesson5Vocabulary, direction, direction);
       appendSaved("saved-lesson5-grammar", decks.lesson5Grammar, "forward", "forward");
+      appendSaved("saved-lesson6-vocabulary", decks.lesson6Vocabulary, direction, direction);
+      appendSaved("saved-lesson6-grammar", decks.lesson6Grammar, "forward", "forward");
+      appendSaved("saved-lesson7-vocabulary", decks.lesson7Vocabulary, direction, direction);
+      appendSaved("saved-lesson7-grammar", decks.lesson7Grammar, "forward", "forward");
     }
     return next;
-  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lesson3GrammarCards, lesson3VocabularyCards, lesson4GrammarCards, lesson4VocabularyCards, lesson5GrammarCards, lesson5VocabularyCards, savedCards.refs]);
+  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lesson3GrammarCards, lesson3VocabularyCards, lesson4GrammarCards, lesson4VocabularyCards, lesson5GrammarCards, lesson5VocabularyCards, lesson6GrammarCards, lesson6VocabularyCards, lesson7GrammarCards, lesson7VocabularyCards, savedCards.refs]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
   const virtualDeck = useMemo<DeckDefinition>(() => ({
@@ -286,6 +357,8 @@ export function GreekPage() {
   const countLesson3Grammar = (category: string) => decks?.lesson3Grammar.cards.filter((card) => card.category === category).length ?? 0;
   const countLesson4Grammar = (category: string) => decks?.lesson4Grammar.cards.filter((card) => card.category === category).length ?? 0;
   const countLesson5Grammar = (category: string) => decks?.lesson5Grammar.cards.filter((card) => card.category === category).length ?? 0;
+  const countLesson6Grammar = (category: string) => decks?.lesson6Grammar.cards.filter((card) => card.category === category).length ?? 0;
+  const countLesson7Grammar = (category: string) => decks?.lesson7Grammar.cards.filter((card) => card.category === category).length ?? 0;
   const savedHint = "Cards you save with the card button or S shortcut are private to your account or this guest browser.";
 
   function groupKeyForCard(sourceDeck: DeckDefinition, card: StudyCard) {
@@ -300,16 +373,20 @@ export function GreekPage() {
     if (sourceDeck.id === decks.lesson3Vocabulary.id) return keys.lesson3Vocabulary;
     if (sourceDeck.id === decks.lesson4Vocabulary.id) return keys.lesson4Vocabulary;
     if (sourceDeck.id === decks.lesson5Vocabulary.id) return keys.lesson5Vocabulary;
+    if (sourceDeck.id === decks.lesson6Vocabulary.id) return keys.lesson6Vocabulary;
+    if (sourceDeck.id === decks.lesson7Vocabulary.id) return keys.lesson7Vocabulary;
     if (sourceDeck.id === decks.lesson3Grammar.id) return keyForCategory(lesson3GrammarCategoryByKey, card.category);
     if (sourceDeck.id === decks.lesson4Grammar.id) return keyForCategory(lesson4GrammarCategoryByKey, card.category);
     if (sourceDeck.id === decks.lesson5Grammar.id) return keyForCategory(lesson5GrammarCategoryByKey, card.category);
+    if (sourceDeck.id === decks.lesson6Grammar.id) return keyForCategory(lesson6GrammarCategoryByKey, card.category);
+    if (sourceDeck.id === decks.lesson7Grammar.id) return keyForCategory(lesson7GrammarCategoryByKey, card.category);
     return null;
   }
 
   function cardsForGroupKeys(values: readonly string[]) {
     if (!decks) return [];
     const allowed = new Set(values);
-    const sourceDecks = [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar, decks.lesson4Vocabulary, decks.lesson4Grammar, decks.lesson5Vocabulary, decks.lesson5Grammar];
+    const sourceDecks = [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar, decks.lesson4Vocabulary, decks.lesson4Grammar, decks.lesson5Vocabulary, decks.lesson5Grammar, decks.lesson6Vocabulary, decks.lesson6Grammar, decks.lesson7Vocabulary, decks.lesson7Grammar];
     return sourceDecks.flatMap((sourceDeck) => sourceDeck.cards.flatMap((card) => {
       const key = groupKeyForCard(sourceDeck, card);
       return key && allowed.has(key) ? [{ deckId: sourceDeck.id, cardId: card.id }] : [];
@@ -330,7 +407,7 @@ export function GreekPage() {
   function changeSavedCards(checked: boolean) {
     setIncludeSavedCards(checked);
     if (!checked || !decks) return;
-    const sourceDecks = [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar, decks.lesson4Vocabulary, decks.lesson4Grammar, decks.lesson5Vocabulary, decks.lesson5Grammar];
+    const sourceDecks = [decks.foundation, decks.lesson3Vocabulary, decks.lesson3Grammar, decks.lesson4Vocabulary, decks.lesson4Grammar, decks.lesson5Vocabulary, decks.lesson5Grammar, decks.lesson6Vocabulary, decks.lesson6Grammar, decks.lesson7Vocabulary, decks.lesson7Grammar];
     const refs = sourceDecks.flatMap((sourceDeck) => sourceDeck.cards
       .filter((card) => savedCards.refs.has(savedCardRef(sourceDeck.id, card.id)))
       .map((card) => ({ deckId: sourceDeck.id, cardId: card.id })));
@@ -375,6 +452,10 @@ export function GreekPage() {
     { label: "Lesson 4 grammar", deck: decks.lesson4Grammar },
     { label: "Lesson 5 vocabulary", deck: decks.lesson5Vocabulary },
     { label: "Lesson 5 grammar", deck: decks.lesson5Grammar },
+    { label: "Lesson 6 vocabulary", deck: decks.lesson6Vocabulary },
+    { label: "Lesson 6 grammar", deck: decks.lesson6Grammar },
+    { label: "Lesson 7 vocabulary", deck: decks.lesson7Vocabulary },
+    { label: "Lesson 7 grammar", deck: decks.lesson7Grammar },
   ] : [];
   const allIndividualCardCount = individualDecks.reduce((sum, item) => sum + item.deck.cards.length, 0);
   const selectedIndividualCardCount = individualDecks.reduce((sum, item) => sum + item.deck.cards.filter((card) => exactCardSelected(item.deck, card)).length, 0);
@@ -466,6 +547,48 @@ export function GreekPage() {
         </FilterDisclosure>
       </FilterDisclosure>
 
+      <FilterDisclosure title="Lesson 6" summary={`${lesson6State.selectedCount} of ${lesson6Keys.length} groups selected`} checked={lesson6State.checked} mixed={lesson6State.mixed} onCheckedChange={(checked) => changeGroups(lesson6Keys, checked)}>
+        <FilterDisclosure title="Vocabulary" summary={`${decks.lesson6Vocabulary.cards.length} entries`} count={decks.lesson6Vocabulary.cards.length} nested checked={groupSelectionState([keys.lesson6Vocabulary]).checked} mixed={groupSelectionState([keys.lesson6Vocabulary]).mixed} onCheckedChange={(checked) => changeGroups([keys.lesson6Vocabulary], checked)}>
+          <FilterCheckbox label="All Lesson 6 vocabulary" count={decks.lesson6Vocabulary.cards.length} checked={groupSelectionState([keys.lesson6Vocabulary]).checked} mixed={groupSelectionState([keys.lesson6Vocabulary]).mixed} onChange={(checked) => changeGroups([keys.lesson6Vocabulary], checked)} />
+        </FilterDisclosure>
+
+        <FilterDisclosure title="Endings" summary={`${lesson6EndingsState.selectedCount} of ${lesson6EndingsKeys.length} selected`} count={lesson6EndingsKeys.length} nested checked={lesson6EndingsState.checked} mixed={lesson6EndingsState.mixed} onCheckedChange={(checked) => changeGroups(lesson6EndingsKeys, checked)}>
+          {lesson6EndingsKeys.map((key) => {
+            const category = lesson6GrammarCategoryByKey.get(key)!;
+            return <FilterCheckbox key={key} label={category} count={countLesson6Grammar(category)} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
+          })}
+        </FilterDisclosure>
+
+        <FilterDisclosure title="Paradigms" summary={`${lesson6ParadigmState.selectedCount} of ${lesson6ParadigmKeys.length} selected`} count={lesson6ParadigmKeys.length} nested checked={lesson6ParadigmState.checked} mixed={lesson6ParadigmState.mixed} onCheckedChange={(checked) => changeGroups(lesson6ParadigmKeys, checked)}>
+          {lesson6ParadigmKeys.map((key) => {
+            const category = lesson6GrammarCategoryByKey.get(key)!;
+            return <FilterCheckbox key={key} label={`${category} — παιδεύω`} count={countLesson6Grammar(category)} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
+          })}
+        </FilterDisclosure>
+
+        <FilterCheckbox label="Letter Changes" count={countLesson6Grammar("Letter Changes")} checked={groupSelectionState([keys.letterChanges]).checked} mixed={groupSelectionState([keys.letterChanges]).mixed} onChange={(checked) => changeGroups([keys.letterChanges], checked)} />
+      </FilterDisclosure>
+
+      <FilterDisclosure title="Lesson 7" summary={`${lesson7State.selectedCount} of ${lesson7Keys.length} groups selected`} checked={lesson7State.checked} mixed={lesson7State.mixed} onCheckedChange={(checked) => changeGroups(lesson7Keys, checked)}>
+        <FilterDisclosure title="Vocabulary" summary={`${decks.lesson7Vocabulary.cards.length} entries`} count={decks.lesson7Vocabulary.cards.length} nested checked={groupSelectionState([keys.lesson7Vocabulary]).checked} mixed={groupSelectionState([keys.lesson7Vocabulary]).mixed} onCheckedChange={(checked) => changeGroups([keys.lesson7Vocabulary], checked)}>
+          <FilterCheckbox label="All Lesson 7 vocabulary" count={decks.lesson7Vocabulary.cards.length} checked={groupSelectionState([keys.lesson7Vocabulary]).checked} mixed={groupSelectionState([keys.lesson7Vocabulary]).mixed} onChange={(checked) => changeGroups([keys.lesson7Vocabulary], checked)} />
+        </FilterDisclosure>
+
+        <FilterDisclosure title="Endings" summary={`${lesson7EndingsState.selectedCount} of ${lesson7EndingsKeys.length} selected`} count={lesson7EndingsKeys.length} nested checked={lesson7EndingsState.checked} mixed={lesson7EndingsState.mixed} onCheckedChange={(checked) => changeGroups(lesson7EndingsKeys, checked)}>
+          {lesson7EndingsKeys.map((key) => {
+            const category = lesson7GrammarCategoryByKey.get(key)!;
+            return <FilterCheckbox key={key} label={category} count={countLesson7Grammar(category)} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
+          })}
+        </FilterDisclosure>
+
+        <FilterDisclosure title="Paradigms" summary={`${lesson7ParadigmState.selectedCount} of ${lesson7ParadigmKeys.length} selected`} count={lesson7ParadigmKeys.length} nested checked={lesson7ParadigmState.checked} mixed={lesson7ParadigmState.mixed} onCheckedChange={(checked) => changeGroups(lesson7ParadigmKeys, checked)}>
+          {lesson7ParadigmKeys.map((key) => {
+            const category = lesson7GrammarCategoryByKey.get(key)!;
+            return <FilterCheckbox key={key} label={category} count={countLesson7Grammar(category)} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
+          })}
+        </FilterDisclosure>
+      </FilterDisclosure>
+
       <FilterDisclosure title="Individual cards" summary={`${selectedIndividualCardCount} of ${allIndividualCardCount} selected`} count={allIndividualCardCount} checked={selectedIndividualCardCount === allIndividualCardCount} mixed={selectedIndividualCardCount > 0 && selectedIndividualCardCount < allIndividualCardCount} onCheckedChange={(checked) => individualDecks.forEach(({ deck: sourceDeck }) => changeExactDeck(sourceDeck, checked))}>
         {individualDecks.map(({ label, deck: sourceDeck }) => {
           const selectedCount = sourceDeck.cards.filter((card) => exactCardSelected(sourceDeck, card)).length;
@@ -487,9 +610,9 @@ export function GreekPage() {
       savedCardRefs={savedCards.refs}
       onToggleSavedCard={savedCards.toggleSaved}
       onDeselectCard={excludedCards.exclude}
-      cardMeta={(card, source) => source.deck.id === decks.foundation.id ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.deck.id === decks.lesson3Vocabulary.id ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson4Vocabulary.id ? `Lesson 4 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson5Vocabulary.id ? `Lesson 5 vocabulary · ${card.notes ?? ""}` : `Lesson ${Number(card.metadata?.lesson ?? 3)} grammar · ${card.category ?? ""}`}
+      cardMeta={(card, source) => source.deck.id === decks.foundation.id ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.deck.id === decks.lesson3Vocabulary.id ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson4Vocabulary.id ? `Lesson 4 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson5Vocabulary.id ? `Lesson 5 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson6Vocabulary.id ? `Lesson 6 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson7Vocabulary.id ? `Lesson 7 vocabulary · ${card.notes ?? ""}` : `Lesson ${Number(card.metadata?.lesson ?? 3)} grammar · ${card.category ?? ""}`}
       renderFront={(card, copy, source) => {
-        if (source.deck.id === decks.lesson3Grammar.id || source.deck.id === decks.lesson4Grammar.id || source.deck.id === decks.lesson5Grammar.id) return <span className="study-prompt reverse-text-prompt">{card.front}</span>;
+        if (source.deck.id === decks.lesson3Grammar.id || source.deck.id === decks.lesson4Grammar.id || source.deck.id === decks.lesson5Grammar.id || source.deck.id === decks.lesson6Grammar.id || source.deck.id === decks.lesson7Grammar.id) return <span className="study-prompt reverse-text-prompt">{card.front}</span>;
         return <span className={source.direction === "forward" ? "greek-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
       }}
       renderBack={(card, copy, source) => {
@@ -497,7 +620,7 @@ export function GreekPage() {
           const details = source.direction === "forward" ? card.back.split("\n").slice(1).join("\n") : card.reverseBack?.split("\n").slice(1).join("\n");
           return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "greek-answer-title"}>{source.direction === "reverse" ? card.front : String(card.metadata?.backTitle ?? "Answer")}</strong><span className="answer-notes">{details}</span>{sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}<GreekCardAudio card={card} /></div>;
         }
-        if (source.deck.id === decks.lesson3Grammar.id || source.deck.id === decks.lesson4Grammar.id || source.deck.id === decks.lesson5Grammar.id) return <div className="answer-block"><GreekParadigm card={card} /></div>;
+        if (source.deck.id === decks.lesson3Grammar.id || source.deck.id === decks.lesson4Grammar.id || source.deck.id === decks.lesson5Grammar.id || source.deck.id === decks.lesson6Grammar.id || source.deck.id === decks.lesson7Grammar.id) return <div className="answer-block"><GreekParadigm card={card} /></div>;
         return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}{sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}<GreekCardAudio card={card} /></div>;
       }}
     /> : <div className="study-loading panel-surface"><span className="loading-mark">α</span><p>Preparing Greek…</p></div>}

@@ -7,18 +7,30 @@ type GreekGrammarChart = { id: string; category: string; prompt: string; columns
 type GreekVocabularyCard = { id: string; source_ref?: string };
 
 describe("authoritative source migration", () => {
-  it("preserves source counts while expanding Greek through Lesson 4", () => {
+  it("preserves source counts while expanding Greek through Lesson 7", () => {
     const greek = JSON.parse(fs.readFileSync("public/data/greek-cards.json", "utf8"));
     const greekLesson3Vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson3-vocab.json", "utf8"));
     const greekLesson3Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as GreekGrammarChart[];
     const greekLesson4Vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson4-vocab.json", "utf8")) as GreekVocabularyCard[];
     const greekLesson4Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson4-grammar.json", "utf8")) as GreekGrammarChart[];
+    const greekLesson5Vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson5-vocab.json", "utf8")) as GreekVocabularyCard[];
+    const greekLesson5Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson5-grammar.json", "utf8")) as GreekGrammarChart[];
+    const greekLesson6Vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson6-vocab.json", "utf8")) as GreekVocabularyCard[];
+    const greekLesson6Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson6-grammar.json", "utf8")) as GreekGrammarChart[];
+    const greekLesson7Vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson7-vocab.json", "utf8")) as GreekVocabularyCard[];
+    const greekLesson7Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson7-grammar.json", "utf8")) as GreekGrammarChart[];
     const latin = latinRowsToCards(parseCsv(fs.readFileSync("public/data/dickinson-latin-core.csv", "utf8")));
     expect(greek).toHaveLength(55);
     expect(greekLesson3Vocabulary).toHaveLength(11);
     expect(greekLesson3Grammar).toHaveLength(6);
     expect(greekLesson4Vocabulary).toHaveLength(11);
     expect(greekLesson4Grammar).toHaveLength(8);
+    expect(greekLesson5Vocabulary).toHaveLength(10);
+    expect(greekLesson5Grammar).toHaveLength(4);
+    expect(greekLesson6Vocabulary).toHaveLength(11);
+    expect(greekLesson6Grammar).toHaveLength(5);
+    expect(greekLesson7Vocabulary).toHaveLength(12);
+    expect(greekLesson7Grammar).toHaveLength(5);
     expect(greekLesson4Vocabulary.every((card) => card.source_ref === "Groton 4.32")).toBe(true);
     expect(greekLesson4Grammar.slice(0, 6).every((card) => card.source_ref === "Groton 4.29")).toBe(true);
     expect(greekLesson4Grammar.slice(6).every((card) => card.source_ref === "Groton 4.30")).toBe(true);

@@ -24,13 +24,13 @@ describe("Groton vocabulary front-form fidelity", () => {
 
   it("uses the printed Lesson 3 forms on the question side", () => {
     expect(lesson3.map((entry) => entry.greek)).toEqual([
-      "γράφω",
-      "ἐθέλω",
-      "θῡ́ω",
-      "κλέπτω",
-      "παιδεύω",
-      "σπεύδω",
-      "φυλάττω",
+      "γράφω, γράψω",
+      "ἐθέλω, ἐθελήσω",
+      "θῡ́ω, θῡ́σω",
+      "κλέπτω, κλέψω",
+      "παιδεύω, παιδεύσω",
+      "σπεύδω, σπεύσω",
+      "φυλάττω, φυλάξω",
       "μή",
       "οὐ (οὐκ, οὐχ)",
       "καί",
@@ -39,12 +39,12 @@ describe("Groton vocabulary front-form fidelity", () => {
   });
 
   it("locks κλέπτω to Groton's polytonic acute form", () => {
-    expect(byId(lesson3, "lesson3-v4").greek).toBe("κλέπτω");
+    expect(byId(lesson3, "lesson3-v4").greek).toBe("κλέπτω, κλέψω");
   });
 
   it("uses the printed Lesson 4 forms on the question side", () => {
     expect(lesson4.map((entry) => entry.greek)).toEqual([
-      "πέμπω",
+      "πέμπω, πέμψω",
       "ἀγορᾱ́, -ᾶς, ἡ",
       "ἐπιστολή, -ῆς, ἡ",
       "ἡσυχίᾱ, -ᾱς, ἡ",

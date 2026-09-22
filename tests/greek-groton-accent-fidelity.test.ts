@@ -39,7 +39,7 @@ describe("Groton acute/grave source fidelity", () => {
   const lesson4Grammar = grammar("public/data/greek-lesson4-grammar.json");
 
   it("keeps Groton's printed vocabulary acute/grave forms exactly", () => {
-    expect(card(lesson3, "lesson3-v4").greek).toBe("κλέπτω");
+    expect(card(lesson3, "lesson3-v4").greek).toBe("κλέπτω, κλέψω");
     expect(card(lesson3, "lesson3-v10").greek).toBe("καί");
     expect(card(lesson3, "lesson3-v11").greek).toBe("καὶ...καί");
 
