@@ -23,9 +23,9 @@ function endingChart(id: string, label: string, columns: readonly (readonly stri
 }
 
 export const lesson5VocabularyAudio: Readonly<Record<string, { label: string; greek: string }>> = {
-  "lesson5-v1": { label: "ἀκούω", greek: "ἀκούω" },
-  "lesson5-v2": { label: "βλάπτω", greek: "βλάπτω" },
-  "lesson5-v3": { label: "κελεύω", greek: "κελεύω" },
+  "lesson5-v1": { label: "ἀκούω, ἀκούσω", greek: "ἀκούω, ἀκούσω" },
+  "lesson5-v2": { label: "βλάπτω, βλάψω", greek: "βλάπτω, βλάψω" },
+  "lesson5-v3": { label: "κελεύω, κελεύσω", greek: "κελεύω, κελεύσω" },
   "lesson5-v4": { label: "δέσποινα", greek: "δέσποινα, δεσποίνης, ἡ" },
   "lesson5-v5": { label: "θάλαττα", greek: "θάλαττα, θαλάττης, ἡ" },
   "lesson5-v6": { label: "θεράπαινα", greek: "θεράπαινα, θεραπαίνης, ἡ" },
