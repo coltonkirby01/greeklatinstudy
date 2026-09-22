@@ -23,7 +23,7 @@ function endingChart(id: string, label: string, columns: readonly (readonly stri
 }
 
 export const lesson4VocabularyAudio: Readonly<Record<string, { label: string; greek: string }>> = {
-  "lesson4-v1": { label: "πέμπω", greek: "πέμπω" },
+  "lesson4-v1": { label: "πέμπω, πέμψω", greek: "πέμπω, πέμψω" },
   "lesson4-v2": { label: "ἀγορᾱ́", greek: "ἀγορᾱ́, ἀγορᾶς, ἡ" },
   "lesson4-v3": { label: "ἐπιστολή", greek: "ἐπιστολή, ἐπιστολῆς, ἡ" },
   "lesson4-v4": { label: "ἡσυχίᾱ", greek: "ἡσυχίᾱ, ἡσυχίᾱς, ἡ" },
