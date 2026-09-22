@@ -189,7 +189,7 @@ function GreekParadigm({ card }: { card: StudyCard }) {
       <tbody>{rows.map((row) => <tr key={row.label}><th scope="row">{row.label}</th>{row.cells.map((cell, index) => <td key={`${row.label}-${columns[index] ?? index}`}><strong className="greek-front compact-greek">{cell}</strong></td>)}</tr>)}</tbody>
     </table>
     {sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}
-    <ClassicalGreekAudio assetId={card.id} label={card.category ?? "Greek paradigm"} />
+    {card.metadata?.pronunciationText !== undefined && <ClassicalGreekAudio assetId={card.id} label={card.category ?? "Greek paradigm"} />}
   </div>;
 }
 
