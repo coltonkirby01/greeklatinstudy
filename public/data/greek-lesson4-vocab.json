@@ -1,5 +1,5 @@
 [
-  { "id": "lesson4-v1", "greek": "πέμπω", "meaning": "send", "part_of_speech": "verb", "lesson": 4, "source_ref": "Groton 4.32" },
+  { "id": "lesson4-v1", "greek": "πέμπω, πέμψω", "meaning": "send", "part_of_speech": "verb", "lesson": 4, "source_ref": "Groton 4.32" },
   { "id": "lesson4-v2", "greek": "ἀγορᾱ́, -ᾶς, ἡ", "meaning": "marketplace, market", "part_of_speech": "noun", "lesson": 4, "source_ref": "Groton 4.32" },
   { "id": "lesson4-v3", "greek": "ἐπιστολή, -ῆς, ἡ", "meaning": "letter, message", "part_of_speech": "noun", "lesson": 4, "source_ref": "Groton 4.32" },
   { "id": "lesson4-v4", "greek": "ἡσυχίᾱ, -ᾱς, ἡ", "meaning": "leisure, stillness, tranquillity", "part_of_speech": "noun", "lesson": 4, "source_ref": "Groton 4.32" },
