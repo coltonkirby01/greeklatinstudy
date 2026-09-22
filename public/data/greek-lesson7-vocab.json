@@ -1,0 +1,98 @@
+[
+  {
+    "id": "lesson7-v1",
+    "greek": "χαίρω, χαιρήσω",
+    "meaning": "be happy; (+ dative) rejoice (in), take delight (in); χαῖρε/χαίρετε: hello or farewell",
+    "part_of_speech": "verb",
+    "lesson": 7,
+    "source_ref": "Groton 7.47, pp. 39–40"
+  },
+  {
+    "id": "lesson7-v2",
+    "greek": "ἀδελφή, -ῆς, ἡ",
+    "meaning": "sister",
+    "part_of_speech": "noun",
+    "lesson": 7,
+    "source_ref": "Groton 7.47, pp. 39–40"
+  },
+  {
+    "id": "lesson7-v3",
+    "greek": "ἀδελφός, -οῦ, ὁ",
+    "meaning": "brother; vocative singular ἄδελφε",
+    "part_of_speech": "noun",
+    "lesson": 7,
+    "source_ref": "Groton 7.47, pp. 39–40"
+  },
+  {
+    "id": "lesson7-v4",
+    "greek": "ἄνθρωπος, -ου, ὁ, ἡ",
+    "meaning": "(masculine) person, man, humankind; (feminine) woman, womankind",
+    "part_of_speech": "noun",
+    "lesson": 7,
+    "source_ref": "Groton 7.47, pp. 39–40"
+  },
+  {
+    "id": "lesson7-v5",
+    "greek": "θεός, -οῦ, ὁ, ἡ",
+    "meaning": "(masculine) god; (feminine) goddess",
+    "part_of_speech": "noun",
+    "lesson": 7,
+    "source_ref": "Groton 7.47, pp. 39–40"
+  },
+  {
+    "id": "lesson7-v6",
+    "greek": "ἵππος, -ου, ὁ, ἡ",
+    "meaning": "(masculine) horse; (feminine) mare",
+    "part_of_speech": "noun",
+    "lesson": 7,
+    "source_ref": "Groton 7.47, pp. 39–40"
+  },
+  {
+    "id": "lesson7-v7",
+    "greek": "λίθος, -ου, ὁ",
+    "meaning": "stone",
+    "part_of_speech": "noun",
+    "lesson": 7,
+    "source_ref": "Groton 7.47, pp. 39–40"
+  },
+  {
+    "id": "lesson7-v8",
+    "greek": "λύπη, -ης, ἡ",
+    "meaning": "pain, grief",
+    "part_of_speech": "noun",
+    "lesson": 7,
+    "source_ref": "Groton 7.47, pp. 39–40"
+  },
+  {
+    "id": "lesson7-v9",
+    "greek": "ὁδός, -οῦ, ἡ",
+    "meaning": "way, path, road, journey",
+    "part_of_speech": "noun",
+    "lesson": 7,
+    "source_ref": "Groton 7.47, pp. 39–40"
+  },
+  {
+    "id": "lesson7-v10",
+    "greek": "ποταμός, -οῦ, ὁ",
+    "meaning": "river",
+    "part_of_speech": "noun",
+    "lesson": 7,
+    "source_ref": "Groton 7.47, pp. 39–40"
+  },
+  {
+    "id": "lesson7-v11",
+    "greek": "χαρά, -ᾶς, ἡ",
+    "meaning": "joy, delight",
+    "part_of_speech": "noun",
+    "lesson": 7,
+    "source_ref": "Groton 7.47, pp. 39–40"
+  },
+  {
+    "id": "lesson7-v12",
+    "greek": "ἀπό (ἀπ’, ἀφ’)",
+    "meaning": "(+ genitive) away from; ἀπ’ before smooth breathing, ἀφ’ before rough breathing",
+    "part_of_speech": "preposition",
+    "lesson": 7,
+    "source_ref": "Groton 7.47, pp. 39–40"
+  }
+]
