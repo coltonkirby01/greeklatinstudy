@@ -1,0 +1,13 @@
+[
+  { "id": "lesson6-v1", "greek": "ἀλλάττω, ἀλλάξω", "meaning": "change, alter", "part_of_speech": "verb", "lesson": 6, "source_ref": "Groton 6.40" },
+  { "id": "lesson6-v2", "greek": "διώκω, διώξω", "meaning": "pursue, chase, hunt, drive away, banish", "part_of_speech": "verb", "lesson": 6, "source_ref": "Groton 6.40" },
+  { "id": "lesson6-v3", "greek": "ἔχω, ἕξω/σχήσω", "meaning": "have, hold, possess; (+ infinitive) be able (to)", "part_of_speech": "verb", "lesson": 6, "source_ref": "Groton 6.40" },
+  { "id": "lesson6-v4", "greek": "μέλλω, μελλήσω", "meaning": "(+ future infinitive) be about (to), intend (to); (+ present infinitive) delay (to), hesitate (to)", "part_of_speech": "verb", "lesson": 6, "source_ref": "Groton 6.40" },
+  { "id": "lesson6-v5", "greek": "κόρη, -ης, ἡ", "meaning": "maiden, girl, daughter; Κόρη = Maiden, Persephone", "part_of_speech": "noun", "lesson": 6, "source_ref": "Groton 6.40" },
+  { "id": "lesson6-v6", "greek": "οἰκίᾱ, -ᾱς, ἡ", "meaning": "house, household", "part_of_speech": "noun", "lesson": 6, "source_ref": "Groton 6.40" },
+  { "id": "lesson6-v7", "greek": "ἔτι", "meaning": "still, yet, longer", "part_of_speech": "adverb", "lesson": 6, "source_ref": "Groton 6.40" },
+  { "id": "lesson6-v8", "greek": "μηκέτι", "meaning": "no longer, no more", "part_of_speech": "adverb", "lesson": 6, "source_ref": "Groton 6.40" },
+  { "id": "lesson6-v9", "greek": "οὐκέτι", "meaning": "no longer, no more", "part_of_speech": "adverb", "lesson": 6, "source_ref": "Groton 6.40" },
+  { "id": "lesson6-v10", "greek": "πάλιν", "meaning": "back, backwards, again, once more", "part_of_speech": "adverb", "lesson": 6, "source_ref": "Groton 6.40" },
+  { "id": "lesson6-v11", "greek": "ἀλλά (ἀλλ’)", "meaning": "but", "part_of_speech": "conjunction", "lesson": 6, "source_ref": "Groton 6.40" }
+]
