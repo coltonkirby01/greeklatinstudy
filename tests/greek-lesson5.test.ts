@@ -13,9 +13,9 @@ const grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson5-grammar.js
 describe("Groton Lesson 5", () => {
   it("contains the ten section 5.36 vocabulary entries in textbook order", () => {
     expect(vocabulary.map((card) => card.greek)).toEqual([
-      "ἀκούω",
-      "βλάπτω",
-      "κελεύω",
+      "ἀκούω, ἀκούσω",
+      "βλάπτω, βλάψω",
+      "κελεύω, κελεύσω",
       "δέσποινα, -ης, ἡ",
       "θάλαττα, -ης, ἡ",
       "θεράπαινα, -ης, ἡ",
