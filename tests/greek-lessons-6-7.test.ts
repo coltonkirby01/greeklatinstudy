@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
+import { resolveBuiltinGreekAsset } from "../supabase/functions/course-audio/builtin-greek-assets";
 
 type VocabCard = { id: string; greek: string; meaning: string; part_of_speech: string; lesson: number; source_ref?: string };
 type GrammarCard = { id: string; category: string; prompt: string; columns: string[]; rows: Array<{ label: string; cells: string[] }>; source_ref?: string };
@@ -121,6 +122,22 @@ describe("Groton Lessons 6 and 7 expansion", () => {
         { label: "Dative", cells: ["τοῖς"] },
         { label: "Accusative", cells: ["τούς"] },
       ]);
+  });
+
+  it("registers future audio definitions without making Letter Changes a phonetic audio card", () => {
+    const lesson6Vocab = readJson<VocabCard[]>("public/data/greek-lesson6-vocab.json");
+    const lesson7Vocab = readJson<VocabCard[]>("public/data/greek-lesson7-vocab.json");
+    const lesson6Grammar = readJson<GrammarCard[]>("public/data/greek-lesson6-grammar.json");
+    const lesson7Grammar = readJson<GrammarCard[]>("public/data/greek-lesson7-grammar.json");
+
+    for (const card of [...lesson6Vocab, ...lesson7Vocab, ...lesson6Grammar.filter((card) => card.id !== "lesson6-chart-letter-changes"), ...lesson7Grammar]) {
+      expect(resolveBuiltinGreekAsset(card.id), card.id).not.toBeNull();
+    }
+    expect(resolveBuiltinGreekAsset("lesson6-chart-letter-changes")).toBeNull();
+
+    const prewarm = fs.readFileSync(".github/workflows/prewarm-greek-audio.yml", "utf8");
+    expect(prewarm).not.toContain("lesson6-v1");
+    expect(prewarm).not.toContain("lesson7-v1");
   });
 
   it("wires both lessons into the Greek selector and built-in Stats registry", () => {
