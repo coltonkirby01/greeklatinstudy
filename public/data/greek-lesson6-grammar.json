@@ -1,0 +1,65 @@
+[
+  {
+    "id": "lesson6-chart-future-active-indicative-endings",
+    "category": "Future Active Indicative Endings",
+    "prompt": "Future Active Indicative Endings",
+    "source_ref": "Groton 6.38",
+    "accent_note": "Groton §6.38: the future active indicative is built on the future stem; finite forms have recessive accent.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["-σω", "-σομεν"] },
+      { "label": "2nd person", "cells": ["-σεις", "-σετε"] },
+      { "label": "3rd person", "cells": ["-σει", "-σουσι(ν)"] }
+    ]
+  },
+  {
+    "id": "lesson6-chart-future-active-infinitive-endings",
+    "category": "Future Active Infinitive Endings",
+    "prompt": "Future Active Infinitive Ending",
+    "source_ref": "Groton 6.39",
+    "accent_note": "Groton §6.39: future active infinitive = future stem + -ειν; from the present stem this appears as future marker σ + -ειν.",
+    "columns": ["Ending"],
+    "rows": [
+      { "label": "Future Active Infinitive", "cells": ["-σειν"] }
+    ]
+  },
+  {
+    "id": "lesson6-chart-future-active-indicative",
+    "category": "Future Active Indicative",
+    "prompt": "Future Active Indicative — παιδεύω",
+    "source_ref": "Groton 6.38",
+    "accent_note": "Groton §6.38 model verb παιδεύω; finite future forms have recessive accent.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["παιδεύσω", "παιδεύσομεν"] },
+      { "label": "2nd person", "cells": ["παιδεύσεις", "παιδεύσετε"] },
+      { "label": "3rd person", "cells": ["παιδεύσει", "παιδεύσουσι(ν)"] }
+    ]
+  },
+  {
+    "id": "lesson6-chart-future-active-infinitive",
+    "category": "Future Active Infinitive",
+    "prompt": "Future Active Infinitive — παιδεύω",
+    "source_ref": "Groton 6.39",
+    "accent_note": "Groton §6.39 model form: παιδεύσειν.",
+    "columns": ["Greek"],
+    "rows": [
+      { "label": "Future Active Infinitive", "cells": ["παιδεύσειν"] }
+    ]
+  },
+  {
+    "id": "lesson6-chart-letter-changes",
+    "category": "Letter Changes",
+    "prompt": "Letter Changes",
+    "source_ref": "Groton 6.38, p. 32",
+    "accent_note": "Euphonic changes before future σ as summarized at the top of p. 32.",
+    "columns": ["Letters", "+ σ", "Result"],
+    "rows": [
+      { "label": "Labial", "cells": ["π, β, φ", "+ σ", "ψ"] },
+      { "label": "Palatal", "cells": ["κ, γ, χ", "+ σ", "ξ"] },
+      { "label": "Dental", "cells": ["τ, δ, θ", "+ σ", "σ"] },
+      { "label": "πτ", "cells": ["πτ", "+ σ", "ψ"] },
+      { "label": "ττ", "cells": ["ττ", "+ σ", "ξ"] }
+    ]
+  }
+]
