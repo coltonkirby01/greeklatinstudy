@@ -548,6 +548,51 @@ export function GreekPage() {
         </FilterDisclosure>
       </FilterDisclosure>
 
+
+      <FilterDisclosure title="Lesson 6" summary={`${lesson6State.selectedCount} of ${lesson6Keys.length} groups selected`} checked={lesson6State.checked} mixed={lesson6State.mixed} onCheckedChange={(checked) => changeGroups(lesson6Keys, checked)}>
+        <FilterDisclosure title="Vocabulary" summary={`${decks.lesson6Vocabulary.cards.length} entries`} count={decks.lesson6Vocabulary.cards.length} nested checked={groupSelectionState([keys.lesson6Vocabulary]).checked} mixed={groupSelectionState([keys.lesson6Vocabulary]).mixed} onCheckedChange={(checked) => changeGroups([keys.lesson6Vocabulary], checked)}>
+          <FilterCheckbox label="All Lesson 6 vocabulary" count={decks.lesson6Vocabulary.cards.length} checked={groupSelectionState([keys.lesson6Vocabulary]).checked} mixed={groupSelectionState([keys.lesson6Vocabulary]).mixed} onChange={(checked) => changeGroups([keys.lesson6Vocabulary], checked)} />
+        </FilterDisclosure>
+
+        <FilterDisclosure title="Endings" summary={`${lesson6EndingsState.selectedCount} of ${lesson6EndingsKeys.length} selected`} count={lesson6EndingsKeys.length} nested checked={lesson6EndingsState.checked} mixed={lesson6EndingsState.mixed} onCheckedChange={(checked) => changeGroups(lesson6EndingsKeys, checked)}>
+          {lesson6EndingsKeys.map((key) => {
+            const category = lesson6GrammarCategoryByKey.get(key)!;
+            return <FilterCheckbox key={key} label={category} count={countLesson6Grammar(category)} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
+          })}
+        </FilterDisclosure>
+
+        <FilterDisclosure title="Paradigms" summary={`${lesson6ParadigmState.selectedCount} of ${lesson6ParadigmKeys.length} selected`} count={lesson6ParadigmKeys.length} nested checked={lesson6ParadigmState.checked} mixed={lesson6ParadigmState.mixed} onCheckedChange={(checked) => changeGroups(lesson6ParadigmKeys, checked)}>
+          {lesson6ParadigmKeys.map((key) => {
+            const category = lesson6GrammarCategoryByKey.get(key)!;
+            return <FilterCheckbox key={key} label={category === "Future Active Indicative" ? "Future Active Indicative — παιδεύω" : "Future Active Infinitive — παιδεύω"} count={countLesson6Grammar(category)} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
+          })}
+        </FilterDisclosure>
+
+        <FilterDisclosure title="Letter Changes" summary={`${groupSelectionState([keys.letterChanges]).selectedCount} of 1 selected`} count={1} nested checked={groupSelectionState([keys.letterChanges]).checked} mixed={groupSelectionState([keys.letterChanges]).mixed} onCheckedChange={(checked) => changeGroups([keys.letterChanges], checked)}>
+          <FilterCheckbox label="Letter Changes" count={countLesson6Grammar("Letter Changes")} checked={groupSelectionState([keys.letterChanges]).checked} mixed={groupSelectionState([keys.letterChanges]).mixed} onChange={(checked) => changeGroups([keys.letterChanges], checked)} />
+        </FilterDisclosure>
+      </FilterDisclosure>
+
+      <FilterDisclosure title="Lesson 7" summary={`${lesson7State.selectedCount} of ${lesson7Keys.length} groups selected`} checked={lesson7State.checked} mixed={lesson7State.mixed} onCheckedChange={(checked) => changeGroups(lesson7Keys, checked)}>
+        <FilterDisclosure title="Vocabulary" summary={`${decks.lesson7Vocabulary.cards.length} entries`} count={decks.lesson7Vocabulary.cards.length} nested checked={groupSelectionState([keys.lesson7Vocabulary]).checked} mixed={groupSelectionState([keys.lesson7Vocabulary]).mixed} onCheckedChange={(checked) => changeGroups([keys.lesson7Vocabulary], checked)}>
+          <FilterCheckbox label="All Lesson 7 vocabulary" count={decks.lesson7Vocabulary.cards.length} checked={groupSelectionState([keys.lesson7Vocabulary]).checked} mixed={groupSelectionState([keys.lesson7Vocabulary]).mixed} onChange={(checked) => changeGroups([keys.lesson7Vocabulary], checked)} />
+        </FilterDisclosure>
+
+        <FilterDisclosure title="Endings" summary={`${lesson7EndingsState.selectedCount} of ${lesson7EndingsKeys.length} selected`} count={lesson7EndingsKeys.length} nested checked={lesson7EndingsState.checked} mixed={lesson7EndingsState.mixed} onCheckedChange={(checked) => changeGroups(lesson7EndingsKeys, checked)}>
+          {lesson7EndingsKeys.map((key) => {
+            const category = lesson7GrammarCategoryByKey.get(key)!;
+            return <FilterCheckbox key={key} label={category} count={countLesson7Grammar(category)} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
+          })}
+        </FilterDisclosure>
+
+        <FilterDisclosure title="Paradigms" summary={`${lesson7ParadigmState.selectedCount} of ${lesson7ParadigmKeys.length} selected`} count={lesson7ParadigmKeys.length} nested checked={lesson7ParadigmState.checked} mixed={lesson7ParadigmState.mixed} onCheckedChange={(checked) => changeGroups(lesson7ParadigmKeys, checked)}>
+          {lesson7ParadigmKeys.map((key) => {
+            const category = lesson7GrammarCategoryByKey.get(key)!;
+            return <FilterCheckbox key={key} label={category} count={countLesson7Grammar(category)} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
+          })}
+        </FilterDisclosure>
+      </FilterDisclosure>
+
       <FilterDisclosure title="Individual cards" summary={`${selectedIndividualCardCount} of ${allIndividualCardCount} selected`} count={allIndividualCardCount} checked={selectedIndividualCardCount === allIndividualCardCount} mixed={selectedIndividualCardCount > 0 && selectedIndividualCardCount < allIndividualCardCount} onCheckedChange={(checked) => individualDecks.forEach(({ deck: sourceDeck }) => changeExactDeck(sourceDeck, checked))}>
         {individualDecks.map(({ label, deck: sourceDeck }) => {
           const selectedCount = sourceDeck.cards.filter((card) => exactCardSelected(sourceDeck, card)).length;
@@ -569,9 +614,9 @@ export function GreekPage() {
       savedCardRefs={savedCards.refs}
       onToggleSavedCard={savedCards.toggleSaved}
       onDeselectCard={excludedCards.exclude}
-      cardMeta={(card, source) => source.deck.id === decks.foundation.id ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.deck.id === decks.lesson3Vocabulary.id ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson4Vocabulary.id ? `Lesson 4 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson5Vocabulary.id ? `Lesson 5 vocabulary · ${card.notes ?? ""}` : `Lesson ${Number(card.metadata?.lesson ?? 3)} grammar · ${card.category ?? ""}`}
+      cardMeta={(card, source) => source.deck.id === decks.foundation.id ? `Lessons ${Number(card.metadata?.lesson ?? 1)} · Card ${card.rank ?? 0}` : source.deck.id === decks.lesson3Vocabulary.id ? `Lesson 3 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson4Vocabulary.id ? `Lesson 4 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson5Vocabulary.id ? `Lesson 5 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson6Vocabulary.id ? `Lesson 6 vocabulary · ${card.notes ?? ""}` : source.deck.id === decks.lesson7Vocabulary.id ? `Lesson 7 vocabulary · ${card.notes ?? ""}` : `Lesson ${Number(card.metadata?.lesson ?? 3)} grammar · ${card.category ?? ""}`}
       renderFront={(card, copy, source) => {
-        if (source.deck.id === decks.lesson3Grammar.id || source.deck.id === decks.lesson4Grammar.id || source.deck.id === decks.lesson5Grammar.id) return <span className="study-prompt reverse-text-prompt">{card.front}</span>;
+        if (source.deck.id === decks.lesson3Grammar.id || source.deck.id === decks.lesson4Grammar.id || source.deck.id === decks.lesson5Grammar.id || source.deck.id === decks.lesson6Grammar.id || source.deck.id === decks.lesson7Grammar.id) return <span className="study-prompt reverse-text-prompt">{card.front}</span>;
         return <span className={source.direction === "forward" ? "greek-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
       }}
       renderBack={(card, copy, source) => {
@@ -579,7 +624,7 @@ export function GreekPage() {
           const details = source.direction === "forward" ? card.back.split("\n").slice(1).join("\n") : card.reverseBack?.split("\n").slice(1).join("\n");
           return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "greek-answer-title"}>{source.direction === "reverse" ? card.front : String(card.metadata?.backTitle ?? "Answer")}</strong><span className="answer-notes">{details}</span>{sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}<GreekCardAudio card={card} /></div>;
         }
-        if (source.deck.id === decks.lesson3Grammar.id || source.deck.id === decks.lesson4Grammar.id || source.deck.id === decks.lesson5Grammar.id) return <div className="answer-block"><GreekParadigm card={card} /></div>;
+        if (source.deck.id === decks.lesson3Grammar.id || source.deck.id === decks.lesson4Grammar.id || source.deck.id === decks.lesson5Grammar.id || source.deck.id === decks.lesson6Grammar.id || source.deck.id === decks.lesson7Grammar.id) return <div className="answer-block"><GreekParadigm card={card} /></div>;
         return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}{sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}<GreekCardAudio card={card} /></div>;
       }}
     /> : <div className="study-loading panel-surface"><span className="loading-mark">α</span><p>Preparing Greek…</p></div>}
