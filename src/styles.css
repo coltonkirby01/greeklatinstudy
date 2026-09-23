@@ -1787,3 +1787,96 @@ button.flashcard-face { appearance: none; }
   .rating-grid { grid-template-columns: 1fr; }
   .sentence-controls { grid-template-columns: 1fr; }
 }
+
+
+/* Henle adjective and participle answer sides size themselves to their content.
+   Both sides share one intrinsic CSS-grid row, so even narrow screens do not
+   need an inner flashcard scrollbar or risk clipped Latin forms. */
+.flashcard-scene:has(.latin-card-auto-fit) {
+  min-height: 370px;
+}
+.flashcard-scene:has(.latin-card-auto-fit) .flashcard-inner {
+  display: grid;
+  height: auto;
+  min-height: 370px;
+}
+.flashcard-scene:has(.latin-card-auto-fit) .flashcard-face {
+  position: relative;
+  inset: auto;
+  grid-area: 1 / 1;
+  min-height: 370px;
+  height: auto;
+  align-self: stretch;
+  padding: clamp(3.15rem, 5vw, 3.7rem) clamp(.7rem, 2.7vw, 1.4rem) clamp(.8rem, 2vw, 1.1rem);
+  overflow: visible;
+}
+.latin-participle-answer {
+  display: grid;
+  width: 100%;
+  max-width: 43rem;
+  gap: clamp(.65rem, 1.4vw, .95rem);
+  text-align: left;
+}
+.latin-participle-answer .participle-answer-row {
+  display: grid;
+  grid-template-columns: minmax(6rem, 7rem) minmax(0, 1fr);
+  gap: clamp(.5rem, 1.2vw, .9rem);
+  align-items: baseline;
+  font-family: var(--font-serif);
+  font-size: clamp(1rem, 2.2vw, 1.26rem);
+  line-height: 1.32;
+}
+.latin-participle-answer .participle-answer-label {
+  color: var(--burgundy);
+  font-weight: 750;
+}
+.latin-participle-answer .participle-answer-value {
+  min-width: 0;
+  font-weight: 550;
+  overflow-wrap: break-word;
+}
+.latin-participle-answer .participle-answer-example {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+  margin-top: .15rem;
+  color: var(--ink-soft);
+  font-size: clamp(.94rem, 1.8vw, 1.08rem);
+  line-height: 1.25;
+}
+.latin-adjective-answer {
+  width: 100%;
+  max-width: 760px;
+  gap: clamp(.3rem, .9vw, .5rem);
+}
+.latin-adjective-answer .henle-card-title {
+  font-size: clamp(1rem, 2.1vw, 1.36rem);
+  line-height: 1.16;
+}
+.latin-adjective-answer .answer-notes {
+  margin: 0;
+  font-size: clamp(.81rem, 1.7vw, .98rem);
+  line-height: 1.2;
+}
+.latin-adjective-answer .answer-notes:first-of-type {
+  color: var(--burgundy);
+  font-weight: 750;
+}
+.flashcard-scene:has(.latin-adjective-answer) .flashcard-face .henle-chart th,
+.flashcard-scene:has(.latin-adjective-answer) .flashcard-face .henle-chart td {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  .latin-participle-answer .participle-answer-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: .13rem;
+    font-size: clamp(.96rem, 3.5vw, 1.09rem);
+    line-height: 1.26;
+  }
+  .latin-participle-answer {
+    gap: .55rem;
+  }
+  .latin-participle-answer .participle-answer-example {
+    font-size: .94rem;
+  }
+}
