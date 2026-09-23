@@ -65,7 +65,7 @@ describe("Henle Participles", () => {
     expect(page).toContain('participle-answer-row');
     expect(page).toContain('participle-answer-label">Formation');
     expect(page).toContain('participle-answer-label">Declension');
-    const css = fs.readFileSync("src/styles.css", "utf8");
+    const css = page;
     expect(css).toContain(".latin-participle-answer .participle-answer-row");
     expect(css).toContain(".flashcard-scene:has(.latin-card-auto-fit) .flashcard-face");
 
