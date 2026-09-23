@@ -3,52 +3,282 @@
     "id": "latin-adjective-1st-2nd-masculine",
     "category": "1st & 2nd Declension Adjective — Masculine",
     "prompt": "1st & 2nd Declension Adjective, Masculine — magnus, -a, -um",
-    "columns": ["Singular", "Plural"],
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
     "rows": [
-      { "label": "Nominative", "cells": ["magn-us", "magn-ī"] },
-      { "label": "Genitive", "cells": ["magn-ī", "magn-ōrum"] },
-      { "label": "Dative", "cells": ["magn-ō", "magn-īs"] },
-      { "label": "Accusative", "cells": ["magn-um", "magn-ōs"] },
-      { "label": "Ablative", "cells": ["magn-ō", "magn-īs"] }
+      {
+        "label": "Nominative",
+        "cells": [
+          "magn-us",
+          "magn-ī"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "magn-ī",
+          "magn-ōrum"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "magn-ō",
+          "magn-īs"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "magn-um",
+          "magn-ōs"
+        ]
+      },
+      {
+        "label": "Ablative",
+        "cells": [
+          "magn-ō",
+          "magn-īs"
+        ]
+      }
     ]
   },
   {
     "id": "latin-adjective-1st-2nd-feminine",
     "category": "1st & 2nd Declension Adjective — Feminine",
     "prompt": "1st & 2nd Declension Adjective, Feminine — magnus, -a, -um",
-    "columns": ["Singular", "Plural"],
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
     "rows": [
-      { "label": "Nominative", "cells": ["magn-a", "magn-ae"] },
-      { "label": "Genitive", "cells": ["magn-ae", "magn-ārum"] },
-      { "label": "Dative", "cells": ["magn-ae", "magn-īs"] },
-      { "label": "Accusative", "cells": ["magn-am", "magn-ās"] },
-      { "label": "Ablative", "cells": ["magn-ā", "magn-īs"] }
+      {
+        "label": "Nominative",
+        "cells": [
+          "magn-a",
+          "magn-ae"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "magn-ae",
+          "magn-ārum"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "magn-ae",
+          "magn-īs"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "magn-am",
+          "magn-ās"
+        ]
+      },
+      {
+        "label": "Ablative",
+        "cells": [
+          "magn-ā",
+          "magn-īs"
+        ]
+      }
     ]
   },
   {
     "id": "latin-adjective-1st-2nd-neuter",
     "category": "1st & 2nd Declension Adjective — Neuter",
     "prompt": "1st & 2nd Declension Adjective, Neuter — magnus, -a, -um",
-    "columns": ["Singular", "Plural"],
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
     "rows": [
-      { "label": "Nominative", "cells": ["magn-um", "magn-a"] },
-      { "label": "Genitive", "cells": ["magn-ī", "magn-ōrum"] },
-      { "label": "Dative", "cells": ["magn-ō", "magn-īs"] },
-      { "label": "Accusative", "cells": ["magn-um", "magn-a"] },
-      { "label": "Ablative", "cells": ["magn-ō", "magn-īs"] }
+      {
+        "label": "Nominative",
+        "cells": [
+          "magn-um",
+          "magn-a"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "magn-ī",
+          "magn-ōrum"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "magn-ō",
+          "magn-īs"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "magn-um",
+          "magn-a"
+        ]
+      },
+      {
+        "label": "Ablative",
+        "cells": [
+          "magn-ō",
+          "magn-īs"
+        ]
+      }
     ]
   },
   {
     "id": "latin-adjective-3rd-gravis",
     "category": "3rd Declension Adjective — gravis, -e",
     "prompt": "3rd Declension Adjective — gravis, -e",
-    "columns": ["Singular", "Plural"],
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
     "rows": [
-      { "label": "Nominative", "cells": ["grav-is (grav-e)", "grav-ēs (grav-ia)"] },
-      { "label": "Genitive", "cells": ["grav-is", "grav-ium"] },
-      { "label": "Dative", "cells": ["grav-ī", "grav-ibus"] },
-      { "label": "Accusative", "cells": ["grav-em (grav-e)", "grav-ēs (grav-ia)"] },
-      { "label": "Ablative", "cells": ["grav-ī", "grav-ibus"] }
+      {
+        "label": "Nominative",
+        "cells": [
+          "grav-is (grav-e)",
+          "grav-ēs (grav-ia)"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "grav-is",
+          "grav-ium"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "grav-ī",
+          "grav-ibus"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "grav-em (grav-e)",
+          "grav-ēs (grav-ia)"
+        ]
+      },
+      {
+        "label": "Ablative",
+        "cells": [
+          "grav-ī",
+          "grav-ibus"
+        ]
+      }
+    ],
+    "terminationLabel": "Two terminations",
+    "terminationDetail": "Masculine/feminine: gravis; neuter: grave."
+  },
+  {
+    "id": "latin-adjective-3rd-acer",
+    "category": "3rd Declension Adjective — ācer, ācris, ācre",
+    "prompt": "3rd Declension Adjective — ācer, ācris, ācre",
+    "terminationLabel": "Three terminations",
+    "terminationDetail": "Nominative singular: masculine ācer / feminine ācris / neuter ācre. Other differences in neuter forms are shown in parentheses.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "ācer / ācr-is / ācr-e",
+          "ācr-ēs (ācr-ia)"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "ācr-is",
+          "ācr-ium"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "ācr-ī",
+          "ācr-ibus"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "ācr-em (ācr-e)",
+          "ācr-ēs (ācr-ia)"
+        ]
+      },
+      {
+        "label": "Ablative",
+        "cells": [
+          "ācr-ī",
+          "ācr-ibus"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "latin-adjective-3rd-diligens",
+    "category": "3rd Declension Adjective — dīligēns, dīligentis",
+    "prompt": "3rd Declension Adjective — dīligēns, dīligentis",
+    "terminationLabel": "One termination",
+    "terminationDetail": "The nominative singular dīligēns is the same for masculine, feminine, and neuter; differing neuter forms appear in parentheses.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "dīligēns",
+          "dīligent-ēs (dīligent-ia)"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "dīligent-is",
+          "dīligent-ium"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "dīligent-ī",
+          "dīligent-ibus"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "dīligent-em (dīligēns)",
+          "dīligent-ēs (dīligent-ia)"
+        ]
+      },
+      {
+        "label": "Ablative",
+        "cells": [
+          "dīligent-ī",
+          "dīligent-ibus"
+        ]
+      }
     ]
   }
 ]
