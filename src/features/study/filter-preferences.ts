@@ -19,12 +19,6 @@ const LATIN_MATERIALS = new Set<LatinMaterial>(["vocabulary", "active-indicative
 // This migration runs only once for legacy saved selections. A user who
 // deliberately unchecks either new adjective after this update stays unchecked.
 const ADJECTIVE_SELECTION_VERSION = 2;
-const ORIGINAL_ADJECTIVE_CARD_IDS = [
-  "latin-adjective-1st-2nd-masculine",
-  "latin-adjective-1st-2nd-feminine",
-  "latin-adjective-1st-2nd-neuter",
-  "latin-adjective-3rd-gravis",
-] as const;
 const NEW_ADJECTIVE_CARD_IDS = ["latin-adjective-3rd-acer", "latin-adjective-3rd-diligens"] as const;
 
 function availableStorage(storage?: StorageLike | null) {
@@ -83,7 +77,7 @@ export function loadLatinFilterPreferences(storage?: StorageLike | null): LatinF
     const paradigmCards = restoreOptionalSelection(stored.paradigmCards);
     if (stored.adjectiveSelectionVersion !== ADJECTIVE_SELECTION_VERSION &&
       materials.has("adjective-paradigms") && paradigmCards !== null &&
-      ORIGINAL_ADJECTIVE_CARD_IDS.every((id) => paradigmCards.has(id))) {
+      paradigmCards.has("latin-adjective-3rd-gravis")) {
       for (const id of NEW_ADJECTIVE_CARD_IDS) paradigmCards.add(id);
     }
     return {
