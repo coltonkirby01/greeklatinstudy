@@ -1,6 +1,6 @@
 import type { OptionalSelection } from "./latin-study-filters";
 
-export type LatinMaterial = "vocabulary" | "active-indicative-paradigms" | "passive-indicative-paradigms" | "adjective-paradigms";
+export type LatinMaterial = "vocabulary" | "active-indicative-paradigms" | "passive-indicative-paradigms" | "adjective-paradigms" | "participles";
 export type LatinFilterPreferences = {
   materials: Set<LatinMaterial>;
   vocabularyParts: OptionalSelection;
@@ -14,7 +14,7 @@ type StorageLike = {
 
 const GREEK_FILTER_KEY = "greeklatinstudy:greek-filters:v1";
 const LATIN_FILTER_KEY = "greeklatinstudy:latin-filters:v1";
-const LATIN_MATERIALS = new Set<LatinMaterial>(["vocabulary", "active-indicative-paradigms", "passive-indicative-paradigms", "adjective-paradigms"]);
+const LATIN_MATERIALS = new Set<LatinMaterial>(["vocabulary", "active-indicative-paradigms", "passive-indicative-paradigms", "adjective-paradigms", "participles"]);
 
 function availableStorage(storage?: StorageLike | null) {
   if (storage !== undefined) return storage;
