@@ -25,7 +25,7 @@ describe("Henle Participles", () => {
   it("uses the second principal part for the present participle and declines it in the third declension", () => {
     expect(cards[0].formation).toContain("second principal part");
     expect(cards[0].formation).toContain("-ns");
-    expect(cards[0].declension).toContain("third-declension adjective");
+    expect(cards[0].declension).toContain("third-declension adjective of one termination");
     expect(cards[0].example).toBe("amāre → amāns, amantis");
   });
 
