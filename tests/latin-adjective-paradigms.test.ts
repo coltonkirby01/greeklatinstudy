@@ -104,7 +104,7 @@ describe("Henle adjective paradigms", () => {
     expect(loader).toContain('latin-adjective-3rd-diligens');
     expect(loader).toContain('cache: "no-store"');
     expect(loader).toContain('The Henle adjective data is out of date. Please reload the page.');
-    const css = fs.readFileSync("src/styles.css", "utf8");
+    const css = page;
     expect(css).toContain(".flashcard-scene:has(.latin-card-auto-fit)");
     expect(css).toContain("grid-area: 1 / 1");
     expect(css).toContain("overflow: visible");
