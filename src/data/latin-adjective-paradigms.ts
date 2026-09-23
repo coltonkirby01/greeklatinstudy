@@ -5,6 +5,8 @@ type LatinAdjectiveSourceCard = {
   id: string;
   category: string;
   prompt: string;
+  terminationLabel?: string;
+  terminationDetail?: string;
   columns: string[];
   rows: LatinAdjectiveChartRow[];
 };
@@ -14,6 +16,8 @@ const RULE_BY_CARD: Record<string, string> = {
   "latin-adjective-1st-2nd-feminine": "72",
   "latin-adjective-1st-2nd-neuter": "72",
   "latin-adjective-3rd-gravis": "78",
+  "latin-adjective-3rd-acer": "80",
+  "latin-adjective-3rd-diligens": "82",
 };
 
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
@@ -26,7 +30,7 @@ export function loadLatinAdjectiveParadigmsDeck() {
       const source = await response.json() as LatinAdjectiveSourceCard[];
       const cards: StudyCard[] = source.map((card, index) => {
         const rule = RULE_BY_CARD[card.id] ?? "";
-        const isThirdDeclension = card.id === "latin-adjective-3rd-gravis";
+        const isThirdDeclension = card.id.startsWith("latin-adjective-3rd-");
         return {
           id: card.id,
           deckId: "latin-adjective-paradigms",
@@ -47,6 +51,8 @@ export function loadLatinAdjectiveParadigmsDeck() {
             rowHeaderLabel: "Case",
             formGroup: "Adjectives",
             adjectiveGroup: isThirdDeclension ? "3rd Declension" : "1st & 2nd Declension",
+            terminationLabel: card.terminationLabel,
+            terminationDetail: card.terminationDetail,
             ruleLabel: rule,
           },
         } satisfies StudyCard;
@@ -57,11 +63,11 @@ export function loadLatinAdjectiveParadigmsDeck() {
         slug: "latin",
         title: "Latin Adjective Paradigms",
         eyebrow: "1st & 2nd declension · 3rd declension",
-        description: "Four Henle adjective paradigm cards: three gender-specific magnus cards and one combined gravis, -e card.",
+        description: "Six Henle adjective paradigm cards: three gender-specific magnus cards and third-declension models of two, three, and one termination.",
         language: "latin",
         cards,
         supportsReverse: false,
-        sourceNote: "Henle Latin Grammar R. 72 (p. 14) and R. 78 (p. 16), cross-checked against Henle Latin Helps adjective charts.",
+        sourceNote: "Henle Latin Grammar R. 72, 78, 80, and 82; adjective charts cross-checked against the Henle quick-reference PDF.",
       } satisfies DeckDefinition;
     });
 
