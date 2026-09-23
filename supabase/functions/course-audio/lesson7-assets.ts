@@ -25,7 +25,7 @@ export const lesson7VocabularyAudio: Readonly<Record<string, { label: string; gr
   "lesson7-v5": { label: "θεός", greek: "θεός, θεοῦ, ὁ, ἡ" },
   "lesson7-v6": { label: "ἵππος", greek: "ἵππος, ἵππου, ὁ, ἡ" },
   "lesson7-v7": { label: "λίθος", greek: "λίθος, λίθου, ὁ" },
-  "lesson7-v8": { label: "πόνος", greek: "πόνος, πόνου, ὁ" },
+  "lesson7-v8": { label: "λῡ́πη", greek: "λῡ́πη, λῡ́πης, ἡ" },
   "lesson7-v9": { label: "ὁδός", greek: "ὁδός, ὁδοῦ, ἡ" },
   "lesson7-v10": { label: "ποταμός", greek: "ποταμός, ποταμοῦ, ὁ" },
   "lesson7-v11": { label: "χαρά", greek: "χαρά, χαρᾶς, ἡ" },
