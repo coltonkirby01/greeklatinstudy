@@ -52,8 +52,20 @@ describe("Groton Lessons 6 and 7 expansion", () => {
 
     expect(lesson7).toHaveLength(12);
     expect(lesson7.every((card) => card.lesson === 7 && card.source_ref === "Groton 7.47")).toBe(true);
-    expect(lesson7[0]).toMatchObject({ id: "lesson7-v1", greek: "χαίρω, χαιρήσω" });
-    expect(lesson7.at(-1)).toMatchObject({ id: "lesson7-v12", greek: "ἀπό (ἀπ’, ἀφ’)" });
+    expect(lesson7.map(({ id, greek, meaning, part_of_speech }) => ({ id, greek, meaning, part_of_speech }))).toEqual([
+      { id: "lesson7-v1", greek: "χαίρω, χαιρήσω", meaning: "be happy; (+ dative) rejoice (in), take delight (in)", part_of_speech: "verb" },
+      { id: "lesson7-v2", greek: "ἀδελφή, -ῆς, ἡ", meaning: "sister", part_of_speech: "noun" },
+      { id: "lesson7-v3", greek: "ἀδελφός, -οῦ, ὁ", meaning: "brother", part_of_speech: "noun" },
+      { id: "lesson7-v4", greek: "ἄνθρωπος, -ου, ὁ, ἡ", meaning: "human being, person, man, mankind, humankind; woman, womankind", part_of_speech: "noun" },
+      { id: "lesson7-v5", greek: "θεός, -οῦ, ὁ, ἡ", meaning: "god; goddess", part_of_speech: "noun" },
+      { id: "lesson7-v6", greek: "ἵππος, -ου, ὁ, ἡ", meaning: "horse; mare", part_of_speech: "noun" },
+      { id: "lesson7-v7", greek: "λίθος, -ου, ὁ", meaning: "stone", part_of_speech: "noun" },
+      { id: "lesson7-v8", greek: "λῡ́πη, -ης, ἡ", meaning: "pain, grief", part_of_speech: "noun" },
+      { id: "lesson7-v9", greek: "ὁδός, -οῦ, ἡ", meaning: "way, path, road, journey", part_of_speech: "noun" },
+      { id: "lesson7-v10", greek: "ποταμός, -οῦ, ὁ", meaning: "river", part_of_speech: "noun" },
+      { id: "lesson7-v11", greek: "χαρά, -ᾶς, ἡ", meaning: "joy, delight", part_of_speech: "noun" },
+      { id: "lesson7-v12", greek: "ἀπό (ἀπ’, ἀφ’)", meaning: "(+ genitive) from, away from", part_of_speech: "preposition" },
+    ]);
   });
 
   it("preserves the Lesson 6 future active charts and p. 32 Letter Changes chart", () => {
@@ -133,6 +145,12 @@ describe("Groton Lessons 6 and 7 expansion", () => {
     for (const card of [...lesson6Vocab, ...lesson7Vocab, ...lesson6Grammar.filter((card) => card.id !== "lesson6-chart-letter-changes"), ...lesson7Grammar]) {
       expect(resolveBuiltinGreekAsset(card.id), card.id).not.toBeNull();
     }
+    const pain = resolveBuiltinGreekAsset("lesson7-v8");
+    expect(pain?.label).toBe("λῡ́πη");
+    expect(pain?.canonicalIpa).toBeTruthy();
+    expect(pain?.ttsText).toBeTruthy();
+    expect(pain?.canonicalIpa).not.toBe(resolveBuiltinGreekAsset("lesson7-v7")?.canonicalIpa);
+
     expect(resolveBuiltinGreekAsset("lesson6-chart-letter-changes")).toBeNull();
 
     const prewarm = fs.readFileSync(".github/workflows/prewarm-greek-audio.yml", "utf8");
