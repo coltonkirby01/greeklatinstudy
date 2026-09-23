@@ -16,6 +16,11 @@ const GREEK_FILTER_KEY = "greeklatinstudy:greek-filters:v1";
 const LATIN_FILTER_KEY = "greeklatinstudy:latin-filters:v1";
 const LATIN_MATERIALS = new Set<LatinMaterial>(["vocabulary", "active-indicative-paradigms", "passive-indicative-paradigms", "adjective-paradigms", "participles"]);
 
+// This migration runs only once for legacy saved selections. A user who
+// deliberately unchecks either new adjective after this update stays unchecked.
+const ADJECTIVE_SELECTION_VERSION = 2;
+const NEW_ADJECTIVE_CARD_IDS = ["latin-adjective-3rd-acer", "latin-adjective-3rd-diligens"] as const;
+
 function availableStorage(storage?: StorageLike | null) {
   if (storage !== undefined) return storage;
   if (typeof window === "undefined") return null;
@@ -69,10 +74,17 @@ export function loadLatinFilterPreferences(storage?: StorageLike | null): LatinF
     const materials = new Set(
       stringArray(stored.materials).filter((value): value is LatinMaterial => LATIN_MATERIALS.has(value as LatinMaterial)),
     );
+    const savedParadigmCards = restoreOptionalSelection(stored.paradigmCards);
+    const paradigmCards = savedParadigmCards === null ? null : new Set(savedParadigmCards);
+    if (stored.adjectiveSelectionVersion !== ADJECTIVE_SELECTION_VERSION &&
+      materials.has("adjective-paradigms") && paradigmCards !== null &&
+      paradigmCards.has("latin-adjective-3rd-gravis")) {
+      for (const id of NEW_ADJECTIVE_CARD_IDS) paradigmCards.add(id);
+    }
     return {
       materials,
       vocabularyParts: restoreOptionalSelection(stored.vocabularyParts),
-      paradigmCards: restoreOptionalSelection(stored.paradigmCards),
+      paradigmCards,
     };
   } catch {
     return fallback();
@@ -87,6 +99,7 @@ export function saveLatinFilterPreferences(preferences: LatinFilterPreferences, 
       materials: [...preferences.materials],
       vocabularyParts: storeOptionalSelection(preferences.vocabularyParts),
       paradigmCards: storeOptionalSelection(preferences.paradigmCards),
+      adjectiveSelectionVersion: ADJECTIVE_SELECTION_VERSION,
     }));
   } catch { /* Ignore unavailable browser storage. */ }
 }

@@ -21,13 +21,26 @@ const RULE_BY_CARD: Record<string, string> = {
 };
 
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
+const REQUIRED_ADJECTIVE_CARD_IDS = [
+  "latin-adjective-1st-2nd-masculine",
+  "latin-adjective-1st-2nd-feminine",
+  "latin-adjective-1st-2nd-neuter",
+  "latin-adjective-3rd-gravis",
+  "latin-adjective-3rd-acer",
+  "latin-adjective-3rd-diligens",
+] as const;
 let promise: Promise<DeckDefinition> | null = null;
 
 export function loadLatinAdjectiveParadigmsDeck() {
-  promise ??= fetch(assetUrl("data/latin-adjective-paradigms.json"), { cache: "force-cache" })
+  promise ??= fetch(assetUrl("data/latin-adjective-paradigms.json?v=henle-r80-r82-v2"), { cache: "no-store" })
     .then(async (response) => {
       if (!response.ok) throw new Error("The Latin adjective paradigm deck could not be loaded.");
       const source = await response.json() as LatinAdjectiveSourceCard[];
+      const loadedIds = new Set(source.map((card) => card.id));
+      if (source.length !== REQUIRED_ADJECTIVE_CARD_IDS.length ||
+        !REQUIRED_ADJECTIVE_CARD_IDS.every((id) => loadedIds.has(id))) {
+        throw new Error("The Henle adjective data is out of date. Please reload the page.");
+      }
       const cards: StudyCard[] = source.map((card, index) => {
         const rule = RULE_BY_CARD[card.id] ?? "";
         const isThirdDeclension = card.id.startsWith("latin-adjective-3rd-");

@@ -99,5 +99,15 @@ describe("Henle adjective paradigms", () => {
     expect(page).toContain("card.metadata.terminationLabel");
     expect(table).toContain('rowHeaderLabel');
     expect(catalog).toContain('id: "latin-adjective-paradigms"');
+    const loader = fs.readFileSync("src/data/latin-adjective-paradigms.ts", "utf8");
+    expect(loader).toContain('latin-adjective-3rd-acer');
+    expect(loader).toContain('latin-adjective-3rd-diligens');
+    expect(loader).toContain('cache: "no-store"');
+    expect(loader).toContain('The Henle adjective data is out of date. Please reload the page.');
+    const css = page;
+    expect(css).toContain(".flashcard-scene:has(.latin-card-auto-fit)");
+    expect(css).toContain("grid-area: 1 / 1");
+    expect(css).toContain("overflow: visible");
+    expect(page).toContain("latin-adjective-answer");
   });
 });
