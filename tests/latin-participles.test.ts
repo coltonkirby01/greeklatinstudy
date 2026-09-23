@@ -61,6 +61,13 @@ describe("Henle Participles", () => {
     expect(page).toContain('next.add("participles")');
     expect(page).toContain('source.deck.id === participlesDeck?.id');
     expect(page).toContain('saved-participles');
+    expect(page).toContain('className="answer-block latin-card-auto-fit latin-participle-answer"');
+    expect(page).toContain('participle-answer-row');
+    expect(page).toContain('participle-answer-label">Formation');
+    expect(page).toContain('participle-answer-label">Declension');
+    const css = fs.readFileSync("src/styles.css", "utf8");
+    expect(css).toContain(".latin-participle-answer .participle-answer-row");
+    expect(css).toContain(".flashcard-scene:has(.latin-card-auto-fit) .flashcard-face");
 
     const filter = fs.readFileSync("src/features/study/filter-preferences.ts", "utf8");
     expect(filter).toContain('"participles"');
