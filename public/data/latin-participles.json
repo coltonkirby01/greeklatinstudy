@@ -1,0 +1,30 @@
+[
+  {
+    "id": "latin-participle-present-active",
+    "front": "Present Active Participle",
+    "formation": "Remove -re from the second principal part to obtain the present stem; add -ns, with the vowel adjustments required by the conjugation.",
+    "declension": "Decline as a third-declension adjective.",
+    "example": "amāre → amāns, amantis"
+  },
+  {
+    "id": "latin-participle-perfect-passive",
+    "front": "Perfect Passive Participle",
+    "formation": "Use the fourth principal part (the perfect passive participle).",
+    "declension": "Decline as a first- and second-declension adjective.",
+    "example": "amātus, amāta, amātum"
+  },
+  {
+    "id": "latin-participle-future-active",
+    "front": "Future Active Participle",
+    "formation": "Take the fourth principal part in -us, remove -us, and add -ūrus, -ūra, -ūrum.",
+    "declension": "Decline as a first- and second-declension adjective.",
+    "example": "amātus → amātūrus, amātūra, amātūrum"
+  },
+  {
+    "id": "latin-participle-future-passive",
+    "front": "Future Passive Participle",
+    "formation": "Take the present stem from the second principal part and add -ndus, -nda, -ndum, with the vowel adjustments required by the conjugation.",
+    "declension": "Decline as a first- and second-declension adjective.",
+    "example": "amāre → amandus, amanda, amandum"
+  }
+]
