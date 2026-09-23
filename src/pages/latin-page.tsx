@@ -789,21 +789,29 @@ export function LatinPage() {
           }}
           renderBack={(card, copy, source) => {
             if (source.deck.id === participlesDeck?.id) {
-              return <span className="answer-block">
-                <strong className="study-answer">{String(card.metadata?.formation ?? copy.answer)}</strong>
-                <span className="answer-notes">{String(card.metadata?.declension ?? "")}</span>
-                <span className="answer-notes">Example: {String(card.metadata?.example ?? "")}</span>
+              return <span className="answer-block latin-card-auto-fit latin-participle-answer">
+                <span className="participle-answer-row">
+                  <strong className="participle-answer-label">Formation</strong>
+                  <span className="participle-answer-value">{String(card.metadata?.formation ?? copy.answer)}</span>
+                </span>
+                <span className="participle-answer-row">
+                  <strong className="participle-answer-label">Declension</strong>
+                  <span className="participle-answer-value">{String(card.metadata?.declension ?? "")}</span>
+                </span>
+                <span className="participle-answer-example">
+                  <strong>Example</strong> <span>{String(card.metadata?.example ?? "")}</span>
+                </span>
               </span>;
             }
             const isParadigm = source.deck.id === adjectiveParadigmDeck?.id || source.deck.id === activeParadigmDeck?.id || source.deck.id === passiveParadigmDeck?.id;
             if (isParadigm) {
-              if (source.direction === "reverse") return <span className="answer-block">
+              if (source.direction === "reverse") return <span className={source.deck.id === adjectiveParadigmDeck?.id ? "answer-block latin-card-auto-fit latin-adjective-answer" : "answer-block"}>
                 <strong className="henle-card-title">{card.front}</strong>
                 {typeof card.metadata?.terminationLabel === "string" && <span className="answer-notes">{card.metadata.terminationLabel}</span>}
                 {typeof card.metadata?.terminationDetail === "string" && <span className="answer-notes">{card.metadata.terminationDetail}</span>}
                 {card.notes && <span className="answer-notes">{card.notes}</span>}
               </span>;
-              return <span className="henle-chart-face">
+              return <span className={source.deck.id === adjectiveParadigmDeck?.id ? "henle-chart-face latin-card-auto-fit latin-adjective-answer" : "henle-chart-face"}>
                 <strong className="henle-card-title">{card.front}</strong>
                 {typeof card.metadata?.terminationLabel === "string" && <span className="answer-notes">{card.metadata.terminationLabel}</span>}
                 {typeof card.metadata?.terminationDetail === "string" && <span className="answer-notes">{card.metadata.terminationDetail}</span>}
