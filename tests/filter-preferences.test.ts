@@ -33,6 +33,18 @@ describe("study filter preferences", () => {
     expect([...(restored.paradigmCards ?? [])].sort()).toEqual(["latin-active-indicative-present-1st", "latin-adjective-3rd-gravis", "latin-passive-indicative-present-1st"]);
   });
 
+  it("persists the new Participles source and individual-card choices without changing older selections", () => {
+    const storage = memoryStorage();
+    saveLatinFilterPreferences({
+      materials: new Set(["vocabulary", "participles"]),
+      vocabularyParts: null,
+      paradigmCards: new Set(["latin-participle-present-active"]),
+    }, storage);
+    const restored = loadLatinFilterPreferences(storage);
+    expect([...restored.materials].sort()).toEqual(["participles", "vocabulary"]);
+    expect([...restored.paradigmCards!]).toEqual(["latin-participle-present-active"]);
+  });
+
   it("drops deleted Henle material keys from older stored preferences", () => {
     const storage = memoryStorage();
     storage.setItem("greeklatinstudy:latin-filters:v1", JSON.stringify({

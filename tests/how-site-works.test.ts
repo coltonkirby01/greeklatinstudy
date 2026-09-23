@@ -59,6 +59,9 @@ describe("How this site works guide", () => {
     expect(guide).toContain("Medieval Latin");
     expect(guide).toContain("magnus, -a, -um");
     expect(guide).toContain("gravis, -e");
+    expect(guide).toContain("ācer, ācris, ācre");
+    expect(guide).toContain("dīligēns, dīligentis");
+    expect(guide).toContain("third-declension adjective of one termination");
     expect(guide).toContain("Rigg and Stotz");
     expect(guide).toContain("Stem/ending dashes are visual teaching marks and are not spoken");
     expect(guide).toContain("shared Supabase cache");

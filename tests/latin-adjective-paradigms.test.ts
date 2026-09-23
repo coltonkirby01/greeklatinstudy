@@ -7,13 +7,15 @@ type AdjectiveCard = {
   prompt: string;
   columns: string[];
   rows: Array<{ label: string; cells: string[] }>;
+  terminationLabel?: string;
+  terminationDetail?: string;
 };
 
 const cards = JSON.parse(fs.readFileSync("public/data/latin-adjective-paradigms.json", "utf8")) as AdjectiveCard[];
 
 describe("Henle adjective paradigms", () => {
   it("keeps first/second-declension magnus as three gender-specific cards", () => {
-    expect(cards).toHaveLength(4);
+    expect(cards).toHaveLength(6);
     expect(cards.slice(0, 3).map((card) => card.id)).toEqual([
       "latin-adjective-1st-2nd-masculine",
       "latin-adjective-1st-2nd-feminine",
@@ -55,6 +57,34 @@ describe("Henle adjective paradigms", () => {
     ]);
   });
 
+  it("marks Rule 78 as two terminations and Rules 80 and 82 as three and one", () => {
+    const gravis = cards.find((card) => card.id === "latin-adjective-3rd-gravis");
+    const acer = cards.find((card) => card.id === "latin-adjective-3rd-acer");
+    const diligens = cards.find((card) => card.id === "latin-adjective-3rd-diligens");
+    expect(gravis?.terminationLabel).toBe("Two terminations");
+    expect(acer?.terminationLabel).toBe("Three terminations");
+    expect(diligens?.terminationLabel).toBe("One termination");
+    expect(cards.slice(3).map((card) => card.id)).toEqual([
+      "latin-adjective-3rd-gravis",
+      "latin-adjective-3rd-acer",
+      "latin-adjective-3rd-diligens",
+    ]);
+    expect(acer?.rows).toEqual([
+      { label: "Nominative", cells: ["ācer / ācr-is / ācr-e", "ācr-ēs (ācr-ia)"] },
+      { label: "Genitive", cells: ["ācr-is", "ācr-ium"] },
+      { label: "Dative", cells: ["ācr-ī", "ācr-ibus"] },
+      { label: "Accusative", cells: ["ācr-em (ācr-e)", "ācr-ēs (ācr-ia)"] },
+      { label: "Ablative", cells: ["ācr-ī", "ācr-ibus"] },
+    ]);
+    expect(diligens?.rows).toEqual([
+      { label: "Nominative", cells: ["dīligēns", "dīligent-ēs (dīligent-ia)"] },
+      { label: "Genitive", cells: ["dīligent-is", "dīligent-ium"] },
+      { label: "Dative", cells: ["dīligent-ī", "dīligent-ibus"] },
+      { label: "Accusative", cells: ["dīligent-em (dīligēns)", "dīligent-ēs (dīligent-ia)"] },
+      { label: "Ablative", cells: ["dīligent-ī", "dīligent-ibus"] },
+    ]);
+  });
+
   it("wires adjective cards into the shared Henle selector and chart behavior", () => {
     const page = fs.readFileSync("src/pages/latin-page.tsx", "utf8");
     const table = fs.readFileSync("src/features/latin/latin-paradigm-table.tsx", "utf8");
@@ -64,6 +94,9 @@ describe("Henle adjective paradigms", () => {
     expect(page).toContain('"1st & 2nd Declension Adjectives"');
     expect(page).toContain('"3rd Declension Adjectives"');
     expect(page).toContain('materials.has("adjective-paradigms")');
+    expect(page).toContain('"latin-adjective-3rd-acer": "ācer, ācris, ācre — three terminations"');
+    expect(page).toContain('"latin-adjective-3rd-diligens": "dīligēns, dīligentis — one termination"');
+    expect(page).toContain("card.metadata.terminationLabel");
     expect(table).toContain('rowHeaderLabel');
     expect(catalog).toContain('id: "latin-adjective-paradigms"');
   });

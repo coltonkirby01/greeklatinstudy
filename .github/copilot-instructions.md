@@ -89,7 +89,14 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - `latin-adjective-paradigms` is a first-class registered Latin grammar deck and must continue to inherit the shared exact-card selection, parent restoration, Deselect card, Adaptive/Sequential/Shuffle, session, and Stats behavior.
 - Henle R. 72 (p. 14) supplies the 1st/2nd-declension model `magnus, -a, -um`. Keep masculine, feminine, and neuter on separate cards with stable IDs `latin-adjective-1st-2nd-masculine`, `latin-adjective-1st-2nd-feminine`, and `latin-adjective-1st-2nd-neuter`.
 - Henle R. 78 (p. 16) supplies the 3rd-declension model `gravis, -e`. Keep it on one combined card (`latin-adjective-3rd-gravis`) and show differing neuter forms parenthetically. Preserve accusative singular as `grav-em (grav-e)` and accusative plural as `grav-ēs (grav-ia)`.
+- R. 78 is **two terminations** (gravis, -e), R. 80 is **three terminations** (ācer, ācris, ācre), and R. 82 is **one termination** (dīligēns, dīligentis). All three remain nested in Adjectives → 3rd Declension, and each must show its termination count on the answer side as well as its full chart. Preserve the existing R. 78 card ID and use stable `latin-adjective-3rd-acer` and `latin-adjective-3rd-diligens` IDs for R. 80 and 82.
 - Adjective charts are case paradigms, so their first table heading is **Case**, not Person. Stem/ending dashes remain visual morphology and follow the shared Latin pronunciation rule that they are never spoken.
+
+## Henle Participles
+
+- `latin-participles` is a separate, registered four-card deck under Latin → Grammar (Henle) → Participles. Keep the four card IDs stable and the labels in this order: Present Active, Perfect Passive, Future Active, Future Passive Participle. The shared Latin session supplies exact-card selection, Deselect/D, Saved Cards, Shuffle, progress, and Stats; do not duplicate those mechanisms.
+- Formation rules: present active = present stem from the second principal part, plus `-ns` with conjugation-specific vowel adjustments, declining as a third-declension adjective **of one termination**; perfect passive = fourth principal part, first-/second-declension adjective; future active = fourth principal part minus `-us` plus `-ūrus, -ūra, -ūrum`, first-/second-declension adjective; future passive (gerundive) = present stem from the **second**, not fourth, principal part plus `-ndus, -nda, -ndum` with necessary connecting-vowel adjustments, first-/second-declension adjective.
+- Keep answer sides formatted using the existing answer block's formation, declension, and example lines. These cards have no paid audio generation or automatic prewarm.
 
 ## Medieval Latin audio
 

@@ -15,6 +15,7 @@ import {
 import { loadLatinActiveIndicativeParadigmsDeck } from "../../data/latin-active-indicative-paradigms";
 import { loadLatinAdjectiveParadigmsDeck } from "../../data/latin-adjective-paradigms";
 import { loadLatinPassiveIndicativeParadigmsDeck } from "../../data/latin-passive-indicative-paradigms";
+import { loadLatinParticiplesDeck } from "../../data/latin-participles";
 import type { DeckDefinition, StudyDirection } from "./types";
 
 export type BuiltinStudyLanguage = "Greek" | "Latin";
@@ -43,6 +44,7 @@ export const BUILTIN_STUDY_DECKS: readonly BuiltinDeckRegistration[] = [
   { id: "dickinson-latin-core", language: "Latin", source: "Dickinson Vocabulary", load: loadLatinDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "latin-active-indicative-paradigms", language: "Latin", source: "Active Indicative Paradigms", load: loadLatinActiveIndicativeParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "latin-adjective-paradigms", language: "Latin", source: "Adjective Paradigms", load: loadLatinAdjectiveParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
+  { id: "latin-participles", language: "Latin", source: "Participles", load: loadLatinParticiplesDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
   { id: "latin-passive-indicative-paradigms", language: "Latin", source: "Passive Indicative Paradigms", load: loadLatinPassiveIndicativeParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
 ] as const;
 
