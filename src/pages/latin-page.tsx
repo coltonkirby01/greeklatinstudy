@@ -181,14 +181,16 @@ function AdjectiveDeckFilters({
     "latin-adjective-1st-2nd-masculine": "Masculine — magnus, -a, -um",
     "latin-adjective-1st-2nd-feminine": "Feminine — magnus, -a, -um",
     "latin-adjective-1st-2nd-neuter": "Neuter — magnus, -a, -um",
-    "latin-adjective-3rd-gravis": "gravis, -e — all genders",
+    "latin-adjective-3rd-gravis": "gravis, -e — two terminations",
+    "latin-adjective-3rd-acer": "ācer, ācris, ācre — three terminations",
+    "latin-adjective-3rd-diligens": "dīligēns, dīligentis — one termination",
   };
 
   return (
     <FilterDisclosure
       title="Adjective Paradigms"
-      count={deck?.cards.length ?? 4}
-      summary={`${state.selectedCount} of ${deckIds.length || 4} selected`}
+      count={deck?.cards.length ?? 6}
+      summary={`${state.selectedCount} of ${deckIds.length || 6} selected`}
       nested
       checked={state.checked}
       mixed={state.mixed}
@@ -701,8 +703,8 @@ export function LatinPage() {
         <FilterDisclosure
           title="Grammar (Henle)"
           ariaLabel="Grammar Henle"
-          count={allParadigmIds.length || 44}
-          summary={`${grammarSelectedCount} of ${allParadigmIds.length || 44} grammar cards selected`}
+          count={allParadigmIds.length || 46}
+          summary={`${grammarSelectedCount} of ${allParadigmIds.length || 46} grammar cards selected`}
           checked={grammarChecked}
           mixed={grammarMixed}
           onCheckedChange={changeGrammarParent}
@@ -795,8 +797,18 @@ export function LatinPage() {
             }
             const isParadigm = source.deck.id === adjectiveParadigmDeck?.id || source.deck.id === activeParadigmDeck?.id || source.deck.id === passiveParadigmDeck?.id;
             if (isParadigm) {
-              if (source.direction === "reverse") return <span className="answer-block"><strong className="henle-card-title">{card.front}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>;
-              return <span className="henle-chart-face"><strong className="henle-card-title">{card.front}</strong><LatinParadigmTable card={card} revealed /></span>;
+              if (source.direction === "reverse") return <span className="answer-block">
+                <strong className="henle-card-title">{card.front}</strong>
+                {typeof card.metadata?.terminationLabel === "string" && <span className="answer-notes">{card.metadata.terminationLabel}</span>}
+                {typeof card.metadata?.terminationDetail === "string" && <span className="answer-notes">{card.metadata.terminationDetail}</span>}
+                {card.notes && <span className="answer-notes">{card.notes}</span>}
+              </span>;
+              return <span className="henle-chart-face">
+                <strong className="henle-card-title">{card.front}</strong>
+                {typeof card.metadata?.terminationLabel === "string" && <span className="answer-notes">{card.metadata.terminationLabel}</span>}
+                {typeof card.metadata?.terminationDetail === "string" && <span className="answer-notes">{card.metadata.terminationDetail}</span>}
+                <LatinParadigmTable card={card} revealed />
+              </span>;
             }
             return <span className="answer-block"><strong className={source.direction === "reverse" ? "latin-front compact-latin" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>;
           }}
