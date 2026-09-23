@@ -91,6 +91,12 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - Henle R. 78 (p. 16) supplies the 3rd-declension model `gravis, -e`. Keep it on one combined card (`latin-adjective-3rd-gravis`) and show differing neuter forms parenthetically. Preserve accusative singular as `grav-em (grav-e)` and accusative plural as `grav-ēs (grav-ia)`.
 - Adjective charts are case paradigms, so their first table heading is **Case**, not Person. Stem/ending dashes remain visual morphology and follow the shared Latin pronunciation rule that they are never spoken.
 
+## Henle Participles
+
+- `latin-participles` is a separate, registered four-card deck under Latin → Grammar (Henle) → Participles. Keep the four card IDs stable and the labels in this order: Present Active, Perfect Passive, Future Active, Future Passive Participle. The shared Latin session supplies exact-card selection, Deselect/D, Saved Cards, Shuffle, progress, and Stats; do not duplicate those mechanisms.
+- Formation rules: present active = present stem from the second principal part, plus `-ns` with conjugation-specific vowel adjustments, declining as a third-declension adjective; perfect passive = fourth principal part, first-/second-declension adjective; future active = fourth principal part minus `-us` plus `-ūrus, -ūra, -ūrum`, first-/second-declension adjective; future passive (gerundive) = present stem from the **second**, not fourth, principal part plus `-ndus, -nda, -ndum` with necessary connecting-vowel adjustments, first-/second-declension adjective.
+- Keep answer sides formatted using the existing answer block's formation, declension, and example lines. These cards have no paid audio generation or automatic prewarm.
+
 ## Medieval Latin audio
 
 - `docs/MEDIEVAL_LATIN_PRONUNCIATION.md` is the pronunciation-source and normalization contract. The learner-facing label is **Medieval Latin**; do not silently replace it with Classical or modern ecclesiastical Latin.
