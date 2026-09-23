@@ -74,7 +74,8 @@ export function loadLatinFilterPreferences(storage?: StorageLike | null): LatinF
     const materials = new Set(
       stringArray(stored.materials).filter((value): value is LatinMaterial => LATIN_MATERIALS.has(value as LatinMaterial)),
     );
-    const paradigmCards = restoreOptionalSelection(stored.paradigmCards);
+    const savedParadigmCards = restoreOptionalSelection(stored.paradigmCards);
+    const paradigmCards = savedParadigmCards === null ? null : new Set(savedParadigmCards);
     if (stored.adjectiveSelectionVersion !== ADJECTIVE_SELECTION_VERSION &&
       materials.has("adjective-paradigms") && paradigmCards !== null &&
       paradigmCards.has("latin-adjective-3rd-gravis")) {
