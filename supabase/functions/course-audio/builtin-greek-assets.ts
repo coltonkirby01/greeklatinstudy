@@ -4,6 +4,7 @@ import { lesson4CourseAudioAssets, lesson4VocabularyAudio } from "./lesson4-asse
 import { lesson5CourseAudioAssets, lesson5VocabularyAudio } from "./lesson5-assets.ts";
 import { lesson6CourseAudioAssets, lesson6VocabularyAudio } from "./lesson6-assets.ts";
 import { lesson7CourseAudioAssets, lesson7VocabularyAudio } from "./lesson7-assets.ts";
+import { lesson8CourseAudioAssets, lesson8VocabularyAudio } from "./lesson8-assets.ts";
 
 export type GreekCourseAudioAsset = Lesson3CourseAudioAsset & { pronunciationSystem?: string };
 
@@ -62,10 +63,10 @@ const symbolLabels: Record<string, { label: string; text: string }> = {
 };
 
 export function resolveBuiltinGreekAsset(assetId: string): GreekCourseAudioAsset | null {
-  const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets, ...lesson5CourseAudioAssets, ...lesson6CourseAudioAssets, ...lesson7CourseAudioAssets].find((asset) => asset.id === assetId);
+  const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets, ...lesson5CourseAudioAssets, ...lesson6CourseAudioAssets, ...lesson7CourseAudioAssets, ...lesson8CourseAudioAssets].find((asset) => asset.id === assetId);
   if (paradigm) return paradigm;
 
-  const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId] ?? lesson6VocabularyAudio[assetId] ?? lesson7VocabularyAudio[assetId];
+  const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId] ?? lesson6VocabularyAudio[assetId] ?? lesson7VocabularyAudio[assetId] ?? lesson8VocabularyAudio[assetId];
   if (vocabulary) {
     const canonicalIpa = greekToClassicalIpa(vocabulary.greek);
     const ttsText = greekToElevenLabsIpa(vocabulary.greek);

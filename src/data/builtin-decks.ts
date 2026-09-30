@@ -55,6 +55,8 @@ let greekLesson6VocabularyPromise: Promise<DeckDefinition> | null = null;
 let greekLesson6GrammarPromise: Promise<DeckDefinition> | null = null;
 let greekLesson7VocabularyPromise: Promise<DeckDefinition> | null = null;
 let greekLesson7GrammarPromise: Promise<DeckDefinition> | null = null;
+let greekLesson8VocabularyPromise: Promise<DeckDefinition> | null = null;
+let greekLesson8GrammarPromise: Promise<DeckDefinition> | null = null;
 let latinPromise: Promise<DeckDefinition> | null = null;
 
 export function loadGreekDeck() {
@@ -349,6 +351,64 @@ export function loadGreekLesson7GrammarDeck() {
     return { id: "alpha-omega-lesson7-grammar", slug: "greek", title: "Greek Lesson 7 Grammar", eyebrow: "Second-declension masculine nouns · definite article", description: "Five Lesson 7 grammar cards: second-declension endings, two model-noun paradigms, and masculine definite-article singular/plural.", language: "greek", cards, supportsReverse: false, sourceNote: "Groton 7.43–7.44." } satisfies DeckDefinition;
   });
   return greekLesson7GrammarPromise;
+}
+
+export function loadGreekLesson8VocabularyDeck() {
+  greekLesson8VocabularyPromise ??= fetchText("data/greek-lesson8-vocab.json", "no-store").then((text) => {
+    const source = JSON.parse(text) as GreekVocabularySourceCard[];
+    const cards: StudyCard[] = source.map((card, index) => {
+      const pronunciation = classicalGreekPronunciation(card.greek);
+      const sourceRef = card.source_ref ?? "Groton 8.56";
+      return {
+        id: card.id,
+        deckId: "alpha-omega-lesson8-vocab",
+        front: card.greek,
+        back: card.meaning,
+        reverseFront: card.meaning,
+        reverseBack: card.greek,
+        category: "Lesson 8 Vocabulary",
+        rank: index + 1,
+        source: "From Alpha to Omega, Lesson 8",
+        notes: [card.part_of_speech, `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
+        metadata: { lesson: 8, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, sourceRef },
+      };
+    });
+    return { id: "alpha-omega-lesson8-vocab", slug: "greek", title: "Greek Lesson 8 Vocabulary", eyebrow: "Lesson 8 vocabulary", description: "Eleven vocabulary entries from Groton §8.56.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 8.56." } satisfies DeckDefinition;
+  });
+  return greekLesson8VocabularyPromise;
+}
+
+export function loadGreekLesson8GrammarDeck() {
+  greekLesson8GrammarPromise ??= fetchText("data/greek-lesson8-grammar.json", "no-store").then((text) => {
+    const source = JSON.parse(text) as GreekGrammarSourceCard[];
+    const cards: StudyCard[] = source.map((card, index) => {
+      const chartRows = card.rows.map((row) => ({ ...row, cells: [...row.cells] }));
+      const chartKind = card.category.includes("Definite Article") ? "Definite-article chart" : "Ending chart";
+      return {
+        id: card.id,
+        deckId: "alpha-omega-lesson8-grammar",
+        front: card.prompt,
+        back: card.category,
+        category: card.category,
+        rank: index + 1,
+        source: "From Alpha to Omega, Lesson 8",
+        notes: [chartKind, card.accent_note].filter(Boolean).join(" · "),
+        metadata: {
+          lesson: 8,
+          studySource: "grammar-chart",
+          grammarGroup: card.category,
+          chartColumns: card.columns,
+          chartRows,
+          rowHeaderLabel: "Case",
+          pronunciationText: greekLesson3ParadigmSpeechText(chartRows),
+          accentNote: card.accent_note,
+          sourceRef: card.source_ref ?? "Groton 8.49–8.52",
+        },
+      };
+    });
+    return { id: "alpha-omega-lesson8-grammar", slug: "greek", title: "Greek Lesson 8 Grammar", eyebrow: "Second-declension neuter nouns · definite article · first/second-declension adjectives", description: "Six Lesson 8 grammar cards: neuter noun endings, neuter definite article singular/plural, and adjective endings on separate masculine, feminine, and neuter cards.", language: "greek", cards, supportsReverse: false, sourceNote: "Groton 8.49–8.52." } satisfies DeckDefinition;
+  });
+  return greekLesson8GrammarPromise;
 }
 
 export function loadLatinDeck() {

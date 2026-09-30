@@ -13,6 +13,14 @@ The original ChatGPT Site remains intact. This repository is the source of truth
 | Greek Lesson 3 Grammar | 6 cards | Three ending charts + three model-verb paradigms |
 | Greek Lesson 4 Vocabulary | 11 cards | Greek → English; English → Greek |
 | Greek Lesson 4 Grammar | 8 cards | Endings, model-noun paradigms, and feminine article |
+| Greek Lesson 5 Vocabulary | 10 cards | Greek → English; English → Greek |
+| Greek Lesson 5 Grammar | 4 cards | Short-alpha endings and model-noun paradigms |
+| Greek Lesson 6 Vocabulary | 11 cards | Greek → English; English → Greek |
+| Greek Lesson 6 Grammar | 5 cards | Future-active endings/paradigms and letter changes |
+| Greek Lesson 7 Vocabulary | 12 cards | Greek → English; English → Greek |
+| Greek Lesson 7 Grammar | 5 cards | Second-declension masculine endings/paradigms and masculine article |
+| Greek Lesson 8 Vocabulary | 11 cards | Greek → English; English → Greek |
+| Greek Lesson 8 Grammar | 6 cards | Second-declension neuter endings/article and adjective endings by gender |
 | Dickinson Latin Core | 997 entries | Latin → English; English → Latin; staged 100 then 25 |
 | Henle Part I Forms | 2,062 unique cards; 331 rules | Prompt → Form; Form → Identify |
 | Henle Whole Charts | 248 multi-form rule groups | Reconstruct complete chart |

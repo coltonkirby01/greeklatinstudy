@@ -1,0 +1,13 @@
+[
+  { "id": "lesson8-v1", "greek": "εὑρίσκω, εὑρήσω", "meaning": "find, find out, discover", "part_of_speech": "verb", "lesson": 8, "source_ref": "Groton 8.56" },
+  { "id": "lesson8-v2", "greek": "λείπω, λείψω", "meaning": "leave, leave behind", "part_of_speech": "verb", "lesson": 8, "source_ref": "Groton 8.56" },
+  { "id": "lesson8-v3", "greek": "βίος, -ου, ὁ", "meaning": "life, lifetime, livelihood", "part_of_speech": "noun", "lesson": 8, "source_ref": "Groton 8.56" },
+  { "id": "lesson8-v4", "greek": "δῶρον, -ου, τό", "meaning": "gift", "part_of_speech": "noun", "lesson": 8, "source_ref": "Groton 8.56" },
+  { "id": "lesson8-v5", "greek": "ἔργον, -ου, τό", "meaning": "work, task, occupation, deed", "part_of_speech": "noun", "lesson": 8, "source_ref": "Groton 8.56" },
+  { "id": "lesson8-v6", "greek": "θησαυρός, -οῦ, ὁ", "meaning": "treasure, treasury, storehouse", "part_of_speech": "noun", "lesson": 8, "source_ref": "Groton 8.56" },
+  { "id": "lesson8-v7", "greek": "τέκνον, -ου, τό", "meaning": "child, offspring", "part_of_speech": "noun", "lesson": 8, "source_ref": "Groton 8.56" },
+  { "id": "lesson8-v8", "greek": "φυτόν, -οῦ, τό", "meaning": "plant, tree (something that is grown in a garden or an orchard)", "part_of_speech": "noun", "lesson": 8, "source_ref": "Groton 8.56" },
+  { "id": "lesson8-v9", "greek": "ἀγαθός, -ή, -όν", "meaning": "good (at doing something), brave, (morally) good, virtuous", "part_of_speech": "adjective", "lesson": 8, "source_ref": "Groton 8.56" },
+  { "id": "lesson8-v10", "greek": "ἄξιος, -ᾱ, -ον", "meaning": "(+ genitive or infinitive) worthy (of, to), deserving (of, to)", "part_of_speech": "adjective", "lesson": 8, "source_ref": "Groton 8.56" },
+  { "id": "lesson8-v11", "greek": "καλός, -ή, -όν", "meaning": "beautiful, handsome, fair (of appearance), (morally) good, fine, noble", "part_of_speech": "adjective", "lesson": 8, "source_ref": "Groton 8.56" }
+]
