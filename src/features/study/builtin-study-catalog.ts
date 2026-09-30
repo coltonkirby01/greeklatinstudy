@@ -10,6 +10,8 @@ import {
   loadGreekLesson6VocabularyDeck,
   loadGreekLesson7GrammarDeck,
   loadGreekLesson7VocabularyDeck,
+  loadGreekLesson8GrammarDeck,
+  loadGreekLesson8VocabularyDeck,
   loadLatinDeck,
 } from "../../data/builtin-decks";
 import { loadLatinActiveIndicativeParadigmsDeck } from "../../data/latin-active-indicative-paradigms";
@@ -41,6 +43,8 @@ export const BUILTIN_STUDY_DECKS: readonly BuiltinDeckRegistration[] = [
   { id: "alpha-omega-lesson6-grammar", language: "Greek", source: "Lesson 6 Grammar", load: loadGreekLesson6GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
   { id: "alpha-omega-lesson7-vocab", language: "Greek", source: "Lesson 7 Vocabulary", load: loadGreekLesson7VocabularyDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "alpha-omega-lesson7-grammar", language: "Greek", source: "Lesson 7 Grammar", load: loadGreekLesson7GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
+  { id: "alpha-omega-lesson8-vocab", language: "Greek", source: "Lesson 8 Vocabulary", load: loadGreekLesson8VocabularyDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
+  { id: "alpha-omega-lesson8-grammar", language: "Greek", source: "Lesson 8 Grammar", load: loadGreekLesson8GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
   { id: "dickinson-latin-core", language: "Latin", source: "Dickinson Vocabulary", load: loadLatinDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "latin-active-indicative-paradigms", language: "Latin", source: "Active Indicative Paradigms", load: loadLatinActiveIndicativeParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "latin-adjective-paradigms", language: "Latin", source: "Adjective Paradigms", load: loadLatinAdjectiveParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
