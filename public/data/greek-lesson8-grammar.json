@@ -1,0 +1,90 @@
+[
+  {
+    "id": "lesson8-chart-second-declension-neuter-endings",
+    "category": "Second Declension Neuter Endings",
+    "prompt": "Second Declension Neuter Endings",
+    "source_ref": "Groton 8.49",
+    "accent_note": "Groton §8.49: in neuter nouns the nominative, accusative, and vocative are identical within each number; noun accent remains persistent.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["-ον", "-α"] },
+      { "label": "Genitive", "cells": ["-ου", "-ων"] },
+      { "label": "Dative", "cells": ["-ῳ", "-οις"] },
+      { "label": "Accusative", "cells": ["-ον", "-α"] },
+      { "label": "Vocative", "cells": ["-ον", "-α"] }
+    ]
+  },
+  {
+    "id": "lesson8-chart-definite-article-neuter-singular",
+    "category": "Neuter Definite Article — Singular",
+    "prompt": "Neuter Definite Article — Singular",
+    "source_ref": "Groton 8.50",
+    "accent_note": "Groton §8.50 isolated neuter article forms: τό, τοῦ, τῷ, τό.",
+    "columns": ["Greek"],
+    "rows": [
+      { "label": "Nominative", "cells": ["τό"] },
+      { "label": "Genitive", "cells": ["τοῦ"] },
+      { "label": "Dative", "cells": ["τῷ"] },
+      { "label": "Accusative", "cells": ["τό"] }
+    ]
+  },
+  {
+    "id": "lesson8-chart-definite-article-neuter-plural",
+    "category": "Neuter Definite Article — Plural",
+    "prompt": "Neuter Definite Article — Plural",
+    "source_ref": "Groton 8.50",
+    "accent_note": "Groton §8.50 isolated neuter article forms: τά, τῶν, τοῖς, τά.",
+    "columns": ["Greek"],
+    "rows": [
+      { "label": "Nominative", "cells": ["τά"] },
+      { "label": "Genitive", "cells": ["τῶν"] },
+      { "label": "Dative", "cells": ["τοῖς"] },
+      { "label": "Accusative", "cells": ["τά"] }
+    ]
+  },
+  {
+    "id": "lesson8-chart-adjective-endings-masculine",
+    "category": "First/Second Declension Adjective Endings — Masculine",
+    "prompt": "First/Second Declension Adjective Endings — Masculine",
+    "source_ref": "Groton 8.52",
+    "accent_note": "Groton §8.52: first/second-declension adjective masculine endings follow the second-declension masculine pattern.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["-ος", "-οι"] },
+      { "label": "Genitive", "cells": ["-ου", "-ων"] },
+      { "label": "Dative", "cells": ["-ῳ", "-οις"] },
+      { "label": "Accusative", "cells": ["-ον", "-ους"] },
+      { "label": "Vocative", "cells": ["-ε", "-οι"] }
+    ]
+  },
+  {
+    "id": "lesson8-chart-adjective-endings-feminine",
+    "category": "First/Second Declension Adjective Endings — Feminine",
+    "prompt": "First/Second Declension Adjective Endings — Feminine",
+    "source_ref": "Groton 8.52",
+    "accent_note": "Groton §8.52: feminine singular uses long alpha after stems ending in ε, ι, or ρ and eta otherwise; the plural endings are shared.",
+    "columns": ["Singular after ε, ι, ρ", "Singular otherwise", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["-ᾱ", "-η", "-αι"] },
+      { "label": "Genitive", "cells": ["-ᾱς", "-ης", "-ων"] },
+      { "label": "Dative", "cells": ["-ᾳ", "-ῃ", "-αις"] },
+      { "label": "Accusative", "cells": ["-ᾱν", "-ην", "-ᾱς"] },
+      { "label": "Vocative", "cells": ["-ᾱ", "-η", "-αι"] }
+    ]
+  },
+  {
+    "id": "lesson8-chart-adjective-endings-neuter",
+    "category": "First/Second Declension Adjective Endings — Neuter",
+    "prompt": "First/Second Declension Adjective Endings — Neuter",
+    "source_ref": "Groton 8.52",
+    "accent_note": "Groton §8.52: first/second-declension adjective neuter endings follow the second-declension neuter pattern.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["-ον", "-α"] },
+      { "label": "Genitive", "cells": ["-ου", "-ων"] },
+      { "label": "Dative", "cells": ["-ῳ", "-οις"] },
+      { "label": "Accusative", "cells": ["-ον", "-α"] },
+      { "label": "Vocative", "cells": ["-ον", "-α"] }
+    ]
+  }
+]
