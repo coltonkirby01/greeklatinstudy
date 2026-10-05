@@ -1,0 +1,47 @@
+[
+  {
+    "id": "lesson9-chart-first-declension-masculine-endings",
+    "category": "First Declension Masculine Endings — η/ᾱ-stems",
+    "prompt": "First Declension Masculine Endings — η/ᾱ-stems",
+    "source_ref": "Groton 9.58",
+    "accent_note": "Groton Lesson 9: masculine first-declension nouns share the feminine first-declension pattern except for the masculine nominative, genitive, and vocative singular forms; noun accent remains persistent.",
+    "columns": ["η-stem Singular", "ᾱ-stem Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["-ης", "-ᾱς", "-αι"] },
+      { "label": "Genitive", "cells": ["-ου", "-ου", "-ων"] },
+      { "label": "Dative", "cells": ["-ῃ", "-ᾳ", "-αις"] },
+      { "label": "Accusative", "cells": ["-ην", "-ᾱν", "-ᾱς"] },
+      { "label": "Vocative", "cells": ["-α/-η", "-ᾱ", "-αι"] }
+    ]
+  },
+  {
+    "id": "lesson9-chart-first-declension-mathetes",
+    "category": "First Declension Masculine Nouns — μαθητής",
+    "prompt": "First Declension Masculine Nouns — μαθητής",
+    "source_ref": "Groton 9.58",
+    "accent_note": "Groton §9.58 model η-stem masculine noun μαθητής; the vocative singular μαθητά has short alpha and recessive accent.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["μαθητής", "μαθηταί"] },
+      { "label": "Genitive", "cells": ["μαθητοῦ", "μαθητῶν"] },
+      { "label": "Dative", "cells": ["μαθητῇ", "μαθηταῖς"] },
+      { "label": "Accusative", "cells": ["μαθητήν", "μαθητᾱ́ς"] },
+      { "label": "Vocative", "cells": ["μαθητά", "μαθηταί"] }
+    ]
+  },
+  {
+    "id": "lesson9-chart-first-declension-neanias",
+    "category": "First Declension Masculine Nouns — νεᾱνίᾱς",
+    "prompt": "First Declension Masculine Nouns — νεᾱνίᾱς",
+    "source_ref": "Groton 9.58",
+    "accent_note": "Groton §9.58 model ᾱ-stem masculine noun νεᾱνίᾱς; the original long alpha is retained after iota.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "Nominative", "cells": ["νεᾱνίᾱς", "νεᾱνίαι"] },
+      { "label": "Genitive", "cells": ["νεᾱνίου", "νεᾱνιῶν"] },
+      { "label": "Dative", "cells": ["νεᾱνίᾳ", "νεᾱνίαις"] },
+      { "label": "Accusative", "cells": ["νεᾱνίᾱν", "νεᾱνίᾱς"] },
+      { "label": "Vocative", "cells": ["νεᾱνίᾱ", "νεᾱνίαι"] }
+    ]
+  }
+]
