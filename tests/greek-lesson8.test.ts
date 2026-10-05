@@ -123,8 +123,9 @@ describe("Groton Lesson 8 expansion", () => {
     expect(page).toContain('title="Adjective endings"');
     expect(page).toContain("decks.lesson8Vocabulary");
     expect(page).toContain("decks.lesson8Grammar");
-    expect(page).toContain('source.deck.id === decks.lesson7Grammar.id || source.deck.id === decks.lesson8Grammar.id) return <span className="study-prompt reverse-text-prompt">{card.front}</span>;');
-    expect(page).toContain('source.deck.id === decks.lesson7Grammar.id || source.deck.id === decks.lesson8Grammar.id) return <div className="answer-block"><GreekParadigm card={card} /></div>;');
+    expect(page).toContain("source.deck.id === decks.lesson8Grammar.id");
+    expect(page).toContain('<span className="study-prompt reverse-text-prompt">{card.front}</span>');
+    expect(page).toContain('<GreekParadigm card={card} />');
     expect(page).toContain('source.deck.id === decks.lesson8Vocabulary.id ? `Lesson 8 vocabulary · ${card.notes ?? ""}`');
     expect(catalog).toContain('id: "alpha-omega-lesson8-vocab"');
     expect(catalog).toContain('id: "alpha-omega-lesson8-grammar"');
