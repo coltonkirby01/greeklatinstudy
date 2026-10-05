@@ -1,0 +1,28 @@
+[
+  {
+    "id": "lesson10-chart-imperfect-active-indicative-endings",
+    "category": "Imperfect Active Indicative Endings",
+    "prompt": "Imperfect Active Indicative Endings",
+    "source_ref": "Groton Lesson 10, pp. 57–59",
+    "accent_note": "Groton Lesson 10: the imperfect uses the secondary active endings with the present stem and past-time augment; finite verb accent is recessive.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["-ον", "-ομεν"] },
+      { "label": "2nd person", "cells": ["-ες", "-ετε"] },
+      { "label": "3rd person", "cells": ["-ε(ν)", "-ον"] }
+    ]
+  },
+  {
+    "id": "lesson10-chart-imperfect-active-indicative",
+    "category": "Imperfect Active Indicative",
+    "prompt": "Imperfect Active Indicative — παιδεύω",
+    "source_ref": "Groton Lesson 10, pp. 57–59",
+    "accent_note": "Groton Lesson 10 model verb παιδεύω: augmented imperfect forms with recessive accent.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["ἐπαίδευον", "ἐπαιδεύομεν"] },
+      { "label": "2nd person", "cells": ["ἐπαίδευες", "ἐπαιδεύετε"] },
+      { "label": "3rd person", "cells": ["ἐπαίδευε(ν)", "ἐπαίδευον"] }
+    ]
+  }
+]
