@@ -1,0 +1,13 @@
+[
+  { "id": "lesson9-v1", "greek": "δουλεύω, δουλεύσω", "meaning": "(+ dative) be a slave (to), serve", "part_of_speech": "verb", "lesson": 9, "source_ref": "Groton 9.63" },
+  { "id": "lesson9-v2", "greek": "δεσπότης, -ου, ὁ", "meaning": "master (of the household), lord, despot", "part_of_speech": "noun", "lesson": 9, "source_ref": "Groton 9.63" },
+  { "id": "lesson9-v3", "greek": "μαθητής, -οῦ, ὁ", "meaning": "student, disciple", "part_of_speech": "noun", "lesson": 9, "source_ref": "Groton 9.63" },
+  { "id": "lesson9-v4", "greek": "νεᾱνίᾱς, -ου, ὁ", "meaning": "young man, a youth; (plural) youth (collectively)", "part_of_speech": "noun", "lesson": 9, "source_ref": "Groton 9.63" },
+  { "id": "lesson9-v5", "greek": "οἰκέτης, -ου, ὁ", "meaning": "servant (of the household), family member", "part_of_speech": "noun", "lesson": 9, "source_ref": "Groton 9.63" },
+  { "id": "lesson9-v6", "greek": "ἀθάνατος, -ον", "meaning": "immortal, undying", "part_of_speech": "adjective", "lesson": 9, "source_ref": "Groton 9.63" },
+  { "id": "lesson9-v7", "greek": "ἀνάξιος, -ον", "meaning": "worthless; (+ genitive or infinitive) unworthy (of, to), undeserving (of, to)", "part_of_speech": "adjective", "lesson": 9, "source_ref": "Groton 9.63" },
+  { "id": "lesson9-v8", "greek": "δοῦλος, -η, -ον", "meaning": "enslaved; δοῦλος, -ου, ὁ = slave (male); δούλη, -ης, ἡ = slave (female)", "part_of_speech": "adjective / substantive", "lesson": 9, "source_ref": "Groton 9.63" },
+  { "id": "lesson9-v9", "greek": "ἐλεύθερος, -ᾱ, -ον", "meaning": "(+ genitive) free (of), free (from)", "part_of_speech": "adjective", "lesson": 9, "source_ref": "Groton 9.63" },
+  { "id": "lesson9-v10", "greek": "κακός, -ή, -όν", "meaning": "ugly, bad (at doing something), cowardly, (morally) bad, evil, wicked", "part_of_speech": "adjective", "lesson": 9, "source_ref": "Groton 9.63" },
+  { "id": "lesson9-v11", "greek": "πρότερος, -ᾱ, -ον", "meaning": "former, earlier", "part_of_speech": "adjective", "lesson": 9, "source_ref": "Groton 9.63" }
+]
