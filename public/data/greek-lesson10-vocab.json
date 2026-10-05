@@ -1,0 +1,14 @@
+[
+  { "id": "lesson10-v1", "greek": "λέγω, ἐρῶ/λέξω", "meaning": "say, speak, tell", "part_of_speech": "verb", "lesson": 10, "source_ref": "Groton 10.69" },
+  { "id": "lesson10-v2", "greek": "πρᾱ́ττω, πρᾱ́ξω", "meaning": "do, act", "part_of_speech": "verb", "lesson": 10, "source_ref": "Groton 10.69" },
+  { "id": "lesson10-v3", "greek": "φεύγω, φεύξομαι", "meaning": "flee, avoid, escape, be in exile", "part_of_speech": "verb", "lesson": 10, "source_ref": "Groton 10.69" },
+  { "id": "lesson10-v4", "greek": "ἀλήθεια, -ᾱς, ἡ", "meaning": "truth; τῇ ἀληθείᾳ = in truth, truly, really", "part_of_speech": "noun", "lesson": 10, "source_ref": "Groton 10.69" },
+  { "id": "lesson10-v5", "greek": "θάνατος, -ου, ὁ", "meaning": "death; Θάνατος = Death (personified as a god)", "part_of_speech": "noun", "lesson": 10, "source_ref": "Groton 10.69" },
+  { "id": "lesson10-v6", "greek": "κίνδῡνος, -ου, ὁ", "meaning": "danger, risk", "part_of_speech": "noun", "lesson": 10, "source_ref": "Groton 10.69" },
+  { "id": "lesson10-v7", "greek": "φίλος, -η, -ον", "meaning": "(+ dative) dear (to); φίλος, -ου, ὁ = friend (male); φίλη, -ης, ἡ = friend (female)", "part_of_speech": "adjective / substantive", "lesson": 10, "source_ref": "Groton 10.69" },
+  { "id": "lesson10-v8", "greek": "δέ (δ’)", "meaning": "and, but (postpositive conjunction; δ’ before a vowel)", "part_of_speech": "conjunction", "lesson": 10, "source_ref": "Groton 10.69" },
+  { "id": "lesson10-v9", "greek": "μέν", "meaning": "indeed (postpositive particle)", "part_of_speech": "particle", "lesson": 10, "source_ref": "Groton 10.69" },
+  { "id": "lesson10-v10", "greek": "μὲν ... δέ", "meaning": "on the one hand ... on the other hand", "part_of_speech": "correlative", "lesson": 10, "source_ref": "Groton 10.69" },
+  { "id": "lesson10-v11", "greek": "ὁ μὲν ... ὁ δέ; οἱ μὲν ... οἱ δέ", "meaning": "this one ... that one; the one ... the other; (plural) some ... others", "part_of_speech": "correlative", "lesson": 10, "source_ref": "Groton 10.69" },
+  { "id": "lesson10-v12", "greek": "οὖν", "meaning": "therefore, then (postpositive particle)", "part_of_speech": "particle", "lesson": 10, "source_ref": "Groton 10.69" }
+]
