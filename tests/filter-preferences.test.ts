@@ -22,15 +22,15 @@ describe("study filter preferences", () => {
   it("restores Latin vocabulary and paradigm selections exactly", () => {
     const storage = memoryStorage();
     saveLatinFilterPreferences({
-      materials: new Set(["adjective-paradigms", "active-indicative-paradigms", "passive-indicative-paradigms"]),
+      materials: new Set(["adjective-paradigms", "active-indicative-paradigms", "active-subjunctive-paradigms", "passive-indicative-paradigms", "passive-subjunctive-paradigms"]),
       vocabularyParts: new Set(["Noun: 1st Declension", "Verb: 1st Conjugation"]),
-      paradigmCards: new Set(["latin-adjective-3rd-gravis", "latin-active-indicative-present-1st", "latin-passive-indicative-present-1st"]),
+      paradigmCards: new Set(["latin-adjective-3rd-gravis", "latin-active-indicative-present-1st", "latin-active-subjunctive-present-1st", "latin-passive-indicative-present-1st", "latin-passive-subjunctive-present-1st"]),
     }, storage);
 
     const restored = loadLatinFilterPreferences(storage);
-    expect([...restored.materials].sort()).toEqual(["active-indicative-paradigms", "adjective-paradigms", "passive-indicative-paradigms"]);
+    expect([...restored.materials].sort()).toEqual(["active-indicative-paradigms", "active-subjunctive-paradigms", "adjective-paradigms", "passive-indicative-paradigms", "passive-subjunctive-paradigms"]);
     expect([...(restored.vocabularyParts ?? [])].sort()).toEqual(["Noun: 1st Declension", "Verb: 1st Conjugation"]);
-    expect([...(restored.paradigmCards ?? [])].sort()).toEqual(["latin-active-indicative-present-1st", "latin-adjective-3rd-gravis", "latin-passive-indicative-present-1st"]);
+    expect([...(restored.paradigmCards ?? [])].sort()).toEqual(["latin-active-indicative-present-1st", "latin-active-subjunctive-present-1st", "latin-adjective-3rd-gravis", "latin-passive-indicative-present-1st", "latin-passive-subjunctive-present-1st"]);
   });
 
   it("persists the new Participles source and individual-card choices without changing older selections", () => {
