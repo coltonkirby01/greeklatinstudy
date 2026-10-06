@@ -1,5 +1,5 @@
 export const loadHomePage = () => import("./pages/home-page");
-export const loadGreekPage = () => import("./pages/greek-page");
+export const loadGreekPage = () => import("./pages/greek-page-v2");
 export const loadLatinPage = () => import("./pages/latin-page");
 export const loadStatsPage = () => import("./pages/stats-page");
 export const loadDynamicDeckPage = () => import("./pages/dynamic-deck-page");
