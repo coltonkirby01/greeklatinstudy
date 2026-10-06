@@ -12,15 +12,17 @@ type SourceCard = {
 function sourceCards() {
   const paths = [
     "public/data/latin-active-indicative-paradigms.json",
+    "public/data/latin-active-subjunctive-paradigms.json",
     "public/data/latin-passive-indicative-paradigms.json",
+    "public/data/latin-passive-subjunctive-paradigms.json",
   ];
   return paths.flatMap((path) => JSON.parse(fs.readFileSync(path, "utf8")) as SourceCard[]);
 }
 
 describe("Medieval Latin paradigm audio integration", () => {
-  it("defines one stable cached-audio asset for all 36 current paradigm cards", () => {
+  it("defines one stable cached-audio asset for all 68 current paradigm cards", () => {
     const cards = sourceCards();
-    expect(cards).toHaveLength(36);
+    expect(cards).toHaveLength(68);
     for (const card of cards) {
       const asset = resolveBuiltinLatinAsset(card.id);
       expect(asset, card.id).not.toBeNull();
@@ -66,5 +68,7 @@ describe("Medieval Latin paradigm audio integration", () => {
     const workflow = fs.readFileSync(".github/workflows/prewarm-greek-audio.yml", "utf8");
     expect(workflow).not.toContain("latin-active-indicative");
     expect(workflow).not.toContain("latin-passive-indicative");
+    expect(workflow).not.toContain("latin-active-subjunctive");
+    expect(workflow).not.toContain("latin-passive-subjunctive");
   });
 });

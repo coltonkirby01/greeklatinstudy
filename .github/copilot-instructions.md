@@ -110,7 +110,7 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - `course-audio` requires `allowGeneration: true` before a missing/changed Latin asset may call ElevenLabs. Preserve that safeguard unless the user explicitly changes the policy.
 - Use a dedicated `ELEVENLABS_MEDIEVAL_LATIN_VOICE_ID`; never silently fall back to the Greek voice for Latin generation.
 - Do not add Latin asset IDs to an automatic prewarm workflow without explicit user approval. Replays of cached Latin MP3s must never spend new ElevenLabs credits.
-- When new built-in Latin grammar paradigm cards are added, give them stable audio definitions in `supabase/functions/course-audio/builtin-latin-assets.ts` and extend regression coverage in the same change.
+- When new built-in Latin grammar paradigm cards are added, give them stable audio definitions in `supabase/functions/course-audio/builtin-latin-assets.ts` and extend regression coverage in the same change. Current paradigm coverage includes the active/passive indicative decks and the active/passive subjunctive decks (present, imperfect, perfect, pluperfect).
 
 ## Removed features
 

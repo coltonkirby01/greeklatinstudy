@@ -1,6 +1,6 @@
 import type { OptionalSelection } from "./latin-study-filters";
 
-export type LatinMaterial = "vocabulary" | "active-indicative-paradigms" | "passive-indicative-paradigms" | "adjective-paradigms" | "participles";
+export type LatinMaterial = "vocabulary" | "active-indicative-paradigms" | "active-subjunctive-paradigms" | "passive-indicative-paradigms" | "passive-subjunctive-paradigms" | "adjective-paradigms" | "participles";
 export type LatinFilterPreferences = {
   materials: Set<LatinMaterial>;
   vocabularyParts: OptionalSelection;
@@ -14,7 +14,7 @@ type StorageLike = {
 
 const GREEK_FILTER_KEY = "greeklatinstudy:greek-filters:v1";
 const LATIN_FILTER_KEY = "greeklatinstudy:latin-filters:v1";
-const LATIN_MATERIALS = new Set<LatinMaterial>(["vocabulary", "active-indicative-paradigms", "passive-indicative-paradigms", "adjective-paradigms", "participles"]);
+const LATIN_MATERIALS = new Set<LatinMaterial>(["vocabulary", "active-indicative-paradigms", "active-subjunctive-paradigms", "passive-indicative-paradigms", "passive-subjunctive-paradigms", "adjective-paradigms", "participles"]);
 
 // This migration runs only once for legacy saved selections. A user who
 // deliberately unchecks either new adjective after this update stays unchecked.

@@ -21,8 +21,10 @@ import {
   loadGreekLesson10VocabularyDeck,
 } from "../../data/greek-lessons-9-10";
 import { loadLatinActiveIndicativeParadigmsDeck } from "../../data/latin-active-indicative-paradigms";
+import { loadLatinActiveSubjunctiveParadigmsDeck } from "../../data/latin-active-subjunctive-paradigms";
 import { loadLatinAdjectiveParadigmsDeck } from "../../data/latin-adjective-paradigms";
 import { loadLatinPassiveIndicativeParadigmsDeck } from "../../data/latin-passive-indicative-paradigms";
+import { loadLatinPassiveSubjunctiveParadigmsDeck } from "../../data/latin-passive-subjunctive-paradigms";
 import { loadLatinParticiplesDeck } from "../../data/latin-participles";
 import type { DeckDefinition, StudyDirection } from "./types";
 
@@ -57,9 +59,11 @@ export const BUILTIN_STUDY_DECKS: readonly BuiltinDeckRegistration[] = [
   { id: "alpha-omega-lesson10-grammar", language: "Greek", source: "Lesson 10 Grammar", load: loadGreekLesson10GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
   { id: "dickinson-latin-core", language: "Latin", source: "Dickinson Vocabulary", load: loadLatinDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "latin-active-indicative-paradigms", language: "Latin", source: "Active Indicative Paradigms", load: loadLatinActiveIndicativeParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
+  { id: "latin-active-subjunctive-paradigms", language: "Latin", source: "Active Subjunctive Paradigms", load: loadLatinActiveSubjunctiveParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "latin-adjective-paradigms", language: "Latin", source: "Adjective Paradigms", load: loadLatinAdjectiveParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "latin-participles", language: "Latin", source: "Participles", load: loadLatinParticiplesDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
   { id: "latin-passive-indicative-paradigms", language: "Latin", source: "Passive Indicative Paradigms", load: loadLatinPassiveIndicativeParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
+  { id: "latin-passive-subjunctive-paradigms", language: "Latin", source: "Passive Subjunctive Paradigms", load: loadLatinPassiveSubjunctiveParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
 ] as const;
 
 const LEGACY_SESSION_DECKS = [{ id: "henle-part1-forms", language: "Latin" as const }] as const;
