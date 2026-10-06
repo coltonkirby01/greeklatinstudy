@@ -1,0 +1,35 @@
+name: Feature verification
+
+on:
+  push:
+    branches: [feature/study-ux-adaptive-wrong-bank]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check repository maintenance invariants
+        run: npm run maintain:check
+      - name: Run tests
+        run: npm test
+      - name: Build Pages bundle
+        run: npm run build:pages
+      - name: Capture npm audit report
+        if: always()
+        run: npm audit --json > npm-audit.json || true
+      - name: Upload npm audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: npm-audit.json
