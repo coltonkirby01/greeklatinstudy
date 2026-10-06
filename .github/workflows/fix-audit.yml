@@ -1,0 +1,38 @@
+name: Refresh audit dependencies
+
+on:
+  push:
+    branches: [feature/study-ux-adaptive-wrong-bank]
+    paths: [.github/workflows/fix-audit.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/study-ux-adaptive-wrong-bank
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Upgrade Vitest and safe transitive fixes
+        run: |
+          npm install --save-dev --save-exact vitest@5.0.3 --package-lock-only --ignore-scripts
+          npm audit fix --package-lock-only --ignore-scripts || true
+          npm audit --audit-level=high
+      - name: Commit dependency refresh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "No dependency changes needed."
+          else
+            git commit -m "Update test dependencies for current security advisories"
+            git push origin HEAD:feature/study-ux-adaptive-wrong-bank
+          fi
