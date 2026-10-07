@@ -32,12 +32,16 @@ export function newTestamentFrequencyGroupForCard(card: StudyCard) {
   return NEW_TESTAMENT_FREQUENCY_GROUPS.find((group) => group.key === value) ?? null;
 }
 
+async function loadBand(dataGroup: string) {
+  const response = await fetch(assetUrl(`data/greek-new-testament-vocab-${dataGroup}.json`), { cache: "no-store" });
+  if (!response.ok) throw new Error(`Could not load New Testament vocabulary band ${dataGroup}.`);
+  return response.json() as Promise<NewTestamentVocabularySourceCard[]>;
+}
+
 export function loadGreekNewTestamentVocabularyDeck() {
-  newTestamentVocabularyPromise ??= fetch(assetUrl("data/greek-new-testament-vocab.json"), { cache: "no-store" })
-    .then(async (response) => {
-      if (!response.ok) throw new Error("Could not load New Testament vocabulary.");
-      const source = await response.json() as NewTestamentVocabularySourceCard[];
-      const ordered = [...source].sort((a, b) => a.frequency_rank - b.frequency_rank || b.frequency - a.frequency || a.greek.localeCompare(b.greek, "el"));
+  newTestamentVocabularyPromise ??= Promise.all(NEW_TESTAMENT_FREQUENCY_GROUPS.map((group) => loadBand(group.dataGroup)))
+    .then((bands) => {
+      const ordered = bands.flat().sort((a, b) => a.frequency_rank - b.frequency_rank || b.frequency - a.frequency || a.greek.localeCompare(b.greek, "el"));
       const cards: StudyCard[] = ordered.map((card) => {
         const group = NEW_TESTAMENT_FREQUENCY_GROUPS.find((item) => item.dataGroup === card.group);
         if (!group) throw new Error(`Unknown New Testament vocabulary frequency group: ${card.group}`);
@@ -62,6 +66,7 @@ export function loadGreekNewTestamentVocabularyDeck() {
             frequencyGroupLabel: group.label,
             pronunciation,
             sourceRef: card.source_ref,
+            audioDisabled: true,
           },
         };
       });
