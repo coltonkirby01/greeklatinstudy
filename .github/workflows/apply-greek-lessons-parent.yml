@@ -1,0 +1,133 @@
+name: Apply Greek lesson grouping
+on:
+  push:
+    branches:
+      - feature/greek-lessons-parent-no-z-label
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/greek-lessons-parent-no-z-label
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply requested source changes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f"missing expected text in {path}: {old[:100]!r}")
+              p.write_text(text.replace(old, new, 1))
+
+          greek = Path('src/pages/greek-page-v2.tsx')
+          text = greek.read_text()
+          old = 'const allEndingKeys = lessonConfigs.flatMap((config) => [...config.endingKeys]);\nconst defaultKeys: string[] = [...lesson1Keys, ...lesson2Keys, ...lessonVocabularyKeys, ...allEndingKeys];'
+          new = 'const allEndingKeys = lessonConfigs.flatMap((config) => [...config.endingKeys]);\nconst greekLessonKeys: string[] = [...lesson1Keys, ...lesson2Keys, ...lessonVocabularyKeys, ...allEndingKeys];\nconst defaultKeys: string[] = [...greekLessonKeys];'
+          if old not in text: raise SystemExit('greek lesson key insertion point missing')
+          text = text.replace(old, new, 1)
+          old = '  const lesson2State = groupSelectionState(lesson2Keys);\n  const countFoundation'
+          new = '  const lesson2State = groupSelectionState(lesson2Keys);\n  const greekLessonsState = groupSelectionState(greekLessonKeys);\n  const countFoundation'
+          if old not in text: raise SystemExit('greek lessons state insertion point missing')
+          text = text.replace(old, new, 1)
+          old = '      <FilterDisclosure title="Lesson 1" summary={`${lesson1State.selectedCount} of ${lesson1Keys.length} groups selected`} checked={lesson1State.checked} mixed={lesson1State.mixed} onCheckedChange={(checked) => changeGroups(lesson1Keys, checked)}>'
+          new = '      <FilterDisclosure title="Greek Lessons (Groton)" summary={`${greekLessonsState.selectedCount} of ${greekLessonKeys.length} groups selected`} checked={greekLessonsState.checked} mixed={greekLessonsState.mixed} onCheckedChange={(checked) => changeGroups(greekLessonKeys, checked)}>\n      <FilterDisclosure title="Lesson 1" nested summary={`${lesson1State.selectedCount} of ${lesson1Keys.length} groups selected`} checked={lesson1State.checked} mixed={lesson1State.mixed} onCheckedChange={(checked) => changeGroups(lesson1Keys, checked)}>'
+          if old not in text: raise SystemExit('lesson 1 disclosure missing')
+          text = text.replace(old, new, 1)
+          old = '      <FilterDisclosure title="Lesson 2" summary={`${lesson2State.selectedCount} of ${lesson2Keys.length} groups selected`} checked={lesson2State.checked} mixed={lesson2State.mixed} onCheckedChange={(checked) => changeGroups(lesson2Keys, checked)}>'
+          new = '      <FilterDisclosure title="Lesson 2" nested summary={`${lesson2State.selectedCount} of ${lesson2Keys.length} groups selected`} checked={lesson2State.checked} mixed={lesson2State.mixed} onCheckedChange={(checked) => changeGroups(lesson2Keys, checked)}>'
+          if old not in text: raise SystemExit('lesson 2 disclosure missing')
+          text = text.replace(old, new, 1)
+          old = '        return <FilterDisclosure key={config.lesson} title={`Lesson ${config.lesson}`} summary={`${lessonState.selectedCount} of ${lessonKeys.length} groups selected`} checked={lessonState.checked} mixed={lessonState.mixed} onCheckedChange={(checked) => changeGroups(lessonKeys, checked)}>'
+          new = '        return <FilterDisclosure key={config.lesson} title={`Lesson ${config.lesson}`} nested summary={`${lessonState.selectedCount} of ${lessonKeys.length} groups selected`} checked={lessonState.checked} mixed={lessonState.mixed} onCheckedChange={(checked) => changeGroups(lessonKeys, checked)}>'
+          if old not in text: raise SystemExit('dynamic lesson disclosure missing')
+          text = text.replace(old, new, 1)
+          old = '      })}\n    </StudyFilterMenu>}'
+          new = '      })}\n      </FilterDisclosure>\n    </StudyFilterMenu>}'
+          if old not in text: raise SystemExit('lesson wrapper closing point missing')
+          text = text.replace(old, new, 1)
+          greek.write_text(text)
+
+          session = Path('src/features/study/multi-source-study-session.tsx')
+          text = session.read_text()
+          z_label = '              <span className="toolbar-timer-shortcut" aria-label="Z pauses the timer"><kbd>Z</kbd><span>Pause</span></span>\n'
+          if z_label not in text: raise SystemExit('visible Z timer label missing')
+          text = text.replace(z_label, '', 1)
+          session.write_text(text)
+
+          # Remove now-unused toolbar shortcut styling anywhere in source CSS/TSX strings.
+          for p in Path('src').rglob('*'):
+              if p.suffix not in {'.css', '.tsx', '.ts'} or p == session:
+                  continue
+              t = p.read_text()
+              if 'toolbar-timer-shortcut' not in t:
+                  continue
+              t2 = re.sub(r'\.toolbar-timer-shortcut(?:\s+[^\{]+)?\{[^}]*\}', '', t)
+              p.write_text(t2)
+
+          how = Path('src/pages/how-site-works.tsx')
+          text = how.read_text()
+          old = 'Every built-in card can also be selected or deselected individually in <strong>Choose cards</strong>. Greek Lessons 3–10 are organized around <strong>Vocabulary</strong> and <strong>Endings</strong>; opening a lesson\'s Vocabulary heading shows its individual words immediately, with no extra “Vocabulary words” layer. <strong>New Testament Vocab (Kubo)</strong> is a separate vocabulary family from the lesson vocabulary selector, ordered from highest to lowest New Testament frequency.'
+          new = 'Every built-in card can also be selected or deselected individually in <strong>Choose cards</strong>. All Groton course material is grouped under the top-level <strong>Greek Lessons (Groton)</strong> heading, with Lessons 1–10 beneath it. Greek Lessons 3–10 are organized around <strong>Vocabulary</strong> and <strong>Endings</strong>; opening a lesson\'s Vocabulary heading shows its individual words immediately, with no extra “Vocabulary words” layer. <strong>New Testament Vocab (Kubo)</strong> remains a separate top-level vocabulary family from the Groton lessons, ordered from highest to lowest New Testament frequency.'
+          if old not in text: raise SystemExit('How This Site Works Greek selector paragraph missing')
+          text = text.replace(old, new, 1)
+          text = text.replace('The timer displays a compact <strong>Z Pause</strong> shortcut reminder. ', '', 1)
+          how.write_text(text)
+
+          agents = Path('AGENTS.md')
+          text = agents.read_text()
+          old = '- Greek filtering is organized by lesson.'
+          new = '- All Groton lesson material (Lessons 1–10) is nested beneath one top-level **Greek Lessons (Groton)** disclosure. Kubo New Testament vocabulary remains a separate top-level family.'
+          if old not in text: raise SystemExit('AGENTS Greek filtering line missing')
+          text = text.replace(old, new, 1)
+          old = '- The timer toolbar visibly labels `Z` as the Pause shortcut. Z stops active question-side timing and reopens the Start gate. Any page click while question-side timing is active does the same; the interrupting flashcard click must not reveal the answer.'
+          new = '- Do not display a `Z` shortcut label in the timer toolbar. The existing Z key shortcut still stops active question-side timing and reopens the Start gate. Any page click while question-side timing is active does the same; the interrupting flashcard click must not reveal the answer.'
+          if old not in text: raise SystemExit('AGENTS Z timer line missing')
+          text = text.replace(old, new, 1)
+          agents.write_text(text)
+
+          copilot = Path('.github/copilot-instructions.md')
+          text = copilot.read_text()
+          old = '- The active Greek UI includes vocabulary through Lessons 9 and 10. Lessons 3–10 expose **Vocabulary** and **Endings** only; paradigm source cards may remain in the repository but are not exposed in the active lesson selector. Each lesson Vocabulary heading is already the all-vocabulary selector, with **Vocabulary words** beneath it for exact cards; do not add a redundant “All Lesson N vocabulary” child row.'
+          new = '- The active Greek UI groups all Groton course material under one top-level **Greek Lessons (Groton)** disclosure, with Lessons 1–10 beneath it. Lessons 3–10 expose **Vocabulary** and **Endings** only; paradigm source cards may remain in the repository but are not exposed in the active lesson selector. Each lesson Vocabulary heading is already the all-vocabulary selector and shows exact word checkboxes immediately beneath it; do not add a redundant “Vocabulary words” or “All Lesson N vocabulary” layer. **New Testament Vocab (Kubo)** remains a separate top-level family.'
+          if old not in text: raise SystemExit('Copilot Greek selector line missing')
+          text = text.replace(old, new, 1)
+          old = '- Z = stop active question-side timing and reopen the Start gate. Any page click while question-side timing is active also pauses timing and reopens the gate; the clicked non-card control may still perform its normal action, but the interrupting flashcard click must not reveal the answer.'
+          new = '- Z = stop active question-side timing and reopen the Start gate, but do not show a visible Z shortcut label in the timer toolbar. Any page click while question-side timing is active also pauses timing and reopens the gate; the clicked non-card control may still perform its normal action, but the interrupting flashcard click must not reveal the answer.'
+          if old not in text: raise SystemExit('Copilot Z line missing')
+          text = text.replace(old, new, 1)
+          copilot.write_text(text)
+
+          test = Path('tests/study-ux-request.test.ts')
+          text = test.read_text()
+          old = '    expect(page).toContain(\'title="New Testament Vocab (Kubo)"\');\n'
+          new = '    expect(page).toContain(\'title="New Testament Vocab (Kubo)"\');\n    expect(page).toContain(\'title="Greek Lessons (Groton)"\');\n'
+          if old not in text: raise SystemExit('test Kubo assertion missing')
+          text = text.replace(old, new, 1)
+          old = '    expect(session).toContain("Return to larger sessions");\n'
+          new = '    expect(session).toContain("Return to larger sessions");\n    expect(session).not.toContain(\'className="toolbar-timer-shortcut"\');\n'
+          if old not in text: raise SystemExit('test session assertion insertion point missing')
+          text = text.replace(old, new, 1)
+          test.write_text(text)
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify repository
+        run: npm run check
+      - name: Commit source changes if needed
+        run: |
+          git config user.name github-actions-bot
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src AGENTS.md docs .github/copilot-instructions.md tests
+          git diff --cached --quiet || git commit -m "Group Groton lessons and simplify timer"
+          git push origin HEAD:feature/greek-lessons-parent-no-z-label
