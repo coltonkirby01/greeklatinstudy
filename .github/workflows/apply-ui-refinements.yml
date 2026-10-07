@@ -106,6 +106,7 @@ jobs:
           rep(guide,
               'The Progress panel keeps a page-visit <strong>Wrong Bank</strong>.',
               'The Progress panel keeps a page-visit <strong>Wrong Bank</strong>. <strong>Highest-Priority Review</strong> is now a dropdown inside that same Progress box, so long-term Adaptive review suggestions stay available without occupying a separate sidebar panel.')
+          rep("tests/study-ux-request.test.ts", 'title="New Testament Vocab"', 'title="New Testament Vocab (Kubo)"')
           PY
       - name: Install dependencies
         run: npm ci
@@ -118,7 +119,7 @@ jobs:
           else
             git config user.name github-actions-bot
             git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-            git add src/features/study/study-session-ui.tsx src/pages/greek-page-v2.tsx src/pages/how-site-works.tsx
+            git add src/features/study/study-session-ui.tsx src/pages/greek-page-v2.tsx src/pages/how-site-works.tsx tests/study-ux-request.test.ts
             git commit -m "Refine study toolbar and sidebar UI"
             git push origin HEAD:feature/sidebar-toolbar-polish
           fi
