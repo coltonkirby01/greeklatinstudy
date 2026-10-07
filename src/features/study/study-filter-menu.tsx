@@ -1,9 +1,15 @@
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
-import type { StudyCard } from "./types";
+import type { StudyCard, StudyDirection } from "./types";
 import "./study-filter-menu.css";
 
 const savedCardsHint = "Cards you save with the card button or S shortcut are private to your account or this guest browser.";
+
+export function FilterDirectionControl({ direction, onChange, labels = { forward: "Forward", reverse: "Reverse" } }: { direction: StudyDirection; onChange: (direction: StudyDirection) => void; labels?: { forward: string; reverse: string } }) {
+  return <div className="segmented-control filter-direction-control" aria-label="Study direction">
+    {(["forward", "reverse"] as StudyDirection[]).map((value) => <button key={value} type="button" aria-pressed={direction === value} onClick={() => onChange(value)}>{labels[value]}</button>)}
+  </div>;
+}
 
 export function StudyFilterMenu({ summary, children }: { summary: string; detail?: string; children: ReactNode }) {
   return <details className="study-filter-menu panel-surface">

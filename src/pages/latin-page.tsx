@@ -14,7 +14,7 @@ import { loadLatinFilterPreferences, saveLatinFilterPreferences, type LatinMater
 import { matchesVocabularyCard, vocabularyFamily, type OptionalSelection } from "../features/study/latin-study-filters";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
 import { loadIncludeSavedCards, saveIncludeSavedCards, savedCardRef, useSavedCards } from "../features/study/saved-cards";
-import { ExactCardSelection, FilterCheckbox, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
+import { ExactCardSelection, FilterCheckbox, FilterDirectionControl, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
 import type { DeckDefinition, StudyCard, StudyDirection } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
 
@@ -746,6 +746,9 @@ export function LatinPage() {
         summary={`${selectedCards.length.toLocaleString()} cards in the current pool`}
         detail="Choose Latin vocabulary, grammar paradigms, Saved Cards, or any combination of them."
       >
+        <FilterSection title="Study direction" description="Forward and Reverse keep separate review histories, mastery, timing, and scheduling.">
+          <FilterDirectionControl direction={direction} onChange={setDirection} />
+        </FilterSection>
         <FilterSection title="Quick select" description="Cards you save with the card button or S shortcut are private to your account or this guest browser." onAll={selectAllCards} onNone={deselectAllCards}>
           <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={changeSavedCards} hint="Your saved Latin cards" />
         </FilterSection>
@@ -921,8 +924,6 @@ export function LatinPage() {
           sources={sources}
           resetKey={resetKey}
           direction={direction}
-          onDirectionChange={setDirection}
-          directionLabels={{ forward: "Forward", reverse: "Reverse" }}
           resumeSession={resumeSession}
           savedCardRefs={savedCards.refs}
           onToggleSavedCard={savedCards.toggleSaved}

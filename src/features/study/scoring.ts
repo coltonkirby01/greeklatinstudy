@@ -107,12 +107,5 @@ export function userProficiencyScore(cards: ScoredCard[]) {
 export function scoredSession(reviews: ScoredReview[]) {
   if (!reviews.length) return 0;
   const accuracy = reviews.filter((review) => review.result === "right").length / reviews.length;
-  let speed = 0, challenge = 0, streak = 0, bestStreak = 0;
-  for (const review of reviews) {
-    speed += recallSpeedScore(review.responseTimeMs, review.intrinsicDifficulty); challenge += review.intrinsicDifficulty / 100;
-    if (review.result === "right") { streak += 1; bestStreak = Math.max(bestStreak, streak); } else streak = 0;
-  }
-  speed /= reviews.length; challenge /= reviews.length;
-  const performance = accuracy * 0.55 + speed * 0.25 + Math.min(1, bestStreak / 10) * 0.20;
-  return Number(clamp(performance * (0.72 + challenge * 0.28) * 100).toFixed(1));
+  return Number((accuracy * 100).toFixed(1));
 }

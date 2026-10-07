@@ -18,7 +18,10 @@ describe("How this site works guide", () => {
     expect(guide).toContain("RECENT_AUTO_GRADE_WINDOW");
     expect(guide).toContain("EASY_RECALL_LIMIT_MS");
     expect(guide).toContain("HARD_RECALL_START_MS");
-    expect(guide).toContain("20 selected cards must all appear by card 25");
+    expect(guide).toContain("20 selected cards, all 20 must appear by card 25");
+    expect(guide).toContain("ADAPTIVE_PROFILES");
+    expect(guide).toContain("1: Diverse");
+    expect(guide).toContain("3: Concentrated");
     expect(guide).toContain("Learner");
     expect(guide).toContain("Reviewer");
     expect(guide).toContain("Visit completion");
@@ -42,7 +45,11 @@ describe("How this site works guide", () => {
     expect(guide).toContain("Space to Save &amp; Next");
     expect(guide).toContain("selecting any parent heading that contains the card restores all cards beneath that parent");
     expect(guide).toContain("There is no separate deselected-card list");
-    const greek = fs.readFileSync("src/pages/greek-page.tsx", "utf8");
+    expect(guide).toContain("Wrong Bank");
+    expect(guide).toContain("Flash These");
+    expect(guide).toContain("<strong>Z</strong>");
+    expect(guide).toContain("Session score is now accuracy only");
+    const greek = fs.readFileSync("src/pages/greek-page-v2.tsx", "utf8");
     const latin = fs.readFileSync("src/pages/latin-page.tsx", "utf8");
     expect(greek).not.toContain('title="Individually deselected"');
     expect(latin).not.toContain('title="Individually deselected"');
@@ -78,7 +85,9 @@ describe("How this site works guide", () => {
     expect(instructions).toContain("D = Deselect card");
     expect(instructions).toContain("card-exclusions.ts");
     expect(instructions).toContain("stem - ending");
-    expect(instructions).toContain("INITIAL_COVERAGE_MULTIPLIER = 1.25");
+    expect(instructions).toContain("Diverse uses 1.05×");
+    expect(instructions).toContain("Standard uses 1.25×");
+    expect(instructions).toContain("Concentrated uses 1.75×");
     expect(instructions).toContain("latin-adjective-paradigms");
     expect(instructions).toContain("grav-em (grav-e)");
     expect(instructions).toContain("docs/MEDIEVAL_LATIN_PRONUNCIATION.md");

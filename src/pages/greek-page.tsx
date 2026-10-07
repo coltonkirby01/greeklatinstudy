@@ -778,8 +778,6 @@ export function GreekPage() {
       sources={sources}
       resetKey={resetKey}
       direction={direction}
-      onDirectionChange={setDirection}
-      directionLabels={{ forward: "Forward", reverse: "Reverse" }}
       resumeSession={resumeSession}
       savedCardRefs={savedCards.refs}
       onToggleSavedCard={savedCards.toggleSaved}

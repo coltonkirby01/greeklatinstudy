@@ -34,10 +34,16 @@ describe("difficulty and proficiency scoring", () => {
     expect(strong.score).toBeGreaterThan(weak.score);
   });
 
-  it("rewards harder accurate sessions more than equally accurate easier sessions", () => {
-    const easy = scoredSession(Array.from({ length: 5 }, () => ({ result: "right" as const, responseTimeMs: 2_000, intrinsicDifficulty: 20 })));
-    const hard = scoredSession(Array.from({ length: 5 }, () => ({ result: "right" as const, responseTimeMs: 2_000, intrinsicDifficulty: 85 })));
-    expect(hard).toBeGreaterThan(easy);
+  it("makes session score equal overall accuracy regardless of speed or intrinsic difficulty", () => {
+    const easyFast = scoredSession(Array.from({ length: 5 }, () => ({ result: "right" as const, responseTimeMs: 2_000, intrinsicDifficulty: 20 })));
+    const hardSlow = scoredSession(Array.from({ length: 5 }, () => ({ result: "right" as const, responseTimeMs: 20_000, intrinsicDifficulty: 95 })));
+    const fourOfFive = scoredSession([
+      ...Array.from({ length: 4 }, () => ({ result: "right" as const, responseTimeMs: 2_000, intrinsicDifficulty: 20 })),
+      { result: "wrong" as const, responseTimeMs: 2_000, intrinsicDifficulty: 20 },
+    ]);
+    expect(easyFast).toBe(100);
+    expect(hardSlow).toBe(100);
+    expect(fourOfFive).toBe(80);
   });
 
   it("uses stable tier boundaries", () => {

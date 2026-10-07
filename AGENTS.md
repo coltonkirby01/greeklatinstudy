@@ -32,12 +32,12 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 
 ### Greek selector
 
-- Greek has top-level quick selectors for All Vocabulary and All Grammar; narrower lesson selectors remain independently adjustable.
+- Greek has top-level quick selectors for All Vocabulary and All Endings; narrower lesson selectors remain independently adjustable. Main Greek/Latin Forward/Reverse direction lives inside Choose cards, not in the flashcard toolbar.
 - All Grammar includes Lesson 1 Alphabet and Punctuation, Lesson 2 Accent Marks, and all current lesson grammar cards. Greek vocabulary currently includes Lessons 3, 4, and 5 Vocabulary.
 - Greek filtering is organized by lesson.
 - Lesson 1 contains Alphabet and Punctuation. Alphabet expands to independent Uppercase and Lowercase choices. Alphabet and punctuation are Grammar, not vocabulary.
 - Lesson 2 contains Accent Marks. Accent marks are Grammar, not vocabulary.
-- Current Greek vocabulary sources are Lessons 3–8 Vocabulary.
+- Current Greek vocabulary sources are Lessons 3–10 Vocabulary. Lessons 3–10 expose Vocabulary and Endings in the active menu; paradigm source cards are not exposed there. Each lesson Vocabulary heading is already its all-vocabulary selector, and Vocabulary words exposes exact cards, so do not add a redundant “All Lesson N vocabulary” row.
 - Greek Lesson 3 contains separate Vocabulary, Endings, and Paradigms groupings. Lesson 3 Grammar currently contains six cards: three ending-only cards (Present Active Indicative, Infinitive, Imperative) plus three corresponding παιδεύω paradigm cards.
 - The three ending cards each preserve one complete endings chart; the three paradigm cards each preserve one complete παιδεύω chart. Do not decompose them into isolated person/number questions unless explicitly requested.
 - Lesson 3 grammar is currently forward-only. Do not add a reverse grammar direction unless explicitly requested; vocabulary Forward/Reverse remains separate.
@@ -87,10 +87,12 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - Preserve per-direction statistics and scheduling.
 - A card's displayed flip/front-back behavior must not collapse the logical distinction between Forward and Reverse.
 - Mixed Greek and Latin sessions may rank cards from multiple persisted sources together, but each review must save to its original deck and study mode.
-- Direction and card order (Adaptive/Sequential/Shuffle) remain adjustable while the Start gate is open. Changing them must not start the timer.
+- Direction (inside Choose cards) and card order (Adaptive/Sequential/Shuffle in the toolbar) remain adjustable while the Start gate is open. Changing them must not start the timer. Adaptive strength labels are 1: Diverse, 2: Standard, and 3: Concentrated.
+- Z stops active question-side timing and reopens the Start gate. Any page click while question-side timing is active does the same; the interrupting flashcard click must not reveal the answer.
 - Sequential follows the current selected/available pool in defined order.
 - Shuffle is equal-coverage random order: every currently selected/available card appears exactly once per shuffle cycle. After a full cycle, generate a new random permutation; do not repeat the exact immediately previous permutation, and avoid an immediate same-card repeat across the cycle boundary when more than one card is available.
 - The live Progress panel beside the Greek and Latin flashcards is page-visit-specific, not persistent-session-specific. Its reviewed count, accuracy, wrong/hard counts, average time, right-once count, streak, and completion/mastery bar use reviews made since that page visit began.
+- The page-visit Progress panel also owns the Wrong Bank and Words/forms left tools. Wrong Bank collects cards saved Wrong during the current page visit and can flash only those cards; Words/forms left lists unseen selected cards and can queue one as the next card.
 - A hard reload or leaving and re-entering the Greek/Latin page resets the live Progress panel to zero. This must not erase or alter persisted review history, mastery, due dates, Stats, or the persistent Learner/Reviewer/custom session identity.
 - Filtering during a page visit changes the current denominator to the selected/available pool but does not delete historical learning state.
 - Warm-up reviews and Stats-excluded reviews do not contribute to the ordinary live page-visit Progress panel.
@@ -113,7 +115,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - The Start gate offers a Personalized Warm-up. The default warm-up contains 5 reviewed cards.
 - Warm-up selection is adaptive/personalized and should favor due, slow, difficult, recently missed, or otherwise high-priority cards from the currently selected material.
 - Warm-up reviews DO update the continuous long-term memory bank and scheduling because they are real recall practice.
-- Warm-up reviews are tagged separately and MUST NOT inflate or distort ranked main-session scores.
+- Warm-up reviews are tagged separately and MUST NOT inflate or distort main-session accuracy scores. Session score is simply overall accuracy: Right reviews divided by total saved reviews, expressed as a percentage.
 - After the warm-up completes, return to the Start gate where the active controller explicitly requires that behavior; do not reset long-term learning memory.
 
 ## Review and mastery behavior

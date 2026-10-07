@@ -35,14 +35,10 @@ const WARMUP_CARDS = 5;
 const makeCustomSession = (): SessionMeta => ({ id: crypto.randomUUID(), startedAt: Date.now() });
 const makeBuiltinSession = (language: "Greek" | "Latin", kind: BuiltinSessionKind): SessionMeta => ({ id: builtinSessionId(language, kind), startedAt: Date.now(), name: kind === "learner" ? "Learner" : "Reviewer" });
 
-const PropsDefaults = { forward: "Forward", reverse: "Reverse" } as const;
-
 type Props = {
   deck: DeckDefinition;
   sources: StudySourceDefinition[];
   direction: StudyDirection;
-  onDirectionChange?: (direction: StudyDirection) => void;
-  directionLabels?: { forward: string; reverse: string };
   resetKey: string;
   resumeSession?: SessionMeta | null;
   cardMeta?: (card: StudyCard, source: StudySourceDefinition) => string;
@@ -127,7 +123,7 @@ function avoidRecentlyPresentedCandidates(candidates: Candidate[], modeFor: (sou
   return filtered.length >= minimumPool ? filtered : candidates;
 }
 
-export function MultiSourceStudySession({ deck, sources, direction, onDirectionChange, directionLabels = PropsDefaults, resetKey, resumeSession, renderFront, renderBack, priorityPrompt, savedCardRefs, onToggleSavedCard, onDeselectCard }: Props) {
+export function MultiSourceStudySession({ deck, sources, direction, resetKey, resumeSession, renderFront, renderBack, priorityPrompt, savedCardRefs, onToggleSavedCard, onDeselectCard }: Props) {
   const { user } = useAuth();
   const sessionLanguage: "Greek" | "Latin" = deck.language === "greek" ? "Greek" : "Latin";
   const [envelopes, setEnvelopes] = useState<Record<string, DeckProgressEnvelope>>({});
@@ -137,6 +133,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   const savedTogglePendingRef = useRef(false);
   const deselectSelectionPendingRef = useRef(false);
   const shuffleCycleRef = useRef(emptyShuffleCycle());
+  const clickPausedTimerRef = useRef(false);
   const visitStartedAtRef = useRef(Date.now());
   const forcedNextRef = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -427,7 +424,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   const currentPendingDeselected = Boolean(current && pendingDeselectKey === candidateKey(current));
 
   function reveal() {
-    if (!current || revealed || editingTransaction || startGateOpen || wrongBankComplete) return;
+    if (clickPausedTimerRef.current || !current || revealed || editingTransaction || startGateOpen || wrongBankComplete) return;
     setBacktracking(false); setReviewFront(false);
     const responseTimeMs = timer.capture();
     const suggested = autoReviewDefaults(responseTimeMs, currentState ? getCardProgress(currentState, current.card.id) : undefined);
@@ -635,6 +632,17 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
   }, [editingTransaction, revealed, wrongBankComplete]);
 
   useEffect(() => {
+    function pauseForPageClick() {
+      if (revealed || editingTransaction || startGateOpen || wrongBankComplete) return;
+      clickPausedTimerRef.current = true;
+      setStartGateOpen(true);
+      queueMicrotask(() => { clickPausedTimerRef.current = false; });
+    }
+    document.addEventListener("click", pauseForPageClick, true);
+    return () => document.removeEventListener("click", pauseForPageClick, true);
+  }, [editingTransaction, revealed, startGateOpen, wrongBankComplete]);
+
+  useEffect(() => {
     function keydown(event: KeyboardEvent) {
       if (wrongBankComplete) return;
       const target = event.target as HTMLElement | null;
@@ -658,6 +666,7 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
       const shortcut = studyShortcut({ key: event.key, startGateOpen, revealed, result, difficulty, typingTarget, controlsTarget });
       if (!shortcut) return;
       if (shortcut.type === "start") { event.preventDefault(); setStartGateOpen(false); return; }
+      if (shortcut.type === "pause") { event.preventDefault(); setStartGateOpen(true); return; }
       if (shortcut.type === "reveal") { event.preventDefault(); reveal(); return; }
       if (shortcut.type === "flip") { event.preventDefault(); toggleReviewFace(); return; }
       if (shortcut.type === "result") { setResult(shortcut.value); return; }
@@ -696,14 +705,13 @@ export function MultiSourceStudySession({ deck, sources, direction, onDirectionC
         {gated && <StudyStartGate onStart={() => setStartGateOpen(false)} onWarmup={wrongBankRun ? undefined : startWarmup} />}
         <div className="study-toolbar session-toolbar">
           <div className="toolbar-control-group">
-            {onDirectionChange && <div className="segmented-control" aria-label="Study direction">{(["forward", "reverse"] as StudyDirection[]).map((value) => <button key={value} type="button" aria-pressed={direction === value} disabled={Boolean(wrongBankRun)} onClick={() => onDirectionChange(value)}>{directionLabels[value]}</button>)}</div>}
-            <label className="compact-select-label"><span className="sr-only">Card order</span><select value={selectionMode} disabled={Boolean(wrongBankRun)} onChange={(event) => changeOrder(event.target.value as SelectionMode)}><option value="adaptive">Adaptive</option><option value="sequential">Sequential</option><option value="shuffle">Shuffle</option></select></label>
-            {selectionMode === "adaptive" ? <label className="compact-select-label"><span className="sr-only">Adaptive repetition strength</span><select value={adaptiveStrength} disabled={Boolean(wrongBankRun)} onChange={(event) => setAdaptiveStrength(Number(event.target.value) as AdaptiveStrength)}><option value={1}>Adapt 1 · Light</option><option value={2}>Adapt 2 · Standard</option><option value={3}>Adapt 3 · Intensive</option></select></label> : <span aria-hidden="true" />}
-            <label className="compact-select-label"><span className="sr-only">Study session</span><select value={sessionControlValue} disabled={Boolean(editingTransaction) || Boolean(wrongBankRun)} onChange={(event) => { const value = event.target.value; if (value === "__new__") startNewSession(); else if (value !== "__current__") continueSession(value); }}><option value="__current__">{wrongBankRun ? "Wrong Bank flash" : currentSessionName}</option><option value="__new__">Start new custom session</option>{selectableSessions.map((item) => <option key={item.id} value={item.id} disabled={item.inferred}>{sessionLabel(item)}</option>)}</select></label>
             <div className="toolbar-timer" aria-label={`Front-card response time ${displayedTimer} seconds`}>
               <span className="toolbar-timer-value">{displayedTimer}</span>
-              <button type="button" className="toolbar-timer-toggle" data-study-control="timer" onClick={() => setStartGateOpen((open) => !open)} disabled={timerToggleDisabled} aria-label={startGateOpen ? "Play timer" : "Pause timer"} title={startGateOpen ? "Play timer" : "Pause timer"}>{startGateOpen ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}</button>
+              <button type="button" className="toolbar-timer-toggle" data-study-control="timer" onClick={() => setStartGateOpen(startGateOpen ? false : true)} disabled={timerToggleDisabled} aria-label={startGateOpen ? "Play timer" : "Pause timer"} title={startGateOpen ? "Play timer" : "Pause timer"}>{startGateOpen ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}</button>
             </div>
+            <label className="compact-select-label"><span className="sr-only">Card order</span><select value={selectionMode} disabled={Boolean(wrongBankRun)} onChange={(event) => changeOrder(event.target.value as SelectionMode)}><option value="adaptive">Adaptive</option><option value="sequential">Sequential</option><option value="shuffle">Shuffle</option></select></label>
+            {selectionMode === "adaptive" ? <label className="compact-select-label"><span className="sr-only">Adaptive repetition strength</span><select value={adaptiveStrength} disabled={Boolean(wrongBankRun)} onChange={(event) => setAdaptiveStrength(Number(event.target.value) as AdaptiveStrength)}><option value={1}>1: Diverse</option><option value={2}>2: Standard</option><option value={3}>3: Concentrated</option></select></label> : <span aria-hidden="true" />}
+            <label className="compact-select-label"><span className="sr-only">Study session</span><select value={sessionControlValue} disabled={Boolean(editingTransaction) || Boolean(wrongBankRun)} onChange={(event) => { const value = event.target.value; if (value === "__new__") startNewSession(); else if (value !== "__current__") continueSession(value); }}><option value="__current__">{wrongBankRun ? "Wrong Bank flash" : currentSessionName}</option><option value="__new__">Start new custom session</option>{selectableSessions.map((item) => <option key={item.id} value={item.id} disabled={item.inferred}>{sessionLabel(item)}</option>)}</select></label>
           </div>
         </div>
         {notice && <button className="inline-notice" type="button" onClick={() => setNotice(null)}>{notice}</button>}

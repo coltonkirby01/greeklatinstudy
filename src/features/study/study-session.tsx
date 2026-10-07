@@ -27,6 +27,7 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
   const envelopeRef = useRef<DeckProgressEnvelope | null>(null);
   const persistQueue = useRef<Promise<void>>(Promise.resolve());
   const shuffleCycleRef = useRef(emptyShuffleCycle());
+  const clickPausedTimerRef = useRef(false);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>("adaptive");
   const [revealed, setRevealed] = useState(false), [reviewFront, setReviewFront] = useState(false), [result, setResult] = useState<ReviewResult | null>(null), [difficulty, setDifficulty] = useState<ReviewDifficulty | null>(null);
   const [capturedTimeMs, setCapturedTimeMs] = useState<number | null>(null), [lastTransaction, setLastTransaction] = useState<ReviewTransaction | null>(null), [editingTransaction, setEditingTransaction] = useState<ReviewTransaction | null>(null);
@@ -98,7 +99,7 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
   }
   function resetUi() { setRevealed(false); setReviewFront(false); setBacktracking(false); setResult(null); setDifficulty(null); setCapturedTimeMs(null); setEditingTransaction(null); }
   function reveal() {
-    if (!current || revealed || editingTransaction || startGateOpen) return;
+    if (clickPausedTimerRef.current || !current || revealed || editingTransaction || startGateOpen) return;
     setBacktracking(false); setReviewFront(false);
     const responseTimeMs = timer.capture();
     const suggested = autoReviewDefaults(responseTimeMs, modeState ? getCardProgress(modeState, current.id) : undefined);
@@ -190,11 +191,23 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
   }, [editingTransaction, revealed]);
 
   useEffect(() => {
+    function pauseForPageClick() {
+      if (revealed || editingTransaction || startGateOpen) return;
+      clickPausedTimerRef.current = true;
+      setStartGateOpen(true);
+      queueMicrotask(() => { clickPausedTimerRef.current = false; });
+    }
+    document.addEventListener("click", pauseForPageClick, true);
+    return () => document.removeEventListener("click", pauseForPageClick, true);
+  }, [editingTransaction, revealed, startGateOpen]);
+
+  useEffect(() => {
     function keydown(event: KeyboardEvent) {
       const target = event.target as HTMLElement | null;
       const shortcut = studyShortcut({ key: event.key, startGateOpen, revealed, result, difficulty, typingTarget: Boolean(target?.closest("input, textarea, select, [contenteditable='true'], [role='textbox'], [role='listbox']")), controlsTarget: Boolean(target?.closest(".session-toolbar, .study-start-card")) });
       if (!shortcut) return;
       if (shortcut.type === "start") { event.preventDefault(); setStartGateOpen(false); return; }
+      if (shortcut.type === "pause") { event.preventDefault(); setStartGateOpen(true); return; }
       if (shortcut.type === "reveal") { event.preventDefault(); reveal(); return; }
       if (shortcut.type === "flip") { event.preventDefault(); toggleReviewFace(); return; }
       if (shortcut.type === "result") { setResult(shortcut.value); return; }

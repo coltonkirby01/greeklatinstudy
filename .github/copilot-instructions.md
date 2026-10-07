@@ -37,13 +37,14 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - Greek Lesson 6 has 11 vocabulary cards, and every verb vocabulary headword from Lessons 3 onward includes the second principal part once Groton introduces it. Keep the existing Lesson 3–5 vocabulary IDs stable when principal parts are displayed. Lesson 6 grammar contains Future Active Indicative Endings, Future Active Infinitive Ending, the corresponding παιδεύω paradigms, and the p. 32 **Letter Changes** chart. Preserve the Letter Changes title and the five euphonic rules (labials + σ → ψ; palatals + σ → ξ; dentals + σ → σ; πτ + σ → ψ; ττ + σ → ξ).
 - Greek Lesson 7 has 12 vocabulary cards. Its grammar contains Second Declension Masculine Endings, the ἄνθρωπος and ποταμός model-noun paradigms, and separate masculine definite-article singular/plural cards. Keep these parallel to the Lesson 4 feminine article conventions.
 - Greek Lesson 8 has 11 vocabulary cards. Its grammar contains Second Declension Neuter Endings, separate neuter definite-article singular/plural cards, and exactly three first/second-declension adjective-ending cards: masculine, feminine, and neuter. Keep the two feminine singular patterns together on the one feminine card.
+- The active Greek UI includes vocabulary through Lessons 9 and 10. Lessons 3–10 expose **Vocabulary** and **Endings** only; paradigm source cards may remain in the repository but are not exposed in the active lesson selector. Each lesson Vocabulary heading is already the all-vocabulary selector, with **Vocabulary words** beneath it for exact cards; do not add a redundant “All Lesson N vocabulary” child row.
 - In Lesson 4, both feminine definite-article cards belong under **Endings**. **Paradigms** contains the four model-noun paradigms.
 - For Greek grammar **paradigm** charts that teach a stem plus ending, display each complete paradigm cell as `stem - ending` with exactly one space on each side of the hyphen. Preserve the source's actual accent, breathing, and quantity marks on the appropriate stem or ending. Ending-only charts continue to use ordinary ending notation such as `-ης` rather than adding the spaced separator.
 - The spaced stem/ending separator is visual morphology, not pronunciation. Greek audio should pronounce the complete form naturally and must not speak the dash.
 
 ## Choose cards
 
-- Both Greek and Latin Choose cards menus must retain top-level **Select all** and **Deselect all** actions.
+- Both Greek and Latin Choose cards menus must retain top-level **Select all** and **Deselect all** actions. Forward/Reverse direction for the main Greek/Latin apps lives inside Choose cards, not in the flashcard toolbar.
 - Every built-in card must be reachable as an exact individual checkbox in the language Choose cards menu. Per-card selection is not a separate temporary UI; it is another view of the same persistent per-card exclusion state used by the answer-side D control.
 - Greek may list exact cards directly under source/deck disclosures. Dickinson is large, so exact Dickinson cards MUST be grouped into nested 10-card ranges (`1–10`, `11–20`, and so on), with each range opening to the ten exact card checkboxes.
 - Keep selectors concise; hierarchy, checkbox labels, counts, and summaries carry the structure.
@@ -62,22 +63,24 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - Custom sessions remain renameable/deletable and preserve long-term adaptive evidence when removed from Stats.
 - Stats must show Learner and Reviewer as selectable session scopes even before they have reviews.
 - Stats session selection is grouped into two language columns on desktop: **Greek** on the left and **Latin** on the right. Use one heading per column; do not repeat a Greek/Latin label inside each session card.
-- Persistent named/session IDs remain part of Stats and review history, but the live Progress panel in the Greek and Latin apps is **page-visit scoped**. Entering/re-entering the page or performing a hard reload starts live Progress at zero without deleting any historical reviews or mastery. Do not derive that live bar from the permanent Learner/Reviewer/custom session lifetime.
+- A Stats session score is **overall accuracy only**: Right saved reviews divided by total saved reviews in that session, expressed as a percentage. Response time and intrinsic card difficulty remain descriptive analysis fields and do not modify session score.
+- Persistent named/session IDs remain part of Stats and review history, but the live Progress panel in the Greek and Latin apps is **page-visit scoped**. Entering/re-entering the page or performing a hard reload starts live Progress at zero without deleting any historical reviews or mastery. Its Wrong Bank is also page-visit-specific: Wrong saves enter the bank, corrected Right reviews leave it, and **Flash These** runs only that bank with repeat/return choices at completion. Do not derive that live bar or Wrong Bank from the permanent Learner/Reviewer/custom session lifetime.
 
 ## Study controls and grading
 
-- Card order exposes **Adaptive**, **Sequential**, and **Shuffle** in the shared study controller.
+- Card order exposes **Adaptive**, **Sequential**, and **Shuffle** in the shared study controller. Adaptive repetition strength is labeled **1: Diverse**, **2: Standard**, and **3: Concentrated**; do not prefix each option with the word Adaptive.
 - Sequential follows the selected pool in order. Shuffle visits every currently selected/available card exactly once per cycle in randomized order, then creates a fresh permutation for the next cycle. Do not repeat the exact prior permutation when a new cycle begins, and avoid an immediate same-card repeat at the cycle boundary when more than one card exists.
 - Shuffle is equal-coverage random order, not adaptive weighting. Filtering changes the eligible pool and may start a new shuffle cycle; long-term progress is unaffected.
 - Space = Start while the Start gate is open; Reveal before answer; Save & Next after reveal. No other key may dismiss the Start gate.
+- Z = stop active question-side timing and reopen the Start gate. Any page click while question-side timing is active also pauses timing and reopens the gate; the clicked non-card control may still perform its normal action, but the interrupting flashcard click must not reveal the answer.
 - F = flip question/answer after reveal.
-- Enter = toggle Right/Wrong after reveal. R/W are intentionally unassigned.
+- Enter = Back on the unrevealed question side when a prior saved grade exists; after reveal, Enter toggles Right/Wrong. R/W are intentionally unassigned.
 - 1/2/3 = Easy/Medium/Hard. S = save/unsave a card. A = audio on Greek or Latin cards where audio exists.
 - D = Deselect card: mark/unmark the visible answer-side card for deselection. D must not fire while typing, using toolbar controls, or correcting a prior grade. The actual pool mutation happens on the subsequent Space/Save & Next advance, not on the D keypress itself.
 - Shift+Enter is unassigned.
 - Automatic correctness is per card + study mode/direction: attempts 1–3 default Wrong; from attempt 4 onward use the majority of the three most recent saved results. Difficulty remains time-based (<3s Easy, <10s Medium, otherwise Hard).
 - Back truly undoes/replaces the prior grade; Skip records no grade.
-- Adaptive initial coverage uses `INITIAL_COVERAGE_MULTIPLIER = 1.25` against the current selected/unlocked pool. Repeats may occur early, but all selected cards must be covered by `ceil(pool size × 1.25)` ranked presentations; after full initial coverage, normal Adaptive selection resumes.
+- Main Greek/Latin Adaptive initial coverage varies by repetition level: Diverse uses 1.05×, Standard uses 1.25×, and Concentrated uses 1.75× the selected/unlocked pool before unseen cards become mandatory. Standard therefore preserves the familiar 125% example. The coverage dropdown lists unseen page-visit cards and may queue one as the next card.
 
 ## Greek audio
 
