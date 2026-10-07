@@ -105,7 +105,7 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - `docs/MEDIEVAL_LATIN_PRONUNCIATION.md` is the pronunciation-source and normalization contract. The learner-facing label is **Medieval Latin**; do not silently replace it with Classical or modern ecclesiastical Latin.
 - The profile is deliberately broad scholastic Medieval Latin: Rigg and Stotz lead, regional reconstructions are comparative controls, and Allen is only the Classical baseline for recognizability.
 - Latin paradigm audio must reconstruct and pronounce the complete word; morphology dashes such as `laud-āmus` are visual only and must never be spoken.
-- Latin paradigm audio is ordered vertically: singular column first, exactly one `[pause]`, then plural column.
+- Latin paradigm audio follows the displayed chart columns vertically. Ordinary two-column singular/plural charts have exactly one `[pause]`; the grouped subjunctive perfect-system cards have four conjugation columns and therefore three pauses.
 - `src/features/latin/medieval-latin-audio.tsx` is intentionally **cache-only** until the user explicitly approves paid generation. It may read `course_audio_assets`/Supabase Storage but must not call the generation Edge Function merely because a learner opens a card.
 - `course-audio` requires `allowGeneration: true` before a missing/changed Latin asset may call ElevenLabs. Preserve that safeguard unless the user explicitly changes the policy.
 - Use a dedicated `ELEVENLABS_MEDIEVAL_LATIN_VOICE_ID`; never silently fall back to the Greek voice for Latin generation.

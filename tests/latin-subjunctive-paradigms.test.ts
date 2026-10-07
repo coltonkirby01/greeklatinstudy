@@ -6,16 +6,33 @@ type SourceCard = {
   category: string;
   prompt: string;
   columns: string[];
-  rows: Array<{ label: string; cells: [string, string] }>;
+  rows: Array<{ label: string; cells: string[] }>;
 };
 
 const active = JSON.parse(fs.readFileSync("public/data/latin-active-subjunctive-paradigms.json", "utf8")) as SourceCard[];
 const passive = JSON.parse(fs.readFileSync("public/data/latin-passive-subjunctive-paradigms.json", "utf8")) as SourceCard[];
 
+const retiredPerfectSystemIds = [
+  "latin-active-subjunctive-perfect-2nd", "latin-active-subjunctive-perfect-3rd", "latin-active-subjunctive-perfect-4th",
+  "latin-active-subjunctive-pluperfect-2nd", "latin-active-subjunctive-pluperfect-3rd", "latin-active-subjunctive-pluperfect-4th",
+  "latin-passive-subjunctive-perfect-2nd", "latin-passive-subjunctive-perfect-3rd", "latin-passive-subjunctive-perfect-4th",
+  "latin-passive-subjunctive-pluperfect-2nd", "latin-passive-subjunctive-pluperfect-3rd", "latin-passive-subjunctive-pluperfect-4th",
+];
+
 describe("Henle subjunctive paradigms", () => {
-  it("adds all four active subjunctive tenses in all four conjugations with stable IDs", () => {
-    expect(active).toHaveLength(16);
-    expect(new Set(active.map((card) => card.id)).size).toBe(16);
+  it("reduces the subjunctive pool to exactly 20 cards", () => {
+    expect(active).toHaveLength(10);
+    expect(passive).toHaveLength(10);
+    expect([...active, ...passive]).toHaveLength(20);
+    expect(new Set([...active, ...passive].map((card) => card.id)).size).toBe(20);
+    const activeTenseCounts = Object.fromEntries(["Present Tense", "Imperfect Tense", "Perfect Tense", "Pluperfect Tense"].map((tense) => [tense, active.filter((card) => card.category.endsWith(tense)).length]));
+    const passiveTenseCounts = Object.fromEntries(["Present Tense", "Imperfect Tense", "Perfect Tense", "Pluperfect Tense"].map((tense) => [tense, passive.filter((card) => card.category.endsWith(tense)).length]));
+    expect(activeTenseCounts).toEqual({ "Present Tense": 4, "Imperfect Tense": 4, "Perfect Tense": 1, "Pluperfect Tense": 1 });
+    expect(passiveTenseCounts).toEqual({ "Present Tense": 4, "Imperfect Tense": 4, "Perfect Tense": 1, "Pluperfect Tense": 1 });
+    for (const retiredId of retiredPerfectSystemIds) expect([...active, ...passive].some((card) => card.id === retiredId)).toBe(false);
+  });
+
+  it("keeps present and imperfect separated by conjugation", () => {
     expect(active[0]).toMatchObject({
       id: "latin-active-subjunctive-present-1st",
       category: "Active Subjunctive — Present Tense",
@@ -25,23 +42,27 @@ describe("Henle subjunctive paradigms", () => {
         { label: "3rd person", cells: ["laud-et", "laud-ent"] },
       ],
     });
-    expect(active.find((card) => card.id === "latin-active-subjunctive-pluperfect-4th")?.rows[1].cells)
-      .toEqual(["audīv-issēs", "audīv-issētis"]);
+    expect(passive.find((card) => card.id === "latin-passive-subjunctive-imperfect-4th")?.rows[2].cells)
+      .toEqual(["aud-īrētur", "aud-īrentur"]);
   });
 
-  it("adds present, imperfect, perfect, and pluperfect passive subjunctive paradigms", () => {
-    expect(passive).toHaveLength(16);
-    expect(new Set(passive.map((card) => card.id)).size).toBe(16);
-    expect(passive.find((card) => card.id === "latin-passive-subjunctive-present-2nd")?.rows[1].cells)
-      .toEqual(["mon-eāris", "mon-eāminī"]);
-    expect(passive.find((card) => card.id === "latin-passive-subjunctive-perfect-1st")?.rows)
-      .toEqual([
-        { label: "1st person", cells: ["laudātus (a, um) sim", "laudātī (ae, a) sīmus"] },
-        { label: "2nd person", cells: ["laudātus (a, um) sīs", "laudātī (ae, a) sītis"] },
-        { label: "3rd person", cells: ["laudātus (a, um) sit", "laudātī (ae, a) sint"] },
-      ]);
-    expect(passive.find((card) => card.id === "latin-passive-subjunctive-pluperfect-4th")?.rows[2].cells)
-      .toEqual(["audītus (a, um) esset", "audītī (ae, a) essent"]);
+  it("groups all four active conjugations onto one perfect card and one pluperfect card", () => {
+    const perfect = active.find((card) => card.id === "latin-active-subjunctive-perfect-1st");
+    const pluperfect = active.find((card) => card.id === "latin-active-subjunctive-pluperfect-1st");
+    expect(perfect?.prompt).toContain("Conjugations 1–4");
+    expect(perfect?.columns).toEqual(["1st Conjugation", "2nd Conjugation", "3rd Conjugation", "4th Conjugation"]);
+    expect(perfect?.rows[0]).toEqual({ label: "1st person singular", cells: ["laudāv-erim", "monu-erim", "mīs-erim", "audīv-erim"] });
+    expect(perfect?.rows[5]).toEqual({ label: "3rd person plural", cells: ["laudāv-erint", "monu-erint", "mīs-erint", "audīv-erint"] });
+    expect(pluperfect?.rows[1]).toEqual({ label: "2nd person singular", cells: ["laudāv-issēs", "monu-issēs", "mīs-issēs", "audīv-issēs"] });
+  });
+
+  it("groups all four passive conjugations onto one perfect card and one pluperfect card", () => {
+    const perfect = passive.find((card) => card.id === "latin-passive-subjunctive-perfect-1st");
+    const pluperfect = passive.find((card) => card.id === "latin-passive-subjunctive-pluperfect-1st");
+    expect(perfect?.prompt).toContain("Conjugations 1–4");
+    expect(perfect?.rows[0]).toEqual({ label: "1st person singular", cells: ["laudātus (a, um) sim", "monitus (a, um) sim", "missus (a, um) sim", "audītus (a, um) sim"] });
+    expect(perfect?.rows[4]).toEqual({ label: "2nd person plural", cells: ["laudātī (ae, a) sītis", "monitī (ae, a) sītis", "missī (ae, a) sītis", "audītī (ae, a) sītis"] });
+    expect(pluperfect?.rows[5]).toEqual({ label: "3rd person plural", cells: ["laudātī (ae, a) essent", "monitī (ae, a) essent", "missī (ae, a) essent", "audītī (ae, a) essent"] });
   });
 
   it("preserves Henle rule references in the deck loaders", () => {

@@ -51,7 +51,7 @@ export function loadLatinPassiveSubjunctiveParadigmsDeck() {
         slug: "latin",
         title: "Latin Passive Subjunctive Paradigms",
         eyebrow: "Present · imperfect · perfect · pluperfect",
-        description: "Sixteen whole-paradigm cards covering all four passive subjunctive tenses in all four regular conjugations.",
+        description: "Ten passive subjunctive cards: present and imperfect by conjugation, with all four conjugations grouped on one perfect card and one pluperfect card.",
         language: "latin",
         cards,
         supportsReverse: false,
