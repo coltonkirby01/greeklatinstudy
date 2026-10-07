@@ -34,7 +34,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 
 - Greek has top-level quick selectors for All Vocabulary and All Endings; narrower lesson selectors remain independently adjustable. Main Greek/Latin Forward/Reverse direction lives inside Choose cards, not in the flashcard toolbar.
 - All Grammar includes Lesson 1 Alphabet and Punctuation, Lesson 2 Accent Marks, and all current lesson grammar cards. Greek vocabulary currently includes Lessons 3, 4, and 5 Vocabulary.
-- Greek filtering is organized by lesson.
+- All Groton lesson material (Lessons 1–10) is nested beneath one top-level **Greek Lessons (Groton)** disclosure. Kubo New Testament vocabulary remains a separate top-level family.
 - Lesson 1 contains Alphabet and Punctuation. Alphabet expands to independent Uppercase and Lowercase choices. Alphabet and punctuation are Grammar, not vocabulary.
 - Lesson 2 contains Accent Marks. Accent marks are Grammar, not vocabulary.
 - Current Greek vocabulary sources are Lessons 3–10 Vocabulary. Lessons 3–10 expose Vocabulary and Endings in the active menu; paradigm source cards are not exposed there. Each lesson Vocabulary heading is already its all-vocabulary selector and exposes exact word checkboxes immediately beneath it; do not add a redundant “Vocabulary words” or “All Lesson N vocabulary” layer.
@@ -88,7 +88,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - A card's displayed flip/front-back behavior must not collapse the logical distinction between Forward and Reverse.
 - Mixed Greek and Latin sessions may rank cards from multiple persisted sources together, but each review must save to its original deck and study mode.
 - Direction (inside Choose cards) and card order (Adaptive/Sequential/Shuffle in the toolbar) remain adjustable while the Start gate is open. Changing them must not start the timer. Adaptive strength labels are 1: Diverse, 2: Standard, and 3: Concentrated.
-- The timer toolbar visibly labels `Z` as the Pause shortcut. Z stops active question-side timing and reopens the Start gate. Any page click while question-side timing is active does the same; the interrupting flashcard click must not reveal the answer.
+- Do not display a `Z` shortcut label in the timer toolbar. The existing Z key shortcut still stops active question-side timing and reopens the Start gate. Any page click while question-side timing is active does the same; the interrupting flashcard click must not reveal the answer.
 - Sequential follows the current selected/available pool in defined order.
 - Shuffle is equal-coverage random order: every currently selected/available card appears exactly once per shuffle cycle. After a full cycle, generate a new random permutation; do not repeat the exact immediately previous permutation, and avoid an immediate same-card repeat across the cycle boundary when more than one card is available.
 - The live Progress panel beside the Greek and Latin flashcards is page-visit-specific, not persistent-session-specific. Its reviewed count, accuracy, wrong/hard counts, average time, right-once count, streak, and completion/mastery bar use reviews made since that page visit began.

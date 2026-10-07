@@ -707,7 +707,6 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
           <div className="toolbar-control-group">
             <div className="toolbar-timer" aria-label={`Front-card response time ${displayedTimer} seconds`}>
               <span className="toolbar-timer-value">{displayedTimer}</span>
-              <span className="toolbar-timer-shortcut" aria-label="Z pauses the timer"><kbd>Z</kbd><span>Pause</span></span>
               <button type="button" className="toolbar-timer-toggle" data-study-control="timer" onClick={() => setStartGateOpen(startGateOpen ? false : true)} disabled={timerToggleDisabled} aria-label={startGateOpen ? "Play timer" : "Pause timer"} title={startGateOpen ? "Play timer" : "Pause timer"}>{startGateOpen ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}</button>
             </div>
             <label className="compact-select-label"><span className="sr-only">Card order</span><select value={selectionMode} disabled={Boolean(wrongBankRun)} onChange={(event) => changeOrder(event.target.value as SelectionMode)}><option value="adaptive">Adaptive</option><option value="sequential">Sequential</option><option value="shuffle">Shuffle</option></select></label>
