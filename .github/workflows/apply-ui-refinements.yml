@@ -10,5 +10,115 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Smoke test
-        run: echo workflow-valid
+        with:
+          ref: feature/sidebar-toolbar-polish
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply requested source changes
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          def rep(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if new in text:
+                  return
+              if old not in text:
+                  raise SystemExit(f"missing expected text in {path}: {old[:80]}")
+              p.write_text(text.replace(old, new, 1))
+
+          ui = Path("src/features/study/study-session-ui.tsx")
+          text = ui.read_text()
+          text = text.replace(
+              "grid-template-columns:max-content minmax(145px,.72fr) minmax(145px,.72fr) minmax(220px,1.45fr) max-content",
+              "grid-template-columns:minmax(145px,.72fr) minmax(145px,.72fr) minmax(220px,1.45fr) max-content",
+              1,
+          )
+          text = text.replace(
+              ".toolbar-timer{min-height:38px;",
+              ".toolbar-timer{order:99;justify-self:end;min-height:38px;",
+              1,
+          )
+          text = text.replace(
+              ".coverage-details,.wrong-bank-details{margin-top:.55rem;",
+              ".coverage-details,.wrong-bank-details,.priority-details{margin-top:.55rem;",
+              1,
+          )
+          text = text.replace(
+              ".coverage-details summary,.wrong-bank-details summary{cursor:pointer;",
+              ".coverage-details summary,.wrong-bank-details summary,.priority-details summary{cursor:pointer;",
+              1,
+          )
+          text = text.replace(
+              ".coverage-details summary::-webkit-details-marker,.wrong-bank-details summary::-webkit-details-marker{display:none}",
+              ".coverage-details summary::-webkit-details-marker,.wrong-bank-details summary::-webkit-details-marker,.priority-details summary::-webkit-details-marker{display:none}.priority-details{margin-top:.8rem}.priority-details .priority-summary-tail{display:inline-flex;align-items:center;gap:.45rem;color:var(--burgundy)}.priority-details .priority-summary-tail svg{width:.95rem;height:.95rem}.priority-details .priority-list{padding:0 .65rem .45rem}.priority-details .source-note{margin:.35rem .65rem .7rem}",
+              1,
+          )
+          if 'className="priority-details"' not in text:
+              marker = '\n    <section className="panel-surface priority-panel">'
+              start = text.index(marker)
+              end = text.index('\n    </section>', start) + len('\n    </section>')
+              section = text[start:end]
+              list_start = section.index('      <div className="priority-list">')
+              list_end = section.index('</div>\n      <p className="source-note">', list_start) + len('</div>')
+              priority_list = section[list_start:list_end]
+              note_start = section.index('      <p className="source-note">', list_end)
+              note_end = section.index('</p>', note_start) + len('</p>')
+              note = section[note_start:note_end]
+              details = '\n      <details className="priority-details">\n        <summary><span>Highest-Priority Review</span><span className="priority-summary-tail"><strong>{priority.length}</strong><RotateCcw aria-hidden="true" /></span></summary>\n' + priority_list.replace('      <div', '        <div', 1) + '\n' + note.replace('      <p', '        <p', 1) + '\n      </details>'
+              text = text[:start] + details + text[end:]
+          ui.write_text(text)
+
+          greek = Path("src/pages/greek-page-v2.tsx")
+          text = greek.read_text()
+          text = text.replace(
+              "const allVocabularyKeys: string[] = [...lessonVocabularyKeys, ...newTestamentVocabularyKeys];",
+              "const allVocabularyKeys: string[] = [...lessonVocabularyKeys];",
+              1,
+          )
+          text = text.replace('label: "New Testament Vocab", deck: decks.newTestamentVocabulary', 'label: "New Testament Vocab (Kubo)", deck: decks.newTestamentVocabulary', 1)
+          text = text.replace('<FilterCheckbox label="All Vocabulary" checked={vocabularyState.checked}', '<FilterCheckbox label="All Lesson Vocabulary" checked={vocabularyState.checked}', 1)
+          if 'title="New Testament Vocab (Kubo)"' not in text:
+              start = text.index('      <FilterDisclosure title="New Testament Vocab"')
+              end = text.index('      {lessonCardSets.map(({ config, vocabularyDeck, grammarDeck }) => {', start)
+              block = text[start:end].rstrip().replace('title="New Testament Vocab"', 'title="New Testament Vocab (Kubo)"', 1)
+              text = text[:start] + text[end:]
+              anchor = '      </FilterSection>\n\n      <FilterDisclosure title="Lesson 1"'
+              if anchor not in text:
+                  raise SystemExit("Quick select anchor missing")
+              text = text.replace(anchor, '      </FilterSection>\n\n' + block + '\n\n      <FilterDisclosure title="Lesson 1"', 1)
+          greek.write_text(text)
+
+          guide = "src/pages/how-site-works.tsx"
+          rep(guide,
+              'In the main Greek and Latin apps, the Forward/Reverse control is inside <strong>Choose cards</strong>, leaving the first toolbar position for the response timer.',
+              'In the main Greek and Latin apps, the Forward/Reverse control is inside <strong>Choose cards</strong>. The response timer sits at the far right of the study toolbar so card-order and session controls read naturally from left to right.')
+          rep(guide,
+              '<strong>New Testament Vocab</strong> is a separate Kubo source, ordered from highest to lowest New Testament frequency.',
+              '<strong>New Testament Vocab (Kubo)</strong> is a separate vocabulary family from the lesson vocabulary selector, ordered from highest to lowest New Testament frequency.')
+          rep(guide,
+              'The response timer measures active time on the unrevealed question side and is the first control in the main Greek/Latin toolbar.',
+              'The response timer measures active time on the unrevealed question side and sits at the far right of the main Greek/Latin toolbar.')
+          rep(guide,
+              'The Progress panel keeps a page-visit <strong>Wrong Bank</strong>.',
+              'The Progress panel keeps a page-visit <strong>Wrong Bank</strong>. <strong>Highest-Priority Review</strong> is now a dropdown inside that same Progress box, so long-term Adaptive review suggestions stay available without occupying a separate sidebar panel.')
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify repository
+        run: npm run check
+      - name: Commit source changes if needed
+        run: |
+          if git diff --quiet; then
+            echo no-source-changes
+          else
+            git config user.name github-actions-bot
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+            git add src/features/study/study-session-ui.tsx src/pages/greek-page-v2.tsx src/pages/how-site-works.tsx
+            git commit -m "Refine study toolbar and sidebar UI"
+            git push origin HEAD:feature/sidebar-toolbar-polish
+          fi
