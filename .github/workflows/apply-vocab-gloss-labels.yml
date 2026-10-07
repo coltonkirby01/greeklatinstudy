@@ -1,0 +1,86 @@
+name: Apply vocabulary selector gloss labels
+on:
+  push:
+    branches:
+      - feature/vocab-gloss-labels
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/vocab-gloss-labels
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply requested source changes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          helper = Path('src/features/greek/vocabulary-selector-gloss.ts')
+          helper.write_text('''export function oneWordVocabularyGloss(meaning: string) {\n  let value = meaning.trim();\n  value = value.replace(/^\\([^)]*\\)\\s*/u, "");\n  value = value.split(/\\s*[;,—]\\s*/u, 1)[0]?.trim() ?? value;\n  value = value.replace(/^[A-Za-z]{1,8}\\.\\s+/u, "");\n  value = value.replace(/^to\\s+/iu, "");\n  if (/^be\\s+\\S+/iu.test(value)) value = value.replace(/^be\\s+/iu, "");\n  value = value.replace(/^(?:a|an|the)\\s+/iu, "");\n  const match = value.match(/[\\p{L}\\p{M}]+(?:[-'’][\\p{L}\\p{M}]+)*/u);\n  return match?.[0] ?? value.split(/\\s+/u)[0] ?? "";\n}\n''')
+
+          greek = Path('src/pages/greek-page-v2.tsx')
+          text = greek.read_text()
+          old = 'import { ClassicalGreekAudio } from "../features/greek/classical-greek-audio";\n'
+          new = old + 'import { oneWordVocabularyGloss } from "../features/greek/vocabulary-selector-gloss";\n'
+          if old not in text: raise SystemExit('Greek page import insertion point missing')
+          text = text.replace(old, new, 1)
+          old_label = 'label={`#${card.rank} · ${card.front}`}'
+          new_label = 'label={`#${card.rank} · ${card.front} — ${oneWordVocabularyGloss(card.back)}`}'
+          if text.count(old_label) != 2:
+              raise SystemExit(f'Expected exactly 2 vocabulary selector labels, found {text.count(old_label)}')
+          text = text.replace(old_label, new_label)
+          greek.write_text(text)
+
+          how = Path('src/pages/how-site-works.tsx')
+          text = how.read_text()
+          old = 'Kubo\'s separate John special-vocabulary lists are not imported unless a word also appears on the general frequency list. Greek paradigm cards remain source data but are not exposed in the active lesson menu.'
+          new = 'Kubo\'s separate John special-vocabulary lists are not imported unless a word also appears on the general frequency list. In both the Groton and Kubo exact-word dropdowns, each Greek entry also shows a compact one-word English gloss derived from that card\'s source meaning so the list can be scanned quickly. Greek paradigm cards remain source data but are not exposed in the active lesson menu.'
+          if old not in text: raise SystemExit('How This Site Works vocabulary paragraph missing')
+          text = text.replace(old, new, 1)
+          how.write_text(text)
+
+          agents = Path('AGENTS.md')
+          text = agents.read_text()
+          old = '- Current Greek vocabulary sources are Lessons 3–10 Vocabulary. Lessons 3–10 expose Vocabulary and Endings in the active menu; paradigm source cards are not exposed there. Each lesson Vocabulary heading is already its all-vocabulary selector and exposes exact word checkboxes immediately beneath it; do not add a redundant “Vocabulary words” or “All Lesson N vocabulary” layer.'
+          new = old + '\n- Exact Greek vocabulary checkboxes under both **Greek Lessons (Groton)** and **New Testament Vocab (Kubo)** show the Greek headword plus a compact one-word English gloss derived from the card\'s existing source meaning. Keep that gloss source-derived; do not replace the underlying full card meaning.'
+          if old not in text: raise SystemExit('AGENTS Greek vocabulary selector line missing')
+          text = text.replace(old, new, 1)
+          agents.write_text(text)
+
+          copilot = Path('.github/copilot-instructions.md')
+          text = copilot.read_text()
+          old = '- Greek may list exact cards directly under source/deck disclosures. Dickinson is large, so exact Dickinson cards MUST be grouped into nested 10-card ranges (`1–10`, `11–20`, and so on), with each range opening to the ten exact card checkboxes.'
+          new = old + '\n- Exact Groton and Kubo Greek vocabulary checkboxes display the Greek headword together with a one-word English gloss derived from the existing source meaning. Preserve the full source meaning on the card itself; the selector gloss is only a compact scanning aid.'
+          if old not in text: raise SystemExit('Copilot exact card selector line missing')
+          text = text.replace(old, new, 1)
+          copilot.write_text(text)
+
+          test = Path('tests/greek-vocabulary-selector-gloss.test.ts')
+          test.write_text('''import { describe, expect, it } from "vitest";\nimport { oneWordVocabularyGloss } from "../src/features/greek/vocabulary-selector-gloss";\n\ndescribe("Greek vocabulary selector one-word glosses", () => {\n  it("derives a compact source-based gloss from Groton meanings", () => {\n    expect(oneWordVocabularyGloss("write, draw")).toBe("write");\n    expect(oneWordVocabularyGloss("(+ infinitive) be willing (to), wish (to)")).toBe("willing");\n    expect(oneWordVocabularyGloss("offer sacrifice, sacrifice, slay")).toBe("offer");\n    expect(oneWordVocabularyGloss("not — used with imperative commands")).toBe("not");\n  });\n\n  it("derives a compact source-based gloss from Kubo meanings", () => {\n    expect(oneWordVocabularyGloss("the")).toBe("the");\n    expect(oneWordVocabularyGloss("and, also, even")).toBe("and");\n    expect(oneWordVocabularyGloss("to be")).toBe("be");\n    expect(oneWordVocabularyGloss("rel. who, which, what, that")).toBe("who");\n    expect(oneWordVocabularyGloss("a man")).toBe("man");\n  });\n\n  it("always returns one lexical token for the tested source patterns", () => {\n    for (const meaning of ["stand guard, guard, protect, preserve", "you (pl.)", "because, that", "both … and"]) {\n      expect(oneWordVocabularyGloss(meaning)).not.toMatch(/\\s/u);\n    }\n  });\n});\n''')
+
+          ux = Path('tests/study-ux-request.test.ts')
+          text = ux.read_text()
+          old = '    expect(page).toContain(\'label={`#${card.rank} · ${card.front}`}\');\n'
+          new = '    expect(page).toContain(\'oneWordVocabularyGloss(card.back)\');\n    expect(page.match(/oneWordVocabularyGloss\\(card\\.back\\)/g)?.length).toBe(2);\n'
+          if old not in text: raise SystemExit('Study UX vocabulary-label assertion missing')
+          text = text.replace(old, new, 1)
+          ux.write_text(text)
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify repository
+        run: npm run check
+      - name: Commit source changes if needed
+        run: |
+          git config user.name github-actions-bot
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src AGENTS.md .github/copilot-instructions.md tests
+          git diff --cached --quiet || git commit -m "Add one-word glosses to Greek vocabulary selectors"
+          git push origin HEAD:feature/vocab-gloss-labels
