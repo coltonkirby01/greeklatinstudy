@@ -24,7 +24,7 @@ describe("requested Greek and Latin study workflow", () => {
 
     expect(route).toContain('import("./pages/greek-page-v2")');
     expect(page).not.toContain('title="Vocabulary words"');
-    expect(page).toContain('title="New Testament Vocab"');
+    expect(page).toContain('title="New Testament Vocab (Kubo)"');
     expect(page).not.toContain("All Lesson ${config.lesson} vocabulary");
     expect(page).toContain("FilterDirectionControl");
     expect(page).toContain('label={`#${card.rank} · ${card.front}`}');
