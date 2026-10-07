@@ -167,7 +167,8 @@ const lessonVocabularyKeys = lessonConfigs.map((config) => config.vocabularyKey)
 const newTestamentVocabularyKeys = NEW_TESTAMENT_FREQUENCY_GROUPS.map((group) => group.key);
 const allVocabularyKeys: string[] = [...lessonVocabularyKeys];
 const allEndingKeys = lessonConfigs.flatMap((config) => [...config.endingKeys]);
-const defaultKeys: string[] = [...lesson1Keys, ...lesson2Keys, ...lessonVocabularyKeys, ...allEndingKeys];
+const greekLessonKeys: string[] = [...lesson1Keys, ...lesson2Keys, ...lessonVocabularyKeys, ...allEndingKeys];
+const defaultKeys: string[] = [...greekLessonKeys];
 const allKeys: string[] = [...defaultKeys, ...newTestamentVocabularyKeys];
 
 function updateSet(current: Set<string>, values: readonly string[], checked: boolean) {
@@ -420,6 +421,7 @@ export function GreekPage() {
   const lesson1State = groupSelectionState(lesson1Keys);
   const alphabetState = groupSelectionState(alphabetKeys);
   const lesson2State = groupSelectionState(lesson2Keys);
+  const greekLessonsState = groupSelectionState(greekLessonKeys);
   const countFoundation = (category: string) => decks?.foundation.cards.filter((card) => card.category === category).length ?? 0;
   const savedHint = "Cards you save with the card button or S shortcut are private to your account or this guest browser.";
 
@@ -449,7 +451,8 @@ export function GreekPage() {
         })}
       </FilterDisclosure>
 
-      <FilterDisclosure title="Lesson 1" summary={`${lesson1State.selectedCount} of ${lesson1Keys.length} groups selected`} checked={lesson1State.checked} mixed={lesson1State.mixed} onCheckedChange={(checked) => changeGroups(lesson1Keys, checked)}>
+      <FilterDisclosure title="Greek Lessons (Groton)" summary={`${greekLessonsState.selectedCount} of ${greekLessonKeys.length} groups selected`} checked={greekLessonsState.checked} mixed={greekLessonsState.mixed} onCheckedChange={(checked) => changeGroups(greekLessonKeys, checked)}>
+      <FilterDisclosure title="Lesson 1" nested summary={`${lesson1State.selectedCount} of ${lesson1Keys.length} groups selected`} checked={lesson1State.checked} mixed={lesson1State.mixed} onCheckedChange={(checked) => changeGroups(lesson1Keys, checked)}>
         <FilterDisclosure title="Alphabet" summary={`${alphabetState.selectedCount} of ${alphabetKeys.length} cases selected`} count={countFoundation(categories.uppercase) + countFoundation(categories.lowercase)} nested checked={alphabetState.checked} mixed={alphabetState.mixed} onCheckedChange={(checked) => changeGroups(alphabetKeys, checked)}>
           <FilterSection title="Letter case">
             <FilterCheckbox label="Uppercase" count={countFoundation(categories.uppercase)} checked={groupSelectionState([keys.uppercase]).checked} mixed={groupSelectionState([keys.uppercase]).mixed} onChange={(checked) => changeGroups([keys.uppercase], checked)} />
@@ -459,7 +462,7 @@ export function GreekPage() {
         <FilterCheckbox label="Punctuation" count={countFoundation(categories.punctuation)} checked={groupSelectionState([keys.punctuation]).checked} mixed={groupSelectionState([keys.punctuation]).mixed} onChange={(checked) => changeGroups([keys.punctuation], checked)} />
       </FilterDisclosure>
 
-      <FilterDisclosure title="Lesson 2" summary={`${lesson2State.selectedCount} of ${lesson2Keys.length} groups selected`} checked={lesson2State.checked} mixed={lesson2State.mixed} onCheckedChange={(checked) => changeGroups(lesson2Keys, checked)}>
+      <FilterDisclosure title="Lesson 2" nested summary={`${lesson2State.selectedCount} of ${lesson2Keys.length} groups selected`} checked={lesson2State.checked} mixed={lesson2State.mixed} onCheckedChange={(checked) => changeGroups(lesson2Keys, checked)}>
         <FilterCheckbox label="Accent marks" count={countFoundation(categories.accents)} checked={groupSelectionState([keys.accents]).checked} mixed={groupSelectionState([keys.accents]).mixed} onChange={(checked) => changeGroups([keys.accents], checked)} />
       </FilterDisclosure>
 
@@ -469,7 +472,7 @@ export function GreekPage() {
         const vocabularySelection = groupSelectionState([config.vocabularyKey]);
         const endingState = groupSelectionState(config.endingKeys);
         const selectedVocabularyCount = vocabularyDeck.cards.filter((card) => exactCardSelected(vocabularyDeck, card)).length;
-        return <FilterDisclosure key={config.lesson} title={`Lesson ${config.lesson}`} summary={`${lessonState.selectedCount} of ${lessonKeys.length} groups selected`} checked={lessonState.checked} mixed={lessonState.mixed} onCheckedChange={(checked) => changeGroups(lessonKeys, checked)}>
+        return <FilterDisclosure key={config.lesson} title={`Lesson ${config.lesson}`} nested summary={`${lessonState.selectedCount} of ${lessonKeys.length} groups selected`} checked={lessonState.checked} mixed={lessonState.mixed} onCheckedChange={(checked) => changeGroups(lessonKeys, checked)}>
           <FilterDisclosure title="Vocabulary" summary={`${selectedVocabularyCount} of ${vocabularyDeck.cards.length} words selected`} count={vocabularyDeck.cards.length} nested checked={vocabularySelection.checked} mixed={vocabularySelection.mixed} onCheckedChange={(checked) => changeGroups([config.vocabularyKey], checked)}>
             {vocabularyDeck.cards.map((card) => <FilterCheckbox key={card.id} label={`#${card.rank} · ${card.front}`} checked={exactCardSelected(vocabularyDeck, card)} onChange={(checked) => changeExactCard(vocabularyDeck, card, checked)} />)}
           </FilterDisclosure>
@@ -483,6 +486,7 @@ export function GreekPage() {
           </FilterDisclosure>
         </FilterDisclosure>;
       })}
+      </FilterDisclosure>
     </StudyFilterMenu>}
 
     {decks ? <MultiSourceStudySession

@@ -18,6 +18,7 @@ describe("requested Greek and Latin study workflow", () => {
     expect(sidebar.indexOf('className="priority-details"')).toBeLessThan(sidebar.indexOf("</section>", sidebar.indexOf('className="panel-surface stats-panel"')));
     expect(session).toContain("Do it again");
     expect(session).toContain("Return to larger sessions");
+    expect(session).not.toContain('className="toolbar-timer-shortcut"');
   });
 
   it("routes Greek to direct vocabulary words and endings but no paradigm selector", () => {
@@ -27,6 +28,7 @@ describe("requested Greek and Latin study workflow", () => {
     expect(route).toContain('import("./pages/greek-page-v2")');
     expect(page).not.toContain('title="Vocabulary words"');
     expect(page).toContain('title="New Testament Vocab (Kubo)"');
+    expect(page).toContain('title="Greek Lessons (Groton)"');
     expect(page).not.toContain("All Lesson ${config.lesson} vocabulary");
     expect(page).toContain("FilterDirectionControl");
     expect(page).toContain('label={`#${card.rank} · ${card.front}`}');
