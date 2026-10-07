@@ -14,6 +14,8 @@ describe("requested Greek and Latin study workflow", () => {
     expect(sidebar).toContain("Words/forms left");
     expect(sidebar).toContain("Wrong Bank");
     expect(sidebar).toContain("Flash These");
+    expect(sidebar).toContain('className="priority-details"');
+    expect(sidebar.indexOf('className="priority-details"')).toBeLessThan(sidebar.indexOf("</section>", sidebar.indexOf('className="panel-surface stats-panel"')));
     expect(session).toContain("Do it again");
     expect(session).toContain("Return to larger sessions");
   });
