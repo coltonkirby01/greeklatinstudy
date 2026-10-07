@@ -75,6 +75,23 @@ describe("study filter preferences", () => {
       .toEqual(["latin-adjective-1st-2nd-feminine"]);
   });
 
+  it("migrates formerly separate subjunctive perfect-system selections onto the grouped cards", () => {
+    const storage = memoryStorage();
+    storage.setItem("greeklatinstudy:latin-filters:v1", JSON.stringify({
+      materials: ["active-subjunctive-paradigms", "passive-subjunctive-paradigms"],
+      vocabularyParts: null,
+      paradigmCards: ["latin-active-subjunctive-perfect-3rd", "latin-passive-subjunctive-pluperfect-4th"],
+      adjectiveSelectionVersion: 2,
+    }));
+    const restored = loadLatinFilterPreferences(storage);
+    expect([...(restored.paradigmCards ?? [])].sort()).toEqual([
+      "latin-active-subjunctive-perfect-1st",
+      "latin-passive-subjunctive-pluperfect-1st",
+    ]);
+    saveLatinFilterPreferences({ ...restored, paradigmCards: new Set() }, storage);
+    expect([...(loadLatinFilterPreferences(storage).paradigmCards ?? [])]).toEqual([]);
+  });
+
   it("drops deleted Henle material keys from older stored preferences", () => {
     const storage = memoryStorage();
     storage.setItem("greeklatinstudy:latin-filters:v1", JSON.stringify({

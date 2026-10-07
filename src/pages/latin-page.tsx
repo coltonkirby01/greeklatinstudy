@@ -104,13 +104,13 @@ function ParadigmDeckFilters({
             key={tense}
             title={tense}
             count={cards.length}
-            summary={`${tenseState.selectedCount} of ${cards.length} conjugations selected`}
+            summary={`${tenseState.selectedCount} of ${cards.length} cards selected`}
             nested
             checked={tenseState.checked}
             mixed={tenseState.mixed}
             onCheckedChange={(checked) => onValuesChange(material, ids, checked)}
           >
-            <FilterSection title={tense} description="Choose the conjugations you want in the paradigm study pool.">
+            <FilterSection title={tense} description="Choose the paradigm cards you want in the study pool.">
               {cards.map((card) => {
                 const promptWithoutRule = card.front.split(" — R.")[0];
                 const label = promptWithoutRule.split(", ").at(-1) ?? promptWithoutRule;
@@ -829,8 +829,8 @@ export function LatinPage() {
         <FilterDisclosure
           title="Grammar (Henle)"
           ariaLabel="Grammar Henle"
-          count={allParadigmIds.length || 78}
-          summary={`${grammarSelectedCount} of ${allParadigmIds.length || 78} grammar cards selected`}
+          count={allParadigmIds.length || 66}
+          summary={`${grammarSelectedCount} of ${allParadigmIds.length || 66} grammar cards selected`}
           checked={grammarChecked}
           mixed={grammarMixed}
           onCheckedChange={changeGrammarParent}

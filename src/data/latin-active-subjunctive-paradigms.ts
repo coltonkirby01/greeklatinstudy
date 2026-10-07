@@ -51,7 +51,7 @@ export function loadLatinActiveSubjunctiveParadigmsDeck() {
         slug: "latin",
         title: "Latin Active Subjunctive Paradigms",
         eyebrow: "Present · imperfect · perfect · pluperfect",
-        description: "Sixteen whole-paradigm cards covering all four active subjunctive tenses in all four regular conjugations.",
+        description: "Ten active subjunctive cards: present and imperfect by conjugation, with all four conjugations grouped on one perfect card and one pluperfect card.",
         language: "latin",
         cards,
         supportsReverse: false,

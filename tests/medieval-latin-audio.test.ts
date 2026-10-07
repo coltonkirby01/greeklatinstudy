@@ -6,7 +6,8 @@ import { latinParadigmToElevenLabsIpa } from "../supabase/functions/course-audio
 type SourceCard = {
   id: string;
   prompt: string;
-  rows: Array<{ cells: [string, string] }>;
+  columns: string[];
+  rows: Array<{ cells: string[] }>;
 };
 
 function sourceCards() {
@@ -20,9 +21,9 @@ function sourceCards() {
 }
 
 describe("Medieval Latin paradigm audio integration", () => {
-  it("defines one stable cached-audio asset for all 68 current paradigm cards", () => {
+  it("defines one stable cached-audio asset for all 56 current paradigm cards", () => {
     const cards = sourceCards();
-    expect(cards).toHaveLength(68);
+    expect(cards).toHaveLength(56);
     for (const card of cards) {
       const asset = resolveBuiltinLatinAsset(card.id);
       expect(asset, card.id).not.toBeNull();
@@ -34,11 +35,10 @@ describe("Medieval Latin paradigm audio integration", () => {
 
   it("derives each spoken paradigm from the authoritative displayed forms", () => {
     for (const card of sourceCards()) {
-      const singular = card.rows.map((row) => row.cells[0]);
-      const plural = card.rows.map((row) => row.cells[1]);
+      const groups = card.columns.map((_, columnIndex) => card.rows.map((row) => row.cells[columnIndex]));
       const asset = resolveBuiltinLatinAsset(card.id);
-      expect(asset?.ttsText, card.id).toBe(latinParadigmToElevenLabsIpa([singular, plural]));
-      expect(asset?.ttsText.match(/\[pause\]/gu), card.id).toHaveLength(1);
+      expect(asset?.ttsText, card.id).toBe(latinParadigmToElevenLabsIpa(groups));
+      expect(asset?.ttsText.match(/\[pause\]/gu), card.id).toHaveLength(Math.max(0, groups.length - 1));
       expect(asset?.ttsText, card.id).not.toContain("-");
       expect(asset?.canonicalIpa, card.id).toMatch(/^\/.*\/$/u);
     }

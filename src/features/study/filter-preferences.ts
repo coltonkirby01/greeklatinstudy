@@ -21,6 +21,14 @@ const LATIN_MATERIALS = new Set<LatinMaterial>(["vocabulary", "active-indicative
 const ADJECTIVE_SELECTION_VERSION = 2;
 const NEW_ADJECTIVE_CARD_IDS = ["latin-adjective-3rd-acer", "latin-adjective-3rd-diligens"] as const;
 
+const SUBJUNCTIVE_SELECTION_VERSION = 2;
+const SUBJUNCTIVE_SELECTION_MIGRATIONS = [
+  { survivor: "latin-active-subjunctive-perfect-1st", retired: ["latin-active-subjunctive-perfect-2nd", "latin-active-subjunctive-perfect-3rd", "latin-active-subjunctive-perfect-4th"] },
+  { survivor: "latin-active-subjunctive-pluperfect-1st", retired: ["latin-active-subjunctive-pluperfect-2nd", "latin-active-subjunctive-pluperfect-3rd", "latin-active-subjunctive-pluperfect-4th"] },
+  { survivor: "latin-passive-subjunctive-perfect-1st", retired: ["latin-passive-subjunctive-perfect-2nd", "latin-passive-subjunctive-perfect-3rd", "latin-passive-subjunctive-perfect-4th"] },
+  { survivor: "latin-passive-subjunctive-pluperfect-1st", retired: ["latin-passive-subjunctive-pluperfect-2nd", "latin-passive-subjunctive-pluperfect-3rd", "latin-passive-subjunctive-pluperfect-4th"] },
+] as const;
+
 function availableStorage(storage?: StorageLike | null) {
   if (storage !== undefined) return storage;
   if (typeof window === "undefined") return null;
@@ -81,6 +89,13 @@ export function loadLatinFilterPreferences(storage?: StorageLike | null): LatinF
       paradigmCards.has("latin-adjective-3rd-gravis")) {
       for (const id of NEW_ADJECTIVE_CARD_IDS) paradigmCards.add(id);
     }
+    if (stored.subjunctiveSelectionVersion !== SUBJUNCTIVE_SELECTION_VERSION && paradigmCards !== null) {
+      for (const migration of SUBJUNCTIVE_SELECTION_MIGRATIONS) {
+        const selectedBeforeMerge = paradigmCards.has(migration.survivor) || migration.retired.some((id) => paradigmCards.has(id));
+        for (const id of migration.retired) paradigmCards.delete(id);
+        if (selectedBeforeMerge) paradigmCards.add(migration.survivor);
+      }
+    }
     return {
       materials,
       vocabularyParts: restoreOptionalSelection(stored.vocabularyParts),
@@ -100,6 +115,7 @@ export function saveLatinFilterPreferences(preferences: LatinFilterPreferences, 
       vocabularyParts: storeOptionalSelection(preferences.vocabularyParts),
       paradigmCards: storeOptionalSelection(preferences.paradigmCards),
       adjectiveSelectionVersion: ADJECTIVE_SELECTION_VERSION,
+      subjunctiveSelectionVersion: SUBJUNCTIVE_SELECTION_VERSION,
     }));
   } catch { /* Ignore unavailable browser storage. */ }
 }
