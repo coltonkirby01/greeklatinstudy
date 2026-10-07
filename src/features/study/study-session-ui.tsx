@@ -142,11 +142,11 @@ export function StudySidebar({ copy, direction, stats, sessionId, initialProgres
         </div>
         <button type="button" className="primary-button wrong-bank-flash" disabled={!wrongBank.length || wrongBankActive} onClick={onFlashWrongBank}>Flash These</button>
       </details>
-    </section>
       <details className="priority-details">
         <summary><span>Highest-Priority Review</span><span className="priority-summary-tail"><strong>{priority.length}</strong><RotateCcw aria-hidden="true" /></span></summary>
         <div className="priority-list">{priority.map(({ card, progress, score }) => { const itemCopy = cardCopy ? cardCopy(card, direction) : directionalCopy(card, direction); return <div className="priority-row" key={`${card.deckId}:${card.id}`}><span className="priority-meta">{card.rank ? `#${card.rank}` : card.category ?? "Card"}</span><span className="priority-prompt">{priorityPrompt ? priorityPrompt(card, itemCopy) : itemCopy.prompt}<small>{priorityReason(progress)}</small></span><span className="priority-score">{Math.max(0, Math.round(score))}</span></div>; })}</div>
         <p className="source-note">Answers remain hidden. Only the currently selected cards can appear here; their correctness, difficulty, recall time, recency, strength, and due dates affect priority.</p>
       </details>
+    </section>
   </aside>;
 }
