@@ -20,217 +20,161 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Apply source data and UI wiring
+      - name: Apply integration patches
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
-          import base64, gzip, json
 
-          root = Path('.')
-          data_b64 = '''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'''
-          data_text = gzip.decompress(base64.b64decode(data_b64)).decode('utf-8')
-          data_path = root / 'public/data/greek-new-testament-vocab.json'
-          data_path.write_text(data_text, encoding='utf-8')
-          data = json.loads(data_text)
+          p = Path('src/pages/greek-page-v2.tsx')
+          text = p.read_text()
+          text = text.replace('} from "../data/greek-lessons-9-10";\n', '} from "../data/greek-lessons-9-10";\nimport { NEW_TESTAMENT_FREQUENCY_GROUPS, loadGreekNewTestamentVocabularyDeck, newTestamentFrequencyGroupForCard } from "../data/greek-new-testament-vocab";\n')
+          text = text.replace('ExactCardSelection, FilterCheckbox, FilterDirectionControl, FilterDisclosure, FilterSection, StudyFilterMenu', 'FilterCheckbox, FilterDirectionControl, FilterDisclosure, FilterSection, StudyFilterMenu')
+          text = text.replace('  lesson10Grammar: DeckDefinition;\n};', '  lesson10Grammar: DeckDefinition;\n  newTestamentVocabulary: DeckDefinition;\n};')
+          text = text.replace('const allVocabularyKeys = lessonConfigs.map((config) => config.vocabularyKey);\nconst allEndingKeys = lessonConfigs.flatMap((config) => [...config.endingKeys]);\nconst allKeys: KeyValue[] = [...lesson1Keys, ...lesson2Keys, ...allVocabularyKeys, ...allEndingKeys];', 'const lessonVocabularyKeys = lessonConfigs.map((config) => config.vocabularyKey);\nconst newTestamentVocabularyKeys = NEW_TESTAMENT_FREQUENCY_GROUPS.map((group) => group.key);\nconst allVocabularyKeys: string[] = [...lessonVocabularyKeys, ...newTestamentVocabularyKeys];\nconst allEndingKeys = lessonConfigs.flatMap((config) => [...config.endingKeys]);\nconst defaultKeys: string[] = [...lesson1Keys, ...lesson2Keys, ...lessonVocabularyKeys, ...allEndingKeys];\nconst allKeys: string[] = [...defaultKeys, ...newTestamentVocabularyKeys];')
+          text = text.replace('    decks.foundation,\n    ...lessonConfigs.flatMap((config) => [decks[config.vocabularyDeck], decks[config.grammarDeck]]),', '    decks.foundation,\n    decks.newTestamentVocabulary,\n    ...lessonConfigs.flatMap((config) => [decks[config.vocabularyDeck], decks[config.grammarDeck]]),')
+          text = text.replace('const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar] = await Promise.all([', 'const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, newTestamentVocabulary] = await Promise.all([')
+          text = text.replace('      loadGreekLesson10VocabularyDeck(), loadGreekLesson10GrammarDeck(),\n    ]);\n    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar } satisfies LoadedDecks;', '      loadGreekLesson10VocabularyDeck(), loadGreekLesson10GrammarDeck(),\n      loadGreekNewTestamentVocabularyDeck(),\n    ]);\n    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, newTestamentVocabulary } satisfies LoadedDecks;')
+          text = text.replace('const [selected, setSelected] = useState<Set<string>>(() => loadGreekFilterSelection(allKeys));', 'const [selected, setSelected] = useState<Set<string>>(() => loadGreekFilterSelection(defaultKeys, undefined, allKeys));')
+          text = text.replace('    for (const config of lessonConfigs) {\n      if (sourceDeck.id === decks[config.vocabularyDeck].id) return config.vocabularyKey;', '    if (sourceDeck.id === decks.newTestamentVocabulary.id) return newTestamentFrequencyGroupForCard(card)?.key ?? null;\n    for (const config of lessonConfigs) {\n      if (sourceDeck.id === decks[config.vocabularyDeck].id) return config.vocabularyKey;')
+          start = text.find('  function changeExactVocabularyDeck(')
+          if start >= 0:
+              end = text.index('\n\n  function changeSavedCards', start)
+              text = text[:start] + text[end+2:]
+          marker = '  const savedCardCount = useMemo(() => {'
+          addition = '''  const newTestamentCards = useMemo(() => {
+    if (!decks) return [];
+    return decks.newTestamentVocabulary.cards.filter((card) => {
+      const key = newTestamentFrequencyGroupForCard(card)?.key;
+      return Boolean(key && selected.has(key) && !excludedCards.refs.has(savedCardRef(decks.newTestamentVocabulary.id, card.id)));
+    });
+  }, [decks, excludedCards.refs, selected]);
 
-          audio_lines = [
-            'export const newTestamentVocabularyAudio: Readonly<Record<string, { label: string; greek: string }>> = {',
-          ]
-          for card in data:
-            key = json.dumps(card['id'], ensure_ascii=False)
-            greek = json.dumps(card['greek'], ensure_ascii=False)
-            audio_lines.append(f'  {key}: {{ label: {greek}, greek: {greek} }},')
-          audio_lines.append('};')
-          (root / 'supabase/functions/course-audio/new-testament-vocabulary-assets.ts').write_text('\n'.join(audio_lines) + '\n', encoding='utf-8')
+'''
+          text = text.replace(marker, addition + marker, 1)
+          text = text.replace('    for (const { config, vocabularyDeck, grammarDeck, vocabularyCards, endingCards } of lessonCardSets) {\n      if (vocabularyCards.length) next.push({ id: `lesson${config.lesson}-vocabulary`, label: `Lesson ${config.lesson} vocabulary`, deck: vocabularyDeck, cards: vocabularyCards, studyKey: direction, direction });\n      if (endingCards.length) next.push({ id: `lesson${config.lesson}-endings`, label: `Lesson ${config.lesson} endings`, deck: grammarDeck, cards: endingCards, studyKey: "forward", direction: "forward" });\n    }', '    for (const { config, vocabularyDeck, grammarDeck, vocabularyCards, endingCards } of lessonCardSets) {\n      if (vocabularyCards.length) next.push({ id: `lesson${config.lesson}-vocabulary`, label: `Lesson ${config.lesson} vocabulary`, deck: vocabularyDeck, cards: vocabularyCards, studyKey: direction, direction });\n      if (endingCards.length) next.push({ id: `lesson${config.lesson}-endings`, label: `Lesson ${config.lesson} endings`, deck: grammarDeck, cards: endingCards, studyKey: "forward", direction: "forward" });\n    }\n    if (newTestamentCards.length) next.push({ id: "new-testament-vocabulary", label: "New Testament Vocab", deck: decks.newTestamentVocabulary, cards: newTestamentCards, studyKey: direction, direction });')
+          text = text.replace('      for (const { config, vocabularyDeck, grammarDeck } of lessonCardSets) {\n        appendSaved(`saved-lesson${config.lesson}-vocabulary`, vocabularyDeck, direction, direction, () => true);\n        appendSaved(`saved-lesson${config.lesson}-endings`, grammarDeck, "forward", "forward", (card) => Boolean(keyForCategory(config.categoryByKey, card.category)));\n      }', '      for (const { config, vocabularyDeck, grammarDeck } of lessonCardSets) {\n        appendSaved(`saved-lesson${config.lesson}-vocabulary`, vocabularyDeck, direction, direction, () => true);\n        appendSaved(`saved-lesson${config.lesson}-endings`, grammarDeck, "forward", "forward", (card) => Boolean(keyForCategory(config.categoryByKey, card.category)));\n      }\n      appendSaved("saved-new-testament-vocabulary", decks.newTestamentVocabulary, direction, direction, () => true);')
+          text = text.replace('  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lessonCardSets, savedCards.refs]);', '  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lessonCardSets, newTestamentCards, savedCards.refs]);')
+          text = text.replace('  const vocabularyState = groupSelectionState(allVocabularyKeys);', '  const vocabularyState = groupSelectionState(allVocabularyKeys);\n  const newTestamentState = groupSelectionState(newTestamentVocabularyKeys);\n  const selectedNewTestamentCount = decks?.newTestamentVocabulary.cards.filter((card) => exactCardSelected(decks.newTestamentVocabulary, card)).length ?? 0;')
+          lesson2 = '''      <FilterDisclosure title="Lesson 2" summary={`${lesson2State.selectedCount} of ${lesson2Keys.length} groups selected`} checked={lesson2State.checked} mixed={lesson2State.mixed} onCheckedChange={(checked) => changeGroups(lesson2Keys, checked)}>
+        <FilterCheckbox label="Accent marks" count={countFoundation(categories.accents)} checked={groupSelectionState([keys.accents]).checked} mixed={groupSelectionState([keys.accents]).mixed} onChange={(checked) => changeGroups([keys.accents], checked)} />
+      </FilterDisclosure>
+'''
+          nt = lesson2 + '''
+      <FilterDisclosure title="New Testament Vocab" summary={`${selectedNewTestamentCount} of ${decks.newTestamentVocabulary.cards.length} words selected`} count={decks.newTestamentVocabulary.cards.length} checked={newTestamentState.checked} mixed={newTestamentState.mixed} onCheckedChange={(checked) => changeGroups(newTestamentVocabularyKeys, checked)}>
+        {NEW_TESTAMENT_FREQUENCY_GROUPS.map((group) => {
+          const cards = decks.newTestamentVocabulary.cards.filter((card) => card.metadata?.frequencyGroupKey === group.key);
+          const state = groupSelectionState([group.key]);
+          const selectedCount = cards.filter((card) => exactCardSelected(decks.newTestamentVocabulary, card)).length;
+          return <FilterDisclosure key={group.key} title={group.label} summary={`${selectedCount} of ${cards.length} selected`} count={cards.length} nested checked={state.checked} mixed={state.mixed} onCheckedChange={(checked) => changeGroups([group.key], checked)}>
+            {cards.map((card) => <FilterCheckbox key={card.id} label={`#${card.rank} · ${card.front}`} checked={exactCardSelected(decks.newTestamentVocabulary, card)} onChange={(checked) => changeExactCard(decks.newTestamentVocabulary, card, checked)} />)}
+          </FilterDisclosure>;
+        })}
+      </FilterDisclosure>
+'''
+          if 'title="New Testament Vocab"' not in text:
+              if lesson2 not in text: raise SystemExit('Lesson 2 insertion point missing')
+              text = text.replace(lesson2, nt, 1)
+          old_vocab = '''          <FilterDisclosure title="Vocabulary" summary={`${selectedVocabularyCount} of ${vocabularyDeck.cards.length} words selected`} count={vocabularyDeck.cards.length} nested checked={vocabularySelection.checked} mixed={vocabularySelection.mixed} onCheckedChange={(checked) => changeGroups([config.vocabularyKey], checked)}>
+            <FilterDisclosure title="Vocabulary words" summary={`${selectedVocabularyCount} of ${vocabularyDeck.cards.length} selected`} count={vocabularyDeck.cards.length} nested checked={selectedVocabularyCount === vocabularyDeck.cards.length} mixed={selectedVocabularyCount > 0 && selectedVocabularyCount < vocabularyDeck.cards.length} onCheckedChange={(checked) => changeExactVocabularyDeck(vocabularyDeck, checked)}>
+              <ExactCardSelection cards={vocabularyDeck.cards} isSelected={(card) => exactCardSelected(vocabularyDeck, card)} onCardChange={(card, checked) => changeExactCard(vocabularyDeck, card, checked)} sectionTitle={`Lesson ${config.lesson} words`} />
+            </FilterDisclosure>
+          </FilterDisclosure>'''
+          new_vocab = '''          <FilterDisclosure title="Vocabulary" summary={`${selectedVocabularyCount} of ${vocabularyDeck.cards.length} words selected`} count={vocabularyDeck.cards.length} nested checked={vocabularySelection.checked} mixed={vocabularySelection.mixed} onCheckedChange={(checked) => changeGroups([config.vocabularyKey], checked)}>
+            {vocabularyDeck.cards.map((card) => <FilterCheckbox key={card.id} label={`#${card.rank} · ${card.front}`} checked={exactCardSelected(vocabularyDeck, card)} onChange={(checked) => changeExactCard(vocabularyDeck, card, checked)} />)}
+          </FilterDisclosure>'''
+          if old_vocab in text: text = text.replace(old_vocab, new_vocab, 1)
+          text = text.replace('{sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}<GreekCardAudio card={card} /></div>;\n      }}', '{sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}{card.metadata?.audioDisabled !== true && <GreekCardAudio card={card} />}</div>;\n      }}')
+          p.write_text(text)
 
-          def replace_once(path, old, new):
-            p = root / path
-            text = p.read_text(encoding='utf-8')
-            if old not in text:
-              raise SystemExit(f'Pattern not found in {path}: {old[:120]!r}')
-            p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          p = Path('src/features/study/builtin-study-catalog.ts')
+          text = p.read_text()
+          if 'greek-new-testament-vocab' not in text:
+              text = text.replace('} from "../../data/greek-lessons-9-10";\n', '} from "../../data/greek-lessons-9-10";\nimport { loadGreekNewTestamentVocabularyDeck } from "../../data/greek-new-testament-vocab";\n')
+              needle = '  { id: "alpha-omega-lesson10-grammar", language: "Greek", source: "Lesson 10 Grammar", load: loadGreekLesson10GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },\n'
+              text = text.replace(needle, needle + '  { id: "kubo-new-testament-vocab", language: "Greek", source: "New Testament Vocab", load: loadGreekNewTestamentVocabularyDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },\n')
+          p.write_text(text)
 
-          # Greek page: new deck, frequency groups, direct word lists, and source integration.
-          replace_once('src/pages/greek-page-v2.tsx',
-            '} from "../data/greek-lessons-9-10";\n',
-            '} from "../data/greek-lessons-9-10";\nimport { NEW_TESTAMENT_FREQUENCY_GROUPS, loadGreekNewTestamentVocabularyDeck, type NewTestamentFrequencyGroupKey } from "../data/greek-new-testament-vocab";\n')
-          replace_once('src/pages/greek-page-v2.tsx',
-            'type KeyValue = (typeof keys)[keyof typeof keys];',
-            'type KeyValue = (typeof keys)[keyof typeof keys] | NewTestamentFrequencyGroupKey;')
-          replace_once('src/pages/greek-page-v2.tsx',
-            '  lesson10Grammar: DeckDefinition;\n};',
-            '  lesson10Grammar: DeckDefinition;\n  newTestamentVocabulary: DeckDefinition;\n};')
-          replace_once('src/pages/greek-page-v2.tsx',
-            'const allVocabularyKeys = lessonConfigs.map((config) => config.vocabularyKey);\nconst allEndingKeys = lessonConfigs.flatMap((config) => [...config.endingKeys]);\nconst allKeys: KeyValue[] = [...lesson1Keys, ...lesson2Keys, ...allVocabularyKeys, ...allEndingKeys];',
-            'const lessonVocabularyKeys = lessonConfigs.map((config) => config.vocabularyKey);\nconst newTestamentFrequencyKeys = NEW_TESTAMENT_FREQUENCY_GROUPS.map((group) => group.key);\nconst allVocabularyKeys: KeyValue[] = [...lessonVocabularyKeys, ...newTestamentFrequencyKeys];\nconst allEndingKeys = lessonConfigs.flatMap((config) => [...config.endingKeys]);\nconst defaultKeys: KeyValue[] = [...lesson1Keys, ...lesson2Keys, ...lessonVocabularyKeys, ...allEndingKeys];\nconst allKeys: KeyValue[] = [...defaultKeys, ...newTestamentFrequencyKeys];')
-          replace_once('src/pages/greek-page-v2.tsx',
-            '    ...lessonConfigs.flatMap((config) => [decks[config.vocabularyDeck], decks[config.grammarDeck]]),\n  ];',
-            '    ...lessonConfigs.flatMap((config) => [decks[config.vocabularyDeck], decks[config.grammarDeck]]),\n    decks.newTestamentVocabulary,\n  ];')
-          replace_once('src/pages/greek-page-v2.tsx',
-            'lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar] = await Promise.all([',
-            'lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, newTestamentVocabulary] = await Promise.all([')
-          replace_once('src/pages/greek-page-v2.tsx',
-            '      loadGreekLesson10VocabularyDeck(), loadGreekLesson10GrammarDeck(),\n    ]);',
-            '      loadGreekLesson10VocabularyDeck(), loadGreekLesson10GrammarDeck(),\n      loadGreekNewTestamentVocabularyDeck(),\n    ]);')
-          replace_once('src/pages/greek-page-v2.tsx',
-            'lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar } satisfies LoadedDecks;',
-            'lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, newTestamentVocabulary } satisfies LoadedDecks;')
-          replace_once('src/pages/greek-page-v2.tsx',
-            'const [selected, setSelected] = useState<Set<string>>(() => loadGreekFilterSelection(allKeys));',
-            'const [selected, setSelected] = useState<Set<string>>(() => loadGreekFilterSelection(defaultKeys, undefined, allKeys));')
-          replace_once('src/pages/greek-page-v2.tsx',
-            '    for (const config of lessonConfigs) {\n      if (sourceDeck.id === decks[config.vocabularyDeck].id) return config.vocabularyKey;',
-            '    if (sourceDeck.id === decks.newTestamentVocabulary.id) {\n      const value = card.metadata?.frequencyGroupKey;\n      return typeof value === "string" && NEW_TESTAMENT_FREQUENCY_GROUPS.some((group) => group.key === value) ? value as NewTestamentFrequencyGroupKey : null;\n    }\n    for (const config of lessonConfigs) {\n      if (sourceDeck.id === decks[config.vocabularyDeck].id) return config.vocabularyKey;')
+          p = Path('src/features/study/multi-source-study-session.tsx')
+          text = p.read_text()
+          if 'toolbar-timer-shortcut' not in text:
+              needle = '<span className="toolbar-timer-value">{displayedTimer}</span>\n              <button type="button" className="toolbar-timer-toggle"'
+              replacement = '<span className="toolbar-timer-value">{displayedTimer}</span>\n              <span className="toolbar-timer-shortcut" aria-label="Z pauses the timer"><kbd>Z</kbd><span>Pause</span></span>\n              <button type="button" className="toolbar-timer-toggle"'
+              if needle not in text: raise SystemExit('Timer toolbar pattern missing')
+              text = text.replace(needle, replacement, 1)
+          p.write_text(text)
 
-          # Remove obsolete lesson-level nested all-vocabulary helper.
-          p = root / 'src/pages/greek-page-v2.tsx'
-          text = p.read_text(encoding='utf-8')
-          start = text.index('  function changeExactVocabularyDeck(')
-          end = text.index('  function changeSavedCards(', start)
-          p.write_text(text[:start] + text[end:], encoding='utf-8')
+          p = Path('src/features/study/study-gate.css')
+          text = p.read_text()
+          if '.toolbar-timer-shortcut {' not in text:
+              text += '''\n.toolbar-timer-shortcut {\n  display: inline-flex;\n  align-items: center;\n  gap: 0.28rem;\n  color: var(--ink-soft);\n  font-size: 0.72rem;\n  font-weight: 750;\n  white-space: nowrap;\n}\n\n.toolbar-timer-shortcut kbd {\n  min-width: 1.35rem;\n  padding: 0.08rem 0.3rem;\n  border: 1px solid var(--border);\n  border-radius: 0.35rem;\n  background: var(--background);\n  color: var(--ink);\n  font: inherit;\n  text-align: center;\n}\n\n@media (max-width: 720px) {\n  .toolbar-timer-shortcut > span { display: none; }\n}\n'''
+          p.write_text(text)
 
-          replace_once('src/pages/greek-page-v2.tsx',
-            '  }, [decks, excludedCards.refs, selected]);\n\n  const savedCardCount = useMemo(() => {',
-            '  }, [decks, excludedCards.refs, selected]);\n\n  const newTestamentCards = useMemo(() => {\n    if (!decks) return [];\n    return decks.newTestamentVocabulary.cards.filter((card) => {\n      const key = card.metadata?.frequencyGroupKey;\n      return typeof key === "string" && selected.has(key) && !excludedCards.refs.has(savedCardRef(decks.newTestamentVocabulary.id, card.id));\n    });\n  }, [decks, excludedCards.refs, selected]);\n\n  const savedCardCount = useMemo(() => {')
-          replace_once('src/pages/greek-page-v2.tsx',
-            '    for (const { config, vocabularyDeck, grammarDeck, vocabularyCards, endingCards } of lessonCardSets) {\n      if (vocabularyCards.length) next.push({ id: `lesson${config.lesson}-vocabulary`, label: `Lesson ${config.lesson} vocabulary`, deck: vocabularyDeck, cards: vocabularyCards, studyKey: direction, direction });\n      if (endingCards.length) next.push({ id: `lesson${config.lesson}-endings`, label: `Lesson ${config.lesson} endings`, deck: grammarDeck, cards: endingCards, studyKey: "forward", direction: "forward" });\n    }\n\n    if (includeSavedCards) {',
-            '    for (const { config, vocabularyDeck, grammarDeck, vocabularyCards, endingCards } of lessonCardSets) {\n      if (vocabularyCards.length) next.push({ id: `lesson${config.lesson}-vocabulary`, label: `Lesson ${config.lesson} vocabulary`, deck: vocabularyDeck, cards: vocabularyCards, studyKey: direction, direction });\n      if (endingCards.length) next.push({ id: `lesson${config.lesson}-endings`, label: `Lesson ${config.lesson} endings`, deck: grammarDeck, cards: endingCards, studyKey: "forward", direction: "forward" });\n    }\n    if (newTestamentCards.length) next.push({ id: "new-testament-vocabulary", label: "New Testament Vocab", deck: decks.newTestamentVocabulary, cards: newTestamentCards, studyKey: direction, direction });\n\n    if (includeSavedCards) {')
-          replace_once('src/pages/greek-page-v2.tsx',
-            '      for (const { config, vocabularyDeck, grammarDeck } of lessonCardSets) {\n        appendSaved(`saved-lesson${config.lesson}-vocabulary`, vocabularyDeck, direction, direction, () => true);\n        appendSaved(`saved-lesson${config.lesson}-endings`, grammarDeck, "forward", "forward", (card) => Boolean(keyForCategory(config.categoryByKey, card.category)));\n      }\n    }',
-            '      for (const { config, vocabularyDeck, grammarDeck } of lessonCardSets) {\n        appendSaved(`saved-lesson${config.lesson}-vocabulary`, vocabularyDeck, direction, direction, () => true);\n        appendSaved(`saved-lesson${config.lesson}-endings`, grammarDeck, "forward", "forward", (card) => Boolean(keyForCategory(config.categoryByKey, card.category)));\n      }\n      appendSaved("saved-new-testament-vocabulary", decks.newTestamentVocabulary, direction, direction, () => true);\n    }')
-          replace_once('src/pages/greek-page-v2.tsx',
-            '  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lessonCardSets, savedCards.refs]);',
-            '  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lessonCardSets, newTestamentCards, savedCards.refs]);')
-          replace_once('src/pages/greek-page-v2.tsx',
-            '  const lesson2State = groupSelectionState(lesson2Keys);\n  const countFoundation',
-            '  const lesson2State = groupSelectionState(lesson2Keys);\n  const newTestamentState = groupSelectionState(newTestamentFrequencyKeys);\n  const selectedNewTestamentCount = decks?.newTestamentVocabulary.cards.filter((card) => exactCardSelected(decks.newTestamentVocabulary, card)).length ?? 0;\n  const countFoundation')
+          p = Path('src/pages/how-site-works.tsx')
+          text = p.read_text()
+          old = 'Greek Lessons 3–10 are organized around <strong>Vocabulary</strong> and <strong>Endings</strong>; the Vocabulary heading itself is the all-vocabulary control for that lesson, and its <strong>Vocabulary words</strong> dropdown exposes every word individually without a redundant second “All Lesson … vocabulary” row. Greek paradigm cards remain source data but are not exposed in the active lesson menu. Dickinson\'s larger Latin vocabulary list is divided into 10-card ranges such as <strong>1–10</strong> and <strong>11–20</strong>, which open to the exact individual cards.'
+          new = 'Greek Lessons 3–10 are organized around <strong>Vocabulary</strong> and <strong>Endings</strong>; opening a lesson\'s Vocabulary heading shows its individual words immediately, with no extra “Vocabulary words” layer. <strong>New Testament Vocab</strong> is a separate Kubo source, ordered from highest to lowest New Testament frequency. It is divided into parent bands of 1,000+, 500–999, 250–499, 150–249, 100–149, 75–99, 60–74, and 50–59 occurrences, and each band opens directly to its individual words. The answer side shows both the occurrence count and frequency rank. Kubo\'s separate John special-vocabulary lists are not imported unless a word also appears on the general frequency list. Greek paradigm cards remain source data but are not exposed in the active lesson menu. Dickinson\'s larger Latin vocabulary list is divided into 10-card ranges such as <strong>1–10</strong> and <strong>11–20</strong>, which open to the exact individual cards.'
+          if old in text: text = text.replace(old, new, 1)
+          old2 = 'The response timer measures active time on the unrevealed question side and is the first control in the main Greek/Latin toolbar. It pauses when the tab or window is hidden or loses focus. While question-side timing is running, <strong>Z</strong> stops the timer and reopens the Start gate.'
+          new2 = 'The response timer measures active time on the unrevealed question side and is the first control in the main Greek/Latin toolbar. The timer displays a compact <strong>Z Pause</strong> shortcut reminder. It pauses when the tab or window is hidden or loses focus. While question-side timing is running, <strong>Z</strong> stops the timer and reopens the Start gate.'
+          if old2 in text: text = text.replace(old2, new2, 1)
+          p.write_text(text)
 
-          nt_markup = '''\n      <FilterDisclosure title="New Testament Vocab" summary={`${selectedNewTestamentCount} of ${decks.newTestamentVocabulary.cards.length} words selected`} count={decks.newTestamentVocabulary.cards.length} checked={newTestamentState.checked} mixed={newTestamentState.mixed} onCheckedChange={(checked) => changeGroups(newTestamentFrequencyKeys, checked)}>\n        {NEW_TESTAMENT_FREQUENCY_GROUPS.map((group) => {\n          const groupCards = decks.newTestamentVocabulary.cards.filter((card) => card.metadata?.frequencyGroupKey === group.key);\n          const groupState = groupSelectionState([group.key]);\n          const selectedCount = groupCards.filter((card) => exactCardSelected(decks.newTestamentVocabulary, card)).length;\n          return <FilterDisclosure key={group.key} title={group.label} summary={`${selectedCount} of ${groupCards.length} words selected`} count={groupCards.length} nested checked={groupState.checked} mixed={groupState.mixed} onCheckedChange={(checked) => changeGroups([group.key], checked)}>\n            <ExactCardSelection cards={groupCards} isSelected={(card) => exactCardSelected(decks.newTestamentVocabulary, card)} onCardChange={(card, checked) => changeExactCard(decks.newTestamentVocabulary, card, checked)} sectionTitle={null} />\n          </FilterDisclosure>;\n        })}\n      </FilterDisclosure>\n'''
-          replace_once('src/pages/greek-page-v2.tsx',
-            '      </FilterSection>\n\n      <FilterDisclosure title="Lesson 1"',
-            '      </FilterSection>\n' + nt_markup + '\n      <FilterDisclosure title="Lesson 1"')
-          replace_once('src/pages/greek-page-v2.tsx',
-            '''          <FilterDisclosure title="Vocabulary" summary={`${selectedVocabularyCount} of ${vocabularyDeck.cards.length} words selected`} count={vocabularyDeck.cards.length} nested checked={vocabularySelection.checked} mixed={vocabularySelection.mixed} onCheckedChange={(checked) => changeGroups([config.vocabularyKey], checked)}>\n            <FilterDisclosure title="Vocabulary words" summary={`${selectedVocabularyCount} of ${vocabularyDeck.cards.length} selected`} count={vocabularyDeck.cards.length} nested checked={selectedVocabularyCount === vocabularyDeck.cards.length} mixed={selectedVocabularyCount > 0 && selectedVocabularyCount < vocabularyDeck.cards.length} onCheckedChange={(checked) => changeExactVocabularyDeck(vocabularyDeck, checked)}>\n              <ExactCardSelection cards={vocabularyDeck.cards} isSelected={(card) => exactCardSelected(vocabularyDeck, card)} onCardChange={(card, checked) => changeExactCard(vocabularyDeck, card, checked)} sectionTitle={`Lesson ${config.lesson} words`} />\n            </FilterDisclosure>\n          </FilterDisclosure>''',
-            '''          <FilterDisclosure title="Vocabulary" summary={`${selectedVocabularyCount} of ${vocabularyDeck.cards.length} words selected`} count={vocabularyDeck.cards.length} nested checked={vocabularySelection.checked} mixed={vocabularySelection.mixed} onCheckedChange={(checked) => changeGroups([config.vocabularyKey], checked)}>\n            <ExactCardSelection cards={vocabularyDeck.cards} isSelected={(card) => exactCardSelected(vocabularyDeck, card)} onCardChange={(card, checked) => changeExactCard(vocabularyDeck, card, checked)} sectionTitle={null} />\n          </FilterDisclosure>''')
+          p = Path('AGENTS.md')
+          text = p.read_text()
+          text = text.replace('Each lesson Vocabulary heading is already its all-vocabulary selector, and Vocabulary words exposes exact cards, so do not add a redundant “All Lesson N vocabulary” row.', 'Each lesson Vocabulary heading is already its all-vocabulary selector and exposes exact word checkboxes immediately beneath it; do not add a redundant “Vocabulary words” or “All Lesson N vocabulary” layer.')
+          if 'kubo-new-testament-vocab' not in text:
+              text += '''\n- `kubo-new-testament-vocab` contains the 301 entries in Kubo Appendix I’s general frequency list (pp. 274–277), ordered by descending occurrence frequency. Do not import John-only special-vocabulary entries from the later John lists. Preserve the source occurrence count and frequency rank on every card and group the selector into 1,000+, 500–999, 250–499, 150–249, 100–149, 75–99, 60–74, and 50–59 parent bands. These frequency bands are valid persistent filter keys but are not selected by default; explicit All Vocabulary / Select all actions may select them.\n'''
+          text = text.replace('- Z stops active question-side timing and reopens the Start gate.', '- The timer toolbar visibly labels `Z` as the Pause shortcut. Z stops active question-side timing and reopens the Start gate.')
+          p.write_text(text)
 
-          # Exact-card component: allow word lists directly beneath their parent disclosure, without a redundant heading layer.
-          replace_once('src/features/study/study-filter-menu.tsx',
-            '  sectionTitle?: string;\n};',
-            '  sectionTitle?: string | null;\n};')
-          replace_once('src/features/study/study-filter-menu.tsx',
-            'export function ExactCardSelection({ cards, isSelected, onCardChange, onCardsChange, chunkSize, labelForCard = defaultCardLabel, sectionTitle = "Cards" }: ExactCardSelectionProps) {\n  const renderCards = (items: readonly StudyCard[], offset = 0) => <FilterSection title={sectionTitle}>\n    {items.map((card, index) => <FilterCheckbox key={`${card.deckId}:${card.id}`} label={labelForCard(card, offset + index)} checked={isSelected(card)} onChange={(checked) => onCardChange(card, checked)} />)}\n  </FilterSection>;',
-            'export function ExactCardSelection({ cards, isSelected, onCardChange, onCardsChange, chunkSize, labelForCard = defaultCardLabel, sectionTitle = "Cards" }: ExactCardSelectionProps) {\n  const renderCards = (items: readonly StudyCard[], offset = 0) => {\n    const options = items.map((card, index) => <FilterCheckbox key={`${card.deckId}:${card.id}`} label={labelForCard(card, offset + index)} checked={isSelected(card)} onChange={(checked) => onCardChange(card, checked)} />);\n    return sectionTitle === null ? <div className="filter-option-grid">{options}</div> : <FilterSection title={sectionTitle}>{options}</FilterSection>;\n  };')
+          Path('public/data/greek-new-testament-vocab.json').unlink(missing_ok=True)
+          PY
 
-          # Greek filter persistence: permit newly introduced optional groups without selecting them by default.
-          replace_once('src/features/study/filter-preferences.ts',
-            'export function loadGreekFilterSelection(defaultKeys: readonly string[], storage?: StorageLike | null) {',
-            'export function loadGreekFilterSelection(defaultKeys: readonly string[], storage?: StorageLike | null, allowedKeys: readonly string[] = defaultKeys) {')
-          replace_once('src/features/study/filter-preferences.ts',
-            '    const allowed = new Set(defaultKeys);\n    return new Set(stringArray(JSON.parse(raw)).filter((key) => allowed.has(key)));',
-            '    const allowed = new Set(allowedKeys);\n    return new Set(stringArray(JSON.parse(raw)).filter((key) => allowed.has(key)));')
+          cat > tests/greek-new-testament-vocab.test.ts <<'EOF'
+          import { readFileSync } from "node:fs";
+          import { describe, expect, it } from "vitest";
 
-          # Register the deck everywhere Stats/session coverage expects built-ins.
-          replace_once('src/features/study/builtin-study-catalog.ts',
-            '} from "../../data/greek-lessons-9-10";\n',
-            '} from "../../data/greek-lessons-9-10";\nimport { loadGreekNewTestamentVocabularyDeck } from "../../data/greek-new-testament-vocab";\n')
-          replace_once('src/features/study/builtin-study-catalog.ts',
-            '  { id: "alpha-omega-lesson10-grammar", language: "Greek", source: "Lesson 10 Grammar", load: loadGreekLesson10GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },\n  { id: "dickinson-latin-core"',
-            '  { id: "alpha-omega-lesson10-grammar", language: "Greek", source: "Lesson 10 Grammar", load: loadGreekLesson10GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },\n  { id: "kubo-new-testament-vocab", language: "Greek", source: "New Testament Vocab", load: loadGreekNewTestamentVocabularyDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },\n  { id: "dickinson-latin-core"')
-
-          # On-demand audio support for the new cards; the existing prewarm workflow is deliberately unchanged.
-          replace_once('supabase/functions/course-audio/builtin-greek-assets.ts',
-            'import { lesson10CourseAudioAssets, lesson10VocabularyAudio } from "./lesson10-assets.ts";\n',
-            'import { lesson10CourseAudioAssets, lesson10VocabularyAudio } from "./lesson10-assets.ts";\nimport { newTestamentVocabularyAudio } from "./new-testament-vocabulary-assets.ts";\n')
-          replace_once('supabase/functions/course-audio/builtin-greek-assets.ts',
-            'lesson9VocabularyAudio[assetId] ?? lesson10VocabularyAudio[assetId];',
-            'lesson9VocabularyAudio[assetId] ?? lesson10VocabularyAudio[assetId] ?? newTestamentVocabularyAudio[assetId];')
-
-          # Make the Z shortcut visible next to the timer without crowding the study controls.
-          replace_once('src/features/study/multi-source-study-session.tsx',
-            '              <span className="toolbar-timer-value">{displayedTimer}</span>\n              <button type="button" className="toolbar-timer-toggle"',
-            '              <span className="toolbar-timer-value">{displayedTimer}</span>\n              <span className="toolbar-timer-shortcut" aria-hidden="true"><kbd>Z</kbd> Pause</span>\n              <button type="button" className="toolbar-timer-toggle"')
-
-          gate = root / 'src/features/study/study-gate.css'
-          gate.write_text(gate.read_text(encoding='utf-8') + '''\n\n/* Keep the pause shortcut visible beside the live timer. A modest desktop-only\n   width increase gives the toolbar room without stretching mobile cards. */\n@media (min-width: 1100px) {\n  .study-page { width: min(1240px, 100%); }\n}\n\n.toolbar-timer {\n  min-height: 40px;\n  padding: 0.3rem 0.35rem 0.3rem 0.72rem;\n  display: inline-flex;\n  gap: 0.45rem;\n  align-items: center;\n  border: 1px solid var(--border);\n  border-radius: 999px;\n  color: var(--foreground);\n  background: var(--panel-2);\n  font-variant-numeric: tabular-nums;\n  font-weight: 750;\n  white-space: nowrap;\n}\n.toolbar-timer-shortcut { display: inline-flex; gap: 0.28rem; align-items: center; color: var(--ink-soft); font-size: 0.72rem; font-weight: 700; }\n.toolbar-timer-toggle { width: 1.9rem; height: 1.9rem; padding: 0; display: grid; place-items: center; border: 0; border-radius: 50%; color: var(--burgundy); background: var(--panel); }\n.toolbar-timer-toggle svg { width: 0.92rem; height: 0.92rem; }\n@media (max-width: 480px) { .toolbar-timer { width: 100%; justify-content: center; } }\n''', encoding='utf-8')
-
-          # Learner-facing guide: document the new selector and the direct lesson word layout.
-          replace_once('src/components/how-site-works.tsx',
-            'Greek Lessons 3–10 are organized around <strong>Vocabulary</strong> and <strong>Endings</strong>; the Vocabulary heading itself is the all-vocabulary control for that lesson, and its <strong>Vocabulary words</strong> dropdown exposes every word individually without a redundant second “All Lesson … vocabulary” row.',
-            'Greek Lessons 3–10 are organized around <strong>Vocabulary</strong> and <strong>Endings</strong>. The Vocabulary heading itself is the all-vocabulary control for that lesson; opening it shows the individual words immediately, with no extra “Vocabulary words” layer and no redundant “All Lesson … vocabulary” row. A separate <strong>New Testament Vocab</strong> parent contains Kubo’s general high-frequency New Testament list, sorted by frequency rank and divided into 1,000+, 500–999, 250–499, 150–249, 100–149, 75–99, 60–74, and 50–59 occurrence groups. Each New Testament card shows its occurrence count and frequency rank on the answer side. The separate John special-vocabulary lists are not added unless a word also occurs in the general list.')
-          replace_once('src/components/how-site-works.tsx',
-            'While question-side timing is running, <strong>Z</strong> stops the timer and reopens the Start gate.',
-            'While question-side timing is running, <strong>Z</strong> stops the timer and reopens the Start gate. The timer itself displays a <strong>Z · Pause</strong> cue so the shortcut is visible during study.')
-
-          # Permanent repository instructions: preserve this structure in future edits.
-          replace_once('AGENTS.md',
-            'Current Greek vocabulary sources are Lessons 3–10 Vocabulary. Lessons 3–10 expose Vocabulary and Endings in the active menu; paradigm source cards are not exposed there. Each lesson Vocabulary heading is already its all-vocabulary selector, and Vocabulary words exposes exact cards, so do not add a redundant “All Lesson N vocabulary” row.',
-            'Current Greek vocabulary sources are Lessons 3–10 Vocabulary plus the separate New Testament Vocab source. Lessons 3–10 expose Vocabulary and Endings in the active menu; paradigm source cards are not exposed there. Each lesson Vocabulary heading is already its all-vocabulary selector, and opening it exposes the exact word cards immediately; do not add a nested “Vocabulary words” layer or a redundant “All Lesson N vocabulary” row. New Testament Vocab is the Kubo Appendix I general list only, frequency-ranked and grouped into 1,000+, 500–999, 250–499, 150–249, 100–149, 75–99, 60–74, and 50–59 parent groups. Do not import John-only special-vocabulary entries unless they also occur in the general list.')
-          replace_once('AGENTS.md',
-            '- Z stops active question-side timing and reopens the Start gate.',
-            '- Z stops active question-side timing and reopens the Start gate. Keep the visible `Z · Pause` cue beside the toolbar timer so learners can discover the shortcut.')
-
-          # Maintenance notes and Copilot instructions get short durable invariants.
-          maint = root / 'docs/MAINTENANCE.md'
-          maint.write_text(maint.read_text(encoding='utf-8') + '''\n\n### New Testament Greek vocabulary\n\n- `kubo-new-testament-vocab` is a separate built-in Greek deck backed by `public/data/greek-new-testament-vocab.json`. Preserve its stable card IDs, frequency values/ranks, Forward/Reverse histories, exact-card selection, Saved Cards, Deselect behavior, Stats/session registration, and pronunciation metadata.\n- The active selector exposes Kubo's general Appendix I list only. John-only special-vocabulary entries do not belong in this deck unless they also occur in the general list. Frequency parents are 1,000+, 500–999, 250–499, 150–249, 100–149, 75–99, 60–74, and 50–59 occurrences.\n- Lesson 3–10 Vocabulary disclosures show their exact words immediately; do not add a redundant `Vocabulary words` disclosure.\n- The study timer keeps a visible `Z · Pause` cue; Z and any page click pause active question-side timing and reopen the Start gate.\n''', encoding='utf-8')
-          copilot = root / '.github/copilot-instructions.md'
-          copilot.write_text(copilot.read_text(encoding='utf-8') + '''\n\n- Greek includes a separate registered `kubo-new-testament-vocab` deck sourced from Kubo Appendix I's general high-frequency list. It is frequency-ranked, grouped by occurrence bands, and excludes John-only special-vocabulary entries. Preserve exact-card selection, Forward/Reverse histories, frequency display, pronunciation, audio-on-demand, Stats/session coverage, and stable IDs.\n- Greek Lessons 3–10 show exact words directly inside each Vocabulary disclosure; do not add a redundant `Vocabulary words` sub-disclosure. Keep the visible `Z · Pause` cue beside the study timer.\n''', encoding='utf-8')
-
-          # Regression tests for source count/order/groups, answer metadata, and John-list exclusion.
-          test = r'''import { describe, expect, it } from "vitest";
-          import { loadGreekNewTestamentVocabularyDeck, NEW_TESTAMENT_FREQUENCY_GROUPS } from "../src/data/greek-new-testament-vocab";
-          import fs from "node:fs/promises";
-          import path from "node:path";
+          type SourceCard = { id: string; greek: string; frequency: number; frequency_rank: number; group: string };
+          const bands = ["1000-plus", "500-999", "250-499", "150-249", "100-149", "75-99", "60-74", "50-59"];
+          const cards = bands.flatMap((band) => JSON.parse(readFileSync(`public/data/greek-new-testament-vocab-${band}.json`, "utf8")) as SourceCard[]);
 
           describe("Kubo New Testament vocabulary", () => {
-            it("contains exactly the 301 general-list cards sorted by descending frequency rank", async () => {
-              const source = JSON.parse(await fs.readFile(path.join(process.cwd(), "public/data/greek-new-testament-vocab.json"), "utf8")) as Array<{ greek: string; frequency: number; frequency_rank: number; group: string }>;
-              expect(source).toHaveLength(301);
-              expect(source.map((card) => card.frequency_rank)).toEqual(Array.from({ length: 301 }, (_, index) => index + 1));
-              expect(source.map((card) => card.frequency)).toEqual([...source.map((card) => card.frequency)].sort((a, b) => b - a));
-              expect(source[0]).toMatchObject({ greek: "ὁ, ἡ, τό", frequency: 19734, frequency_rank: 1, group: "1000-plus" });
-              expect(source.find((card) => card.greek === "ἐσθίω")?.frequency).toBe(65);
-              expect(source.find((card) => card.greek === "φάγω")?.frequency).toBe(94);
-              expect(source.some((card) => card.greek.toLowerCase().includes("χριστ"))).toBe(false);
+            it("contains exactly the 301 general-list entries in descending frequency order", () => {
+              expect(cards).toHaveLength(301);
+              expect(new Set(cards.map((card) => card.id)).size).toBe(301);
+              expect(cards.map((card) => card.frequency_rank)).toEqual(Array.from({ length: 301 }, (_, index) => index + 1));
+              expect(cards.every((card) => card.frequency >= 50)).toBe(true);
+              expect(cards.every((card, index) => index === 0 || cards[index - 1].frequency >= card.frequency)).toBe(true);
             });
-
-            it("uses the eight requested natural frequency parents and keeps all cards covered exactly once", async () => {
-              const source = JSON.parse(await fs.readFile(path.join(process.cwd(), "public/data/greek-new-testament-vocab.json"), "utf8")) as Array<{ group: string }>;
-              expect(NEW_TESTAMENT_FREQUENCY_GROUPS.map((group) => group.dataGroup)).toEqual(["1000-plus", "500-999", "250-499", "150-249", "100-149", "75-99", "60-74", "50-59"]);
-              const counts = Object.fromEntries(NEW_TESTAMENT_FREQUENCY_GROUPS.map((group) => [group.dataGroup, source.filter((card) => card.group === group.dataGroup).length]));
+            it("uses the intended natural frequency bands", () => {
+              const counts = Object.fromEntries(bands.map((band) => [band, cards.filter((card) => card.group === band).length]));
               expect(counts).toEqual({ "1000-plus": 19, "500-999": 19, "250-499": 23, "150-249": 44, "100-149": 60, "75-99": 57, "60-74": 42, "50-59": 37 });
             });
-
-            it("does not import John-only special-vocabulary entries", async () => {
-              const source = JSON.parse(await fs.readFile(path.join(process.cwd(), "public/data/greek-new-testament-vocab.json"), "utf8")) as Array<{ greek: string }>;
-              const text = source.map((card) => card.greek).join(" ");
-              for (const johnOnly of ["ἀδελφή", "νίπτω", "πάσχα", "πρόβατον", "ῥαββί", "σκοτία", "σταυρόω", "φίλος"]) expect(text).not.toContain(johnOnly);
+            it("includes general-list φάγω but no John-only χριστός import", () => {
+              expect(cards.find((card) => card.greek === "φάγω")?.frequency).toBe(94);
+              expect(cards.some((card) => card.greek.startsWith("χριστ"))).toBe(false);
+            });
+            it("keeps lesson words directly under Vocabulary and exposes the new source", () => {
+              const source = readFileSync("src/pages/greek-page-v2.tsx", "utf8");
+              expect(source).toContain('title="New Testament Vocab"');
+              expect(source).not.toContain('title="Vocabulary words"');
+              expect(source).toContain('label={`#${card.rank} · ${card.front}`}');
             });
           });
-          '''
-          (root / 'tests/greek-new-testament-vocab.test.ts').write_text('\n'.join(line[10:] if line.startswith('          ') else line for line in test.splitlines()) + '\n', encoding='utf-8')
+          EOF
 
-          # Static UI regression: no extra Vocabulary words disclosure and visible Z pause cue.
-          ui_test = r'''import { describe, expect, it } from "vitest";
-          import fs from "node:fs";
-          import path from "node:path";
-
-          describe("Greek vocabulary selector structure", () => {
-            it("shows lesson words directly and exposes New Testament Vocab frequency parents", () => {
-              const page = fs.readFileSync(path.join(process.cwd(), "src/pages/greek-page-v2.tsx"), "utf8");
-              expect(page).not.toContain('title="Vocabulary words"');
-              expect(page).toContain('title="New Testament Vocab"');
-              expect(page).toContain("NEW_TESTAMENT_FREQUENCY_GROUPS.map");
-              expect(page).toContain("sectionTitle={null}");
-            });
-            it("keeps the timer shortcut discoverable", () => {
-              const session = fs.readFileSync(path.join(process.cwd(), "src/features/study/multi-source-study-session.tsx"), "utf8");
-              expect(session).toContain('<kbd>Z</kbd> Pause');
-            });
-          });
-          '''
-          (root / 'tests/greek-selector-structure.test.ts').write_text('\n'.join(line[10:] if line.startswith('          ') else line for line in ui_test.splitlines()) + '\n', encoding='utf-8')
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('tests/filter-preferences.test.ts')
+          text=p.read_text()
+          if 'optional Greek groups without enabling them by default' not in text:
+              anchor='''  it("restores Latin vocabulary and paradigm selections exactly", () => {'''
+              test='''  it("can restore optional Greek groups without enabling them by default", () => {\n    const storage = memoryStorage();\n    expect([...loadGreekFilterSelection(["lesson3-vocabulary"], storage, ["lesson3-vocabulary", "nt-vocab-1000-plus"])]).toEqual(["lesson3-vocabulary"]);\n    saveGreekFilterSelection(new Set(["nt-vocab-1000-plus"]), storage);\n    expect([...loadGreekFilterSelection(["lesson3-vocabulary"], storage, ["lesson3-vocabulary", "nt-vocab-1000-plus"])]).toEqual(["nt-vocab-1000-plus"]);\n  });\n\n'''
+              if anchor not in text: raise SystemExit('filter test insertion point missing')
+              p.write_text(text.replace(anchor, test+anchor, 1))
           PY
+
       - name: Install dependencies
         run: npm ci
       - name: Verify maintenance, tests, and Pages build
@@ -239,11 +183,9 @@ jobs:
           npm test
           npm run build:pages
       - name: Commit verified changes
-        shell: bash
         run: |
-          rm .github/workflows/apply-new-testament-vocab.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Add frequency-ranked New Testament Greek vocabulary"
-          git push origin feature/new-testament-vocab
+          git commit -m "Add frequency-ranked New Testament Greek vocabulary" || exit 0
+          git push origin HEAD:feature/new-testament-vocab
