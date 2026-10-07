@@ -14,6 +14,8 @@ describe("requested Greek and Latin study workflow", () => {
     expect(sidebar).toContain("Words/forms left");
     expect(sidebar).toContain("Wrong Bank");
     expect(sidebar).toContain("Flash These");
+    expect(sidebar).toContain('className="priority-details"');
+    expect(sidebar.indexOf('className="priority-details"')).toBeLessThan(sidebar.indexOf("</section>", sidebar.indexOf('className="panel-surface stats-panel"')));
     expect(session).toContain("Do it again");
     expect(session).toContain("Return to larger sessions");
   });
@@ -24,7 +26,7 @@ describe("requested Greek and Latin study workflow", () => {
 
     expect(route).toContain('import("./pages/greek-page-v2")');
     expect(page).not.toContain('title="Vocabulary words"');
-    expect(page).toContain('title="New Testament Vocab"');
+    expect(page).toContain('title="New Testament Vocab (Kubo)"');
     expect(page).not.toContain("All Lesson ${config.lesson} vocabulary");
     expect(page).toContain("FilterDirectionControl");
     expect(page).toContain('label={`#${card.rank} · ${card.front}`}');

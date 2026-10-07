@@ -165,7 +165,7 @@ const lessonConfigs: LessonConfig[] = [
 
 const lessonVocabularyKeys = lessonConfigs.map((config) => config.vocabularyKey);
 const newTestamentVocabularyKeys = NEW_TESTAMENT_FREQUENCY_GROUPS.map((group) => group.key);
-const allVocabularyKeys: string[] = [...lessonVocabularyKeys, ...newTestamentVocabularyKeys];
+const allVocabularyKeys: string[] = [...lessonVocabularyKeys];
 const allEndingKeys = lessonConfigs.flatMap((config) => [...config.endingKeys]);
 const defaultKeys: string[] = [...lesson1Keys, ...lesson2Keys, ...lessonVocabularyKeys, ...allEndingKeys];
 const allKeys: string[] = [...defaultKeys, ...newTestamentVocabularyKeys];
@@ -376,7 +376,7 @@ export function GreekPage() {
       if (vocabularyCards.length) next.push({ id: `lesson${config.lesson}-vocabulary`, label: `Lesson ${config.lesson} vocabulary`, deck: vocabularyDeck, cards: vocabularyCards, studyKey: direction, direction });
       if (endingCards.length) next.push({ id: `lesson${config.lesson}-endings`, label: `Lesson ${config.lesson} endings`, deck: grammarDeck, cards: endingCards, studyKey: "forward", direction: "forward" });
     }
-    if (newTestamentCards.length) next.push({ id: "new-testament-vocabulary", label: "New Testament Vocab", deck: decks.newTestamentVocabulary, cards: newTestamentCards, studyKey: direction, direction });
+    if (newTestamentCards.length) next.push({ id: "new-testament-vocabulary", label: "New Testament Vocab (Kubo)", deck: decks.newTestamentVocabulary, cards: newTestamentCards, studyKey: direction, direction });
 
     if (includeSavedCards) {
       const alreadySelected = new Set(next.flatMap((source) => source.cards.map((card) => savedCardRef(source.deck.id, card.id))));
@@ -434,9 +434,20 @@ export function GreekPage() {
       </FilterSection>
       <FilterSection title="Quick select" onAll={() => { setSelected(new Set(allKeys)); excludedCards.clear(); }} onNone={() => { setSelected(new Set()); setIncludeSavedCards(false); }}>
         <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={changeSavedCards} hint={savedHint} />
-        <FilterCheckbox label="All Vocabulary" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onChange={(checked) => changeGroups(allVocabularyKeys, checked)} />
+        <FilterCheckbox label="All Lesson Vocabulary" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onChange={(checked) => changeGroups(allVocabularyKeys, checked)} />
         <FilterCheckbox label="All Endings" checked={endingsState.checked} mixed={endingsState.mixed} onChange={(checked) => changeGroups(allEndingKeys, checked)} />
       </FilterSection>
+
+      <FilterDisclosure title="New Testament Vocab (Kubo)" summary={`${selectedNewTestamentCount} of ${decks.newTestamentVocabulary.cards.length} words selected`} count={decks.newTestamentVocabulary.cards.length} checked={newTestamentState.checked} mixed={newTestamentState.mixed} onCheckedChange={(checked) => changeGroups(newTestamentVocabularyKeys, checked)}>
+        {NEW_TESTAMENT_FREQUENCY_GROUPS.map((group) => {
+          const cards = decks.newTestamentVocabulary.cards.filter((card) => card.metadata?.frequencyGroupKey === group.key);
+          const state = groupSelectionState([group.key]);
+          const selectedCount = cards.filter((card) => exactCardSelected(decks.newTestamentVocabulary, card)).length;
+          return <FilterDisclosure key={group.key} title={group.label} summary={`${selectedCount} of ${cards.length} selected`} count={cards.length} nested checked={state.checked} mixed={state.mixed} onCheckedChange={(checked) => changeGroups([group.key], checked)}>
+            {cards.map((card) => <FilterCheckbox key={card.id} label={`#${card.rank} · ${card.front}`} checked={exactCardSelected(decks.newTestamentVocabulary, card)} onChange={(checked) => changeExactCard(decks.newTestamentVocabulary, card, checked)} />)}
+          </FilterDisclosure>;
+        })}
+      </FilterDisclosure>
 
       <FilterDisclosure title="Lesson 1" summary={`${lesson1State.selectedCount} of ${lesson1Keys.length} groups selected`} checked={lesson1State.checked} mixed={lesson1State.mixed} onCheckedChange={(checked) => changeGroups(lesson1Keys, checked)}>
         <FilterDisclosure title="Alphabet" summary={`${alphabetState.selectedCount} of ${alphabetKeys.length} cases selected`} count={countFoundation(categories.uppercase) + countFoundation(categories.lowercase)} nested checked={alphabetState.checked} mixed={alphabetState.mixed} onCheckedChange={(checked) => changeGroups(alphabetKeys, checked)}>
@@ -450,17 +461,6 @@ export function GreekPage() {
 
       <FilterDisclosure title="Lesson 2" summary={`${lesson2State.selectedCount} of ${lesson2Keys.length} groups selected`} checked={lesson2State.checked} mixed={lesson2State.mixed} onCheckedChange={(checked) => changeGroups(lesson2Keys, checked)}>
         <FilterCheckbox label="Accent marks" count={countFoundation(categories.accents)} checked={groupSelectionState([keys.accents]).checked} mixed={groupSelectionState([keys.accents]).mixed} onChange={(checked) => changeGroups([keys.accents], checked)} />
-      </FilterDisclosure>
-
-      <FilterDisclosure title="New Testament Vocab" summary={`${selectedNewTestamentCount} of ${decks.newTestamentVocabulary.cards.length} words selected`} count={decks.newTestamentVocabulary.cards.length} checked={newTestamentState.checked} mixed={newTestamentState.mixed} onCheckedChange={(checked) => changeGroups(newTestamentVocabularyKeys, checked)}>
-        {NEW_TESTAMENT_FREQUENCY_GROUPS.map((group) => {
-          const cards = decks.newTestamentVocabulary.cards.filter((card) => card.metadata?.frequencyGroupKey === group.key);
-          const state = groupSelectionState([group.key]);
-          const selectedCount = cards.filter((card) => exactCardSelected(decks.newTestamentVocabulary, card)).length;
-          return <FilterDisclosure key={group.key} title={group.label} summary={`${selectedCount} of ${cards.length} selected`} count={cards.length} nested checked={state.checked} mixed={state.mixed} onCheckedChange={(checked) => changeGroups([group.key], checked)}>
-            {cards.map((card) => <FilterCheckbox key={card.id} label={`#${card.rank} · ${card.front}`} checked={exactCardSelected(decks.newTestamentVocabulary, card)} onChange={(checked) => changeExactCard(decks.newTestamentVocabulary, card, checked)} />)}
-          </FilterDisclosure>;
-        })}
       </FilterDisclosure>
 
       {lessonCardSets.map(({ config, vocabularyDeck, grammarDeck }) => {
