@@ -7,6 +7,7 @@ export type StudyShortcut =
   | { type: "result"; value: ReviewResult }
   | { type: "difficulty"; value: ReviewDifficulty }
   | { type: "save" }
+  | { type: "pause" }
   | null;
 
 type ShortcutContext = {
@@ -55,12 +56,14 @@ export function studyDeselectShortcut({ key, showingAnswer, typingTarget, contro
 
 export function studyShortcut({ key, startGateOpen, revealed, typingTarget, controlsTarget = false }: ShortcutContext): StudyShortcut {
   const isSpace = key === " " || key === "Spacebar";
+  const normalized = key.toLowerCase();
+  const isPause = normalized === "z" && !startGateOpen && !revealed;
 
   // Genuine text-entry fields keep normal typing behavior. Toolbar selects are
-  // also classified as typing targets by the controllers, but Space must still
-  // belong to the flashcard session after Adaptive/Sequential or Learner/Reviewer
-  // has been clicked. controlsTarget distinguishes those toolbar controls.
-  if (typingTarget && !(isSpace && controlsTarget)) return null;
+  // also classified as typing targets by the controllers, but Space and the
+  // question-side Z pause shortcut still belong to the flashcard session when
+  // a toolbar control has focus.
+  if (typingTarget && !(isSpace && controlsTarget) && !(isPause && controlsTarget)) return null;
 
   // Space is always owned by the flashcard session, even if a toolbar button,
   // select, timer control, rating control, or other non-text control has focus.
@@ -76,11 +79,14 @@ export function studyShortcut({ key, startGateOpen, revealed, typingTarget, cont
   // click the on-screen Start control or press Space.
   if (startGateOpen) return null;
 
-  // Non-Space shortcuts do not override toolbar/start-card controls.
+  // Z is the dedicated question-side timer stop key. It reopens the Start gate
+  // without revealing, grading, or advancing the card.
+  if (isPause) return { type: "pause" };
+
+  // Other non-Space shortcuts do not override toolbar/start-card controls.
   if (controlsTarget) return null;
   if (!revealed) return null;
 
-  const normalized = key.toLowerCase();
   if (normalized === "f") return { type: "flip" };
   if (key === "1") return { type: "difficulty", value: "easy" };
   if (key === "2") return { type: "difficulty", value: "medium" };

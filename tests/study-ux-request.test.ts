@@ -6,9 +6,9 @@ describe("requested Greek and Latin study workflow", () => {
     const session = fs.readFileSync("src/features/study/multi-source-study-session.tsx", "utf8");
     const sidebar = fs.readFileSync("src/features/study/study-session-ui.tsx", "utf8");
 
-    expect(session).toContain("Adapt 1 · Light");
-    expect(session).toContain("Adapt 2 · Standard");
-    expect(session).toContain("Adapt 3 · Intensive");
+    expect(session).toContain("1: Diverse");
+    expect(session).toContain("2: Standard");
+    expect(session).toContain("3: Concentrated");
     expect(session).toContain('event.key === "Enter"');
     expect(session).toContain("back();");
     expect(sidebar).toContain("Words/forms left");
@@ -24,6 +24,8 @@ describe("requested Greek and Latin study workflow", () => {
 
     expect(route).toContain('import("./pages/greek-page-v2")');
     expect(page).toContain('title="Vocabulary words"');
+    expect(page).not.toContain("All Lesson ${config.lesson} vocabulary");
+    expect(page).toContain("FilterDirectionControl");
     expect(page).toContain("<ExactCardSelection");
     expect(page).toContain('title="Endings"');
     expect(page).toContain('label="All Endings"');

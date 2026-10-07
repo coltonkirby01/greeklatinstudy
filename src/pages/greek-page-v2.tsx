@@ -27,7 +27,7 @@ import { useCardExclusions } from "../features/study/card-exclusions";
 import { loadGreekFilterSelection, saveGreekFilterSelection } from "../features/study/filter-preferences";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
 import { loadIncludeSavedCards, saveIncludeSavedCards, savedCardRef, useSavedCards } from "../features/study/saved-cards";
-import { ExactCardSelection, FilterCheckbox, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
+import { ExactCardSelection, FilterCheckbox, FilterDirectionControl, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
 import type { DeckDefinition, StudyCard, StudyDirection } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
 
@@ -421,6 +421,9 @@ export function GreekPage() {
     {(error || savedCards.error) && <div className="inline-alert">{error ?? savedCards.error}</div>}
 
     {decks && <StudyFilterMenu summary={`${selectedCards.length} cards in the current pool`}>
+      <FilterSection title="Study direction" description="Forward and Reverse keep separate review histories, mastery, timing, and scheduling.">
+        <FilterDirectionControl direction={direction} onChange={setDirection} />
+      </FilterSection>
       <FilterSection title="Quick select" onAll={() => { setSelected(new Set(allKeys)); excludedCards.clear(); }} onNone={() => { setSelected(new Set()); setIncludeSavedCards(false); }}>
         <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={changeSavedCards} hint={savedHint} />
         <FilterCheckbox label="All Vocabulary" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onChange={(checked) => changeGroups(allVocabularyKeys, checked)} />
@@ -449,7 +452,6 @@ export function GreekPage() {
         const selectedVocabularyCount = vocabularyDeck.cards.filter((card) => exactCardSelected(vocabularyDeck, card)).length;
         return <FilterDisclosure key={config.lesson} title={`Lesson ${config.lesson}`} summary={`${lessonState.selectedCount} of ${lessonKeys.length} groups selected`} checked={lessonState.checked} mixed={lessonState.mixed} onCheckedChange={(checked) => changeGroups(lessonKeys, checked)}>
           <FilterDisclosure title="Vocabulary" summary={`${selectedVocabularyCount} of ${vocabularyDeck.cards.length} words selected`} count={vocabularyDeck.cards.length} nested checked={vocabularySelection.checked} mixed={vocabularySelection.mixed} onCheckedChange={(checked) => changeGroups([config.vocabularyKey], checked)}>
-            <FilterCheckbox label={`All Lesson ${config.lesson} vocabulary`} count={vocabularyDeck.cards.length} checked={vocabularySelection.checked} mixed={vocabularySelection.mixed} onChange={(checked) => changeGroups([config.vocabularyKey], checked)} />
             <FilterDisclosure title="Vocabulary words" summary={`${selectedVocabularyCount} of ${vocabularyDeck.cards.length} selected`} count={vocabularyDeck.cards.length} nested checked={selectedVocabularyCount === vocabularyDeck.cards.length} mixed={selectedVocabularyCount > 0 && selectedVocabularyCount < vocabularyDeck.cards.length} onCheckedChange={(checked) => changeExactVocabularyDeck(vocabularyDeck, checked)}>
               <ExactCardSelection cards={vocabularyDeck.cards} isSelected={(card) => exactCardSelected(vocabularyDeck, card)} onCardChange={(card, checked) => changeExactCard(vocabularyDeck, card, checked)} sectionTitle={`Lesson ${config.lesson} words`} />
             </FilterDisclosure>
@@ -471,8 +473,6 @@ export function GreekPage() {
       sources={sources}
       resetKey={resetKey}
       direction={direction}
-      onDirectionChange={setDirection}
-      directionLabels={{ forward: "Forward", reverse: "Reverse" }}
       resumeSession={resumeSession}
       savedCardRefs={savedCards.refs}
       onToggleSavedCard={savedCards.toggleSaved}

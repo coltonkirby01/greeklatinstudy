@@ -114,7 +114,7 @@ Do not maintain parallel built-in deck lists in Account, Stats, or session code.
 
 ### Greek and Latin study pages
 
-- `src/pages/greek-page.tsx` — Greek filter composition and unified Greek study surface.
+- `src/pages/greek-page-v2.tsx` — active Greek filter composition and unified Greek study surface.
 - `src/pages/latin-page.tsx` — Latin filter composition and unified Latin study surface.
 - `src/features/study/filter-preferences.ts` — persistent filter selections.
 - `src/features/study/study-filter-menu.tsx` — shared hierarchical selector UI, including Select all/Deselect all actions.
@@ -137,16 +137,17 @@ Do not fork timer, grading, card-face, or scheduler implementations by language.
 
 ### Current keyboard behavior
 
-- Space = Reveal before answer; Save & Next after reveal.
+- Space = Start from the gate; Reveal before answer; Save & Next after reveal.
+- Z = stop active question-side timing and reopen the Start gate.
 - F = flip question/answer after reveal.
-- Enter = toggle Right/Wrong after reveal.
+- Enter = Back on the unrevealed question side when a prior saved grade exists; toggle Right/Wrong after reveal.
 - R/W = intentionally unassigned.
 - 1/2/3 = Easy/Medium/Hard.
 - S = save/unsave a card in built-in Greek/Latin study.
-- A = Greek audio play/pause/replay.
+- A = audio play/pause/replay when audio is available.
 - Shift+Enter = unassigned.
 
-Global shortcuts must not interfere with typing/ordinary controls.
+Any page click during active question-side timing pauses timing and reopens the Start gate. Global shortcuts must not interfere with typing/ordinary controls.
 
 ### Automatic correctness and difficulty
 
@@ -172,7 +173,7 @@ Every language has two deterministic permanent built-in session types:
 
 They exist for old and new users without provisioning rows, cannot be renamed/deleted, and appear as selectable Stats scopes even before they contain reviews. Custom sessions remain available alongside them.
 
-The selected-session Progress sidebar and Stats session view must use the same session identity. Warmups and `statsExcluded` reviews do not inflate ranked session metrics.
+The selected-session Progress sidebar and Stats session view must use the same session identity. Warmups and `statsExcluded` reviews do not inflate session metrics. Session score is overall accuracy only (`Right / total saved reviews × 100`); response time and intrinsic difficulty remain descriptive Stats fields, not score multipliers.
 
 ## Persistence, auth, and cloud synchronization
 

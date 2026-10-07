@@ -19,7 +19,7 @@ export function StudyStartGate({ onStart, onWarmup }: { onStart: () => void; onW
     <div className="study-start-card">
       <p className="eyebrow">Timer paused</p>
       <h2>Ready?</h2>
-      <p>Choose direction or card order above while paused, then begin when ready.</p>
+      <p>Choose card order above or study direction inside Choose cards while paused, then begin when ready.</p>
       <div className="study-start-actions">
         <button type="button" className="primary-button study-start-button" onClick={onStart}>Start</button>
         {onWarmup && <button type="button" className="small-outline-button study-warmup-button" onClick={onWarmup}>Personalized warm-up · 5 cards</button>}

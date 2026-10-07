@@ -263,7 +263,8 @@ function weeklyTrendData(sessions: SessionSummary[]) {
   const score: TrendPoint[] = [], time: TrendPoint[] = [];
   for (const [week, items] of weeks) {
     const reviews = items.reduce((sum, item) => sum + item.reviews, 0), totalTime = items.reduce((sum, item) => sum + item.totalTimeMs, 0);
-    score.push({ label: weekFormatter.format(week), value: items.reduce((sum, item) => sum + item.score, 0) / items.length });
+    const right = items.reduce((sum, item) => sum + item.right, 0);
+    score.push({ label: weekFormatter.format(week), value: reviews ? right / reviews * 100 : 0 });
     time.push({ label: weekFormatter.format(week), value: reviews ? totalTime / reviews / 1_000 : 0 });
   }
   return { score, time };
@@ -387,7 +388,7 @@ function renderSessionChoice(session: SessionSummary) {
     <input type="checkbox" aria-label={`Include ${session.name} in Stats`} checked={allSessionsSelected || (selectedSessions?.has(session.id) ?? false)} onChange={(event) => toggleSession(session.id, event.target.checked)} />
     <div style={{ minWidth: 0, flex: "1 1 auto", display: "grid", gap: "0.14rem" }}>
       {editing ? <input autoFocus value={draftName} maxLength={80} aria-label="Session name" disabled={busy} style={{ margin: 0, width: "100%", minWidth: 0, padding: "0.25rem 0.4rem", border: "1px solid var(--line)", borderRadius: "6px", background: "var(--surface)", color: "var(--foreground)", font: "inherit", fontWeight: 700 }} onFocus={(event) => event.currentTarget.select()} onChange={(event) => setDraftName(event.target.value)} onBlur={() => void saveRename(session)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); event.currentTarget.blur(); } if (event.key === "Escape") { event.preventDefault(); setEditingSessionId(null); setDraftName(""); } }} /> : session.builtin ? <strong>{sessionName(session)}</strong> : <strong role="button" tabIndex={0} title="Double-click to rename" onDoubleClick={() => beginRename(session)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === "F2") beginRename(session); }}>{sessionName(session)}</strong>}
-      <small>{dateTime(session.startedAt)} · {session.reviews} reviews · score {session.score.toFixed(1)}{session.inferred ? " · imported legacy history" : ""}</small>
+      <small>{dateTime(session.startedAt)} · {session.reviews} reviews · score {session.score.toFixed(1)}%{session.inferred ? " · imported legacy history" : ""}</small>
     </div>
     <div className="stats-filter-actions"><button className="text-button" type="button" onClick={() => setSelectedSessions(new Set([session.id]))}>Only</button>{!session.builtin && <button className="text-button" type="button" disabled={busy} onClick={() => void deleteSession(session)}>Delete</button>}</div>
   </div>;
@@ -411,7 +412,7 @@ return <main className="page-shell stats-page">
     </section>
 
     <section className="stats-trend-grid">
-      <TrendChart title="Session score by week" subtitle="Average ranked-session score" points={trends.score} format={(value) => value.toFixed(1)} />
+      <TrendChart title="Session score by week" subtitle="Overall accuracy of the selected session reviews" points={trends.score} format={(value) => `${value.toFixed(1)}%`} />
       <TrendChart title="Recall time by week" subtitle="Average active front-side time" points={trends.time} format={(value) => `${value.toFixed(value < 10 ? 2 : 1)} s`} lowerIsBetter />
     </section>
 
@@ -452,8 +453,8 @@ function LanguageStats({ language, rows, cards, sessions, href, sessionName }: {
     </div>
 
     <div className="panel-surface stats-table-wrap">
-      <div className="stats-section-heading"><div><p className="eyebrow">Session analysis</p><h3>Session rankings</h3><p>Learner and Reviewer are permanent session types. Custom sessions can be continued, renamed, or deleted while adaptive learning memory remains intact.</p></div><TrendingUp aria-hidden="true" /></div>
-      {rankedSessions.length ? <div className="stats-table-scroll"><table className="stats-table stats-session-table"><thead><tr><th>Rank</th><th>Session</th><th>Reviews</th><th>Accuracy</th><th>Avg. difficulty</th><th>Total time</th><th>Avg. time</th><th>Score</th><th>Vs. previous</th><th>Actions</th></tr></thead><tbody>{rankedSessions.map((session, index) => <tr key={session.id}><td>#{index + 1}</td><td><strong>{sessionName(session)}</strong><span className="stats-session-date">{dateTime(session.startedAt)}{session.inferred ? " · legacy inferred" : ""}</span></td><td>{session.reviews}</td><td>{percent(session.accuracy)}</td><td>{difficultyLabel(session.averageCardDifficulty)}</td><td>{formatDuration(session.totalTimeMs)}</td><td>{formatResponseTime(session.averageTimeMs)}</td><td><strong>{session.score.toFixed(1)}</strong></td><td>{session.changeFromPrevious === null ? "—" : `${session.changeFromPrevious >= 0 ? "+" : ""}${session.changeFromPrevious.toFixed(1)}`}</td><td><div className="stats-session-actions">{!session.inferred && <Link className="small-outline-button" to={`${href}?session=${encodeURIComponent(session.id)}&sessionStartedAt=${session.startedAt || Date.now()}`}>Continue</Link>}</div></td></tr>)}</tbody></table></div> : <p className="stats-empty">No sessions match this Stats selection.</p>}
+      <div className="stats-section-heading"><div><p className="eyebrow">Session analysis</p><h3>Session rankings</h3><p>Session score is simply overall accuracy: percent of saved reviews answered Right. Speed and card difficulty remain visible statistics but do not change the session score.</p></div><TrendingUp aria-hidden="true" /></div>
+      {rankedSessions.length ? <div className="stats-table-scroll"><table className="stats-table stats-session-table"><thead><tr><th>Rank</th><th>Session</th><th>Reviews</th><th>Accuracy</th><th>Avg. difficulty</th><th>Total time</th><th>Avg. time</th><th>Score</th><th>Vs. previous</th><th>Actions</th></tr></thead><tbody>{rankedSessions.map((session, index) => <tr key={session.id}><td>#{index + 1}</td><td><strong>{sessionName(session)}</strong><span className="stats-session-date">{dateTime(session.startedAt)}{session.inferred ? " · legacy inferred" : ""}</span></td><td>{session.reviews}</td><td>{percent(session.accuracy)}</td><td>{difficultyLabel(session.averageCardDifficulty)}</td><td>{formatDuration(session.totalTimeMs)}</td><td>{formatResponseTime(session.averageTimeMs)}</td><td><strong>{session.score.toFixed(1)}%</strong></td><td>{session.changeFromPrevious === null ? "—" : `${session.changeFromPrevious >= 0 ? "+" : ""}${session.changeFromPrevious.toFixed(1)} pp`}</td><td><div className="stats-session-actions">{!session.inferred && <Link className="small-outline-button" to={`${href}?session=${encodeURIComponent(session.id)}&sessionStartedAt=${session.startedAt || Date.now()}`}>Continue</Link>}</div></td></tr>)}</tbody></table></div> : <p className="stats-empty">No sessions match this Stats selection.</p>}
     </div>
 
     <div className="panel-surface stats-table-wrap">

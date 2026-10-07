@@ -42,6 +42,15 @@ describe("study keyboard shortcuts", () => {
     expect(studyShortcut({ ...context, key: " ", revealed: true, result: "right", typingTarget: true, controlsTarget: true })).toEqual({ type: "save" });
   });
 
+  it("uses Z to pause question-side timing without revealing or grading", () => {
+    expect(studyShortcut({ ...context, key: "z" })).toEqual({ type: "pause" });
+    expect(studyShortcut({ ...context, key: "Z" })).toEqual({ type: "pause" });
+    expect(studyShortcut({ ...context, key: "z", controlsTarget: true })).toEqual({ type: "pause" });
+    expect(studyShortcut({ ...context, key: "z", startGateOpen: true })).toBeNull();
+    expect(studyShortcut({ ...context, key: "z", revealed: true })).toBeNull();
+    expect(studyShortcut({ ...context, key: "z", typingTarget: true })).toBeNull();
+  });
+
   it("maps F to flip and 1/2/3 to difficulty only after reveal", () => {
     expect(studyShortcut({ ...context, key: "f" })).toBeNull();
     expect(studyShortcut({ ...context, key: "f", revealed: true })).toEqual({ type: "flip" });

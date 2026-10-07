@@ -65,6 +65,9 @@
   gap: 0.4rem;
 }
 
+.filter-direction-control { width: min(100%, 22rem); }
+.filter-direction-control button { flex: 1 1 0; }
+
 .filter-checkbox {
   min-height: 42px;
   padding: 0.48rem 0.58rem;
