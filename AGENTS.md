@@ -37,7 +37,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - Greek filtering is organized by lesson.
 - Lesson 1 contains Alphabet and Punctuation. Alphabet expands to independent Uppercase and Lowercase choices. Alphabet and punctuation are Grammar, not vocabulary.
 - Lesson 2 contains Accent Marks. Accent marks are Grammar, not vocabulary.
-- Current Greek vocabulary sources are Lessons 3–10 Vocabulary. Lessons 3–10 expose Vocabulary and Endings in the active menu; paradigm source cards are not exposed there. Each lesson Vocabulary heading is already its all-vocabulary selector, and Vocabulary words exposes exact cards, so do not add a redundant “All Lesson N vocabulary” row.
+- Current Greek vocabulary sources are Lessons 3–10 Vocabulary. Lessons 3–10 expose Vocabulary and Endings in the active menu; paradigm source cards are not exposed there. Each lesson Vocabulary heading is already its all-vocabulary selector and exposes exact word checkboxes immediately beneath it; do not add a redundant “Vocabulary words” or “All Lesson N vocabulary” layer.
 - Greek Lesson 3 contains separate Vocabulary, Endings, and Paradigms groupings. Lesson 3 Grammar currently contains six cards: three ending-only cards (Present Active Indicative, Infinitive, Imperative) plus three corresponding παιδεύω paradigm cards.
 - The three ending cards each preserve one complete endings chart; the three paradigm cards each preserve one complete παιδεύω chart. Do not decompose them into isolated person/number questions unless explicitly requested.
 - Lesson 3 grammar is currently forward-only. Do not add a reverse grammar direction unless explicitly requested; vocabulary Forward/Reverse remains separate.
@@ -88,7 +88,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - A card's displayed flip/front-back behavior must not collapse the logical distinction between Forward and Reverse.
 - Mixed Greek and Latin sessions may rank cards from multiple persisted sources together, but each review must save to its original deck and study mode.
 - Direction (inside Choose cards) and card order (Adaptive/Sequential/Shuffle in the toolbar) remain adjustable while the Start gate is open. Changing them must not start the timer. Adaptive strength labels are 1: Diverse, 2: Standard, and 3: Concentrated.
-- Z stops active question-side timing and reopens the Start gate. Any page click while question-side timing is active does the same; the interrupting flashcard click must not reveal the answer.
+- The timer toolbar visibly labels `Z` as the Pause shortcut. Z stops active question-side timing and reopens the Start gate. Any page click while question-side timing is active does the same; the interrupting flashcard click must not reveal the answer.
 - Sequential follows the current selected/available pool in defined order.
 - Shuffle is equal-coverage random order: every currently selected/available card appears exactly once per shuffle cycle. After a full cycle, generate a new random permutation; do not repeat the exact immediately previous permutation, and avoid an immediate same-card repeat across the cycle boundary when more than one card is available.
 - The live Progress panel beside the Greek and Latin flashcards is page-visit-specific, not persistent-session-specific. Its reviewed count, accuracy, wrong/hard counts, average time, right-once count, streak, and completion/mastery bar use reviews made since that page visit began.
@@ -200,3 +200,5 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - A high score must require demonstrated performance, not merely attempting hard material. Difficulty raises potential reward, while accuracy, active recall speed, retention/mastery breadth, and streaks determine whether that reward is earned.
 - Stats show overall, Greek, and Latin proficiency plus reviewed difficulty and hardest mastered material.
 - Ranked session scores account for intrinsic difficulty, accuracy, speed, and streaks. Warm-up activity is excluded from ranked session scoring.
+
+- `kubo-new-testament-vocab` contains the 301 entries in Kubo Appendix I’s general frequency list (pp. 274–277), ordered by descending occurrence frequency. Do not import John-only special-vocabulary entries from the later John lists. Preserve the source occurrence count and frequency rank on every card and group the selector into 1,000+, 500–999, 250–499, 150–249, 100–149, 75–99, 60–74, and 50–59 parent bands. These frequency bands are valid persistent filter keys but are not selected by default; explicit All Vocabulary / Select all actions may select them.

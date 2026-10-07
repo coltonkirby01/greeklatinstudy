@@ -18,15 +18,16 @@ describe("requested Greek and Latin study workflow", () => {
     expect(session).toContain("Return to larger sessions");
   });
 
-  it("routes Greek to a menu with vocabulary words and endings but no paradigm selector", () => {
+  it("routes Greek to direct vocabulary words and endings but no paradigm selector", () => {
     const route = fs.readFileSync("src/route-preload.ts", "utf8");
     const page = fs.readFileSync("src/pages/greek-page-v2.tsx", "utf8");
 
     expect(route).toContain('import("./pages/greek-page-v2")');
-    expect(page).toContain('title="Vocabulary words"');
+    expect(page).not.toContain('title="Vocabulary words"');
+    expect(page).toContain('title="New Testament Vocab"');
     expect(page).not.toContain("All Lesson ${config.lesson} vocabulary");
     expect(page).toContain("FilterDirectionControl");
-    expect(page).toContain("<ExactCardSelection");
+    expect(page).toContain('label={`#${card.rank} · ${card.front}`}');
     expect(page).toContain('title="Endings"');
     expect(page).toContain('label="All Endings"');
     expect(page).not.toContain('title="Paradigms"');

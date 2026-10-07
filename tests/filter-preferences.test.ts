@@ -19,6 +19,13 @@ describe("study filter preferences", () => {
     expect([...loadGreekFilterSelection(["lesson1-uppercase"], storage)]).toEqual([]);
   });
 
+  it("can restore optional Greek groups without enabling them by default", () => {
+    const storage = memoryStorage();
+    expect([...loadGreekFilterSelection(["lesson3-vocabulary"], storage, ["lesson3-vocabulary", "nt-vocab-1000-plus"])]).toEqual(["lesson3-vocabulary"]);
+    saveGreekFilterSelection(new Set(["nt-vocab-1000-plus"]), storage);
+    expect([...loadGreekFilterSelection(["lesson3-vocabulary"], storage, ["lesson3-vocabulary", "nt-vocab-1000-plus"])]).toEqual(["nt-vocab-1000-plus"]);
+  });
+
   it("restores Latin vocabulary and paradigm selections exactly", () => {
     const storage = memoryStorage();
     saveLatinFilterPreferences({
