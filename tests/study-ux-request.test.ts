@@ -31,7 +31,8 @@ describe("requested Greek and Latin study workflow", () => {
     expect(page).toContain('title="Greek Lessons (Groton)"');
     expect(page).not.toContain("All Lesson ${config.lesson} vocabulary");
     expect(page).toContain("FilterDirectionControl");
-    expect(page).toContain('label={`#${card.rank} · ${card.front}`}');
+    expect(page).toContain('oneWordVocabularyGloss(card.back)');
+    expect(page.match(/oneWordVocabularyGloss\(card\.back\)/g)?.length).toBe(2);
     expect(page).toContain('title="Endings"');
     expect(page).toContain('label="All Endings"');
     expect(page).not.toContain('title="Paradigms"');
