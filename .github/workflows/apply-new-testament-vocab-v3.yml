@@ -1,0 +1,59 @@
+name: Apply New Testament vocabulary integration v3
+
+on:
+  push:
+    branches: [feature/new-testament-vocab]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/new-testament-vocab
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply integration and current selector convention
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+
+          workflow = Path('.github/workflows/apply-new-testament-vocab.yml').read_text(encoding='utf-8')
+          start_marker = "          python - <<'PY'\n"
+          end_marker = "\n          PY\n"
+          start = workflow.index(start_marker) + len(start_marker)
+          end = workflow.index(end_marker, start)
+          script = textwrap.dedent(workflow[start:end]).replace('src/components/how-site-works.tsx', 'src/pages/how-site-works.tsx')
+          exec(compile(script, '<new-testament-integration>', 'exec'))
+
+          test_path = Path('tests/study-ux-request.test.ts')
+          test = test_path.read_text(encoding='utf-8')
+          test = test.replace('it("routes Greek to a menu with vocabulary words and endings but no paradigm selector", () => {', 'it("routes Greek to a menu with direct vocabulary words and endings but no paradigm selector", () => {')
+          test = test.replace('expect(page).toContain(\'title="Vocabulary words"\');', 'expect(page).not.toContain(\'title="Vocabulary words"\');\n    expect(page).toContain(\'title="Vocabulary"\');\n    expect(page).toContain("sectionTitle={null}");')
+          test_path.write_text(test, encoding='utf-8')
+          PY
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify maintenance, tests, and Pages build
+        run: |
+          npm run maintain:check
+          npm test
+          npm run build:pages
+      - name: Commit verified changes
+        shell: bash
+        run: |
+          rm .github/workflows/apply-new-testament-vocab.yml .github/workflows/apply-new-testament-vocab-v2.yml .github/workflows/apply-new-testament-vocab-v3.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add frequency-ranked New Testament Greek vocabulary"
+          git push origin feature/new-testament-vocab
