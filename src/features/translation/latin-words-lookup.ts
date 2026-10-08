@@ -5,7 +5,7 @@ type ProxyPayload = {
   error?: unknown;
 };
 
-const CACHE_PREFIX = "translation-helper-latin-words-v1:";
+const CACHE_PREFIX = "translation-helper-latin-words-v2:";
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const memoryCache = new Map<string, DictionaryMatch[]>();
 
@@ -30,7 +30,7 @@ function isDictionaryMatch(value: unknown): value is DictionaryMatch {
 
 function normalizeMatches(payload: ProxyPayload) {
   if (!Array.isArray(payload.matches)) return [];
-  return payload.matches.filter(isDictionaryMatch).slice(0, 12);
+  return payload.matches.filter(isDictionaryMatch);
 }
 
 function readPersistentCache(word: string) {
@@ -43,14 +43,19 @@ function readPersistentCache(word: string) {
       localStorage.removeItem(`${CACHE_PREFIX}${word}`);
       return null;
     }
-    return parsed.matches.filter(isDictionaryMatch).slice(0, 12);
+    const matches = parsed.matches.filter(isDictionaryMatch);
+    if (!matches.length) {
+      localStorage.removeItem(`${CACHE_PREFIX}${word}`);
+      return null;
+    }
+    return matches;
   } catch {
     return null;
   }
 }
 
 function writePersistentCache(word: string, matches: DictionaryMatch[]) {
-  if (typeof localStorage === "undefined") return;
+  if (typeof localStorage === "undefined" || !matches.length) return;
   try {
     localStorage.setItem(`${CACHE_PREFIX}${word}`, JSON.stringify({
       expiresAt: Date.now() + CACHE_TTL_MS,
@@ -102,7 +107,9 @@ export async function lookupLatinWords(surface: string): Promise<DictionaryMatch
   if (typeof proxy.error === "string") throw new Error(proxy.error);
 
   const matches = normalizeMatches(proxy);
-  memoryCache.set(word, matches);
-  writePersistentCache(word, matches);
+  if (matches.length) {
+    memoryCache.set(word, matches);
+    writePersistentCache(word, matches);
+  }
   return matches;
 }
