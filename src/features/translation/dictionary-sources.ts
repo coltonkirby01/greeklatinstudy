@@ -5,7 +5,6 @@ import {
   loadGreekLesson6VocabularyDeck,
   loadGreekLesson7VocabularyDeck,
   loadGreekLesson8VocabularyDeck,
-  loadLatinDeck,
 } from "../../data/builtin-decks";
 import { loadGreekLesson9VocabularyDeck, loadGreekLesson10VocabularyDeck } from "../../data/greek-lessons-9-10";
 import { loadGreekNewTestamentVocabularyDeck } from "../../data/greek-new-testament-vocab";
@@ -19,6 +18,7 @@ export type DictionaryMatch = {
   source: string;
   sourceRef?: string;
   externalUrl?: string;
+  morphology?: string[];
 };
 
 const ignoredHeadwordTokens = new Set([
@@ -81,41 +81,29 @@ function addDeck(index: Map<string, DictionaryMatch[]>, deck: DeckDefinition, fa
 }
 
 let greekIndexPromise: Promise<Map<string, DictionaryMatch[]>> | null = null;
-let latinIndexPromise: Promise<Map<string, DictionaryMatch[]>> | null = null;
 
 export function loadTranslationDictionary(language: TranslationHelperLanguage) {
-  if (language === "greek") {
-    greekIndexPromise ??= Promise.all([
-      loadGreekLesson3VocabularyDeck(),
-      loadGreekLesson4VocabularyDeck(),
-      loadGreekLesson5VocabularyDeck(),
-      loadGreekLesson6VocabularyDeck(),
-      loadGreekLesson7VocabularyDeck(),
-      loadGreekLesson8VocabularyDeck(),
-      loadGreekLesson9VocabularyDeck(),
-      loadGreekLesson10VocabularyDeck(),
-      loadGreekNewTestamentVocabularyDeck(),
-    ]).then((decks) => {
-      const index = new Map<string, DictionaryMatch[]>();
-      for (const deck of decks.slice(0, 8)) addDeck(index, deck, "Groton, From Alpha to Omega");
-      addDeck(index, decks[8], "Kubo New Testament Vocabulary");
-      return index;
-    });
-    return greekIndexPromise;
-  }
+  if (language === "latin") return Promise.resolve(new Map<string, DictionaryMatch[]>());
 
-  latinIndexPromise ??= loadLatinDeck().then((deck) => {
+  greekIndexPromise ??= Promise.all([
+    loadGreekLesson3VocabularyDeck(),
+    loadGreekLesson4VocabularyDeck(),
+    loadGreekLesson5VocabularyDeck(),
+    loadGreekLesson6VocabularyDeck(),
+    loadGreekLesson7VocabularyDeck(),
+    loadGreekLesson8VocabularyDeck(),
+    loadGreekLesson9VocabularyDeck(),
+    loadGreekLesson10VocabularyDeck(),
+    loadGreekNewTestamentVocabularyDeck(),
+  ]).then((decks) => {
     const index = new Map<string, DictionaryMatch[]>();
-    addDeck(index, deck, "Dickinson College Commentaries Latin Core Vocabulary");
+    for (const deck of decks.slice(0, 8)) addDeck(index, deck, "Groton, From Alpha to Omega");
+    addDeck(index, decks[8], "Kubo New Testament Vocabulary");
     return index;
   });
-  return latinIndexPromise;
+  return greekIndexPromise;
 }
 
 export function lookupDictionaryWord(index: Map<string, DictionaryMatch[]>, surface: string) {
   return index.get(normalizeDictionaryKey(surface)) ?? [];
-}
-
-export function latinFallbackUrl(surface: string) {
-  return `https://www.online-latin-dictionary.com/latin-english-dictionary.php?parola=${encodeURIComponent(surface)}`;
 }
