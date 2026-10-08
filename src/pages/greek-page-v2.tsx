@@ -20,6 +20,8 @@ import {
   loadGreekLesson9VocabularyDeck,
   loadGreekLesson10GrammarDeck,
   loadGreekLesson10VocabularyDeck,
+  loadGreekLesson11GrammarDeck,
+  loadGreekLesson11VocabularyDeck,
 } from "../data/greek-lessons-9-10";
 import { NEW_TESTAMENT_FREQUENCY_GROUPS, loadGreekNewTestamentVocabularyDeck, newTestamentFrequencyGroupForCard } from "../data/greek-new-testament-vocab";
 import { useAuth } from "../features/auth/auth-context";
@@ -77,6 +79,13 @@ const keys = {
   firstDeclensionMasculineEndings: "lesson9-first-declension-masculine-endings",
   lesson10Vocabulary: "lesson10-vocabulary",
   imperfectActiveIndicativeEndings: "lesson10-imperfect-active-indicative-endings",
+  lesson11Vocabulary: "lesson11-vocabulary",
+  presentMiddlePassiveIndicativeEndings: "lesson11-present-middle-passive-indicative-endings",
+  presentMiddlePassiveInfinitiveEndings: "lesson11-present-middle-passive-infinitive-endings",
+  futureMiddleIndicativeEndings: "lesson11-future-middle-indicative-endings",
+  futureMiddleInfinitiveEndings: "lesson11-future-middle-infinitive-endings",
+  imperfectMiddlePassiveIndicativeEndings: "lesson11-imperfect-middle-passive-indicative-endings",
+  presentMiddlePassiveImperativeEndings: "lesson11-present-middle-passive-imperative-endings",
 } as const;
 
 type KeyValue = (typeof keys)[keyof typeof keys];
@@ -100,6 +109,8 @@ type LoadedDecks = {
   lesson9Grammar: DeckDefinition;
   lesson10Vocabulary: DeckDefinition;
   lesson10Grammar: DeckDefinition;
+  lesson11Vocabulary: DeckDefinition;
+  lesson11Grammar: DeckDefinition;
   newTestamentVocabulary: DeckDefinition;
 };
 
@@ -154,6 +165,14 @@ const lesson9CategoryByKey = new Map<string, string>([
 const lesson10CategoryByKey = new Map<string, string>([
   [keys.imperfectActiveIndicativeEndings, "Imperfect Active Indicative Endings"],
 ]);
+const lesson11CategoryByKey = new Map<string, string>([
+  [keys.presentMiddlePassiveIndicativeEndings, "Present Middle/Passive Indicative Endings"],
+  [keys.presentMiddlePassiveInfinitiveEndings, "Present Middle/Passive Infinitive Endings"],
+  [keys.futureMiddleIndicativeEndings, "Future Middle Indicative Endings"],
+  [keys.futureMiddleInfinitiveEndings, "Future Middle Infinitive Endings"],
+  [keys.imperfectMiddlePassiveIndicativeEndings, "Imperfect Middle/Passive Indicative Endings"],
+  [keys.presentMiddlePassiveImperativeEndings, "Present Middle/Passive Imperative Endings"],
+]);
 
 const lessonConfigs: LessonConfig[] = [
   { lesson: 3, vocabularyKey: keys.lesson3Vocabulary, vocabularyDeck: "lesson3Vocabulary", grammarDeck: "lesson3Grammar", endingKeys: [keys.presentActiveIndicativeEndings, keys.presentActiveInfinitiveEndings, keys.presentActiveImperativeEndings], categoryByKey: lesson3CategoryByKey },
@@ -164,6 +183,7 @@ const lessonConfigs: LessonConfig[] = [
   { lesson: 8, vocabularyKey: keys.lesson8Vocabulary, vocabularyDeck: "lesson8Vocabulary", grammarDeck: "lesson8Grammar", endingKeys: [keys.secondDeclensionNeuterEndings, keys.neuterArticleSingular, keys.neuterArticlePlural, keys.adjectiveMasculineEndings, keys.adjectiveFeminineEndings, keys.adjectiveNeuterEndings], categoryByKey: lesson8CategoryByKey },
   { lesson: 9, vocabularyKey: keys.lesson9Vocabulary, vocabularyDeck: "lesson9Vocabulary", grammarDeck: "lesson9Grammar", endingKeys: [keys.firstDeclensionMasculineEndings], categoryByKey: lesson9CategoryByKey },
   { lesson: 10, vocabularyKey: keys.lesson10Vocabulary, vocabularyDeck: "lesson10Vocabulary", grammarDeck: "lesson10Grammar", endingKeys: [keys.imperfectActiveIndicativeEndings], categoryByKey: lesson10CategoryByKey },
+  { lesson: 11, vocabularyKey: keys.lesson11Vocabulary, vocabularyDeck: "lesson11Vocabulary", grammarDeck: "lesson11Grammar", endingKeys: [keys.presentMiddlePassiveIndicativeEndings, keys.presentMiddlePassiveInfinitiveEndings, keys.futureMiddleIndicativeEndings, keys.futureMiddleInfinitiveEndings, keys.imperfectMiddlePassiveIndicativeEndings, keys.presentMiddlePassiveImperativeEndings], categoryByKey: lesson11CategoryByKey },
 ];
 
 const lessonVocabularyKeys = lessonConfigs.map((config) => config.vocabularyKey);
@@ -214,7 +234,7 @@ function GreekEndingChart({ card }: { card: StudyCard }) {
   const columns = chartColumns(card), rows = chartRows(card);
   const lesson = Number(card.metadata?.lesson ?? 0);
   const explicitRowHeader = typeof card.metadata?.rowHeaderLabel === "string" ? card.metadata.rowHeaderLabel : "";
-  const firstColumnLabel = explicitRowHeader || (lesson === 3 || lesson === 6 || lesson === 10 ? (columns.length === 1 ? "Form" : "Person") : "Case");
+  const firstColumnLabel = explicitRowHeader || (lesson === 3 || lesson === 6 || lesson === 10 || lesson === 11 ? (columns.length === 1 ? "Form" : "Person") : "Case");
   return <div className="chart-scroll">
     <table className="henle-chart">
       <thead><tr><th scope="col">{firstColumnLabel}</th>{columns.map((column) => <th scope="col" key={column}>{column}</th>)}</tr></thead>
@@ -239,7 +259,7 @@ function deckList(decks: LoadedDecks) {
 
 export function GreekPage() {
   const { value: decks, error } = useAsync(async () => {
-    const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, newTestamentVocabulary] = await Promise.all([
+    const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, newTestamentVocabulary] = await Promise.all([
       loadGreekDeck(),
       loadGreekLesson3VocabularyDeck(), loadGreekLesson3GrammarDeck(),
       loadGreekLesson4VocabularyDeck(), loadGreekLesson4GrammarDeck(),
@@ -249,9 +269,10 @@ export function GreekPage() {
       loadGreekLesson8VocabularyDeck(), loadGreekLesson8GrammarDeck(),
       loadGreekLesson9VocabularyDeck(), loadGreekLesson9GrammarDeck(),
       loadGreekLesson10VocabularyDeck(), loadGreekLesson10GrammarDeck(),
+      loadGreekLesson11VocabularyDeck(), loadGreekLesson11GrammarDeck(),
       loadGreekNewTestamentVocabularyDeck(),
     ]);
-    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, newTestamentVocabulary } satisfies LoadedDecks;
+    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, newTestamentVocabulary } satisfies LoadedDecks;
   }, []);
   const { user } = useAuth();
   const savedCards = useSavedCards("greek", user);
