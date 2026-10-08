@@ -38,6 +38,19 @@ When latin-words.com returns more than one valid analysis, the helper must prese
 
 Morphology labels are expanded for readability from the abbreviations returned by Whitaker's Words. For example, `ACC S F` is displayed as `accusative · singular · feminine`, while a verb analysis can display tense, voice, mood, person, and number. The site must not invent a grammatical analysis that is not present in the source output.
 
+## Saved vocabulary flash cards
+
+Authenticated users can save a lookup result into a private vocabulary deck from the Translation Helper. The chooser is deliberately **lexical**, not morphological.
+
+- Every distinct source dictionary entry/sense available for the clicked word is shown as a checkbox with its headword, definition, and source.
+- Results that have the same headword, definition, and source but differ only in grammatical analysis are combined into one choice. A nominative and accusative analysis, or two tense/person analyses of the same lexical entry, must not become separate vocabulary cards.
+- Genuine lexical alternatives remain separate choices. The helper does not silently pick one when the source provides more than one possible dictionary entry.
+- The saved flashcard uses the source dictionary headword as the front and the selected source definition as the back. The clicked surface form is retained as metadata but is not used to create a separate inflection card.
+- Vocabulary choices are stored in the authenticated user's private `translation_vocab_cards` rows and protected by row-level security.
+- The Greek and Latin study apps expose these cards as a separate top-level **Translation Helper Vocab** deck. It is independently selectable, supports Forward and Reverse study, and permits exact-card selection.
+- Removing a checkbox in the Translation Helper removes that lexical choice from the account's Translation Helper vocabulary deck.
+- Signed-out learners can inspect the available lexical choices but must sign in to save them to the cross-device deck.
+
 ## File ingestion
 
 The current Translation Helper supports pasted text plus local extraction from TXT/MD, DOCX, and text-based PDF files. Extracted text is placed in the editable review box before the learner creates the clickable reading view.
@@ -70,8 +83,9 @@ Authenticated users have a private `translation_texts` collection in Supabase. R
 - Extraction and cloud-save progress or failures are surfaced instead of failing silently.
 - Words are rendered as clickable tokens while punctuation and whitespace are preserved.
 - The lookup panel remains visible beside the text on desktop and below it on narrow screens.
+- The lookup panel includes the lexical vocabulary chooser whenever the source returns one or more dictionary entries.
 - The Latin lookup panel prominently identifies Whitaker's Words Online and links to latin-words.com.
 - Latin results come only from latin-words.com and show meaning plus form analysis when available.
-- Ambiguous Latin forms remain visible as multiple possible analyses.
+- Ambiguous Latin forms remain visible as multiple possible analyses, while morphology-only duplicates collapse to one vocabulary-saving choice.
 - Successful Latin lookups are cached locally for seven days.
 - Greek does not fall back outside Groton/Kubo.
