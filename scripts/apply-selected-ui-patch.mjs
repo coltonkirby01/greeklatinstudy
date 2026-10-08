@@ -66,7 +66,7 @@ patchFile("src/pages/greek-page-v2.tsx", [
   }, [decks, savedCards.refs]);
   const savedCardFilterItems = useMemo<SavedCardFilterItem[]>(() => savedCardEntries.map(({ key, card }) => ({
     key,
-    label: `${card.rank ? `#${card.rank} · ` : ""}${card.front}`,
+    label: (card.rank ? "#" + card.rank + " · " : "") + card.front,
     checked: includeSavedCards && !excludedCards.refs.has(key),
   })), [excludedCards.refs, includeSavedCards, savedCardEntries]);
   const savedCardCount = savedCardEntries.length;
@@ -82,7 +82,7 @@ patchFile("src/pages/greek-page-v2.tsx", [
       const key = savedCardRef(source.deck.id, card.id);
       if (seen.has(key)) return [];
       seen.add(key);
-      return [{ key, deckId: source.deck.id, cardId: card.id, label: `${card.rank ? `#${card.rank} · ` : ""}${card.front}` }];
+      return [{ key, deckId: source.deck.id, cardId: card.id, label: (card.rank ? "#" + card.rank + " · " : "") + card.front }];
     }));
   }, [sources]);
 `,
@@ -137,7 +137,7 @@ patchFile("src/pages/latin-page.tsx", [
   }, [savedCards.refs, savedSourceDecks]);
   const savedCardFilterItems = useMemo<SavedCardFilterItem[]>(() => savedCardEntries.map(({ key, card }) => ({
     key,
-    label: `${card.rank ? `#${card.rank} · ` : ""}${card.front.split(" — R.")[0]}`,
+    label: (card.rank ? "#" + card.rank + " · " : "") + card.front.split(" — R.")[0],
     checked: includeSavedCards && !excludedCards.refs.has(key),
   })), [excludedCards.refs, includeSavedCards, savedCardEntries]);
   const savedCardCount = savedCardEntries.length;
@@ -153,7 +153,7 @@ patchFile("src/pages/latin-page.tsx", [
       const key = savedCardRef(source.deck.id, card.id);
       if (seen.has(key)) return [];
       seen.add(key);
-      return [{ key, deckId: source.deck.id, cardId: card.id, label: `${card.rank ? `#${card.rank} · ` : ""}${card.front.split(" — R.")[0]}` }];
+      return [{ key, deckId: source.deck.id, cardId: card.id, label: (card.rank ? "#" + card.rank + " · " : "") + card.front.split(" — R.")[0] }];
     }));
   }, [sources]);
 `,
