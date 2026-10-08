@@ -10,11 +10,13 @@ import {
   loadLatinPage,
   loadNotFoundPage,
   loadStatsPage,
+  loadTranslationHelperPage,
 } from "./route-preload";
 
 const HomePage = lazy(async () => ({ default: (await loadHomePage()).HomePage }));
 const GreekPage = lazy(async () => ({ default: (await loadGreekPage()).GreekPage }));
 const LatinPage = lazy(async () => ({ default: (await loadLatinPage()).LatinPage }));
+const TranslationHelperPage = lazy(async () => ({ default: (await loadTranslationHelperPage()).TranslationHelperPage }));
 const StatsPage = lazy(async () => ({ default: (await loadStatsPage()).StatsPage }));
 const DynamicDeckPage = lazy(async () => ({ default: (await loadDynamicDeckPage()).DynamicDeckPage }));
 const AccountPage = lazy(async () => ({ default: (await loadAccountPage()).AccountPage }));
@@ -33,6 +35,7 @@ export function App() {
 <Route index element={<HomePage />} />
 <Route path="greek" element={<GreekPage />} />
 <Route path="latin" element={<LatinPage />} />
+<Route path="translation-helper" element={<TranslationHelperPage />} />
 <Route path="latin/passive-indicative-paradigms" element={<Navigate to="/latin" replace />} />
 <Route path="stats" element={<StatsPage />} />
 <Route path="decks/:slug" element={<DynamicDeckPage />} />
