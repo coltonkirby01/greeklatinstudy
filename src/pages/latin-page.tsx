@@ -495,7 +495,7 @@ export function LatinPage() {
   const passiveParadigmStudyCards = useMemo(() => passiveParadigmDeck?.cards.filter((card) => selected(paradigmCards, card.id) && !excludedCards.refs.has(savedCardRef(passiveParadigmDeck.id, card.id))) ?? [], [excludedCards.refs, paradigmCards, passiveParadigmDeck]);
   const passiveSubjunctiveStudyCards = useMemo(() => passiveSubjunctiveDeck?.cards.filter((card) => selected(paradigmCards, card.id) && !excludedCards.refs.has(savedCardRef(passiveSubjunctiveDeck.id, card.id))) ?? [], [excludedCards.refs, paradigmCards, passiveSubjunctiveDeck]);
 
-  const savedSourceDecks = useMemo(() => [vocabularyDeck, adjectiveParadigmDeck, participlesDeck, activeParadigmDeck, passiveParadigmDeck, activeSubjunctiveDeck, passiveSubjunctiveDeck].filter((item): item is DeckDefinition => Boolean(item)), [activeParadigmDeck, activeSubjunctiveDeck, adjectiveParadigmDeck, participlesDeck, passiveParadigmDeck, passiveSubjunctiveDeck, vocabularyDeck]);
+  const savedSourceDecks = useMemo(() => [vocabularyDeck, adjectiveParadigmDeck, participlesDeck, activeParadigmDeck, passiveParadigmDeck, activeSubjunctiveDeck, passiveSubjunctiveDeck, translationVocab.deck].filter((item): item is DeckDefinition => Boolean(item)), [activeParadigmDeck, activeSubjunctiveDeck, adjectiveParadigmDeck, participlesDeck, passiveParadigmDeck, passiveSubjunctiveDeck, translationVocab.deck, vocabularyDeck]);
   const savedCardEntries = useMemo(() => {
     const seen = new Set<string>();
     return savedSourceDecks.flatMap((sourceDeck) => sourceDeck.cards.flatMap((card) => {
@@ -566,9 +566,10 @@ export function LatinPage() {
       appendSaved("saved-active-subjunctive-paradigms", activeSubjunctiveDeck, paradigmStudyKey);
       appendSaved("saved-passive-indicative-paradigms", passiveParadigmDeck, paradigmStudyKey);
       appendSaved("saved-passive-subjunctive-paradigms", passiveSubjunctiveDeck, paradigmStudyKey);
+      appendSaved("saved-translation-helper-vocab", translationVocab.deck, direction);
     }
     return next;
-  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, activeSubjunctiveActive, activeSubjunctiveDeck, activeSubjunctiveStudyCards, adjectiveParadigmDeck, adjectiveParadigmStudyCards, adjectiveParadigmsActive, direction, excludedCards.refs, includeSavedCards, participlesDeck, participleStudyCards, participlesActive, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, passiveSubjunctiveActive, passiveSubjunctiveDeck, passiveSubjunctiveStudyCards, savedCards.refs, translationVocab.source, vocabularyActive, vocabularyCards, vocabularyDeck]);
+  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, activeSubjunctiveActive, activeSubjunctiveDeck, activeSubjunctiveStudyCards, adjectiveParadigmDeck, adjectiveParadigmStudyCards, adjectiveParadigmsActive, direction, excludedCards.refs, includeSavedCards, participlesDeck, participleStudyCards, participlesActive, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, passiveSubjunctiveActive, passiveSubjunctiveDeck, passiveSubjunctiveStudyCards, savedCards.refs, translationVocab.deck, translationVocab.source, vocabularyActive, vocabularyCards, vocabularyDeck]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
   const currentlySelectedItems = useMemo<SelectedCardPanelItem[]>(() => {

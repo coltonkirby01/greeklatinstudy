@@ -401,13 +401,14 @@ export function GreekPage() {
   const savedCardEntries = useMemo(() => {
     if (!decks) return [];
     const seen = new Set<string>();
-    return deckList(decks).flatMap((sourceDeck) => sourceDeck.cards.flatMap((card) => {
+    return [...deckList(decks), translationVocab.deck].flatMap((sourceDeck) => sourceDeck.cards.flatMap((card) => {
       const key = savedCardRef(sourceDeck.id, card.id);
-      if (!groupKeyForCard(sourceDeck, card) || !savedCards.refs.has(key) || seen.has(key)) return [];
+      const available = sourceDeck.id === translationVocab.deck.id || Boolean(groupKeyForCard(sourceDeck, card));
+      if (!available || !savedCards.refs.has(key) || seen.has(key)) return [];
       seen.add(key);
       return [{ key, sourceDeck, card }];
     }));
-  }, [decks, savedCards.refs]);
+  }, [decks, savedCards.refs, translationVocab.deck]);
   const savedCardFilterItems = useMemo<SavedCardFilterItem[]>(() => savedCardEntries.map(({ key, card }) => ({
     key,
     label: (card.rank ? "#" + card.rank + " · " : "") + card.front,
@@ -442,9 +443,10 @@ export function GreekPage() {
         appendSaved(`saved-lesson${config.lesson}-endings`, grammarDeck, "forward", "forward", (card) => Boolean(keyForCategory(config.categoryByKey, card.category)));
       }
       appendSaved("saved-new-testament-vocabulary", decks.newTestamentVocabulary, direction, direction, () => true);
+      appendSaved("saved-translation-helper-vocab", translationVocab.deck, direction, direction, () => true);
     }
     return next;
-  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lessonCardSets, newTestamentCards, savedCards.refs, translationVocab.source]);
+  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lessonCardSets, newTestamentCards, savedCards.refs, translationVocab.deck, translationVocab.source]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
   const currentlySelectedItems = useMemo<SelectedCardPanelItem[]>(() => {
