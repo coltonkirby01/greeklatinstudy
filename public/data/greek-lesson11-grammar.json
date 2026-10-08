@@ -1,0 +1,75 @@
+[
+  {
+    "id": "lesson11-chart-present-middle-passive-indicative-endings",
+    "category": "Present Middle/Passive Indicative Endings",
+    "prompt": "Present Middle/Passive Indicative Endings",
+    "source_ref": "Groton 11.71",
+    "accent_note": "Groton §11.71: present middle/passive forms use the present stem plus the primary middle/passive endings; finite forms have recessive accent.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["-ομαι", "-όμεθα"] },
+      { "label": "2nd person", "cells": ["-ῃ", "-εσθε"] },
+      { "label": "3rd person", "cells": ["-εται", "-ονται"] }
+    ]
+  },
+  {
+    "id": "lesson11-chart-present-middle-passive-infinitive-endings",
+    "category": "Present Middle/Passive Infinitive Endings",
+    "prompt": "Present Middle/Passive Infinitive Ending",
+    "source_ref": "Groton 11.72",
+    "accent_note": "Groton §11.72: present middle/passive infinitive = present stem + -εσθαι.",
+    "columns": ["Ending"],
+    "rows": [
+      { "label": "Present Middle/Passive Infinitive", "cells": ["-εσθαι"] }
+    ]
+  },
+  {
+    "id": "lesson11-chart-future-middle-indicative-endings",
+    "category": "Future Middle Indicative Endings",
+    "prompt": "Future Middle Indicative Endings",
+    "source_ref": "Groton 11.71",
+    "accent_note": "Groton §11.71: future middle forms use the future stem plus the primary middle/passive endings; finite forms have recessive accent.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["-σομαι", "-σόμεθα"] },
+      { "label": "2nd person", "cells": ["-σῃ", "-σεσθε"] },
+      { "label": "3rd person", "cells": ["-σεται", "-σονται"] }
+    ]
+  },
+  {
+    "id": "lesson11-chart-future-middle-infinitive-endings",
+    "category": "Future Middle Infinitive Endings",
+    "prompt": "Future Middle Infinitive Ending",
+    "source_ref": "Groton 11.72",
+    "accent_note": "Groton §11.72: future middle infinitive = future stem + -εσθαι; from the present stem this appears as future marker σ + -εσθαι.",
+    "columns": ["Ending"],
+    "rows": [
+      { "label": "Future Middle Infinitive", "cells": ["-σεσθαι"] }
+    ]
+  },
+  {
+    "id": "lesson11-chart-imperfect-middle-passive-indicative-endings",
+    "category": "Imperfect Middle/Passive Indicative Endings",
+    "prompt": "Imperfect Middle/Passive Indicative Endings",
+    "source_ref": "Groton 11.71",
+    "accent_note": "Groton §11.71: imperfect middle/passive forms use the augmented present stem plus the secondary middle/passive endings; finite forms have recessive accent.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "1st person", "cells": ["-όμην", "-όμεθα"] },
+      { "label": "2nd person", "cells": ["-ου", "-εσθε"] },
+      { "label": "3rd person", "cells": ["-ετο", "-οντο"] }
+    ]
+  },
+  {
+    "id": "lesson11-chart-present-middle-passive-imperative-endings",
+    "category": "Present Middle/Passive Imperative Endings",
+    "prompt": "Present Middle/Passive Imperative Endings",
+    "source_ref": "Groton 11.73",
+    "accent_note": "Groton §11.73: present middle/passive imperative forms have recessive accent; model endings are -ου, -έσθω, -εσθε, -έσθων.",
+    "columns": ["Singular", "Plural"],
+    "rows": [
+      { "label": "2nd person", "cells": ["-ου", "-εσθε"] },
+      { "label": "3rd person", "cells": ["-έσθω", "-έσθων"] }
+    ]
+  }
+]
