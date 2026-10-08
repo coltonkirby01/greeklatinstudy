@@ -14,6 +14,7 @@ export const primaryNavLinks = [
   { label: "Home", href: "/" },
   { label: "Greek", href: "/greek" },
   { label: "Latin", href: "/latin" },
+  { label: "Translation Helper", href: "/translation-helper" },
   { label: "Stats", href: "/stats" },
 ] as const;
 
