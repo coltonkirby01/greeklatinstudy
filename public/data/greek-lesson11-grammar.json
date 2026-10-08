@@ -65,11 +65,11 @@
     "category": "Present Middle/Passive Imperative Endings",
     "prompt": "Present Middle/Passive Imperative Endings",
     "source_ref": "Groton 11.73, p. 66",
-    "accent_note": "Groton §11.73: the present middle/passive imperative has second- and third-person forms only and is built on the present stem.",
+    "accent_note": "Groton §11.73: the present middle/passive imperative has second- and third-person forms only; its finite forms have recessive accent.",
     "columns": ["Singular", "Plural"],
     "rows": [
       { "label": "2nd person", "cells": ["-ου", "-εσθε"] },
-      { "label": "3rd person", "cells": ["-εσθω", "-εσθων"] }
+      { "label": "3rd person", "cells": ["-έσθω", "-έσθων"] }
     ]
   }
 ]
