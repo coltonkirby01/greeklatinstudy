@@ -69,7 +69,9 @@ describe("Translation Helper", () => {
 
     expect(page).toContain("lookupWhitakersWord");
     expect(page).toContain("Whitaker's Words");
-    expect(fallback).toContain("whitakers-words@${WHITAKER_VERSION}");
+    expect(fallback).toContain("cdn.jsdelivr.net/npm/whitakers-words@${WHITAKER_VERSION}/+esm");
+    expect(fallback).toContain("esm.sh/whitakers-words@${WHITAKER_VERSION}?bundle");
+    expect(fallback).toContain("unpkg.com/whitakers-words@${WHITAKER_VERSION}/data");
     expect(fallback).toContain("DICTLINE.GEN");
     expect(fallback).toContain("INFLECTS.LAT");
     expect(fallback).toContain("parseWord(word)");
