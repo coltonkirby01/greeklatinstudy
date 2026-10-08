@@ -50,16 +50,30 @@ describe("Translation Helper", () => {
     expect(page).not.toContain("grammar explanation");
   });
 
-  it("extracts DOCX/PDF uploads into the review step while keeping image OCR deferred", () => {
+  it("extracts DOCX/PDF uploads into the compact review step while keeping image OCR deferred", () => {
     const page = fs.readFileSync("src/pages/translation-helper-page.tsx", "utf8");
     const extraction = fs.readFileSync("src/features/translation/file-extraction.ts", "utf8");
 
     expect(page).toContain("extractTranslationFile");
+    expect(page).toContain("Text &amp; upload");
     expect(page).toContain("TXT/MD · DOCX · text-based PDF");
+    expect(page).toContain("setInputOpen(false)");
+    expect(page).toContain("Edit source");
     expect(extraction).toContain("mammoth.browser.min.js");
     expect(extraction).toContain("pdf.min.js");
     expect(extraction).toContain("scanned/image-only PDF");
     expect(page).toContain("Image/scanned-PDF OCR later");
+  });
+
+  it("keeps the clickable reading text and lookup panel as the primary workspace", () => {
+    const page = fs.readFileSync("src/pages/translation-helper-page.tsx", "utf8");
+
+    expect(page).toContain("Reading text");
+    expect(page).toContain("translation-workspace");
+    expect(page).toContain("translation-text panel-surface");
+    expect(page).toContain("translation-definition panel-surface");
+    expect(page).toContain("Latin word lookup");
+    expect(page).toContain("Select a word from the reading text.");
   });
 
   it("uses latin-words.com as the sole Latin helper source and preserves morphology", () => {
