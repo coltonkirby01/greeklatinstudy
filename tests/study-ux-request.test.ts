@@ -41,7 +41,7 @@ describe("requested Greek and Latin study workflow", () => {
     expect(page).not.toContain("imperfectActiveIndicative,");
   });
 
-  it("shows individual Saved Cards and a persistent Currently Selected snapshot", () => {
+  it("shows individual Saved Cards and a persistent Currently Selected snapshot without stretching the flashcard panel", () => {
     const sidebar = fs.readFileSync("src/features/study/study-session-ui.tsx", "utf8");
     const savedFilter = fs.readFileSync("src/features/study/saved-cards-filter.tsx", "utf8");
     const greek = fs.readFileSync("src/pages/greek-page-v2.tsx", "utf8");
@@ -60,7 +60,9 @@ describe("requested Greek and Latin study workflow", () => {
     expect(sidebar).toContain('className={`current-selected-item ${checked ? "" : "is-deselected"}`}');
     expect(sidebar).not.toContain("Progress · {copy.sideLabel}");
     expect(sidebar).not.toContain("Answers remain hidden. Only the currently selected cards can appear here");
-    expect(sidebar).toContain(".study-grid{align-items:stretch}");
-    expect(sidebar).toContain(".study-panel{min-height:0;height:100%}");
+    expect(sidebar).toContain(".study-grid{align-items:start}");
+    expect(sidebar).toContain(".study-panel{min-height:650px;height:auto;align-self:start}");
+    expect(sidebar).toContain(".study-sidebar,.stats-panel{height:auto;align-self:start}");
+    expect(sidebar).not.toContain(".study-grid{align-items:stretch}");
   });
 });
