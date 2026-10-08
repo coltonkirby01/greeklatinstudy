@@ -19,18 +19,21 @@ Do not add an outside Greek dictionary or model-generated gloss without an expli
 
 ### Latin
 
-Target priority is:
+Target course-source priority remains:
 
 1. Robert J. Henle material represented in the site.
 2. Moreland & Fleischer once ingested.
 3. Dickinson College Commentaries Latin Core Vocabulary.
-4. Online Latin Dictionary (Olivetti) as an explicit external fallback.
 
-The current live version connects Dickinson locally and exposes Online Latin Dictionary as a fallback. Henle/Moreland form-recognition and vocabulary layers remain the next source-ingestion step.
+For the current live fallback, direct Dickinson headword matches are checked first. If the clicked surface form is not a direct Dickinson entry, the helper loads Whitaker's Words in the browser and uses its morphology/dictionary data to identify an inflected form and display the corresponding English dictionary meaning inline. Whitaker's Words is a freely reusable Latin dictionary and morphology system and is used here as the practical in-app fallback while Henle/Moreland form-recognition is still being built.
+
+Online Latin Dictionary (Olivetti) remains an optional external reference only. Do not scrape, mirror, proxy, or republish its dictionary entries inside the site without permission. Its published terms restrict reproduction/publication of the service on third-party sites, so the Translation Helper must not present copied Olivetti entries as an in-app dictionary.
 
 ## Form recognition
 
 Vocabulary lookup and form recognition are separate concerns. A recognized inflected form may point to a lemma, but the displayed English definition must still come from an approved source. Do not invent a lemma or definition and present it as source-backed.
+
+The Whitaker fallback specifically solves the common reading case in which the passage contains an inflected form rather than a dictionary headword. For example, a declined noun or conjugated verb can be analyzed in-browser and linked to a Whitaker dictionary entry without opening another website. The learner-facing panel still shows dictionary information rather than a contextual sentence translation.
 
 ## File ingestion
 
@@ -48,4 +51,7 @@ PDF extraction depends on an embedded PDF text layer. A scanned/image-only PDF w
 - Extraction progress and failures are surfaced to the learner instead of failing silently.
 - Words are rendered as clickable tokens while punctuation and whitespace are preserved.
 - The definition panel shows the clicked surface form, matched source headword, source definition, and source reference.
-- If there is no approved-source match, say so. Latin may offer an explicit Online Latin Dictionary fallback. Greek does not fall back outside Groton/Kubo.
+- Latin checks Dickinson first and then Whitaker's Words inline when the clicked surface form is not a direct Dickinson headword.
+- Whitaker data is loaded only when needed and cached by the browser when possible.
+- If neither Dickinson nor Whitaker matches, the page may offer Online Latin Dictionary as an optional external reference.
+- Greek does not fall back outside Groton/Kubo.

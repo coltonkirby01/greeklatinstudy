@@ -63,6 +63,19 @@ describe("Translation Helper", () => {
     expect(page).toContain("Image/scanned-PDF OCR later");
   });
 
+  it("uses Whitaker's Words as an inline Latin form-and-definition fallback", () => {
+    const page = fs.readFileSync("src/pages/translation-helper-page.tsx", "utf8");
+    const fallback = fs.readFileSync("src/features/translation/latin-inline-fallback.ts", "utf8");
+
+    expect(page).toContain("lookupWhitakersWord");
+    expect(page).toContain("Whitaker's Words");
+    expect(fallback).toContain("whitakers-words@${WHITAKER_VERSION}");
+    expect(fallback).toContain("DICTLINE.GEN");
+    expect(fallback).toContain("INFLECTS.LAT");
+    expect(fallback).toContain("parseWord(word)");
+    expect(fallback).not.toContain("online-latin-dictionary.com");
+  });
+
   it("keeps Greek and Latin source boundaries explicit", () => {
     const sources = fs.readFileSync("src/features/translation/dictionary-sources.ts", "utf8");
     const page = fs.readFileSync("src/pages/translation-helper-page.tsx", "utf8");
@@ -73,6 +86,7 @@ describe("Translation Helper", () => {
     expect(page).toContain("Groton");
     expect(page).toContain("Kubo");
     expect(page).toContain("Dickinson Latin Core Vocabulary");
+    expect(page).toContain("Whitaker's Words");
     expect(page).toContain("Online Latin Dictionary");
   });
 });
