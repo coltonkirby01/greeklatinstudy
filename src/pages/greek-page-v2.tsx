@@ -29,6 +29,8 @@ import { useCardExclusions } from "../features/study/card-exclusions";
 import { loadGreekFilterSelection, saveGreekFilterSelection } from "../features/study/filter-preferences";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
 import { loadIncludeSavedCards, saveIncludeSavedCards, savedCardRef, useSavedCards } from "../features/study/saved-cards";
+import { SavedCardsFilter, type SavedCardFilterItem } from "../features/study/saved-cards-filter";
+import { SelectedCardsProvider, type SelectedCardPanelItem } from "../features/study/selected-cards-context";
 import { FilterCheckbox, FilterDirectionControl, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
 import type { DeckDefinition, StudyCard, StudyDirection } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
@@ -325,11 +327,22 @@ export function GreekPage() {
 
   function changeSavedCards(checked: boolean) {
     setIncludeSavedCards(checked);
-    if (!checked || !decks) return;
-    const refs = deckList(decks).flatMap((sourceDeck) => sourceDeck.cards
-      .filter((card) => Boolean(groupKeyForCard(sourceDeck, card)) && savedCards.refs.has(savedCardRef(sourceDeck.id, card.id)))
-      .map((card) => ({ deckId: sourceDeck.id, cardId: card.id })));
-    excludedCards.setMany(refs, false);
+    if (!checked) return;
+    excludedCards.setMany(savedCardEntries.map(({ sourceDeck, card }) => ({ deckId: sourceDeck.id, cardId: card.id })), false);
+  }
+
+  function changeSavedCardEntry(key: string, checked: boolean) {
+    const entry = savedCardEntries.find((item) => item.key === key);
+    if (!entry) return;
+    if (!checked) {
+      excludedCards.exclude(entry.sourceDeck.id, entry.card.id);
+      return;
+    }
+    if (!includeSavedCards) {
+      setIncludeSavedCards(true);
+      excludedCards.setMany(savedCardEntries.map(({ sourceDeck, card }) => ({ deckId: sourceDeck.id, cardId: card.id })), true);
+    }
+    excludedCards.restore(entry.sourceDeck.id, entry.card.id);
   }
 
   const foundationCards = useMemo(() => decks?.foundation.cards.filter((card) => {
@@ -362,13 +375,22 @@ export function GreekPage() {
     });
   }, [decks, excludedCards.refs, selected]);
 
-  const savedCardCount = useMemo(() => {
-    if (!decks) return 0;
-    return deckList(decks).flatMap((sourceDeck) => sourceDeck.cards
-      .filter((card) => Boolean(groupKeyForCard(sourceDeck, card)))
-      .map((card) => savedCardRef(sourceDeck.id, card.id)))
-      .filter((ref) => savedCards.refs.has(ref)).length;
+  const savedCardEntries = useMemo(() => {
+    if (!decks) return [];
+    const seen = new Set<string>();
+    return deckList(decks).flatMap((sourceDeck) => sourceDeck.cards.flatMap((card) => {
+      const key = savedCardRef(sourceDeck.id, card.id);
+      if (!groupKeyForCard(sourceDeck, card) || !savedCards.refs.has(key) || seen.has(key)) return [];
+      seen.add(key);
+      return [{ key, sourceDeck, card }];
+    }));
   }, [decks, savedCards.refs]);
+  const savedCardFilterItems = useMemo<SavedCardFilterItem[]>(() => savedCardEntries.map(({ key, card }) => ({
+    key,
+    label: (card.rank ? "#" + card.rank + " · " : "") + card.front,
+    checked: includeSavedCards && !excludedCards.refs.has(key),
+  })), [excludedCards.refs, includeSavedCards, savedCardEntries]);
+  const savedCardCount = savedCardEntries.length;
 
   const sources = useMemo(() => {
     if (!decks) return [];
@@ -402,6 +424,15 @@ export function GreekPage() {
   }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lessonCardSets, newTestamentCards, savedCards.refs]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
+  const currentlySelectedItems = useMemo<SelectedCardPanelItem[]>(() => {
+    const seen = new Set<string>();
+    return sources.flatMap((source) => source.cards.flatMap((card) => {
+      const key = savedCardRef(source.deck.id, card.id);
+      if (seen.has(key)) return [];
+      seen.add(key);
+      return [{ key, deckId: source.deck.id, cardId: card.id, label: (card.rank ? "#" + card.rank + " · " : "") + card.front }];
+    }));
+  }, [sources]);
   const virtualDeck = useMemo<DeckDefinition>(() => ({
     id: "greek-study-app",
     slug: "greek",
@@ -424,7 +455,6 @@ export function GreekPage() {
   const lesson2State = groupSelectionState(lesson2Keys);
   const greekLessonsState = groupSelectionState(greekLessonKeys);
   const countFoundation = (category: string) => decks?.foundation.cards.filter((card) => card.category === category).length ?? 0;
-  const savedHint = "Cards you save with the card button or S shortcut are private to your account or this guest browser.";
 
   return <main className="page-shell study-page">
     <div className="study-page-heading"><div><h1>Greek</h1></div></div>
@@ -436,7 +466,7 @@ export function GreekPage() {
         <FilterDirectionControl direction={direction} onChange={setDirection} />
       </FilterSection>
       <FilterSection title="Quick select" onAll={() => { setSelected(new Set(allKeys)); excludedCards.clear(); }} onNone={() => { setSelected(new Set()); setIncludeSavedCards(false); }}>
-        <FilterCheckbox label="Saved Cards" count={savedCardCount} checked={includeSavedCards} disabled={!savedCards.ready || savedCardCount === 0} onChange={changeSavedCards} hint={savedHint} />
+        <SavedCardsFilter items={savedCardFilterItems} ready={savedCards.ready} onAllChange={changeSavedCards} onItemChange={changeSavedCardEntry} />
         <FilterCheckbox label="All Lesson Vocabulary" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onChange={(checked) => changeGroups(allVocabularyKeys, checked)} />
         <FilterCheckbox label="All Endings" checked={endingsState.checked} mixed={endingsState.mixed} onChange={(checked) => changeGroups(allEndingKeys, checked)} />
       </FilterSection>
@@ -490,7 +520,7 @@ export function GreekPage() {
       </FilterDisclosure>
     </StudyFilterMenu>}
 
-    {decks ? <MultiSourceStudySession
+    {decks ? <SelectedCardsProvider items={currentlySelectedItems} onChange={(item, checked) => checked ? excludedCards.restore(item.deckId, item.cardId) : excludedCards.exclude(item.deckId, item.cardId)}><MultiSourceStudySession
       deck={virtualDeck}
       sources={sources}
       resetKey={resetKey}
@@ -511,6 +541,6 @@ export function GreekPage() {
         if (chartRows(card).length) return <div className="answer-block"><GreekEndingChart card={card} /></div>;
         return <div className="answer-block"><strong className={source.direction === "reverse" ? "greek-front compact-greek" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}{sourceRef(card) && <span className="answer-notes">{sourceRef(card)}</span>}{card.metadata?.audioDisabled !== true && <GreekCardAudio card={card} />}</div>;
       }}
-    /> : <div className="study-loading panel-surface"><span className="loading-mark">α</span><p>Preparing Greek…</p></div>}
+    /></SelectedCardsProvider> : <div className="study-loading panel-surface"><span className="loading-mark">α</span><p>Preparing Greek…</p></div>}
   </main>;
 }
