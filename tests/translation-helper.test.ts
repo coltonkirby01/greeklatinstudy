@@ -63,19 +63,24 @@ describe("Translation Helper", () => {
     expect(page).toContain("Image/scanned-PDF OCR later");
   });
 
-  it("uses Whitaker's Words as an inline Latin form-and-definition fallback", () => {
+  it("uses a server-backed Latin lookup instead of loading a dictionary engine from third-party CDNs", () => {
     const page = fs.readFileSync("src/pages/translation-helper-page.tsx", "utf8");
     const fallback = fs.readFileSync("src/features/translation/latin-inline-fallback.ts", "utf8");
+    const edge = fs.readFileSync("supabase/functions/latin-lookup/index.ts", "utf8");
+    const supabaseConfig = fs.readFileSync("supabase/config.toml", "utf8");
 
     expect(page).toContain("lookupWhitakersWord");
     expect(page).toContain("Whitaker's Words");
-    expect(fallback).toContain("cdn.jsdelivr.net/npm/whitakers-words@${WHITAKER_VERSION}/+esm");
-    expect(fallback).toContain("esm.sh/whitakers-words@${WHITAKER_VERSION}?bundle");
-    expect(fallback).toContain("unpkg.com/whitakers-words@${WHITAKER_VERSION}/data");
-    expect(fallback).toContain("DICTLINE.GEN");
-    expect(fallback).toContain("INFLECTS.LAT");
-    expect(fallback).toContain("parseWord(word)");
-    expect(fallback).not.toContain("online-latin-dictionary.com");
+    expect(fallback).toContain("/functions/v1/latin-lookup?word=");
+    expect(fallback).toContain("latin.30twelve.org");
+    expect(fallback).toContain("localStorage");
+    expect(fallback).not.toContain("cdn.jsdelivr.net/npm/whitakers-words");
+    expect(fallback).not.toContain("esm.sh/whitakers-words");
+    expect(fallback).not.toContain("DICTLINE.GEN");
+    expect(edge).toContain('const PROVIDERS = ["https://latin.30twelve.org", "https://latin.71m.us"]');
+    expect(edge).toContain("Cache-Control");
+    expect(supabaseConfig).toContain("[functions.latin-lookup]");
+    expect(supabaseConfig).toContain("verify_jwt = false");
   });
 
   it("keeps Greek and Latin source boundaries explicit", () => {

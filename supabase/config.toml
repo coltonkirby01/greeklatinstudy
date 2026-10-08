@@ -1,2 +1,5 @@
 [functions.course-audio]
 verify_jwt = false
+
+[functions.latin-lookup]
+verify_jwt = false

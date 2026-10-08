@@ -67,7 +67,7 @@ export function TranslationHelperPage() {
       })
       .catch((error) => {
         if (cancelled) return;
-        setInlineLatinError(error instanceof Error ? error.message : "The inline Latin dictionary could not be loaded.");
+        setInlineLatinError(error instanceof Error ? error.message : "The Latin dictionary lookup could not be reached.");
         setInlineLatinState("error");
       });
 
@@ -159,7 +159,7 @@ export function TranslationHelperPage() {
       <h2>Dictionary sources</h2>
       {language === "greek"
         ? <p>Greek definitions are limited to Groton's <em>From Alpha to Omega</em> and Kubo's New Testament vocabulary already loaded into the site.</p>
-        : <p>Latin checks the site's Dickinson Latin Core Vocabulary first. If the clicked form is not a direct Dickinson headword, the helper uses Whitaker's Words as an inline form analyzer and dictionary so the definition can appear here without opening another site. Henle and Moreland &amp; Fleischer will be added ahead of these fallbacks as course-source priorities. Online Latin Dictionary remains an optional external reference.</p>}
+        : <p>Latin checks the site's Dickinson Latin Core Vocabulary first. If the clicked form is not a direct Dickinson headword, the helper uses a server-backed Whitaker's Words lookup so inflected forms can resolve to dictionary entries without loading a large dictionary engine into your browser or sending you to another website. Henle and Moreland &amp; Fleischer will be added ahead of these fallbacks as course-source priorities. Online Latin Dictionary remains an optional external reference.</p>}
     </section>
 
     {dictionaryError && <div className="inline-alert">{dictionaryError}</div>}
@@ -183,10 +183,10 @@ export function TranslationHelperPage() {
           {displayedMatches.length > 1 && <details className="translation-alternatives"><summary>Other source entries ({displayedMatches.length - 1})</summary>{displayedMatches.slice(1).map((match) => <div key={`${match.source}-${match.headword}-${match.definition}`}><strong>{match.headword}</strong><span>{match.definition}</span><small>{match.sourceRef || match.source}</small></div>)}</details>}
         </>}
         {selectedWord && dictionary && !primaryMatch && language === "latin" && <>
-          <p className="eyebrow">Inline Latin lookup</p>
+          <p className="eyebrow">Latin dictionary lookup</p>
           <h2>{selectedWord}</h2>
           {(inlineLatinState === "idle" || inlineLatinState === "loading") && <p className="translation-fallback-status">Checking Whitaker's Words for this form…</p>}
-          {inlineLatinState === "error" && <p className="translation-fallback-status is-error">{inlineLatinError || "The inline Latin dictionary could not be loaded."}</p>}
+          {inlineLatinState === "error" && <p className="translation-fallback-status is-error">{inlineLatinError || "The Latin dictionary lookup could not be reached."}</p>}
           {inlineLatinState === "ready" && <p>No Dickinson or Whitaker's Words entry matched this form.</p>}
           {(inlineLatinState === "ready" || inlineLatinState === "error") && <a className="button-link small-outline-button" href={latinFallbackUrl(selectedWord)} target="_blank" rel="noreferrer">Optional: check Online Latin Dictionary</a>}
         </>}
