@@ -9,6 +9,7 @@ import { loadLatinPassiveSubjunctiveParadigmsDeck } from "../data/latin-passive-
 import { loadLatinParticiplesDeck } from "../data/latin-participles";
 import { useAuth } from "../features/auth/auth-context";
 import { LatinParadigmTable } from "../features/latin/latin-paradigm-table";
+import { TranslationVocabDeckFilter, useTranslationVocabStudy } from "../features/translation/translation-vocab-study";
 import { useCardExclusions } from "../features/study/card-exclusions";
 import { loadLatinFilterPreferences, saveLatinFilterPreferences, type LatinMaterial } from "../features/study/filter-preferences";
 import { matchesVocabularyCard, vocabularyFamily, type OptionalSelection } from "../features/study/latin-study-filters";
@@ -415,6 +416,7 @@ export function LatinPage() {
   const [vocabularyParts, setVocabularyParts] = useState<OptionalSelection>(() => initialFilters.vocabularyParts === null ? null : new Set(initialFilters.vocabularyParts));
   const [paradigmCards, setParadigmCards] = useState<OptionalSelection>(() => initialFilters.paradigmCards === null ? null : new Set(initialFilters.paradigmCards));
   const [includeSavedCards, setIncludeSavedCards] = useState(() => loadIncludeSavedCards("latin"));
+  const translationVocab = useTranslationVocabStudy("latin", user, direction, excludedCards);
 
   const resumeSession = useMemo(() => {
     const id = searchParams.get("session");
@@ -534,6 +536,7 @@ export function LatinPage() {
     if (passiveSubjunctiveActive && passiveSubjunctiveDeck && passiveSubjunctiveStudyCards.length) {
       next.push({ id: "passive-subjunctive-paradigms", label: "Passive subjunctive paradigm", deck: passiveSubjunctiveDeck, cards: passiveSubjunctiveStudyCards, studyKey: paradigmStudyKey, direction });
     }
+    if (translationVocab.source) next.push(translationVocab.source);
 
     if (includeSavedCards) {
       const alreadySelected = new Set(next.flatMap((source) => source.cards.map((card) => savedCardRef(source.deck.id, card.id))));
@@ -565,7 +568,7 @@ export function LatinPage() {
       appendSaved("saved-passive-subjunctive-paradigms", passiveSubjunctiveDeck, paradigmStudyKey);
     }
     return next;
-  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, activeSubjunctiveActive, activeSubjunctiveDeck, activeSubjunctiveStudyCards, adjectiveParadigmDeck, adjectiveParadigmStudyCards, adjectiveParadigmsActive, direction, excludedCards.refs, includeSavedCards, participlesDeck, participleStudyCards, participlesActive, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, passiveSubjunctiveActive, passiveSubjunctiveDeck, passiveSubjunctiveStudyCards, savedCards.refs, vocabularyActive, vocabularyCards, vocabularyDeck]);
+  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, activeSubjunctiveActive, activeSubjunctiveDeck, activeSubjunctiveStudyCards, adjectiveParadigmDeck, adjectiveParadigmStudyCards, adjectiveParadigmsActive, direction, excludedCards.refs, includeSavedCards, participlesDeck, participleStudyCards, participlesActive, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, passiveSubjunctiveActive, passiveSubjunctiveDeck, passiveSubjunctiveStudyCards, savedCards.refs, translationVocab.source, vocabularyActive, vocabularyCards, vocabularyDeck]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
   const currentlySelectedItems = useMemo<SelectedCardPanelItem[]>(() => {
@@ -588,7 +591,7 @@ export function LatinPage() {
     supportsReverse: true,
   }), [selectedCards]);
   const savedSelectionKey = includeSavedCards ? [...savedCards.refs].sort().join(",") : "off";
-  const resetKey = `${direction}|${[...materials].sort().join(",")}|v:${selectionKey(vocabularyParts)}|p:${selectionKey(paradigmCards)}|saved:${savedSelectionKey}|excluded:${excludedCards.signature}`;
+  const resetKey = `${direction}|${[...materials].sort().join(",")}|v:${selectionKey(vocabularyParts)}|p:${selectionKey(paradigmCards)}|saved:${savedSelectionKey}|translation:${translationVocab.signature}|excluded:${excludedCards.signature}`;
 
   function changeSavedCards(checked: boolean) {
     setIncludeSavedCards(checked);
@@ -753,6 +756,7 @@ export function LatinPage() {
     setVocabularyParts(null);
     setParadigmCards(null);
     excludedCards.clear();
+    translationVocab.selectAll();
   }
 
   function deselectAllCards() {
@@ -760,6 +764,7 @@ export function LatinPage() {
     setVocabularyParts(new Set());
     setParadigmCards(new Set());
     setIncludeSavedCards(false);
+    translationVocab.selectNone();
   }
 
   const paradigmError = adjectiveParadigmError ?? participlesError ?? activeParadigmError ?? activeSubjunctiveError ?? passiveParadigmError ?? passiveSubjunctiveError;
@@ -772,7 +777,7 @@ export function LatinPage() {
       </div>
 
       {!user && <div className="guest-banner"><span>You are studying as a guest. Progress stays on this device.</span><Link to="/account">Sign in to sync</Link></div>}
-      {(vocabularyError || paradigmError || savedCards.error) && <div className="inline-alert">{vocabularyError ?? paradigmError ?? savedCards.error}</div>}
+      {(vocabularyError || paradigmError || savedCards.error || translationVocab.error) && <div className="inline-alert">{vocabularyError ?? paradigmError ?? savedCards.error ?? translationVocab.error}</div>}
 
       <StudyFilterMenu
         summary={`${selectedCards.length.toLocaleString()} cards in the current pool`}
@@ -785,6 +790,7 @@ export function LatinPage() {
           <SavedCardsFilter items={savedCardFilterItems} ready={savedCards.ready} onAllChange={changeSavedCards} onItemChange={changeSavedCardEntry} />
         </FilterSection>
 
+        <TranslationVocabDeckFilter study={translationVocab} />
 
         <FilterDisclosure
           title="Latin (Dickinson)"
