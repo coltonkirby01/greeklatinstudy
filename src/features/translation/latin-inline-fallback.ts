@@ -29,6 +29,13 @@ type WhitakerModule = {
   dictionaryForm(entry: WhitakerDictionaryEntry): string;
 };
 
+type WhitakerModuleCandidate = {
+  WordsEngine?: {
+    create?: WhitakerModule["WordsEngine"]["create"];
+  };
+  dictionaryForm?: WhitakerModule["dictionaryForm"];
+};
+
 const WHITAKER_VERSION = "0.1.2";
 const WHITAKER_MODULE_URLS = [
   `https://cdn.jsdelivr.net/npm/whitakers-words@${WHITAKER_VERSION}/+esm`,
@@ -65,8 +72,10 @@ async function loadModule() {
   let lastError: unknown = null;
   for (const url of WHITAKER_MODULE_URLS) {
     try {
-      const module = await import(/* @vite-ignore */ url) as unknown as WhitakerModule;
-      if (module?.WordsEngine?.create && module.dictionaryForm) return module;
+      const module = await import(/* @vite-ignore */ url) as unknown as WhitakerModuleCandidate;
+      if (typeof module?.WordsEngine?.create === "function" && typeof module.dictionaryForm === "function") {
+        return module as WhitakerModule;
+      }
       lastError = new Error(`Dictionary module from ${new URL(url).hostname} was missing required exports.`);
     } catch (error) {
       lastError = error;
