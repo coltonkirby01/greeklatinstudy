@@ -9,8 +9,11 @@ import {
   type TranslationHelperLanguage,
 } from "../features/translation/dictionary-sources";
 import { extractTranslationFile } from "../features/translation/file-extraction";
+import { lookupWhitakersWord } from "../features/translation/latin-inline-fallback";
 
-const translationHelperCss = `.translation-helper-page{display:grid;gap:1rem}.translation-helper-heading p,.translation-source-policy p,.translation-empty,.translation-source-line,.translation-notice{color:var(--muted-foreground)}.translation-input,.translation-text,.translation-definition,.translation-source-policy{padding:1rem}.translation-input{display:grid;gap:.8rem}.translation-language{display:flex;gap:.35rem}.translation-language button{border:1px solid var(--border);border-radius:999px;padding:.5rem .9rem;background:var(--panel);color:inherit;font:inherit;font-weight:700}.translation-language button.is-active{background:var(--primary);color:var(--primary-foreground)}.translation-upload{display:flex;gap:.75rem;align-items:center;justify-content:space-between;border:1px dashed var(--border);border-radius:var(--radius);padding:.8rem}.translation-upload span{display:inline-flex;gap:.45rem;align-items:center}.translation-upload svg,.translation-file-types svg{width:1rem;height:1rem}.translation-file-types{display:flex;gap:1rem;flex-wrap:wrap}.translation-file-types span{display:inline-flex;gap:.35rem;align-items:center;color:var(--muted-foreground);font-size:.85rem}.translation-input textarea{width:100%;min-height:12rem;resize:vertical;padding:.9rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);color:inherit;font:inherit}.translation-workspace{display:grid;grid-template-columns:2fr 1fr;gap:1rem;align-items:start}.translation-text p{white-space:pre-wrap;line-height:2;margin:0}.translation-word{border:0;background:transparent;color:inherit;font:inherit;padding:0;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--primary) 45%,transparent);text-underline-offset:.15em;cursor:pointer}.translation-word:hover,.translation-word.is-selected{color:var(--primary)}.translation-definition{position:sticky;top:6rem}.translation-definition-copy{font-size:1.08rem}.translation-headword{font-family:var(--font-serif);font-size:1.2rem}.translation-alternatives div{display:grid;gap:.15rem;padding:.6rem 0;border-top:1px solid var(--border)}.translation-prepare-button{min-height:44px}.translation-helper-heading h1{margin:.1rem 0 .45rem;font-family:var(--font-serif);font-size:clamp(2rem,4vw,3.2rem);font-weight:600;letter-spacing:-.03em}.translation-source-policy h2,.translation-definition h2{margin:.1rem 0 .5rem;font-family:var(--font-serif)}.translation-notice.is-error{color:#b42318}.translation-upload input:disabled{opacity:.55}@media(max-width:850px){.translation-workspace{grid-template-columns:1fr}.translation-definition{position:static}.translation-upload{align-items:flex-start;flex-direction:column}}`;
+const translationHelperCss = `.translation-helper-page{display:grid;gap:1rem}.translation-helper-heading p,.translation-source-policy p,.translation-empty,.translation-source-line,.translation-notice{color:var(--muted-foreground)}.translation-input,.translation-text,.translation-definition,.translation-source-policy{padding:1rem}.translation-input{display:grid;gap:.8rem}.translation-language{display:flex;gap:.35rem}.translation-language button{border:1px solid var(--border);border-radius:999px;padding:.5rem .9rem;background:var(--panel);color:inherit;font:inherit;font-weight:700}.translation-language button.is-active{background:var(--primary);color:var(--primary-foreground)}.translation-upload{display:flex;gap:.75rem;align-items:center;justify-content:space-between;border:1px dashed var(--border);border-radius:var(--radius);padding:.8rem}.translation-upload span{display:inline-flex;gap:.45rem;align-items:center}.translation-upload svg,.translation-file-types svg{width:1rem;height:1rem}.translation-file-types{display:flex;gap:1rem;flex-wrap:wrap}.translation-file-types span{display:inline-flex;gap:.35rem;align-items:center;color:var(--muted-foreground);font-size:.85rem}.translation-input textarea{width:100%;min-height:12rem;resize:vertical;padding:.9rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);color:inherit;font:inherit}.translation-workspace{display:grid;grid-template-columns:2fr 1fr;gap:1rem;align-items:start}.translation-text p{white-space:pre-wrap;line-height:2;margin:0}.translation-word{border:0;background:transparent;color:inherit;font:inherit;padding:0;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--primary) 45%,transparent);text-underline-offset:.15em;cursor:pointer}.translation-word:hover,.translation-word.is-selected{color:var(--primary)}.translation-definition{position:sticky;top:6rem}.translation-definition-copy{font-size:1.08rem}.translation-headword{font-family:var(--font-serif);font-size:1.2rem}.translation-alternatives div{display:grid;gap:.15rem;padding:.6rem 0;border-top:1px solid var(--border)}.translation-prepare-button{min-height:44px}.translation-helper-heading h1{margin:.1rem 0 .45rem;font-family:var(--font-serif);font-size:clamp(2rem,4vw,3.2rem);font-weight:600;letter-spacing:-.03em}.translation-source-policy h2,.translation-definition h2{margin:.1rem 0 .5rem;font-family:var(--font-serif)}.translation-notice.is-error{color:#b42318}.translation-upload input:disabled{opacity:.55}.translation-fallback-status{color:var(--muted-foreground);font-size:.94rem}.translation-fallback-status.is-error{color:#b42318}@media(max-width:850px){.translation-workspace{grid-template-columns:1fr}.translation-definition{position:static}.translation-upload{align-items:flex-start;flex-direction:column}}`;
+
+type InlineLatinState = "idle" | "loading" | "ready" | "error";
 
 function isWord(part: string) {
   return /^[\p{L}\p{M}]+(?:[’'][\p{L}\p{M}]+)*$/u.test(part);
@@ -27,6 +30,9 @@ export function TranslationHelperPage() {
   const [fileNotice, setFileNotice] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [inlineLatinMatches, setInlineLatinMatches] = useState<DictionaryMatch[]>([]);
+  const [inlineLatinState, setInlineLatinState] = useState<InlineLatinState>("idle");
+  const [inlineLatinError, setInlineLatinError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,23 +45,63 @@ export function TranslationHelperPage() {
   }, [language]);
 
   const parts = useMemo(() => tokenizeTranslationText(preparedText), [preparedText]);
-  const matches = selectedWord && dictionary ? lookupDictionaryWord(dictionary, selectedWord) : [];
-  const primaryMatch = matches[0] ?? null;
+  const localMatches = selectedWord && dictionary ? lookupDictionaryWord(dictionary, selectedWord) : [];
+  const displayedMatches = localMatches.length > 0 ? localMatches : inlineLatinMatches;
+  const primaryMatch = displayedMatches[0] ?? null;
+
+  useEffect(() => {
+    let cancelled = false;
+    setInlineLatinMatches([]);
+    setInlineLatinError(null);
+    setInlineLatinState("idle");
+
+    if (!selectedWord || language !== "latin" || !dictionary) return;
+    if (lookupDictionaryWord(dictionary, selectedWord).length > 0) return;
+
+    setInlineLatinState("loading");
+    lookupWhitakersWord(selectedWord)
+      .then((matches) => {
+        if (cancelled) return;
+        setInlineLatinMatches(matches);
+        setInlineLatinState("ready");
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setInlineLatinError(error instanceof Error ? error.message : "The inline Latin dictionary could not be loaded.");
+        setInlineLatinState("error");
+      });
+
+    return () => { cancelled = true; };
+  }, [selectedWord, language, dictionary]);
 
   function changeLanguage(next: TranslationHelperLanguage) {
     setLanguage(next);
     setSelectedWord(null);
+    setInlineLatinMatches([]);
+    setInlineLatinState("idle");
+    setInlineLatinError(null);
+  }
+
+  function chooseWord(word: string) {
+    setSelectedWord(word);
+    setInlineLatinMatches([]);
+    setInlineLatinState("idle");
+    setInlineLatinError(null);
   }
 
   function prepare() {
     setPreparedText(draft.trim());
     setSelectedWord(null);
+    setInlineLatinMatches([]);
+    setInlineLatinState("idle");
   }
 
   async function onFile(file: File | null) {
     setSelectedWord(null);
     setPreparedText("");
     setFileError(null);
+    setInlineLatinMatches([]);
+    setInlineLatinState("idle");
     if (!file) {
       setSelectedFile(null);
       setFileNotice(null);
@@ -113,7 +159,7 @@ export function TranslationHelperPage() {
       <h2>Dictionary sources</h2>
       {language === "greek"
         ? <p>Greek definitions are limited to Groton's <em>From Alpha to Omega</em> and Kubo's New Testament vocabulary already loaded into the site.</p>
-        : <p>Latin currently uses the site's Dickinson Latin Core Vocabulary. Henle and Moreland &amp; Fleischer will be added ahead of it as course-source priorities. Online Latin Dictionary is available as the external fallback when no local entry matches.</p>}
+        : <p>Latin checks the site's Dickinson Latin Core Vocabulary first. If the clicked form is not a direct Dickinson headword, the helper uses Whitaker's Words as an inline form analyzer and dictionary so the definition can appear here without opening another site. Henle and Moreland &amp; Fleischer will be added ahead of these fallbacks as course-source priorities. Online Latin Dictionary remains an optional external reference.</p>}
     </section>
 
     {dictionaryError && <div className="inline-alert">{dictionaryError}</div>}
@@ -121,7 +167,7 @@ export function TranslationHelperPage() {
     {preparedText && <section className="translation-workspace">
       <article className="translation-text panel-surface" aria-label={`${language} clickable text`}>
         <p>{parts.map((part, index) => isWord(part)
-          ? <button type="button" key={`${part}-${index}`} className={`translation-word ${selectedWord === part ? "is-selected" : ""}`} onClick={() => setSelectedWord(part)}>{part}</button>
+          ? <button type="button" key={`${part}-${index}`} className={`translation-word ${selectedWord === part ? "is-selected" : ""}`} onClick={() => chooseWord(part)}>{part}</button>
           : <span key={`${index}-${part}`}>{part}</span>)}</p>
       </article>
 
@@ -134,13 +180,20 @@ export function TranslationHelperPage() {
           <p className="translation-headword">{primaryMatch.headword}</p>
           <p className="translation-definition-copy">{primaryMatch.definition}</p>
           <p className="translation-source-line">{primaryMatch.sourceRef || primaryMatch.source}</p>
-          {matches.length > 1 && <details className="translation-alternatives"><summary>Other source entries ({matches.length - 1})</summary>{matches.slice(1).map((match) => <div key={`${match.source}-${match.headword}-${match.definition}`}><strong>{match.headword}</strong><span>{match.definition}</span><small>{match.sourceRef || match.source}</small></div>)}</details>}
+          {displayedMatches.length > 1 && <details className="translation-alternatives"><summary>Other source entries ({displayedMatches.length - 1})</summary>{displayedMatches.slice(1).map((match) => <div key={`${match.source}-${match.headword}-${match.definition}`}><strong>{match.headword}</strong><span>{match.definition}</span><small>{match.sourceRef || match.source}</small></div>)}</details>}
         </>}
-        {selectedWord && dictionary && !primaryMatch && <>
-          <p className="eyebrow">No local match yet</p>
+        {selectedWord && dictionary && !primaryMatch && language === "latin" && <>
+          <p className="eyebrow">Inline Latin lookup</p>
           <h2>{selectedWord}</h2>
-          <p>No definition from the currently connected {language === "greek" ? "Groton/Kubo" : "Dickinson"} source matches this form yet.</p>
-          {language === "latin" && <a className="button-link small-outline-button" href={latinFallbackUrl(selectedWord)} target="_blank" rel="noreferrer">Check Online Latin Dictionary</a>}
+          {(inlineLatinState === "idle" || inlineLatinState === "loading") && <p className="translation-fallback-status">Checking Whitaker's Words for this form…</p>}
+          {inlineLatinState === "error" && <p className="translation-fallback-status is-error">{inlineLatinError || "The inline Latin dictionary could not be loaded."}</p>}
+          {inlineLatinState === "ready" && <p>No Dickinson or Whitaker's Words entry matched this form.</p>}
+          {(inlineLatinState === "ready" || inlineLatinState === "error") && <a className="button-link small-outline-button" href={latinFallbackUrl(selectedWord)} target="_blank" rel="noreferrer">Optional: check Online Latin Dictionary</a>}
+        </>}
+        {selectedWord && dictionary && !primaryMatch && language === "greek" && <>
+          <p className="eyebrow">No source match yet</p>
+          <h2>{selectedWord}</h2>
+          <p>No definition from the currently connected Groton/Kubo sources matches this form yet.</p>
         </>}
       </aside>
     </section>}
