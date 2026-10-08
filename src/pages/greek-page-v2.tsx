@@ -27,6 +27,7 @@ import { NEW_TESTAMENT_FREQUENCY_GROUPS, loadGreekNewTestamentVocabularyDeck, ne
 import { useAuth } from "../features/auth/auth-context";
 import { ClassicalGreekAudio } from "../features/greek/classical-greek-audio";
 import { oneWordVocabularyGloss } from "../features/greek/vocabulary-selector-gloss";
+import { TranslationVocabDeckFilter, useTranslationVocabStudy } from "../features/translation/translation-vocab-study";
 import { useCardExclusions } from "../features/study/card-exclusions";
 import { loadGreekFilterSelection, saveGreekFilterSelection } from "../features/study/filter-preferences";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
@@ -281,6 +282,7 @@ export function GreekPage() {
   const [direction, setDirection] = useState<StudyDirection>("forward");
   const [selected, setSelected] = useState<Set<string>>(() => loadGreekFilterSelection(defaultKeys, undefined, allKeys));
   const [includeSavedCards, setIncludeSavedCards] = useState(() => loadIncludeSavedCards("greek"));
+  const translationVocab = useTranslationVocabStudy("greek", user, direction, excludedCards);
   const resumeSession = useMemo(() => {
     const id = searchParams.get("session"), startedAt = Number(searchParams.get("sessionStartedAt"));
     return id && Number.isFinite(startedAt) && startedAt > 0 ? { id, startedAt } : null;
@@ -399,13 +401,14 @@ export function GreekPage() {
   const savedCardEntries = useMemo(() => {
     if (!decks) return [];
     const seen = new Set<string>();
-    return deckList(decks).flatMap((sourceDeck) => sourceDeck.cards.flatMap((card) => {
+    return [...deckList(decks), translationVocab.deck].flatMap((sourceDeck) => sourceDeck.cards.flatMap((card) => {
       const key = savedCardRef(sourceDeck.id, card.id);
-      if (!groupKeyForCard(sourceDeck, card) || !savedCards.refs.has(key) || seen.has(key)) return [];
+      const available = sourceDeck.id === translationVocab.deck.id || Boolean(groupKeyForCard(sourceDeck, card));
+      if (!available || !savedCards.refs.has(key) || seen.has(key)) return [];
       seen.add(key);
       return [{ key, sourceDeck, card }];
     }));
-  }, [decks, savedCards.refs]);
+  }, [decks, savedCards.refs, translationVocab.deck]);
   const savedCardFilterItems = useMemo<SavedCardFilterItem[]>(() => savedCardEntries.map(({ key, card }) => ({
     key,
     label: (card.rank ? "#" + card.rank + " · " : "") + card.front,
@@ -421,6 +424,7 @@ export function GreekPage() {
       if (endingCards.length) next.push({ id: `lesson${config.lesson}-endings`, label: `Lesson ${config.lesson} endings`, deck: grammarDeck, cards: endingCards, studyKey: "forward", direction: "forward" });
     }
     if (newTestamentCards.length) next.push({ id: "new-testament-vocabulary", label: "New Testament Vocab (Kubo)", deck: decks.newTestamentVocabulary, cards: newTestamentCards, studyKey: direction, direction });
+    if (translationVocab.source) next.push(translationVocab.source);
 
     if (includeSavedCards) {
       const alreadySelected = new Set(next.flatMap((source) => source.cards.map((card) => savedCardRef(source.deck.id, card.id))));
@@ -439,9 +443,10 @@ export function GreekPage() {
         appendSaved(`saved-lesson${config.lesson}-endings`, grammarDeck, "forward", "forward", (card) => Boolean(keyForCategory(config.categoryByKey, card.category)));
       }
       appendSaved("saved-new-testament-vocabulary", decks.newTestamentVocabulary, direction, direction, () => true);
+      appendSaved("saved-translation-helper-vocab", translationVocab.deck, direction, direction, () => true);
     }
     return next;
-  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lessonCardSets, newTestamentCards, savedCards.refs]);
+  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lessonCardSets, newTestamentCards, savedCards.refs, translationVocab.deck, translationVocab.source]);
 
   const selectedCards = useMemo(() => sources.flatMap((source) => source.cards), [sources]);
   const currentlySelectedItems = useMemo<SelectedCardPanelItem[]>(() => {
@@ -464,7 +469,7 @@ export function GreekPage() {
     supportsReverse: true,
   }), [selectedCards]);
   const savedSelectionKey = includeSavedCards ? [...savedCards.refs].sort().join(",") : "off";
-  const resetKey = `${direction}|${[...selected].sort().join("|")}|saved:${savedSelectionKey}|excluded:${excludedCards.signature}`;
+  const resetKey = `${direction}|${[...selected].sort().join("|")}|saved:${savedSelectionKey}|translation:${translationVocab.signature}|excluded:${excludedCards.signature}`;
 
   const vocabularyState = groupSelectionState(allVocabularyKeys);
   const newTestamentState = groupSelectionState(newTestamentVocabularyKeys);
@@ -479,17 +484,19 @@ export function GreekPage() {
   return <main className="page-shell study-page">
     <div className="study-page-heading"><div><h1>Greek</h1></div></div>
     {!user && <div className="guest-banner"><span>You are studying as a guest. Progress stays on this device.</span><Link to="/account">Sign in to sync</Link></div>}
-    {(error || savedCards.error) && <div className="inline-alert">{error ?? savedCards.error}</div>}
+    {(error || savedCards.error || translationVocab.error) && <div className="inline-alert">{error ?? savedCards.error ?? translationVocab.error}</div>}
 
     {decks && <StudyFilterMenu summary={`${selectedCards.length} cards in the current pool`}>
       <FilterSection title="Study direction" description="Forward and Reverse keep separate review histories, mastery, timing, and scheduling.">
         <FilterDirectionControl direction={direction} onChange={setDirection} />
       </FilterSection>
-      <FilterSection title="Quick select" onAll={() => { setSelected(new Set(allKeys)); excludedCards.clear(); }} onNone={() => { setSelected(new Set()); setIncludeSavedCards(false); }}>
+      <FilterSection title="Quick select" onAll={() => { setSelected(new Set(allKeys)); excludedCards.clear(); translationVocab.selectAll(); }} onNone={() => { setSelected(new Set()); setIncludeSavedCards(false); translationVocab.selectNone(); }}>
         <SavedCardsFilter items={savedCardFilterItems} ready={savedCards.ready} onAllChange={changeSavedCards} onItemChange={changeSavedCardEntry} />
         <FilterCheckbox label="All Lesson Vocabulary" checked={vocabularyState.checked} mixed={vocabularyState.mixed} onChange={(checked) => changeGroups(allVocabularyKeys, checked)} />
         <FilterCheckbox label="All Endings" checked={endingsState.checked} mixed={endingsState.mixed} onChange={(checked) => changeGroups(allEndingKeys, checked)} />
       </FilterSection>
+
+      <TranslationVocabDeckFilter study={translationVocab} />
 
       <FilterDisclosure title="New Testament Vocab (Kubo)" summary={`${selectedNewTestamentCount} of ${decks.newTestamentVocabulary.cards.length} words selected`} count={decks.newTestamentVocabulary.cards.length} checked={newTestamentState.checked} mixed={newTestamentState.mixed} onCheckedChange={(checked) => changeGroups(newTestamentVocabularyKeys, checked)}>
         {NEW_TESTAMENT_FREQUENCY_GROUPS.map((group) => {

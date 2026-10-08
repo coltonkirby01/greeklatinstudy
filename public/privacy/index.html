@@ -24,10 +24,11 @@
       <h2>Information the application processes</h2>
       <ul>
         <li><strong>Account information.</strong> When you create an account or use Google sign-in, Supabase Auth processes your email address, an account identifier, and basic profile information supplied by Google. Passwords are handled by Supabase Auth and are not stored or viewed by this application.</li>
-        <li><strong>Study information.</strong> The application may store card responses, correctness and difficulty ratings, response times, mastery strength, scheduling dates, review history, deck progress, saved cards, session data, and administrator-created deck content.</li>
+        <li><strong>Study information.</strong> The application may store card responses, correctness and difficulty ratings, response times, mastery strength, scheduling dates, review history, deck progress, saved cards, session data, Translation Helper vocabulary choices, and administrator-created deck content.</li>
         <li><strong>Translation Helper texts.</strong> When a signed-in user uploads a supported document to the Translation Helper, the extracted text is saved to that user's cloud account so it can be reopened on another device. The application may also store the text title, selected language, original source filename, and timestamps. Signed-in users may save pasted or edited reading text in the same way and may delete saved texts from the Translation Helper.</li>
+        <li><strong>Translation Helper vocabulary.</strong> When a signed-in user saves a dictionary entry as a vocabulary flash card, the application stores the selected language, clicked surface form, dictionary headword, selected source definition, source information, and timestamps. These private vocabulary choices are used to build the user's separate Translation Helper Vocab deck in the Greek or Latin study app and can be removed from the Translation Helper.</li>
         <li><strong>Administrator-provided deck material.</strong> If an administrator imports deck content, the application processes that material to provide the requested study deck.</li>
-        <li><strong>Guest-device information.</strong> Before sign-in, study progress may be kept in your browser's local storage. Translation Helper uploads are not saved to a cloud account while signed out. You can remove local information by clearing this site's browser data.</li>
+        <li><strong>Guest-device information.</strong> Before sign-in, study progress may be kept in your browser's local storage. Translation Helper uploads and vocabulary choices are not saved to a cloud account while signed out. You can remove local information by clearing this site's browser data.</li>
         <li><strong>Operational information.</strong> GitHub Pages, Supabase, and your browser may process ordinary technical data such as IP address, browser type, request logs, and authentication-session data to host, secure, and operate the service.</li>
       </ul>
 
@@ -35,16 +36,16 @@
       <p>Google sign-in is used only to authenticate you and associate your private study data with your account. The application requests only basic identity scopes: OpenID, email address, and profile. It does not request access to Gmail, Google Drive, Calendar, Contacts, or other Google services, and it does not use Google account information for advertising.</p>
 
       <h2>How information is used</h2>
-      <p>Information is used to authenticate users, synchronize progress across devices, restore saved Translation Helper reading texts, personalize adaptive review, restore study history, protect administrator functions, maintain security, and troubleshoot the application.</p>
+      <p>Information is used to authenticate users, synchronize progress across devices, restore saved Translation Helper reading texts and vocabulary choices, personalize adaptive review, restore study history, protect administrator functions, maintain security, and troubleshoot the application.</p>
 
       <h2>Service providers and disclosure</h2>
       <p>Supabase provides authentication, database, and private account-linked storage services. GitHub Pages hosts the public application files. Information is shared with these providers only as needed to operate the service. Personal information is not sold, rented, or used for third-party advertising. Information may be disclosed when reasonably necessary to comply with law, protect users, or secure the service.</p>
 
       <h2>Retention and control</h2>
-      <p>Account-linked study information and saved Translation Helper texts are retained while the account is active or as reasonably needed to operate and secure the service. Saved Translation Helper texts can be deleted from the Translation Helper. Local guest information remains on the device until it is replaced or cleared. For correction or deletion requests, contact the site administrator using the support contact shown during Google sign-in. Do not post private account information in a public GitHub issue.</p>
+      <p>Account-linked study information, saved Translation Helper texts, and Translation Helper vocabulary choices are retained while the account is active or as reasonably needed to operate and secure the service. Saved texts and vocabulary choices can be deleted from the Translation Helper. Local guest information remains on the device until it is replaced or cleared. For correction or deletion requests, contact the site administrator using the support contact shown during Google sign-in. Do not post private account information in a public GitHub issue.</p>
 
       <h2>Security</h2>
-      <p>The application uses secure Supabase sessions and database row-level security so users can access only their own private progress and saved Translation Helper texts. No online service can guarantee absolute security, but reasonable safeguards are used and secret credentials are not placed in public frontend code.</p>
+      <p>The application uses secure Supabase sessions and database row-level security so users can access only their own private progress, saved Translation Helper texts, and Translation Helper vocabulary choices. No online service can guarantee absolute security, but reasonable safeguards are used and secret credentials are not placed in public frontend code.</p>
 
       <h2>Children's privacy</h2>
       <p>The service is not directed to children under 13 and does not knowingly solicit their personal information. A parent or guardian who believes a child supplied information may contact the site administrator to request its removal.</p>
