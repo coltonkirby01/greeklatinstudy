@@ -42,9 +42,20 @@ Morphology labels are expanded for readability from the abbreviations returned b
 
 The current Translation Helper supports pasted text plus local extraction from TXT/MD, DOCX, and text-based PDF files. Extracted text is placed in the editable review box before the learner creates the clickable reading view.
 
-DOCX extraction uses a pinned browser build of Mammoth loaded only when a DOCX is selected. PDF extraction uses a pinned browser build of PDF.js loaded only when a PDF is selected. The file contents remain in the learner's browser; they are not uploaded to the site backend or to an AI service for extraction.
+DOCX extraction uses a pinned browser build of Mammoth loaded only when a DOCX is selected. PDF extraction uses a pinned browser build of PDF.js loaded only when a PDF is selected. Extraction itself happens in the learner's browser and is not sent to an AI service.
 
 PDF extraction depends on an embedded PDF text layer. A scanned/image-only PDF will report that no embedded text was found. Image OCR and scanned-PDF OCR remain a later milestone. Older binary `.doc` files are also not supported yet; users should save them as `.docx` or PDF first.
+
+## Cloud text persistence
+
+Authenticated users have a private `translation_texts` collection in Supabase. Row-level security limits select, insert, update, and delete operations to the authenticated user's own rows.
+
+- After a supported file is extracted, its **extracted text** is automatically saved to the signed-in user's cloud account. The original PDF/DOCX/TXT file bytes are not copied to cloud storage by this feature.
+- The saved record includes a user-editable title, language, extracted/edited text, source filename when available, and timestamps.
+- Creating or updating the reading text updates the same cloud record, so corrections made in the review box persist.
+- A signed-in user's `Saved texts` disclosure lists recent texts and lets the learner reopen them on another device or delete them.
+- Pasted text is saved when a signed-in learner creates the reading text. Signed-out learners can still use the Translation Helper, but their text is not written to a cloud account.
+- Cloud errors must never discard the locally extracted or edited text; the reading workflow remains usable and the failure is shown to the learner.
 
 ## UI contract
 
@@ -52,9 +63,11 @@ PDF extraction depends on an embedded PDF text layer. A scanned/image-only PDF w
 - The text/upload editor is compact and collapsible. It starts open and automatically collapses after the learner creates or updates the reading text.
 - The collapsed editor remains available as a small `Text & upload` control, and an `Edit source` action is available beside the reading text.
 - Language is explicitly Greek or Latin.
-- Source text is editable before preparation.
+- Source text and title are editable before preparation.
 - Uploading TXT/MD, DOCX, or a text-based PDF automatically fills the review box with extracted text.
-- Extraction progress and failures are surfaced to the learner instead of failing silently.
+- Signed-in uploads automatically create a private cloud text; subsequent edits update it.
+- The editor shows cloud state clearly and provides a `Saved texts` library for authenticated users.
+- Extraction and cloud-save progress or failures are surfaced instead of failing silently.
 - Words are rendered as clickable tokens while punctuation and whitespace are preserved.
 - The lookup panel remains visible beside the text on desktop and below it on narrow screens.
 - The Latin lookup panel prominently identifies Whitaker's Words Online and links to latin-words.com.
