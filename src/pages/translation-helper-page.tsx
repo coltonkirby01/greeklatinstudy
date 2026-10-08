@@ -8,9 +8,9 @@ import {
   type DictionaryMatch,
   type TranslationHelperLanguage,
 } from "../features/translation/dictionary-sources";
-import "./translation-helper-page.css";
 
 const plainTextExtensions = new Set(["txt", "text", "md"]);
+const translationHelperCss = `.translation-helper-page{display:grid;gap:1rem}.translation-helper-heading p,.translation-source-policy p,.translation-empty,.translation-source-line,.translation-notice{color:var(--muted-foreground)}.translation-input,.translation-text,.translation-definition,.translation-source-policy{padding:1rem}.translation-input{display:grid;gap:.8rem}.translation-language{display:flex;gap:.35rem}.translation-language button{border:1px solid var(--border);border-radius:999px;padding:.5rem .9rem;background:var(--panel);color:inherit;font:inherit;font-weight:700}.translation-language button.is-active{background:var(--primary);color:var(--primary-foreground)}.translation-upload{display:flex;gap:.75rem;align-items:center;justify-content:space-between;border:1px dashed var(--border);border-radius:var(--radius);padding:.8rem}.translation-file-types{display:flex;gap:1rem;flex-wrap:wrap}.translation-input textarea{width:100%;min-height:12rem;resize:vertical;padding:.9rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);color:inherit;font:inherit}.translation-workspace{display:grid;grid-template-columns:2fr 1fr;gap:1rem;align-items:start}.translation-text p{white-space:pre-wrap;line-height:2;margin:0}.translation-word{border:0;background:transparent;color:inherit;font:inherit;padding:0;text-decoration:underline;text-underline-offset:.15em;cursor:pointer}.translation-word.is-selected{color:var(--primary)}.translation-definition{position:sticky;top:6rem}.translation-definition-copy{font-size:1.08rem}.translation-alternatives div{display:grid;gap:.15rem;padding:.6rem 0;border-top:1px solid var(--border)}@media(max-width:850px){.translation-workspace{grid-template-columns:1fr}.translation-definition{position:static}}`;
 
 function extension(name: string) {
   return name.toLocaleLowerCase().split(".").at(-1) ?? "";
@@ -70,6 +70,7 @@ export function TranslationHelperPage() {
   }
 
   return <main className="page-shell translation-helper-page">
+    <style>{translationHelperCss}</style>
     <section className="translation-helper-heading">
       <div>
         <p className="eyebrow">Reading tool</p>
