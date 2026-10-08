@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { normalizeDictionaryKey, tokenizeTranslationText } from "../src/features/translation/dictionary-sources";
+import { pdfTextItemsToString, translationFileKind } from "../src/features/translation/file-extraction";
 
 describe("Translation Helper", () => {
   it("normalizes Greek accents and Latin macrons for tolerant source lookup", () => {
@@ -16,6 +17,25 @@ describe("Translation Helper", () => {
     expect(tokenizeTranslationText(source)).toContain("ἀρχῇ");
   });
 
+  it("recognizes locally extractable text, DOCX, and PDF inputs", () => {
+    expect(translationFileKind("notes.txt")).toBe("text");
+    expect(translationFileKind("lesson.docx")).toBe("docx");
+    expect(translationFileKind("reader.pdf")).toBe("pdf");
+    expect(translationFileKind("legacy.doc")).toBe("legacy-doc");
+    expect(translationFileKind("scan.png", "image/png")).toBe("image");
+  });
+
+  it("reassembles PDF text items with spaces, punctuation, and line breaks", () => {
+    expect(pdfTextItemsToString([
+      { str: "Arma" },
+      { str: "virumque" },
+      { str: "cano", hasEOL: true },
+      { str: "Troiae" },
+      { str: "," },
+      { str: "qui" },
+    ])).toBe("Arma virumque cano\nTroiae, qui");
+  });
+
   it("registers the route and limits learner-facing output to dictionary definitions", () => {
     const app = fs.readFileSync("src/app.tsx", "utf8");
     const route = fs.readFileSync("src/route-preload.ts", "utf8");
@@ -29,6 +49,18 @@ describe("Translation Helper", () => {
     expect(page).toContain("does not generate a sentence translation");
     expect(page).not.toContain("contextual meaning");
     expect(page).not.toContain("grammar explanation");
+  });
+
+  it("extracts DOCX/PDF uploads into the review step while keeping image OCR deferred", () => {
+    const page = fs.readFileSync("src/pages/translation-helper-page.tsx", "utf8");
+    const extraction = fs.readFileSync("src/features/translation/file-extraction.ts", "utf8");
+
+    expect(page).toContain("extractTranslationFile");
+    expect(page).toContain("TXT/MD · DOCX · text-based PDF");
+    expect(extraction).toContain("mammoth.browser.min.js");
+    expect(extraction).toContain("pdf.min.js");
+    expect(extraction).toContain("scanned/image-only PDF");
+    expect(page).toContain("Image/scanned-PDF OCR later");
   });
 
   it("keeps Greek and Latin source boundaries explicit", () => {
