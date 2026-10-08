@@ -413,7 +413,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     return visitProgressSummary(items, visitStartedAtRef.current);
   }, [modeFor, states, visibleCandidates]);
   const stats = sessionProgress.stats;
-  const priority = useMemo(() => visibleCandidates.map(({ source, card }) => ({ card, progress: getCardProgress(states.get(source.id) ?? modeFor(source), card.id), score: priorityScore(card, states.get(source.id) ?? modeFor(source), { ignoreRecency: true }) })).sort((a, b) => b.score - a.score).slice(0, 5), [modeFor, states, visibleCandidates]);
+  const priority = useMemo(() => visibleCandidates.map(({ source, card }) => ({ card, progress: getCardProgress(states.get(source.id) ?? modeFor(source), card.id), score: priorityScore(card, states.get(source.id) ?? modeFor(source), { ignoreRecency: true }) })).sort((a, b) => b.score - a.score).slice(0, 10), [modeFor, states, visibleCandidates]);
   const sourceByCard = useMemo(() => new Map(sources.flatMap((source) => source.cards.map((card) => [`${card.deckId}:${card.id}`, source] as const))), [sources]);
   const coverageRemaining = useMemo<SidebarStudyItem[]>(() => visibleCandidates
     .filter((candidate) => candidateKey(candidate) !== (current ? candidateKey(current) : ""))
