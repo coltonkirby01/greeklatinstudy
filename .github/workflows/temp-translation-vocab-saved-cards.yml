@@ -1,0 +1,72 @@
+name: Temporary Translation Vocab Saved Cards patch
+
+on:
+  push:
+    branches:
+      - feature/translation-vocab-deck
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/translation-vocab-deck
+      - name: Patch Saved Cards integration
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{path}: expected 1 match, found {count}: {old[:90]!r}")
+              p.write_text(text.replace(old, new, 1))
+
+          replace_once(
+              "src/pages/greek-page-v2.tsx",
+              '''  const savedCardEntries = useMemo(() => {\n    if (!decks) return [];\n    const seen = new Set<string>();\n    return deckList(decks).flatMap((sourceDeck) => sourceDeck.cards.flatMap((card) => {\n      const key = savedCardRef(sourceDeck.id, card.id);\n      if (!groupKeyForCard(sourceDeck, card) || !savedCards.refs.has(key) || seen.has(key)) return [];\n      seen.add(key);\n      return [{ key, sourceDeck, card }];\n    }));\n  }, [decks, savedCards.refs]);''',
+              '''  const savedCardEntries = useMemo(() => {\n    if (!decks) return [];\n    const seen = new Set<string>();\n    return [...deckList(decks), translationVocab.deck].flatMap((sourceDeck) => sourceDeck.cards.flatMap((card) => {\n      const key = savedCardRef(sourceDeck.id, card.id);\n      const available = sourceDeck.id === translationVocab.deck.id || Boolean(groupKeyForCard(sourceDeck, card));\n      if (!available || !savedCards.refs.has(key) || seen.has(key)) return [];\n      seen.add(key);\n      return [{ key, sourceDeck, card }];\n    }));\n  }, [decks, savedCards.refs, translationVocab.deck]);''',
+          )
+          replace_once(
+              "src/pages/greek-page-v2.tsx",
+              '''      appendSaved("saved-new-testament-vocabulary", decks.newTestamentVocabulary, direction, direction, () => true);\n    }''',
+              '''      appendSaved("saved-new-testament-vocabulary", decks.newTestamentVocabulary, direction, direction, () => true);\n      appendSaved("saved-translation-helper-vocab", translationVocab.deck, direction, direction, () => true);\n    }''',
+          )
+          replace_once(
+              "src/pages/greek-page-v2.tsx",
+              '  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lessonCardSets, newTestamentCards, savedCards.refs, translationVocab.source]);',
+              '  }, [decks, direction, excludedCards.refs, foundationCards, includeSavedCards, lessonCardSets, newTestamentCards, savedCards.refs, translationVocab.deck, translationVocab.source]);',
+          )
+
+          replace_once(
+              "src/pages/latin-page.tsx",
+              '  const savedSourceDecks = useMemo(() => [vocabularyDeck, adjectiveParadigmDeck, participlesDeck, activeParadigmDeck, passiveParadigmDeck, activeSubjunctiveDeck, passiveSubjunctiveDeck].filter((item): item is DeckDefinition => Boolean(item)), [activeParadigmDeck, activeSubjunctiveDeck, adjectiveParadigmDeck, participlesDeck, passiveParadigmDeck, passiveSubjunctiveDeck, vocabularyDeck]);',
+              '  const savedSourceDecks = useMemo(() => [vocabularyDeck, adjectiveParadigmDeck, participlesDeck, activeParadigmDeck, passiveParadigmDeck, activeSubjunctiveDeck, passiveSubjunctiveDeck, translationVocab.deck].filter((item): item is DeckDefinition => Boolean(item)), [activeParadigmDeck, activeSubjunctiveDeck, adjectiveParadigmDeck, participlesDeck, passiveParadigmDeck, passiveSubjunctiveDeck, translationVocab.deck, vocabularyDeck]);',
+          )
+          replace_once(
+              "src/pages/latin-page.tsx",
+              '''      appendSaved("saved-passive-subjunctive-paradigms", passiveSubjunctiveDeck, paradigmStudyKey);\n    }''',
+              '''      appendSaved("saved-passive-subjunctive-paradigms", passiveSubjunctiveDeck, paradigmStudyKey);\n      appendSaved("saved-translation-helper-vocab", translationVocab.deck, direction);\n    }''',
+          )
+          replace_once(
+              "src/pages/latin-page.tsx",
+              '  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, activeSubjunctiveActive, activeSubjunctiveDeck, activeSubjunctiveStudyCards, adjectiveParadigmDeck, adjectiveParadigmStudyCards, adjectiveParadigmsActive, direction, excludedCards.refs, includeSavedCards, participlesDeck, participleStudyCards, participlesActive, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, passiveSubjunctiveActive, passiveSubjunctiveDeck, passiveSubjunctiveStudyCards, savedCards.refs, translationVocab.source, vocabularyActive, vocabularyCards, vocabularyDeck]);',
+              '  }, [activeParadigmDeck, activeParadigmStudyCards, activeParadigmsActive, activeSubjunctiveActive, activeSubjunctiveDeck, activeSubjunctiveStudyCards, adjectiveParadigmDeck, adjectiveParadigmStudyCards, adjectiveParadigmsActive, direction, excludedCards.refs, includeSavedCards, participlesDeck, participleStudyCards, participlesActive, passiveParadigmDeck, passiveParadigmStudyCards, passiveParadigmsActive, passiveSubjunctiveActive, passiveSubjunctiveDeck, passiveSubjunctiveStudyCards, savedCards.refs, translationVocab.deck, translationVocab.source, vocabularyActive, vocabularyCards, vocabularyDeck]);',
+          )
+          PY
+      - name: Commit patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/greek-page-v2.tsx src/pages/latin-page.tsx
+          git commit -m "Keep Translation Vocab cards compatible with Saved Cards"
+          git push origin HEAD:feature/translation-vocab-deck
