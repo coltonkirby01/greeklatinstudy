@@ -27,7 +27,7 @@ describe("Translation Helper foundation", () => {
     expect(nav).toContain('label: "Translation Helper"');
     expect(page).toContain("dictionary definition");
     expect(page).not.toContain("AI tutor");
-    expect(page).not.toContain("sentence translation");
+    expect(page).toContain("does not generate a sentence translation");
   });
 
   it("keeps Greek and Latin source boundaries explicit", () => {
