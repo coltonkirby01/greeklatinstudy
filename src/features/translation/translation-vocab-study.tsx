@@ -153,7 +153,7 @@ export function TranslationVocabDeckFilter({ study }: { study: TranslationVocabS
       cards={study.deck.cards}
       chunkSize={10}
       sectionTitle="Saved from Translation Helper"
-      isSelected={(card) => study.enabled && !study.deck.cards.length ? false : study.enabled && study.source?.cards.some((item) => item.id === card.id) === true}
+      isSelected={(card) => study.enabled && study.source?.cards.some((item) => item.id === card.id) === true}
       onCardChange={study.changeCard}
       onCardsChange={(cards, next) => cards.forEach((card) => study.changeCard(card, next))}
       labelForCard={(card) => `${card.front} — ${card.back}`}
