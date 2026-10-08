@@ -390,7 +390,6 @@ export function GreekPage() {
     label: (card.rank ? "#" + card.rank + " · " : "") + card.front,
     checked: includeSavedCards && !excludedCards.refs.has(key),
   })), [excludedCards.refs, includeSavedCards, savedCardEntries]);
-  const savedCardCount = savedCardEntries.length;
 
   const sources = useMemo(() => {
     if (!decks) return [];

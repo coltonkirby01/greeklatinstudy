@@ -508,7 +508,6 @@ export function LatinPage() {
     label: (card.rank ? "#" + card.rank + " · " : "") + card.front.split(" — R.")[0],
     checked: includeSavedCards && !excludedCards.refs.has(key),
   })), [excludedCards.refs, includeSavedCards, savedCardEntries]);
-  const savedCardCount = savedCardEntries.length;
 
 
   const sources = useMemo(() => {
