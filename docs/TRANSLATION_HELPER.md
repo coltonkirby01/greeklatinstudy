@@ -4,7 +4,7 @@ The Translation Helper is a source-grounded reading aid. It is not an automatic 
 
 ## Learner-facing goal
 
-A learner pastes or uploads Greek or Latin text, reviews the extracted text, and then clicks individual words. The helper shows a dictionary definition for the clicked word.
+A learner pastes or uploads Greek or Latin text, reviews the extracted text, and then clicks individual words. The helper shows a dictionary definition and, for Latin, the grammatical form analysis returned by the selected source.
 
 ## Source policy
 
@@ -19,23 +19,24 @@ Do not add an outside Greek dictionary or model-generated gloss without an expli
 
 ### Latin
 
-Target course-source priority remains:
+The Translation Helper uses **Whitaker's Words Online at https://latin-words.com/** as its only Latin dictionary and morphology source.
 
-1. Robert J. Henle material represented in the site.
-2. Moreland & Fleischer once ingested.
-3. Dickinson College Commentaries Latin Core Vocabulary.
+Do not use Dickinson, Henle, Moreland & Fleischer, Olivetti, the previous public JSON Latin API, or any other Latin dictionary/morphology source on this page. This restriction applies only to the Translation Helper. It does not remove or alter Dickinson vocabulary or other Latin material used elsewhere in the site's flashcards.
 
-Direct Dickinson headword matches are checked first. If the clicked surface form is not a direct Dickinson entry, the helper uses a server-backed Whitaker's Words lookup through the site's Supabase `latin-lookup` Edge Function. The Edge Function calls a public JSON Whitaker API and returns only normalized headword/definition records to the site. This avoids loading third-party executable JavaScript and multi-megabyte dictionary files in every user's browser.
+The site's Supabase `latin-lookup` Edge Function requests the individual-word result page from latin-words.com and converts that result into a small structured response for the learner-facing panel. No Whitaker dictionary engine or bulk dictionary data is downloaded into the learner's browser.
 
-The browser keeps a seven-day cache of successful fallback lookups. If the Supabase lookup is temporarily unavailable, the client may try the same public JSON provider directly. The previous architecture that dynamically imported Whitaker's Words from third-party CDNs and downloaded its raw data files at runtime is intentionally retired.
+## Latin form display
 
-Online Latin Dictionary (Olivetti) remains an optional external reference only. Do not scrape, mirror, proxy, or republish its dictionary entries inside the site without permission. Its published terms restrict reproduction/publication of the service on third-party sites, so the Translation Helper must not present copied Olivetti entries as an in-app dictionary.
+The panel should present the source output in a learner-readable order:
 
-## Form recognition
+1. clicked surface form;
+2. dictionary headword/principal parts;
+3. English dictionary meaning;
+4. grammatical form or possible forms.
 
-Vocabulary lookup and form recognition are separate concerns. A recognized inflected form may point to a lemma, but the displayed English definition must still come from an approved/source-identified dictionary layer. Do not invent a lemma or definition and present it as source-backed.
+When latin-words.com returns more than one valid analysis, the helper must preserve the ambiguity instead of choosing one. The first result is shown cleanly and additional analyses are available under an `Other possible analyses` disclosure.
 
-The Whitaker fallback handles the common reading case in which the passage contains an inflected form rather than a dictionary headword. The learner-facing panel still shows dictionary information rather than a contextual sentence translation.
+Morphology labels are expanded for readability from the abbreviations returned by Whitaker's Words. For example, `ACC S F` is displayed as `accusative · singular · feminine`, while a verb analysis can display tense, voice, mood, person, and number. The site must not invent a grammatical analysis that is not present in the source output.
 
 ## File ingestion
 
@@ -52,9 +53,7 @@ PDF extraction depends on an embedded PDF text layer. A scanned/image-only PDF w
 - Uploading TXT/MD, DOCX, or a text-based PDF automatically fills the review box with extracted text.
 - Extraction progress and failures are surfaced to the learner instead of failing silently.
 - Words are rendered as clickable tokens while punctuation and whitespace are preserved.
-- The definition panel shows the clicked surface form, matched source headword, source definition, and source reference.
-- Latin checks Dickinson first and then the server-backed Whitaker lookup when the clicked surface form is not a direct Dickinson headword.
-- Successful fallback lookups are cached locally for seven days.
-- The client must not dynamically import a Latin dictionary engine or download raw Whitaker dictionary files at runtime.
-- If neither Dickinson nor Whitaker matches, the page may offer Online Latin Dictionary as an optional external reference.
+- Latin results come only from latin-words.com and show meaning plus form analysis when available.
+- Ambiguous Latin forms remain visible as multiple possible analyses.
+- Successful Latin lookups are cached locally for seven days.
 - Greek does not fall back outside Groton/Kubo.
