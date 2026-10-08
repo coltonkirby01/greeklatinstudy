@@ -66,12 +66,15 @@ function writePersistentCache(word: string, matches: DictionaryMatch[]) {
   }
 }
 
-async function fetchJson(url: string) {
+async function fetchJson(url: string, apiKey: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 9000);
   try {
     const response = await fetch(url, {
-      headers: { Accept: "application/json" },
+      headers: {
+        Accept: "application/json",
+        apikey: apiKey,
+      },
       signal: controller.signal,
     });
     const payload = await response.json().catch(() => null);
@@ -100,8 +103,9 @@ export async function lookupLatinWords(surface: string): Promise<DictionaryMatch
   }
 
   const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\/$/, "");
-  if (!supabaseUrl) throw new Error("The Whitaker's Words lookup service is not configured.");
-  const payload = await fetchJson(`${supabaseUrl}/functions/v1/latin-lookup?word=${encodeURIComponent(word)}`);
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+  if (!supabaseUrl || !supabaseAnonKey) throw new Error("The Whitaker's Words lookup service is not configured.");
+  const payload = await fetchJson(`${supabaseUrl}/functions/v1/latin-lookup?word=${encodeURIComponent(word)}`, supabaseAnonKey);
   if (!payload || typeof payload !== "object") return [];
   const proxy = payload as ProxyPayload;
   if (typeof proxy.error === "string") throw new Error(proxy.error);
