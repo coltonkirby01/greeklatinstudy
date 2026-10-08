@@ -41,6 +41,7 @@ export type TranslationVocabStudyState = {
   selectAll(): void;
   selectNone(): void;
   changeCard(card: StudyCard, checked: boolean): void;
+  changeCards(cards: readonly StudyCard[], checked: boolean): void;
 };
 
 export function useTranslationVocabStudy(
@@ -99,17 +100,23 @@ export function useTranslationVocabStudy(
 
   const selectNone = useCallback(() => setEnabled(false), []);
 
-  const changeCard = useCallback((card: StudyCard, checked: boolean) => {
+  const changeCards = useCallback((cards: readonly StudyCard[], checked: boolean) => {
+    if (!cards.length) return;
+    const targets = cards.map((card) => ({ deckId: deck.id, cardId: card.id }));
     if (!checked) {
-      exclusions.exclude(deck.id, card.id);
+      exclusions.setMany(targets, true);
       return;
     }
     if (!enabled) {
       setEnabled(true);
-      exclusions.setMany(deck.cards.map((item) => ({ deckId: deck.id, cardId: item.id })), true);
+      exclusions.setMany(deck.cards.map((card) => ({ deckId: deck.id, cardId: card.id })), true);
     }
-    exclusions.restore(deck.id, card.id);
-  }, [deck, enabled, exclusions.exclude, exclusions.restore, exclusions.setMany]);
+    exclusions.setMany(targets, false);
+  }, [deck, enabled, exclusions.setMany]);
+
+  const changeCard = useCallback((card: StudyCard, checked: boolean) => {
+    changeCards([card], checked);
+  }, [changeCards]);
 
   const signature = `${enabled ? "on" : "off"}:${selectedCards.map((card) => card.id).sort().join(",")}`;
 
@@ -125,6 +132,7 @@ export function useTranslationVocabStudy(
     selectAll,
     selectNone,
     changeCard,
+    changeCards,
   };
 }
 
@@ -155,7 +163,7 @@ export function TranslationVocabDeckFilter({ study }: { study: TranslationVocabS
       sectionTitle="Saved from Translation Helper"
       isSelected={(card) => study.enabled && study.source?.cards.some((item) => item.id === card.id) === true}
       onCardChange={study.changeCard}
-      onCardsChange={(cards, next) => cards.forEach((card) => study.changeCard(card, next))}
+      onCardsChange={study.changeCards}
       labelForCard={(card) => `${card.front} — ${card.back}`}
     />
   </FilterDisclosure>;
