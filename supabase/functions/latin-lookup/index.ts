@@ -10,7 +10,10 @@ const CACHE_MS = 24 * 60 * 60 * 1000;
 
 const partsOfSpeech = new Set([
   "N", "V", "VPAR", "ADJ", "ADV", "PREP", "CONJ", "INTERJ", "PRON", "PACK", "NUM", "SUPINE",
+  "TACKON", "PREFIX", "SUFFIX",
 ]);
+const modifierPartsOfSpeech = new Set(["TACKON", "PREFIX", "SUFFIX"]);
+const posPattern = "N|V|VPAR|ADJ|ADV|PREP|CONJ|INTERJ|PRON|PACK|NUM|SUPINE|TACKON|PREFIX|SUFFIX";
 
 const labelMap: Record<string, string> = {
   NOM: "nominative", GEN: "genitive", DAT: "dative", ACC: "accusative", ABL: "ablative", VOC: "vocative", LOC: "locative",
@@ -25,6 +28,7 @@ const labelMap: Record<string, string> = {
 const posMap: Record<string, string> = {
   N: "noun", V: "verb", VPAR: "participle", ADJ: "adjective", ADV: "adverb", PREP: "preposition",
   CONJ: "conjunction", INTERJ: "interjection", PRON: "pronoun", PACK: "pronoun", NUM: "numeral", SUPINE: "supine",
+  TACKON: "enclitic", PREFIX: "prefix", SUFFIX: "suffix",
 };
 
 type LookupMatch = {
@@ -39,6 +43,7 @@ type ParsedGroup = {
   analyses: string[];
   headword: string;
   definitions: string[];
+  modifier: boolean;
 };
 
 function normalizeLatin(value: string) {
@@ -84,12 +89,18 @@ function decodeHtml(value: string) {
     .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(Number.parseInt(code, 16)));
 }
 
+function containsWordsOutput(text: string) {
+  const posLine = new RegExp(`\\s{2,}(?:${posPattern})\\b`);
+  return text.split(/\r?\n/).some((line) => posLine.test(line));
+}
+
 function extractWordsOutput(html: string) {
   const preBlocks = [...html.matchAll(/<pre\b[^>]*>([\s\S]*?)<\/pre>/gi)]
     .map((match) => decodeHtml(match[1].replace(/<[^>]+>/g, "")))
     .map((text) => text.trim())
     .filter(Boolean);
-  if (preBlocks.length) return preBlocks.sort((a, b) => b.length - a.length)[0];
+  const resultBlocks = preBlocks.filter(containsWordsOutput);
+  if (resultBlocks.length) return resultBlocks.join("\n");
 
   const cleaned = decodeHtml(
     html
@@ -98,20 +109,27 @@ function extractWordsOutput(html: string) {
       .replace(/<[^>]+>/g, "\n"),
   );
   const lines = cleaned.split(/\r?\n/).map((line) => line.trimEnd());
-  const start = lines.findIndex((line) => /^\s*\S+\s{2,}(?:N|V|VPAR|ADJ|ADV|PREP|CONJ|INTERJ|PRON|PACK|NUM|SUPINE)\s+/.test(line));
+  const startPattern = new RegExp(`^\\s*\\S+\\s{2,}(?:${posPattern})\\b`);
+  const start = lines.findIndex((line) => startPattern.test(line));
   return start >= 0 ? lines.slice(start).join("\n").trim() : "";
 }
 
 function analysisParts(line: string) {
-  const match = line.match(/^\s*(\S+)\s{2,}([A-Z]+)\s+(.+)$/);
+  const match = line.match(/^\s*(\S+)\s{2,}([A-Z]+)(?:\s+(.*))?$/);
   if (!match || !partsOfSpeech.has(match[2])) return null;
-  return { pos: match[2], rest: match[3].trim().split(/\s+/) };
+  const restText = (match[3] ?? "").trim();
+  if (/\[[A-Z0-9]+\]/.test(restText)) return null;
+  return { pos: match[2], rest: restText ? restText.split(/\s+/) : [] };
 }
 
 function headwordParts(line: string) {
-  const match = line.match(/^\s*(.+?)\s{2,}(N|V|VPAR|ADJ|ADV|PREP|CONJ|INTERJ|PRON|PACK|NUM|SUPINE)\b(.*)$/);
-  if (!match || analysisParts(line)) return null;
-  return { headword: match[1].trim() };
+  const match = line.match(new RegExp(`^\\s*(.+?)\\s{2,}(${posPattern})\\b(.*)$`));
+  if (!match) return null;
+  const pos = match[2];
+  const rest = match[3] ?? "";
+  const modifier = modifierPartsOfSpeech.has(pos);
+  if (!modifier && !/\[[A-Z0-9]+\]/.test(rest)) return null;
+  return { headword: match[1].trim(), pos, modifier };
 }
 
 function parseGroups(text: string) {
@@ -127,19 +145,24 @@ function parseGroups(text: string) {
   for (const rawLine of text.split(/\r?\n/)) {
     const line = rawLine.trimEnd();
     const trimmed = line.trim();
-    if (!trimmed || /^MORE\b/i.test(trimmed) || /^\*$/.test(trimmed)) continue;
-
-    if (analysisParts(line)) {
-      if (current?.definitions.length) finish();
-      pendingAnalyses.push(line);
-      continue;
-    }
+    if (!trimmed || /^MORE\b/i.test(trimmed) || /^Unexpected exception in PAUSE\b/i.test(trimmed) || /^\*$/.test(trimmed)) continue;
 
     const headword = headwordParts(line);
     if (headword) {
       if (current) finish();
-      current = { analyses: pendingAnalyses, headword: headword.headword, definitions: [] };
+      current = {
+        analyses: headword.modifier ? [line] : pendingAnalyses,
+        headword: headword.headword,
+        definitions: [],
+        modifier: headword.modifier,
+      };
       pendingAnalyses = [];
+      continue;
+    }
+
+    if (analysisParts(line)) {
+      if (current?.definitions.length) finish();
+      pendingAnalyses.push(line);
       continue;
     }
 
@@ -151,7 +174,10 @@ function parseGroups(text: string) {
 
 function humanizeAnalysis(line: string) {
   const parsed = analysisParts(line);
-  if (!parsed) return line.trim();
+  if (!parsed) {
+    const headword = headwordParts(line);
+    return headword?.modifier ? posMap[headword.pos] : line.trim();
+  }
   const tokens = parsed.rest.filter((token) => !/^\d+$/.test(token));
   const labels = tokens.map((token) => labelMap[token] ?? null).filter((value): value is string => Boolean(value));
 
@@ -185,8 +211,9 @@ function humanizeAnalysis(line: string) {
 function toMatches(text: string): LookupMatch[] {
   const output: LookupMatch[] = [];
   const seen = new Set<string>();
+  const groups = parseGroups(text).sort((a, b) => Number(a.modifier) - Number(b.modifier));
 
-  for (const group of parseGroups(text)) {
+  for (const group of groups) {
     const definition = group.definitions.join(" ").replace(/\s+/g, " ").trim();
     if (!definition) continue;
     const morphology = [...new Set(group.analyses.map(humanizeAnalysis).filter(Boolean))];
@@ -201,7 +228,7 @@ function toMatches(text: string): LookupMatch[] {
       sourceRef: "Whitaker's Words Online · latin-words.com",
     });
   }
-  return output.slice(0, 12);
+  return output;
 }
 
 async function fetchLatinWords(word: string) {
