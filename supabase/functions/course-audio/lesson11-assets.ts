@@ -19,8 +19,8 @@ export const lesson11VocabularyAudio: Readonly<Record<string, { label: string; g
   "lesson11-v4": { label: "λίμνη", greek: "λίμνη" },
   "lesson11-v5": { label: "τόπος", greek: "τόπος" },
   "lesson11-v6": { label: "τρόπος", greek: "τρόπος" },
-  "lesson11-v7": { label: "μακρός, -ά, -όν", greek: "μακρός, μακρά, μακρόν" },
-  "lesson11-v8": { label: "μικρός, -ά, -όν", greek: "μικρός, μικρά, μικρόν" },
+  "lesson11-v7": { label: "μακρός, -ᾱ́, -όν", greek: "μακρός, μακρᾱ́, μακρόν" },
+  "lesson11-v8": { label: "μῑκρός, -ᾱ́, -όν", greek: "μῑκρός, μῑκρᾱ́, μῑκρόν" },
   "lesson11-v9": { label: "πόρρω", greek: "πόρρω" },
   "lesson11-v10": { label: "ὑπό", greek: "ὑπό" },
 };
@@ -45,7 +45,7 @@ export const lesson11CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
     ["-όμεθα", "-εσθε", "-οντο"],
   ]),
   endingChart("lesson11-chart-present-middle-passive-imperative-endings", "Present Middle/Passive Imperative Endings", [
-    ["-ου", "-εσθω"],
-    ["-εσθε", "-εσθων"],
+    ["-ου", "-έσθω"],
+    ["-εσθε", "-έσθων"],
   ]),
 ] as const;
