@@ -57,7 +57,8 @@
 .filter-section-heading h3 { margin: 0; font-family: var(--font-serif); font-size: 1rem; }
 .filter-section-heading p { margin: 0.2rem 0 0; color: var(--ink-soft); font-size: 0.76rem; }
 .filter-actions { display: flex; gap: 0.35rem; }
-.filter-actions button { padding: 0.2rem 0.35rem; border: 0; color: var(--burgundy); background: transparent; font-size: 0.72rem; font-weight: 800; text-decoration: underline; }
+.filter-actions button,
+.saved-card-library-action { padding: 0.2rem 0.35rem; border: 0; color: var(--burgundy); background: transparent; font-size: 0.72rem; font-weight: 800; text-decoration: underline; }
 
 .filter-option-grid {
   display: grid;
@@ -79,6 +80,22 @@
   border-radius: 0.6rem;
   background: var(--panel);
   cursor: pointer;
+}
+
+.saved-card-filter-row {
+  position: relative;
+}
+.saved-card-filter-row .filter-checkbox {
+  padding-right: 5.7rem;
+}
+.saved-card-library-action {
+  position: absolute;
+  top: 50%;
+  right: 0.58rem;
+  z-index: 1;
+  transform: translateY(-50%);
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .filter-checkbox.is-nested { margin-left: 0.35rem; }
