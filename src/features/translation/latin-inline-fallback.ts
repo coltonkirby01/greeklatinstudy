@@ -30,8 +30,14 @@ type WhitakerModule = {
 };
 
 const WHITAKER_VERSION = "0.1.2";
-const WHITAKER_MODULE_URL = `https://esm.sh/whitakers-words@${WHITAKER_VERSION}?bundle`;
-const WHITAKER_DATA_BASE = `https://cdn.jsdelivr.net/npm/whitakers-words@${WHITAKER_VERSION}/data`;
+const WHITAKER_MODULE_URLS = [
+  `https://cdn.jsdelivr.net/npm/whitakers-words@${WHITAKER_VERSION}/+esm`,
+  `https://esm.sh/whitakers-words@${WHITAKER_VERSION}?bundle`,
+] as const;
+const WHITAKER_DATA_BASES = [
+  `https://cdn.jsdelivr.net/npm/whitakers-words@${WHITAKER_VERSION}/data`,
+  `https://unpkg.com/whitakers-words@${WHITAKER_VERSION}/data`,
+] as const;
 const WHITAKER_CACHE = `translation-helper-whitakers-${WHITAKER_VERSION}`;
 
 let enginePromise: Promise<{ engine: WhitakerEngine; dictionaryForm: WhitakerModule["dictionaryForm"] }> | null = null;
@@ -55,32 +61,59 @@ async function openCache() {
   }
 }
 
+async function loadModule() {
+  let lastError: unknown = null;
+  for (const url of WHITAKER_MODULE_URLS) {
+    try {
+      const module = await import(/* @vite-ignore */ url) as unknown as WhitakerModule;
+      if (module?.WordsEngine?.create && module.dictionaryForm) return module;
+      lastError = new Error(`Dictionary module from ${new URL(url).hostname} was missing required exports.`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  const detail = lastError instanceof Error ? ` ${lastError.message}` : "";
+  throw new Error(`The inline Latin dictionary library could not be loaded.${detail}`);
+}
+
 async function loadText(url: string, cache: Cache | null) {
   const cached = await cache?.match(url);
   if (cached) return cached.text();
 
-  const response = await fetch(url, { mode: "cors" });
-  if (!response.ok) throw new Error(`Could not load the inline Latin dictionary data (${response.status}).`);
+  const response = await fetch(url, { mode: "cors", cache: "force-cache" });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
   await cache?.put(url, response.clone()).catch(() => undefined);
   return response.text();
+}
+
+async function loadDataFile(fileName: string, cache: Cache | null) {
+  let lastError: unknown = null;
+  for (const base of WHITAKER_DATA_BASES) {
+    const url = `${base}/${fileName}`;
+    try {
+      return await loadText(url, cache);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  const detail = lastError instanceof Error ? ` ${lastError.message}` : "";
+  throw new Error(`Could not load ${fileName} for the inline Latin dictionary.${detail}`);
 }
 
 async function loadWhitakerEngine() {
   if (enginePromise) return enginePromise;
 
   enginePromise = (async () => {
-    const module = await import(/* @vite-ignore */ WHITAKER_MODULE_URL) as unknown as WhitakerModule;
-    if (!module?.WordsEngine?.create || !module.dictionaryForm) {
-      throw new Error("The inline Latin dictionary library loaded incorrectly.");
-    }
-
+    const module = await loadModule();
     const cache = await openCache();
     const [dictGen, dictSup, inflects, addons, uniques] = await Promise.all([
-      loadText(`${WHITAKER_DATA_BASE}/DICTLINE.GEN`, cache),
-      loadText(`${WHITAKER_DATA_BASE}/DICTLINE.SUP`, cache),
-      loadText(`${WHITAKER_DATA_BASE}/INFLECTS.LAT`, cache),
-      loadText(`${WHITAKER_DATA_BASE}/ADDONS.LAT`, cache),
-      loadText(`${WHITAKER_DATA_BASE}/UNIQUES.LAT`, cache),
+      loadDataFile("DICTLINE.GEN", cache),
+      loadDataFile("DICTLINE.SUP", cache),
+      loadDataFile("INFLECTS.LAT", cache),
+      loadDataFile("ADDONS.LAT", cache),
+      loadDataFile("UNIQUES.LAT", cache),
     ]);
 
     const engine = module.WordsEngine.create({
