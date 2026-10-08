@@ -8,13 +8,9 @@ import {
   type DictionaryMatch,
   type TranslationHelperLanguage,
 } from "../features/translation/dictionary-sources";
+import { extractTranslationFile } from "../features/translation/file-extraction";
 
-const plainTextExtensions = new Set(["txt", "text", "md"]);
-const translationHelperCss = `.translation-helper-page{display:grid;gap:1rem}.translation-helper-heading p,.translation-source-policy p,.translation-empty,.translation-source-line,.translation-notice{color:var(--muted-foreground)}.translation-input,.translation-text,.translation-definition,.translation-source-policy{padding:1rem}.translation-input{display:grid;gap:.8rem}.translation-language{display:flex;gap:.35rem}.translation-language button{border:1px solid var(--border);border-radius:999px;padding:.5rem .9rem;background:var(--panel);color:inherit;font:inherit;font-weight:700}.translation-language button.is-active{background:var(--primary);color:var(--primary-foreground)}.translation-upload{display:flex;gap:.75rem;align-items:center;justify-content:space-between;border:1px dashed var(--border);border-radius:var(--radius);padding:.8rem}.translation-upload span{display:inline-flex;gap:.45rem;align-items:center}.translation-upload svg,.translation-file-types svg{width:1rem;height:1rem}.translation-file-types{display:flex;gap:1rem;flex-wrap:wrap}.translation-file-types span{display:inline-flex;gap:.35rem;align-items:center;color:var(--muted-foreground);font-size:.85rem}.translation-input textarea{width:100%;min-height:12rem;resize:vertical;padding:.9rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);color:inherit;font:inherit}.translation-workspace{display:grid;grid-template-columns:2fr 1fr;gap:1rem;align-items:start}.translation-text p{white-space:pre-wrap;line-height:2;margin:0}.translation-word{border:0;background:transparent;color:inherit;font:inherit;padding:0;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--primary) 45%,transparent);text-underline-offset:.15em;cursor:pointer}.translation-word:hover,.translation-word.is-selected{color:var(--primary)}.translation-definition{position:sticky;top:6rem}.translation-definition-copy{font-size:1.08rem}.translation-headword{font-family:var(--font-serif);font-size:1.2rem}.translation-alternatives div{display:grid;gap:.15rem;padding:.6rem 0;border-top:1px solid var(--border)}.translation-prepare-button{min-height:44px}.translation-helper-heading h1{margin:.1rem 0 .45rem;font-family:var(--font-serif);font-size:clamp(2rem,4vw,3.2rem);font-weight:600;letter-spacing:-.03em}.translation-source-policy h2,.translation-definition h2{margin:.1rem 0 .5rem;font-family:var(--font-serif)}@media(max-width:850px){.translation-workspace{grid-template-columns:1fr}.translation-definition{position:static}.translation-upload{align-items:flex-start;flex-direction:column}}`;
-
-function extension(name: string) {
-  return name.toLocaleLowerCase().split(".").at(-1) ?? "";
-}
+const translationHelperCss = `.translation-helper-page{display:grid;gap:1rem}.translation-helper-heading p,.translation-source-policy p,.translation-empty,.translation-source-line,.translation-notice{color:var(--muted-foreground)}.translation-input,.translation-text,.translation-definition,.translation-source-policy{padding:1rem}.translation-input{display:grid;gap:.8rem}.translation-language{display:flex;gap:.35rem}.translation-language button{border:1px solid var(--border);border-radius:999px;padding:.5rem .9rem;background:var(--panel);color:inherit;font:inherit;font-weight:700}.translation-language button.is-active{background:var(--primary);color:var(--primary-foreground)}.translation-upload{display:flex;gap:.75rem;align-items:center;justify-content:space-between;border:1px dashed var(--border);border-radius:var(--radius);padding:.8rem}.translation-upload span{display:inline-flex;gap:.45rem;align-items:center}.translation-upload svg,.translation-file-types svg{width:1rem;height:1rem}.translation-file-types{display:flex;gap:1rem;flex-wrap:wrap}.translation-file-types span{display:inline-flex;gap:.35rem;align-items:center;color:var(--muted-foreground);font-size:.85rem}.translation-input textarea{width:100%;min-height:12rem;resize:vertical;padding:.9rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);color:inherit;font:inherit}.translation-workspace{display:grid;grid-template-columns:2fr 1fr;gap:1rem;align-items:start}.translation-text p{white-space:pre-wrap;line-height:2;margin:0}.translation-word{border:0;background:transparent;color:inherit;font:inherit;padding:0;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--primary) 45%,transparent);text-underline-offset:.15em;cursor:pointer}.translation-word:hover,.translation-word.is-selected{color:var(--primary)}.translation-definition{position:sticky;top:6rem}.translation-definition-copy{font-size:1.08rem}.translation-headword{font-family:var(--font-serif);font-size:1.2rem}.translation-alternatives div{display:grid;gap:.15rem;padding:.6rem 0;border-top:1px solid var(--border)}.translation-prepare-button{min-height:44px}.translation-helper-heading h1{margin:.1rem 0 .45rem;font-family:var(--font-serif);font-size:clamp(2rem,4vw,3.2rem);font-weight:600;letter-spacing:-.03em}.translation-source-policy h2,.translation-definition h2{margin:.1rem 0 .5rem;font-family:var(--font-serif)}.translation-notice.is-error{color:#b42318}.translation-upload input:disabled{opacity:.55}@media(max-width:850px){.translation-workspace{grid-template-columns:1fr}.translation-definition{position:static}.translation-upload{align-items:flex-start;flex-direction:column}}`;
 
 function isWord(part: string) {
   return /^[\p{L}\p{M}]+(?:[’'][\p{L}\p{M}]+)*$/u.test(part);
@@ -29,6 +25,8 @@ export function TranslationHelperPage() {
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [fileNotice, setFileNotice] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [isExtracting, setIsExtracting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,21 +55,27 @@ export function TranslationHelperPage() {
   async function onFile(file: File | null) {
     setSelectedWord(null);
     setPreparedText("");
+    setFileError(null);
     if (!file) {
       setSelectedFile(null);
       setFileNotice(null);
+      setIsExtracting(false);
       return;
     }
+
     setSelectedFile(file.name);
-    const suffix = extension(file.name);
-    if (plainTextExtensions.has(suffix) || file.type.startsWith("text/")) {
-      const text = await file.text();
-      setDraft(text);
-      setPreparedText(text.trim());
-      setFileNotice("Text extracted locally. Review or correct it below before using the helper.");
-      return;
+    setFileNotice(`Extracting text from ${file.name}…`);
+    setIsExtracting(true);
+    try {
+      const text = await extractTranslationFile(file);
+      setDraft(text.replace(/\r\n?/g, "\n"));
+      setFileNotice("Text extracted locally in your browser. Review or correct it below, then create the clickable text.");
+    } catch (error) {
+      setFileNotice(null);
+      setFileError(error instanceof Error ? error.message : "The file could not be read. Please try another file or paste the text directly.");
+    } finally {
+      setIsExtracting(false);
     }
-    setFileNotice("DOC/DOCX, PDF, and image extraction will be connected in the next step. This file was not uploaded anywhere. For now, paste its text into the box below.");
   }
 
   return <main className="page-shell translation-helper-page">
@@ -79,10 +83,10 @@ export function TranslationHelperPage() {
     <section className="translation-helper-heading">
       <p className="eyebrow">Reading tool</p>
       <h1>Translation Helper</h1>
-      <p>Paste Greek or Latin text, or upload a plain-text file, then click any word to check its dictionary definition. The helper does not generate a sentence translation or contextual paraphrase.</p>
+      <p>Paste Greek or Latin text, or upload TXT/MD, DOCX, or a text-based PDF. The source text is extracted into the review box before you create the clickable reading view. The helper does not generate a sentence translation or contextual paraphrase.</p>
     </section>
 
-    <section className="translation-input panel-surface">
+    <section className="translation-input panel-surface" aria-busy={isExtracting}>
       <div className="translation-language" aria-label="Language">
         <button type="button" className={language === "latin" ? "is-active" : ""} aria-pressed={language === "latin"} onClick={() => changeLanguage("latin")}>Latin</button>
         <button type="button" className={language === "greek" ? "is-active" : ""} aria-pressed={language === "greek"} onClick={() => changeLanguage("greek")}>Greek</button>
@@ -90,18 +94,19 @@ export function TranslationHelperPage() {
 
       <label className="translation-upload">
         <span><Upload aria-hidden="true" /> Upload a file</span>
-        <input type="file" accept=".txt,.text,.md,.doc,.docx,.pdf,image/*" onChange={(event) => void onFile(event.target.files?.[0] ?? null)} />
+        <input type="file" accept=".txt,.text,.md,.doc,.docx,.pdf,image/*" disabled={isExtracting} onChange={(event) => void onFile(event.target.files?.[0] ?? null)} />
       </label>
       <div className="translation-file-types" aria-label="Translation Helper inputs">
-        <span><FileText aria-hidden="true" /> Text now · DOC/DOCX/PDF next</span>
-        <span><Image aria-hidden="true" /> Image OCR next</span>
+        <span><FileText aria-hidden="true" /> TXT/MD · DOCX · text-based PDF</span>
+        <span><Image aria-hidden="true" /> Image/scanned-PDF OCR later</span>
       </div>
       {selectedFile && <p className="translation-file-name"><strong>{selectedFile}</strong></p>}
-      {fileNotice && <p className="translation-notice">{fileNotice}</p>}
+      {fileNotice && <p className="translation-notice" role="status">{fileNotice}</p>}
+      {fileError && <p className="translation-notice is-error" role="alert">{fileError}</p>}
 
       <label className="translation-textarea-label" htmlFor="translation-source-text"><strong>Review source text</strong></label>
       <textarea id="translation-source-text" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={language === "latin" ? "Paste Latin text here…" : "Paste Greek text here…"} rows={10} />
-      <button type="button" className="primary-button translation-prepare-button" onClick={prepare} disabled={!draft.trim()}>Create clickable text</button>
+      <button type="button" className="primary-button translation-prepare-button" onClick={prepare} disabled={isExtracting || !draft.trim()}>{isExtracting ? "Extracting text…" : "Create clickable text"}</button>
     </section>
 
     <section className="translation-source-policy panel-surface">
