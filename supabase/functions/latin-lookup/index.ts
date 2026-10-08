@@ -111,7 +111,7 @@ function analysisParts(line: string) {
 function headwordParts(line: string) {
   const match = line.match(/^\s*(.+?)\s{2,}(N|V|VPAR|ADJ|ADV|PREP|CONJ|INTERJ|PRON|PACK|NUM|SUPINE)\b(.*)$/);
   if (!match || analysisParts(line)) return null;
-  return { headword: `${match[1].trim()}  ${match[2]}${match[3]}`.trim() };
+  return { headword: match[1].trim() };
 }
 
 function parseGroups(text: string) {
@@ -153,25 +153,22 @@ function humanizeAnalysis(line: string) {
   const parsed = analysisParts(line);
   if (!parsed) return line.trim();
   const tokens = parsed.rest.filter((token) => !/^\d+$/.test(token));
-  const labels = tokens
-    .map((token) => labelMap[token] ?? (/^[123]$/.test(token) ? `${token}${token === "1" ? "st" : token === "2" ? "nd" : "rd"} person` : null))
-    .filter((value): value is string => Boolean(value));
+  const labels = tokens.map((token) => labelMap[token] ?? null).filter((value): value is string => Boolean(value));
 
-  if (parsed.pos === "V" && tokens.length >= 5) {
-    const person = tokens.find((token) => /^[123]$/.test(token));
+  if (parsed.pos === "V") {
+    const person = parsed.rest.filter((token) => /^[123]$/.test(token)).at(-1);
     const number = tokens.find((token) => token === "S" || token === "P");
     const tense = tokens.find((token) => ["PRES", "IMPF", "FUT", "PERF", "PLUP", "FUTP"].includes(token));
     const voice = tokens.find((token) => token === "ACTIVE" || token === "PASSIVE");
     const mood = tokens.find((token) => ["IND", "SUB", "IMP", "INF"].includes(token));
-    const pieces = [
+    return [
       posMap[parsed.pos],
       tense ? labelMap[tense] : null,
       voice ? labelMap[voice] : null,
       mood ? labelMap[mood] : null,
       person ? `${person}${person === "1" ? "st" : person === "2" ? "nd" : "rd"} person` : null,
       number ? labelMap[number] : null,
-    ].filter(Boolean);
-    return pieces.join(" · ");
+    ].filter(Boolean).join(" · ");
   }
 
   if (["N", "ADJ", "PRON", "PACK", "NUM", "VPAR"].includes(parsed.pos)) {
