@@ -4,7 +4,7 @@ The Translation Helper is a source-grounded reading aid. It is not an automatic 
 
 ## Learner-facing goal
 
-A learner pastes or uploads Greek or Latin text, reviews the extracted text, and then clicks individual words. The helper shows a dictionary definition and, for Latin, the grammatical form analysis returned by the selected source.
+A learner pastes or uploads Greek or Latin text, reviews the extracted text, and then reads from a large clickable passage. Clicking a word opens its dictionary information in a dedicated lookup panel. Latin also shows the grammatical form analysis returned by the selected source.
 
 ## Source policy
 
@@ -27,7 +27,7 @@ The site's Supabase `latin-lookup` Edge Function requests the individual-word re
 
 ## Latin form display
 
-The panel should present the source output in a learner-readable order:
+The lookup panel presents the source output in a learner-readable order:
 
 1. clicked surface form;
 2. dictionary headword/principal parts;
@@ -48,11 +48,16 @@ PDF extraction depends on an embedded PDF text layer. A scanned/image-only PDF w
 
 ## UI contract
 
+- The clickable reading text is the dominant visual element after a passage is prepared.
+- The text/upload editor is compact and collapsible. It starts open and automatically collapses after the learner creates or updates the reading text.
+- The collapsed editor remains available as a small `Text & upload` control, and an `Edit source` action is available beside the reading text.
 - Language is explicitly Greek or Latin.
 - Source text is editable before preparation.
 - Uploading TXT/MD, DOCX, or a text-based PDF automatically fills the review box with extracted text.
 - Extraction progress and failures are surfaced to the learner instead of failing silently.
 - Words are rendered as clickable tokens while punctuation and whitespace are preserved.
+- The lookup panel remains visible beside the text on desktop and below it on narrow screens.
+- The Latin lookup panel prominently identifies Whitaker's Words Online and links to latin-words.com.
 - Latin results come only from latin-words.com and show meaning plus form analysis when available.
 - Ambiguous Latin forms remain visible as multiple possible analyses.
 - Successful Latin lookups are cached locally for seven days.
