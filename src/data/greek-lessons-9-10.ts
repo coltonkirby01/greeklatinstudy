@@ -2,6 +2,8 @@ import type { DeckDefinition, StudyCard } from "../features/study/types";
 import { classicalGreekPronunciation } from "../features/greek/greek-pronunciation";
 import { greekLesson3ParadigmSpeechText } from "./builtin-decks";
 
+type GrotonLesson = 9 | 10 | 11;
+
 type GreekVocabularySourceCard = {
   id: string;
   greek: string;
@@ -29,7 +31,13 @@ async function fetchText(path: string) {
   return response.text();
 }
 
-function vocabularyDeck(lesson: 9 | 10, source: GreekVocabularySourceCard[]): DeckDefinition {
+function vocabularySourceNote(lesson: GrotonLesson) {
+  if (lesson === 9) return "Groton 9.63.";
+  if (lesson === 10) return "Groton 10.69.";
+  return "Groton 11.77.";
+}
+
+function vocabularyDeck(lesson: GrotonLesson, source: GreekVocabularySourceCard[]): DeckDefinition {
   const id = `alpha-omega-lesson${lesson}-vocab`;
   const cards: StudyCard[] = source.map((card, index) => {
     const pronunciation = classicalGreekPronunciation(card.greek);
@@ -63,11 +71,11 @@ function vocabularyDeck(lesson: 9 | 10, source: GreekVocabularySourceCard[]): De
     language: "greek",
     cards,
     supportsReverse: true,
-    sourceNote: lesson === 9 ? "Groton 9.63." : "Groton 10.69.",
+    sourceNote: vocabularySourceNote(lesson),
   };
 }
 
-function grammarDeck(lesson: 9 | 10, source: GreekGrammarSourceCard[]): DeckDefinition {
+function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): DeckDefinition {
   const id = `alpha-omega-lesson${lesson}-grammar`;
   const cards: StudyCard[] = source.map((card, index) => {
     const chartRows = card.rows.map((row) => ({ ...row, cells: [...row.cells] }));
@@ -87,25 +95,42 @@ function grammarDeck(lesson: 9 | 10, source: GreekGrammarSourceCard[]): DeckDefi
         grammarGroup: card.category,
         chartColumns: card.columns,
         chartRows,
-        rowHeaderLabel: lesson === 10 ? "Person" : "Case",
+        rowHeaderLabel: lesson === 9 ? "Case" : card.columns.length === 1 ? "Form" : "Person",
         pronunciationText: greekLesson3ParadigmSpeechText(chartRows),
         accentNote: card.accent_note,
         sourceRef: card.source_ref ?? `Groton Lesson ${lesson}`,
       },
     };
   });
+
+  const lessonDetails = lesson === 9
+    ? {
+        eyebrow: "First-declension masculine nouns",
+        description: "Three Lesson 9 grammar cards: first-declension masculine endings and the μαθητής / νεᾱνίᾱς model paradigms.",
+        sourceNote: "Groton 9.58.",
+      }
+    : lesson === 10
+      ? {
+          eyebrow: "Imperfect active indicative",
+          description: "Two Lesson 10 grammar cards: imperfect active indicative endings and the παιδεύω model paradigm.",
+          sourceNote: "Groton Lesson 10, pp. 57–59.",
+        }
+      : {
+          eyebrow: "Middle/passive endings",
+          description: "Six Lesson 11 ending charts covering present middle/passive, future middle, imperfect middle/passive, and present middle/passive imperative and infinitive forms.",
+          sourceNote: "Groton Lesson 11, §§71–73, pp. 63–66.",
+        };
+
   return {
     id,
     slug: "greek",
     title: `Greek Lesson ${lesson} Grammar`,
-    eyebrow: lesson === 9 ? "First-declension masculine nouns" : "Imperfect active indicative",
-    description: lesson === 9
-      ? "Three Lesson 9 grammar cards: first-declension masculine endings and the μαθητής / νεᾱνίᾱς model paradigms."
-      : "Two Lesson 10 grammar cards: imperfect active indicative endings and the παιδεύω model paradigm.",
+    eyebrow: lessonDetails.eyebrow,
+    description: lessonDetails.description,
     language: "greek",
     cards,
     supportsReverse: false,
-    sourceNote: lesson === 9 ? "Groton 9.58." : "Groton Lesson 10, pp. 57–59.",
+    sourceNote: lessonDetails.sourceNote,
   };
 }
 
@@ -113,6 +138,8 @@ let lesson9VocabularyPromise: Promise<DeckDefinition> | null = null;
 let lesson9GrammarPromise: Promise<DeckDefinition> | null = null;
 let lesson10VocabularyPromise: Promise<DeckDefinition> | null = null;
 let lesson10GrammarPromise: Promise<DeckDefinition> | null = null;
+let lesson11VocabularyPromise: Promise<DeckDefinition> | null = null;
+let lesson11GrammarPromise: Promise<DeckDefinition> | null = null;
 
 export function loadGreekLesson9VocabularyDeck() {
   lesson9VocabularyPromise ??= fetchText("data/greek-lesson9-vocab.json").then((text) => vocabularyDeck(9, JSON.parse(text) as GreekVocabularySourceCard[]));
@@ -132,4 +159,14 @@ export function loadGreekLesson10VocabularyDeck() {
 export function loadGreekLesson10GrammarDeck() {
   lesson10GrammarPromise ??= fetchText("data/greek-lesson10-grammar.json").then((text) => grammarDeck(10, JSON.parse(text) as GreekGrammarSourceCard[]));
   return lesson10GrammarPromise;
+}
+
+export function loadGreekLesson11VocabularyDeck() {
+  lesson11VocabularyPromise ??= fetchText("data/greek-lesson11-vocab.json").then((text) => vocabularyDeck(11, JSON.parse(text) as GreekVocabularySourceCard[]));
+  return lesson11VocabularyPromise;
+}
+
+export function loadGreekLesson11GrammarDeck() {
+  lesson11GrammarPromise ??= fetchText("data/greek-lesson11-grammar.json").then((text) => grammarDeck(11, JSON.parse(text) as GreekGrammarSourceCard[]));
+  return lesson11GrammarPromise;
 }
