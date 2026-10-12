@@ -12,7 +12,6 @@ import {
   LESSON3_PRONUNCIATION_SYSTEM,
   lesson3CourseAudioAssets,
 } from "../supabase/functions/course-audio/lesson3-assets";
-import { lesson4CourseAudioAssets } from "../supabase/functions/course-audio/lesson4-assets";
 
 type IdCard = { id: string };
 
@@ -20,34 +19,35 @@ function withoutPitchMarks(ipa: string) {
   return ipa.normalize("NFD").replace(/[\u0300\u0301]/gu, "");
 }
 
+function lessonCards(lesson: number, kind: "vocab" | "grammar") {
+  return JSON.parse(fs.readFileSync(`public/data/greek-lesson${lesson}-${kind}.json`, "utf8")) as IdCard[];
+}
+
 describe("Classical Greek course audio", () => {
-  it("defines one permanent audio asset for every active whole-paradigm grammar chart", () => {
-    const lesson3Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as IdCard[];
-    const lesson4Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson4-grammar.json", "utf8")) as IdCard[];
-    expect(lesson3CourseAudioAssets.map((asset) => asset.id).sort()).toEqual(lesson3Grammar.map((card) => card.id).sort());
-    expect(lesson4CourseAudioAssets.map((asset) => asset.id).sort()).toEqual(lesson4Grammar.map((card) => card.id).sort());
+  it("defines one permanent audio asset for every active Groton vocabulary and grammar card", () => {
+    for (let lesson = 3; lesson <= 12; lesson += 1) {
+      for (const kind of ["vocab", "grammar"] as const) {
+        for (const card of lessonCards(lesson, kind)) {
+          expect(resolveBuiltinGreekAsset(card.id), `${lesson} ${kind} ${card.id}`).not.toBeNull();
+        }
+      }
+    }
   });
 
-  it("covers every current built-in Greek card, including Lesson 4 and non-phonetic symbol cards", () => {
+  it("covers the foundation Greek cards, including non-phonetic symbol cards", () => {
     const foundation = JSON.parse(fs.readFileSync("public/data/greek-cards.json", "utf8")) as IdCard[];
-    const lesson3Vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson3-vocab.json", "utf8")) as IdCard[];
-    const lesson3Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson3-grammar.json", "utf8")) as IdCard[];
-    const lesson4Vocabulary = JSON.parse(fs.readFileSync("public/data/greek-lesson4-vocab.json", "utf8")) as IdCard[];
-    const lesson4Grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson4-grammar.json", "utf8")) as IdCard[];
-    for (const card of [...foundation, ...lesson3Vocabulary, ...lesson3Grammar, ...lesson4Vocabulary, ...lesson4Grammar]) {
-      expect(resolveBuiltinGreekAsset(card.id), card.id).not.toBeNull();
-    }
+    for (const card of foundation) expect(resolveBuiltinGreekAsset(card.id), card.id).not.toBeNull();
     expect(resolveBuiltinGreekAsset("punct-4")?.pronunciationSystem).toContain("non-phonetic");
   });
 
-  it("documents the source hierarchy and keeps canonical IPA separate from ElevenLabs", () => {
-    expect(LESSON3_AUDIO_MODEL).toBe("eleven_v3");
+  it("documents the Groton-first source hierarchy and uses Eleven v4 IPA", () => {
+    expect(LESSON3_AUDIO_MODEL).toBe("eleven_v4");
     expect(DEFAULT_ELEVENLABS_VOICE_ID).toBe("JBFqnCBsd6RMkjVDRZzb");
-    expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("Josolon");
+    expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("Groton");
+    expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("Allen");
     expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("Smyth");
     expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("Open University");
-    expect(LESSON3_PRONUNCIATION_SYSTEM).toContain("University of Victoria");
-    for (const asset of [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets]) {
+    for (const asset of lesson3CourseAudioAssets) {
       expect(asset.canonicalIpa).toMatch(/^\/.*\/$/u);
       expect(asset.ttsText).toMatch(/^\/.*\/$/u);
       expect(asset.canonicalIpa).not.toContain("ˈ");
@@ -55,41 +55,51 @@ describe("Classical Greek course audio", () => {
     }
   });
 
-  it("reads paradigms vertically and applies the Josolon/Vox Graeca hiatus treatment", () => {
+  it("reads Lesson 3 paradigms vertically with Groton's vowel and diphthong values", () => {
     expect(lesson3CourseAudioAssets[0].ttsText.split(", ")).toEqual([
-      "/pai̯dˈeu̯ːɔː/",
-      "/pai̯dˈeu̯ːeːs/",
-      "/pai̯dˈeu̯ːeː/",
-      "/pai̯dˈeu̯ːomen/",
-      "/pai̯dˈeu̯ːete/",
-      "/pai̯dˈeu̯ːuːsi/",
+      "/pai̯ˈdey̯ɔː/",
+      "/pai̯ˈdey̯ei̯s/",
+      "/pai̯ˈdey̯ei̯/",
+      "/pai̯ˈdey̯omen/",
+      "/pai̯ˈdey̯ete/",
+      "/pai̯ˈdey̯uːsi/",
     ]);
-    expect(lesson3CourseAudioAssets[1].ttsText).toBe("/pai̯dˈeu̯ːeːn/");
+    expect(lesson3CourseAudioAssets[1].ttsText).toBe("/pai̯ˈdey̯ei̯n/");
     expect(lesson3CourseAudioAssets[2].ttsText.split(", ")).toEqual([
-      "/pˈai̯deu̯ːe/",
-      "/pai̯deu̯ːˈetɔː/",
-      "/pai̯dˈeu̯ːete/",
-      "/pai̯deu̯ːˈontɔːn/",
+      "/ˈpai̯dey̯e/",
+      "/pai̯dey̯ˈetɔː/",
+      "/pai̯ˈdey̯ete/",
+      "/pai̯dey̯ˈontɔːn/",
     ]);
   });
 
-  it("uses Josolon/Vox Graeca-led Attic segmental rules", () => {
+  it("uses Groton's explicit course-level segmental rules", () => {
     expect(resolveBuiltinGreekAsset("cap-zeta")?.canonicalIpa).toBe("/zd/");
-    expect(greekToClassicalIpa("οἶκος")).toContain("œ");
+    expect(greekToClassicalIpa("εἰμί")).toContain("ei̯");
+    expect(greekToClassicalIpa("οἶκος")).toContain("oi̯");
+    expect(greekToClassicalIpa("εὖ")).toContain("ey̯");
+    expect(greekToClassicalIpa("ηὖ")).toContain("ɛːy̯");
     expect(greekToClassicalIpa("φυλάττω")).toContain("tt");
     expect(greekToClassicalIpa("ἄγγελος")).toContain("ŋɡ");
-    expect(greekToClassicalIpa("βασιλεία")).toContain("ei");
+    expect(greekToClassicalIpa("βασιλεία")).toContain("ei̯");
     expect(greekToClassicalIpa("χάρις")).toContain("kʰ");
   });
 
-  it("tracks a wider Josolon/Vox Graeca regression corpus across core Attic contrasts", () => {
+  it("limits gamma nasalization to Smyth's gamma/kappa/chi/xi environment", () => {
+    expect(withoutPitchMarks(greekToClassicalIpa("ἄγγελος"))).toContain("ŋɡ");
+    expect(withoutPitchMarks(greekToClassicalIpa("ἄγκυρα"))).toContain("ŋk");
+    expect(withoutPitchMarks(greekToClassicalIpa("πρᾶγμα"))).toContain("ɡm");
+    expect(withoutPitchMarks(greekToClassicalIpa("πρᾶγμα"))).not.toContain("ŋm");
+  });
+
+  it("tracks core reconstructed Classical contrasts used by the course", () => {
     const references: Array<[string, string[]]> = [
-      ["Ζεύς", ["zd", "eu̯"]],
-      ["οἶκος", ["œi̯"]],
-      ["εἰμί", ["eː"]],
+      ["Ζεύς", ["zd", "ey̯"]],
+      ["οἶκος", ["oi̯"]],
+      ["εἰμί", ["ei̯"]],
       ["ἄγγελος", ["ŋɡ"]],
-      ["πρᾶγμα", ["ŋm"]],
-      ["βασιλεία", ["ei̯ː"]],
+      ["πρᾶγμα", ["ɡm"]],
+      ["βασιλεία", ["ei̯"]],
       ["αὐτός", ["au̯"]],
       ["τῇ", ["ɛːi̯"]],
       ["ᾠδή", ["ɔːi̯"]],
@@ -108,19 +118,24 @@ describe("Classical Greek course audio", () => {
     }
   });
 
-  it("preserves canonical pitch information but gives ElevenLabs stable stress approximation", () => {
+  it("preserves canonical pitch information but gives ElevenLabs Groton-style syllable stress", () => {
     expect(greekToClassicalIpa("μή")).not.toContain("ˈ");
     expect(greekToClassicalIpa("μή")).toContain("́");
     expect(greekToElevenLabsIpa("μή")).toBe("/mɛː/");
-    expect(greekToElevenLabsIpa("παιδεύω")).toContain("ˈ");
+    expect(greekToElevenLabsIpa("παιδεύω")).toBe("/pai̯ˈdey̯ɔː/");
+    expect(greekToElevenLabsIpa("θεοὶ")).toBe("/tʰeˈoi̯/");
+    expect(greekToElevenLabsIpa("ὑπό")).toBe("/hyˈpo/");
   });
 
   it("puts ending-chart pauses only between vertical columns", () => {
-    const lesson3Indicative = resolveBuiltinGreekAsset("lesson3-chart-present-active-indicative-endings");
-    const lesson3Imperative = resolveBuiltinGreekAsset("lesson3-chart-present-active-imperative-endings");
-    const lesson4Alpha = resolveBuiltinGreekAsset("lesson4-chart-first-declension-endings-alpha");
-    const lesson4Eta = resolveBuiltinGreekAsset("lesson4-chart-first-declension-endings-eta");
-    for (const asset of [lesson3Indicative, lesson3Imperative, lesson4Alpha, lesson4Eta]) {
+    const ids = [
+      "lesson3-chart-present-active-indicative-endings",
+      "lesson3-chart-present-active-imperative-endings",
+      "lesson4-chart-first-declension-endings-alpha",
+      "lesson4-chart-first-declension-endings-eta",
+    ];
+    for (const id of ids) {
+      const asset = resolveBuiltinGreekAsset(id);
       expect(asset?.ttsText.match(/\[pause\]/gu)).toHaveLength(1);
       const columns = asset?.ttsText.split(" [pause] ") ?? [];
       expect(columns).toHaveLength(2);
