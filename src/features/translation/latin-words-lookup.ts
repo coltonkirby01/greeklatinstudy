@@ -1,11 +1,11 @@
-import type { DictionaryMatch } from "./dictionary-sources";
+import type { DictionaryMatch, WhitakerMetadata } from "./dictionary-sources";
 
 type ProxyPayload = {
   matches?: unknown;
   error?: unknown;
 };
 
-const CACHE_PREFIX = "translation-helper-latin-words-v2:";
+const CACHE_PREFIX = "translation-helper-latin-words-v3:";
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const memoryCache = new Map<string, DictionaryMatch[]>();
 
@@ -19,13 +19,37 @@ function normalizeLatinSurface(value: string) {
     .replace(/[^a-z]/g, "");
 }
 
+function isStringArray(value: unknown) {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function isWhitakerMetadata(value: unknown): value is WhitakerMetadata {
+  if (value === undefined) return true;
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Record<string, unknown>;
+  const stringFields = [
+    "partOfSpeech",
+    "dictionaryDetails",
+    "code",
+    "age",
+    "area",
+    "geography",
+    "frequency",
+    "dictionarySource",
+    "rawEntry",
+  ];
+  return stringFields.every((field) => candidate[field] === undefined || typeof candidate[field] === "string")
+    && (candidate.rawAnalyses === undefined || isStringArray(candidate.rawAnalyses));
+}
+
 function isDictionaryMatch(value: unknown): value is DictionaryMatch {
   if (!value || typeof value !== "object") return false;
   const candidate = value as Record<string, unknown>;
   return typeof candidate.headword === "string"
     && typeof candidate.definition === "string"
     && typeof candidate.source === "string"
-    && (candidate.morphology === undefined || (Array.isArray(candidate.morphology) && candidate.morphology.every((item) => typeof item === "string")));
+    && (candidate.morphology === undefined || isStringArray(candidate.morphology))
+    && isWhitakerMetadata(candidate.whitaker);
 }
 
 function normalizeMatches(payload: ProxyPayload) {
@@ -103,9 +127,10 @@ export async function lookupLatinWords(surface: string): Promise<DictionaryMatch
   }
 
   const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\/$/, "");
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-  if (!supabaseUrl || !supabaseAnonKey) throw new Error("The Whitaker's Words lookup service is not configured.");
-  const payload = await fetchJson(`${supabaseUrl}/functions/v1/latin-lookup?word=${encodeURIComponent(word)}`, supabaseAnonKey);
+  const supabaseApiKey = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined)
+    ?? (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined);
+  if (!supabaseUrl || !supabaseApiKey) throw new Error("The Whitaker's Words lookup service is not configured.");
+  const payload = await fetchJson(`${supabaseUrl}/functions/v1/latin-lookup?word=${encodeURIComponent(word)}&v=3`, supabaseApiKey);
   if (!payload || typeof payload !== "object") return [];
   const proxy = payload as ProxyPayload;
   if (typeof proxy.error === "string") throw new Error(proxy.error);
