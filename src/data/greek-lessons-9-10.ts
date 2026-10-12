@@ -2,7 +2,7 @@ import type { DeckDefinition, StudyCard } from "../features/study/types";
 import { classicalGreekPronunciation } from "../features/greek/greek-pronunciation";
 import { greekLesson3ParadigmSpeechText } from "./builtin-decks";
 
-type GrotonLesson = 9 | 10 | 11;
+type GrotonLesson = 9 | 10 | 11 | 12;
 
 type GreekVocabularySourceCard = {
   id: string;
@@ -34,7 +34,8 @@ async function fetchText(path: string) {
 function vocabularySourceNote(lesson: GrotonLesson) {
   if (lesson === 9) return "Groton 9.63.";
   if (lesson === 10) return "Groton 10.69.";
-  return "Groton 11.77.";
+  if (lesson === 11) return "Groton 11.77.";
+  return "Groton 12.81.";
 }
 
 function vocabularyDeck(lesson: GrotonLesson, source: GreekVocabularySourceCard[]): DeckDefinition {
@@ -88,7 +89,7 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
       category: card.category,
       rank: index + 1,
       source: `From Alpha to Omega, Lesson ${lesson}`,
-      notes: [isEndingChart ? "Ending chart" : "Whole-paradigm chart", card.accent_note].filter(Boolean).join(" · "),
+      notes: [lesson === 12 ? "Irregular-form chart" : isEndingChart ? "Ending chart" : "Whole-paradigm chart", card.accent_note].filter(Boolean).join(" · "),
       metadata: {
         lesson,
         studySource: "grammar-chart",
@@ -115,11 +116,17 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
           description: "Two Lesson 10 grammar cards: imperfect active indicative endings and the παιδεύω model paradigm.",
           sourceNote: "Groton Lesson 10, pp. 57–59.",
         }
-      : {
-          eyebrow: "Middle/passive endings",
-          description: "Six Lesson 11 ending charts covering present middle/passive, future middle, imperfect middle/passive, and present middle/passive imperative and infinitive forms.",
-          sourceNote: "Groton Lesson 11, §§71–73, pp. 63–66.",
-        };
+      : lesson === 11
+        ? {
+            eyebrow: "Middle/passive endings",
+            description: "Six Lesson 11 ending charts covering present middle/passive, future middle, imperfect middle/passive, and present middle/passive imperative and infinitive forms.",
+            sourceNote: "Groton Lesson 11, §§71–73, pp. 63–66.",
+          }
+        : {
+            eyebrow: "εἰμί forms",
+            description: "Six Lesson 12 morphology charts for the irregular verb εἰμί: present, future, imperfect, imperative, and infinitive forms.",
+            sourceNote: "Groton Lesson 12, §79, pp. 71–72.",
+          };
 
   return {
     id,
@@ -140,6 +147,8 @@ let lesson10VocabularyPromise: Promise<DeckDefinition> | null = null;
 let lesson10GrammarPromise: Promise<DeckDefinition> | null = null;
 let lesson11VocabularyPromise: Promise<DeckDefinition> | null = null;
 let lesson11GrammarPromise: Promise<DeckDefinition> | null = null;
+let lesson12VocabularyPromise: Promise<DeckDefinition> | null = null;
+let lesson12GrammarPromise: Promise<DeckDefinition> | null = null;
 
 export function loadGreekLesson9VocabularyDeck() {
   lesson9VocabularyPromise ??= fetchText("data/greek-lesson9-vocab.json").then((text) => vocabularyDeck(9, JSON.parse(text) as GreekVocabularySourceCard[]));
@@ -169,4 +178,14 @@ export function loadGreekLesson11VocabularyDeck() {
 export function loadGreekLesson11GrammarDeck() {
   lesson11GrammarPromise ??= fetchText("data/greek-lesson11-grammar.json").then((text) => grammarDeck(11, JSON.parse(text) as GreekGrammarSourceCard[]));
   return lesson11GrammarPromise;
+}
+
+export function loadGreekLesson12VocabularyDeck() {
+  lesson12VocabularyPromise ??= fetchText("data/greek-lesson12-vocab.json").then((text) => vocabularyDeck(12, JSON.parse(text) as GreekVocabularySourceCard[]));
+  return lesson12VocabularyPromise;
+}
+
+export function loadGreekLesson12GrammarDeck() {
+  lesson12GrammarPromise ??= fetchText("data/greek-lesson12-grammar.json").then((text) => grammarDeck(12, JSON.parse(text) as GreekGrammarSourceCard[]));
+  return lesson12GrammarPromise;
 }
