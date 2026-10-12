@@ -66,9 +66,16 @@ const symbolLabels: Record<string, { label: string; text: string }> = {
   "accent-3": { label: "Circumflex accent", text: "Circumflex accent" },
 };
 
+function addChartFormPacing(ttsText: string) {
+  // Eleven v4 treats punctuation as a pacing cue. A comma gives a small,
+  // natural separation between successive forms while [pause] remains the
+  // more deliberate break between vertical chart columns.
+  return ttsText.replace(/\/\s+(?=\/)/gu, "/, ");
+}
+
 export function resolveBuiltinGreekAsset(assetId: string): GreekCourseAudioAsset | null {
   const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets, ...lesson5CourseAudioAssets, ...lesson6CourseAudioAssets, ...lesson7CourseAudioAssets, ...lesson8CourseAudioAssets, ...lesson9CourseAudioAssets, ...lesson10CourseAudioAssets, ...lesson11CourseAudioAssets, ...lesson12CourseAudioAssets].find((asset) => asset.id === assetId);
-  if (paradigm) return paradigm;
+  if (paradigm) return { ...paradigm, ttsText: addChartFormPacing(paradigm.ttsText) };
 
   const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId] ?? lesson6VocabularyAudio[assetId] ?? lesson7VocabularyAudio[assetId] ?? lesson8VocabularyAudio[assetId] ?? lesson9VocabularyAudio[assetId] ?? lesson10VocabularyAudio[assetId] ?? lesson11VocabularyAudio[assetId] ?? lesson12VocabularyAudio[assetId];
   if (vocabulary) {
