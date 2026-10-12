@@ -232,13 +232,13 @@ async function ensureAsset(asset: CourseAudioAsset, context: {
   const canonical = asset.canonicalIpa ? ` Canonical IPA: ${asset.canonicalIpa}.` : "";
   const voiceId = asset.language === "latin" ? latinVoiceId : greekVoiceId;
 
-  // Preserve the exact historical Greek signature so existing cache rows remain
-  // valid. Latin is new, so its signature can safely record model + voice from
-  // the beginning without causing a Greek cache regeneration.
-  const latinEngine = asset.language === "latin" && voiceId
+  // Cache identity must include the synthesis engine and voice for both Greek
+  // and Latin. This lets us audition or replace a Classical Greek voice without
+  // silently serving audio made by an older voice or model.
+  const engineSignature = voiceId
     ? ` ElevenLabs model: ${LESSON3_AUDIO_MODEL}; voice: ${voiceId}.`
     : "";
-  const sourceNote = `${asset.label}. ${pronunciationSystem}.${canonical} ElevenLabs input: ${asset.ttsText}${latinEngine}`;
+  const sourceNote = `${asset.label}. ${pronunciationSystem}.${canonical} ElevenLabs input: ${asset.ttsText}${engineSignature}`;
   const existing = await inspectAudio(supabaseUrl, serviceKey, asset.id);
 
   if (existing && existing.source_note === sourceNote) {
