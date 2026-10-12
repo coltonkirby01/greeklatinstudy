@@ -14,27 +14,27 @@ type Props = {
   user: User | null;
 };
 
-const partOfSpeechAbbreviations: Record<string, string> = {
-  noun: "N.",
-  verb: "V.",
-  participle: "Part.",
-  adjective: "Adj.",
-  adverb: "Adv.",
-  preposition: "Prep.",
-  conjunction: "Conj.",
-  interjection: "Interj.",
-  pronoun: "Pron.",
-  numeral: "Num.",
-  supine: "Sup.",
-  enclitic: "Encl.",
-  prefix: "Pref.",
-  suffix: "Suff.",
+const partOfSpeechLabels: Record<string, string> = {
+  noun: "Noun",
+  verb: "Verb",
+  participle: "Participle",
+  adjective: "Adjective",
+  adverb: "Adverb",
+  preposition: "Preposition",
+  conjunction: "Conjunction",
+  interjection: "Interjection",
+  pronoun: "Pronoun",
+  numeral: "Numeral",
+  supine: "Supine",
+  enclitic: "Enclitic",
+  prefix: "Prefix",
+  suffix: "Suffix",
 };
 
-function abbreviatedPartOfSpeech(partOfSpeech?: string) {
+function displayPartOfSpeech(partOfSpeech?: string) {
   const trimmed = partOfSpeech?.trim();
   if (!trimmed) return null;
-  return partOfSpeechAbbreviations[trimmed.toLocaleLowerCase()] ?? `${trimmed.replace(/\.$/u, "")}.`;
+  return partOfSpeechLabels[trimmed.toLocaleLowerCase()] ?? `${trimmed.charAt(0).toLocaleUpperCase()}${trimmed.slice(1)}`;
 }
 
 function InfoSection({ label, children }: { label: string; children?: ReactNode }) {
@@ -123,12 +123,12 @@ export function TranslationVocabSaver({ language, surfaceWord, matches, user }: 
       const key = dictionaryChoiceKey(choice);
       const saved = entryByKey.has(key);
       const whitaker = choice.whitaker;
-      const posAbbreviation = abbreviatedPartOfSpeech(whitaker?.partOfSpeech);
+      const partOfSpeechLabel = displayPartOfSpeech(whitaker?.partOfSpeech);
       return <details className="translation-vocab-definition" key={key}>
         <summary>
           <span className="translation-vocab-summary-copy">
             <span className="translation-vocab-summary-meaning">{choice.definition}</span>
-            {posAbbreviation && <span className="translation-vocab-summary-pos">{posAbbreviation}</span>}
+            {partOfSpeechLabel && <span className="translation-vocab-summary-pos">{partOfSpeechLabel}</span>}
           </span>
         </summary>
 
