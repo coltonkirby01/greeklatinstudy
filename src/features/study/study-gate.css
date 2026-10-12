@@ -7,6 +7,105 @@
   z-index: 30;
 }
 
+/* Shared study surfaces --------------------------------------------------- */
+.study-panel,
+.stats-panel,
+.priority-panel,
+.source-panel {
+  border-color: color-mix(in srgb, var(--burgundy) 10%, var(--border));
+}
+
+.study-panel .flashcard-face {
+  border-color: color-mix(in srgb, var(--burgundy) 14%, var(--border));
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+
+.study-panel .flashcard-face:hover {
+  border-color: color-mix(in srgb, var(--burgundy) 38%, var(--border));
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--foreground) 7%, transparent);
+}
+
+.study-controls {
+  gap: 0.7rem;
+}
+
+.study-controls .small-outline-button,
+.study-warmup-button {
+  border-color: color-mix(in srgb, var(--burgundy) 18%, var(--border));
+  background: var(--panel-2);
+  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+
+.study-controls .small-outline-button:hover,
+.study-warmup-button:hover {
+  border-color: color-mix(in srgb, var(--burgundy) 42%, var(--border));
+  background: color-mix(in srgb, var(--burgundy) 5%, var(--panel));
+}
+
+.study-primary,
+.study-start-button,
+.wrong-bank-flash {
+  min-height: 46px;
+  border-radius: 0.78rem;
+  border-color: var(--burgundy);
+  background: var(--burgundy);
+  color: var(--primary-foreground);
+  font-weight: 780;
+  letter-spacing: 0.005em;
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--burgundy) 17%, transparent);
+  transition: background 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.study-primary:hover:not(:disabled),
+.study-start-button:hover:not(:disabled),
+.wrong-bank-flash:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--burgundy) 88%, black);
+  background: color-mix(in srgb, var(--burgundy) 90%, black);
+  box-shadow: 0 9px 22px color-mix(in srgb, var(--burgundy) 22%, transparent);
+  transform: translateY(-1px);
+}
+
+.study-primary:disabled,
+.study-start-button:disabled,
+.wrong-bank-flash:disabled {
+  opacity: 0.48;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.rating-box {
+  border-color: color-mix(in srgb, var(--burgundy) 10%, var(--border));
+  background: var(--panel-2);
+}
+
+.rating-choice {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  box-shadow: 0 2px 7px color-mix(in srgb, var(--foreground) 3%, transparent);
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.rating-choice:hover:not([aria-pressed="true"]) {
+  border-color: color-mix(in srgb, var(--burgundy) 35%, var(--border));
+  background: color-mix(in srgb, var(--burgundy) 3%, var(--panel));
+  transform: translateY(-1px);
+}
+
+.rating-choice[aria-pressed="true"] {
+  outline-width: 1px;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--burgundy) 9%, transparent);
+}
+
+.toolbar-timer {
+  border-radius: 999px !important;
+  background: var(--panel-2) !important;
+}
+
+.toolbar-timer-toggle {
+  transition: background 140ms ease, color 140ms ease;
+}
+
+/* Start gate ------------------------------------------------------------- */
 .study-start-gate {
   position: absolute;
   inset: 0;
@@ -15,20 +114,32 @@
   place-items: center;
   padding: 5.25rem 1rem 1rem;
   border-radius: inherit;
-  background: color-mix(in srgb, var(--background) 78%, transparent);
-  backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--background) 72%, transparent);
+  backdrop-filter: blur(9px) saturate(0.9);
 }
 
 .study-start-card {
-  width: min(440px, 100%);
-  padding: 1.5rem;
+  position: relative;
+  width: min(470px, 100%);
+  padding: clamp(1.35rem, 3vw, 1.75rem);
   display: grid;
   gap: 0.85rem;
+  overflow: hidden;
   text-align: center;
-  border: 1px solid var(--border);
+  border: 1px solid color-mix(in srgb, var(--burgundy) 22%, var(--border));
   border-radius: 1rem;
-  background: var(--panel);
-  box-shadow: var(--panel-shadow);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--burgundy) 4%, var(--panel)), var(--panel) 48%);
+  box-shadow: 0 20px 54px color-mix(in srgb, var(--foreground) 13%, transparent);
+}
+
+.study-start-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--burgundy);
+  opacity: 0.8;
 }
 
 .study-start-card h2,
@@ -36,38 +147,182 @@
   margin: 0;
 }
 
+.study-start-card .eyebrow {
+  margin-bottom: -0.1rem;
+}
+
 .study-start-card h2 {
   font-family: var(--font-serif);
   font-size: clamp(1.8rem, 4vw, 2.4rem);
   font-weight: 650;
+  letter-spacing: -0.025em;
 }
 
-.study-start-card > p:not(.eyebrow),
-.study-start-card > span {
+.study-start-card > p:not(.eyebrow) {
+  max-width: 38rem;
+  margin-inline: auto;
   color: var(--ink-soft);
+  line-height: 1.58;
 }
 
 .study-start-actions {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.6rem;
+  margin-top: 0.2rem;
 }
 
 .study-start-button,
 .study-warmup-button {
-  min-height: 48px;
+  width: 100%;
+  min-height: 46px;
 }
 
 .study-start-button {
-  margin-top: 0.2rem;
-  border-radius: 0.75rem;
-  background: var(--burgundy);
-  color: var(--primary-foreground);
-  font-weight: 800;
+  margin-top: 0;
+}
+
+.study-warmup-button {
+  border-radius: 0.78rem;
+  font-weight: 740;
 }
 
 .study-start-card > span {
-  font-size: 0.82rem;
+  width: fit-content;
+  margin: 0.05rem auto 0;
+  padding: 0.22rem 0.48rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  background: var(--panel-2);
+  font-size: 0.76rem;
   font-weight: 700;
+}
+
+/* Sidebar disclosures ---------------------------------------------------- */
+.current-selected-details,
+.coverage-details,
+.wrong-bank-details,
+.priority-details {
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--burgundy) 14%, var(--border)) !important;
+  border-radius: 0.78rem !important;
+  background: var(--panel-2) !important;
+}
+
+.current-selected-details > summary,
+.coverage-details > summary,
+.wrong-bank-details > summary,
+.priority-details > summary {
+  min-height: 42px;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.current-selected-details > summary:hover,
+.coverage-details > summary:hover,
+.wrong-bank-details > summary:hover,
+.priority-details > summary:hover {
+  background: color-mix(in srgb, var(--burgundy) 5%, var(--panel));
+}
+
+.current-selected-details[open] > summary,
+.coverage-details[open] > summary,
+.wrong-bank-details[open] > summary,
+.priority-details[open] > summary {
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--burgundy) 4%, var(--panel));
+}
+
+.current-selected-details > summary strong,
+.coverage-details > summary strong,
+.wrong-bank-details > summary strong,
+.priority-details > summary strong {
+  min-width: 1.7rem;
+  padding: 0.16rem 0.43rem;
+  border: 1px solid color-mix(in srgb, var(--burgundy) 20%, var(--border));
+  border-radius: 999px;
+  color: var(--burgundy);
+  background: var(--panel);
+  font-size: 0.72rem;
+  line-height: 1.25;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.wrong-bank-status {
+  margin: 0;
+  padding: 0.52rem 0.7rem 0;
+  color: var(--burgundy);
+  font-size: 0.73rem;
+  font-weight: 800;
+}
+
+.wrong-bank-list {
+  gap: 0.4rem !important;
+  padding: 0.55rem !important;
+}
+
+.wrong-bank-item {
+  padding: 0.48rem 0.55rem !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.55rem;
+  background: var(--panel);
+  font-size: 0.8rem !important;
+  line-height: 1.38 !important;
+}
+
+.wrong-bank-empty {
+  padding: 0.2rem 0.15rem 0.35rem !important;
+  line-height: 1.45;
+}
+
+.wrong-bank-flash {
+  width: calc(100% - 1.1rem) !important;
+  margin: 0 0.55rem 0.6rem !important;
+  font-size: 0.86rem;
+}
+
+.coverage-item {
+  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+
+.coverage-item:hover {
+  border-color: color-mix(in srgb, var(--burgundy) 34%, var(--border));
+  transform: translateY(-1px);
+}
+
+/* Wrong Bank completion dialog ----------------------------------------- */
+.wrong-bank-modal-backdrop {
+  background: color-mix(in srgb, var(--foreground) 32%, transparent) !important;
+  backdrop-filter: blur(6px);
+}
+
+.wrong-bank-modal {
+  padding: 1.35rem !important;
+  gap: 0.85rem !important;
+  border-color: color-mix(in srgb, var(--burgundy) 18%, var(--border)) !important;
+  border-radius: 1rem !important;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--burgundy) 3%, var(--panel)), var(--panel)) !important;
+  box-shadow: 0 24px 70px color-mix(in srgb, var(--foreground) 24%, transparent) !important;
+}
+
+.wrong-bank-modal h2 {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.wrong-bank-modal p {
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.wrong-bank-modal-actions .primary-button,
+.wrong-bank-modal-actions .small-outline-button {
+  min-height: 44px;
+  border-radius: 0.72rem;
+  font-weight: 750;
 }
 
 .flashcard-face { justify-content: safe center; }
@@ -90,8 +345,22 @@
   white-space: nowrap;
 }
 
-
-
 @media (max-width: 720px) {
-  
+  .study-start-gate {
+    padding: 5rem 0.7rem 0.7rem;
+  }
+
+  .study-start-card {
+    padding: 1.2rem;
+    border-radius: 0.9rem;
+  }
+
+  .study-start-card h2 {
+    font-size: 1.9rem;
+  }
+
+  .wrong-bank-modal-actions {
+    display: grid !important;
+    grid-template-columns: 1fr;
+  }
 }
