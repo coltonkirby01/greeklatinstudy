@@ -13,7 +13,7 @@ type RememberedPath = { path: string; checkedAt: number };
 type MemoryAsset = { promise: Promise<CourseAudioAsset | null>; checkedAt: number };
 const assetCache = new Map<string, MemoryAsset>();
 const generationRequests = new Map<string, Promise<boolean>>();
-const storageCacheVersion = "classical-greek-audio-v3";
+const storageCacheVersion = "classical-greek-audio-v4";
 const persistentPathMaxAgeMs = 5 * 60 * 1_000;
 
 function cacheKey(request: AudioRequest) {
@@ -91,18 +91,12 @@ export function loadCourseAudioAsset(request: AudioRequest) {
     const remembered = readPersistentPath(request.assetId);
     if (remembered) return { id: request.assetId, mime_type: "audio/mpeg", storage_path: remembered.path };
 
-    if (request.cloudCardId) {
-      // Uploaded Greek cards can be edited after audio was first generated. On
-      // a cache miss/expiry, ask the Edge Function to validate source_note
-      // before reading the path. If the pronunciation metadata changed, it
-      // regenerates once; if not, this is a cheap metadata check with no TTS cost.
-      if (!await generateCourseAudio(request)) return fetchCourseAudioAsset(request.assetId, true);
-      return fetchCourseAudioAsset(request.assetId, true);
-    }
-
-    const existing = await fetchCourseAudioAsset(request.assetId, true);
-    if (existing) return existing;
-    if (!await generateCourseAudio(request)) return null;
+    // Every Greek course recording, built-in or uploaded, can become stale when
+    // its pronunciation or chart-pacing script changes. On cache miss/expiry,
+    // ask the Edge Function to compare source_note with the current script
+    // before returning the shared MP3. This is a metadata-only check when the
+    // recording is current; ElevenLabs is called only when the signature changed.
+    if (!await generateCourseAudio(request)) return fetchCourseAudioAsset(request.assetId, true);
     return fetchCourseAudioAsset(request.assetId, true);
   })().catch(() => null).then((asset) => {
     if (!asset) assetCache.delete(key);
