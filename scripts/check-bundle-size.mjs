@@ -25,7 +25,11 @@ const budgets = {
   // async boundary. Keep enough headroom for normal changes without allowing
   // a future refactor to silently put the service SDK back in the initial app.
   mainJsGzipKb: 100,
-  cssGzipKb: 12,
+  // The shared flashcard visual-system pass intentionally centralizes the study
+  // surfaces, gates, rating states, and responsive polish in production CSS.
+  // Keep the ceiling close to the current 13.2 KB output while allowing that
+  // refinement without blocking an otherwise healthy Pages deployment.
+  cssGzipKb: 14,
 };
 
 console.log(`Bundle budget: main JS ${mainJsGzipKb.toFixed(1)} KB gzip / ${budgets.mainJsGzipKb} KB; CSS ${cssGzipKb.toFixed(1)} KB gzip / ${budgets.cssGzipKb} KB.`);
