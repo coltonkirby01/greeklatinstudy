@@ -26,15 +26,22 @@
   box-shadow: 0 14px 34px color-mix(in srgb, var(--foreground) 7%, transparent);
 }
 
-/* Ordinary flashcard prompts and answers share one visual scale across
-   Greek, Latin, forward, and reverse study. Dense charts keep their own
-   smaller fit-to-content typography below. */
+/* Main prompt/answer terms share one typography system across Greek, Latin,
+   forward, and reverse study. Supporting definitions, notes, references, and
+   dense charts intentionally remain smaller so the hierarchy stays clear. */
 .study-panel .greek-front,
 .study-panel .latin-front,
 .study-panel .study-prompt,
-.study-panel .study-answer {
+.study-panel .study-answer,
+.study-panel .greek-answer-title {
+  max-width: min(760px, 100%);
+  font-family: var(--font-serif);
   font-size: var(--flashcard-primary-text-size);
+  font-style: normal;
+  font-weight: 600;
   line-height: 1.18;
+  letter-spacing: 0;
+  text-wrap: balance;
 }
 
 .study-controls {
