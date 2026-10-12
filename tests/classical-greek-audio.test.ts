@@ -14,7 +14,7 @@ import {
 } from "../supabase/functions/course-audio/lesson3-assets";
 
 type IdCard = { id: string };
-type GrammarCard = { id: string; category: string; columns: string[] };
+type GrammarCard = { id: string; category: string; columns: string[]; rows: Array<{ cells: string[] }> };
 
 function withoutPitchMarks(ipa: string) {
   return ipa.normalize("NFD").replace(/[\u0300\u0301]/gu, "");
@@ -140,7 +140,7 @@ describe("Classical Greek course audio", () => {
     expect(greekToElevenLabsIpa("ὑπό")).toBe("/hyˈpo/");
   });
 
-  it("reads every active Groton chart down each vertical column with exactly one pause between columns", () => {
+  it("reads every active Groton chart down each vertical column, with slight form pauses and one longer pause between columns", () => {
     for (let lesson = 3; lesson <= 12; lesson += 1) {
       for (const card of lessonGrammarCards(lesson)) {
         const isActiveChart = lesson === 12 || card.category.includes("Endings");
@@ -155,6 +155,14 @@ describe("Classical Greek course audio", () => {
         const spokenColumns = asset?.ttsText.split(" [pause] ") ?? [];
         expect(spokenColumns, `${lesson} ${card.id}`).toHaveLength(card.columns.length);
         expect(spokenColumns.every(Boolean), `${lesson} ${card.id}`).toBe(true);
+
+        for (let column = 0; column < card.columns.length; column += 1) {
+          const formCount = card.rows.filter((row) => Boolean(row.cells[column])).length;
+          if (formCount > 1) {
+            const shortPauses = spokenColumns[column]?.match(/\/, \/+/gu)?.length ?? 0;
+            expect(shortPauses, `${lesson} ${card.id} column ${column + 1}`).toBeGreaterThanOrEqual(formCount - 1);
+          }
+        }
       }
     }
   });
