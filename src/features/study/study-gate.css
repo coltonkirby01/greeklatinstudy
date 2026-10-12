@@ -1,6 +1,7 @@
 .study-panel {
   position: relative;
   --flashcard-primary-text-size: clamp(2.1rem, 4.6vw, 3.25rem);
+  --flashcard-primary-font: "Noto Serif", "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
 }
 
 .study-panel.is-gated .study-toolbar {
@@ -26,16 +27,20 @@
   box-shadow: 0 14px 34px color-mix(in srgb, var(--foreground) 7%, transparent);
 }
 
-/* Main prompt/answer terms share one typography system across Greek, Latin,
-   forward, and reverse study. Supporting definitions, notes, references, and
-   dense charts intentionally remain smaller so the hierarchy stays clear. */
-.study-panel .greek-front,
-.study-panel .latin-front,
-.study-panel .study-prompt,
-.study-panel .study-answer,
-.study-panel .greek-answer-title {
+/* Only the primary term/phrase on each card face gets the large treatment.
+   These structural selectors deliberately override legacy front/back and
+   compact sizing classes on ordinary cards while leaving notes and charts
+   smaller. Noto Serif gives polytonic Greek clearer, more consistent forms. */
+.study-panel .flashcard-face > .greek-front,
+.study-panel .flashcard-face > .latin-front,
+.study-panel .flashcard-face > .study-prompt,
+.study-panel .flashcard-face > .answer-block > .greek-front,
+.study-panel .flashcard-face > .answer-block > .latin-front,
+.study-panel .flashcard-face > .answer-block > .study-answer,
+.study-panel .flashcard-face > .answer-block > .greek-answer-title {
   max-width: min(760px, 100%);
-  font-family: var(--font-serif);
+  margin-inline: auto;
+  font-family: var(--flashcard-primary-font);
   font-size: var(--flashcard-primary-text-size);
   font-style: normal;
   font-weight: 600;
