@@ -14,6 +14,7 @@ import {
 } from "../supabase/functions/course-audio/lesson3-assets";
 
 type IdCard = { id: string };
+type GrammarCard = { id: string; category: string; columns: string[] };
 
 function withoutPitchMarks(ipa: string) {
   return ipa.normalize("NFD").replace(/[\u0300\u0301]/gu, "");
@@ -21,6 +22,10 @@ function withoutPitchMarks(ipa: string) {
 
 function lessonCards(lesson: number, kind: "vocab" | "grammar") {
   return JSON.parse(fs.readFileSync(`public/data/greek-lesson${lesson}-${kind}.json`, "utf8")) as IdCard[];
+}
+
+function lessonGrammarCards(lesson: number) {
+  return JSON.parse(fs.readFileSync(`public/data/greek-lesson${lesson}-grammar.json`, "utf8")) as GrammarCard[];
 }
 
 const intentionallyNonPhoneticGrammarCards = new Set([
@@ -135,21 +140,23 @@ describe("Classical Greek course audio", () => {
     expect(greekToElevenLabsIpa("ὑπό")).toBe("/hyˈpo/");
   });
 
-  it("puts ending-chart pauses only between vertical columns", () => {
-    const ids = [
-      "lesson3-chart-present-active-indicative-endings",
-      "lesson3-chart-present-active-imperative-endings",
-      "lesson4-chart-first-declension-endings-alpha",
-      "lesson4-chart-first-declension-endings-eta",
-    ];
-    for (const id of ids) {
-      const asset = resolveBuiltinGreekAsset(id);
-      expect(asset?.ttsText.match(/\[pause\]/gu)).toHaveLength(1);
-      const columns = asset?.ttsText.split(" [pause] ") ?? [];
-      expect(columns).toHaveLength(2);
-      expect(columns.every((column) => !column.includes(","))).toBe(true);
+  it("reads every active Groton chart down each vertical column with exactly one pause between columns", () => {
+    for (let lesson = 3; lesson <= 12; lesson += 1) {
+      for (const card of lessonGrammarCards(lesson)) {
+        const isActiveChart = lesson === 12 || card.category.includes("Endings");
+        if (!isActiveChart || intentionallyNonPhoneticGrammarCards.has(card.id)) continue;
+
+        const asset = resolveBuiltinGreekAsset(card.id);
+        expect(asset, `${lesson} ${card.id}`).not.toBeNull();
+        const expectedPauses = Math.max(0, card.columns.length - 1);
+        const actualPauses = asset?.ttsText.match(/\[pause\]/gu)?.length ?? 0;
+        expect(actualPauses, `${lesson} ${card.id}`).toBe(expectedPauses);
+
+        const spokenColumns = asset?.ttsText.split(" [pause] ") ?? [];
+        expect(spokenColumns, `${lesson} ${card.id}`).toHaveLength(card.columns.length);
+        expect(spokenColumns.every((column) => !column.includes(",")), `${lesson} ${card.id}`).toBe(true);
+      }
     }
-    expect(resolveBuiltinGreekAsset("lesson3-chart-present-active-infinitive-endings")?.ttsText).not.toContain("[pause]");
   });
 
   it("never pronounces parenthetical material or morphology dashes", () => {
