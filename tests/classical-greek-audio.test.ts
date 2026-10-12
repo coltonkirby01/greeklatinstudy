@@ -23,11 +23,19 @@ function lessonCards(lesson: number, kind: "vocab" | "grammar") {
   return JSON.parse(fs.readFileSync(`public/data/greek-lesson${lesson}-${kind}.json`, "utf8")) as IdCard[];
 }
 
+const intentionallyNonPhoneticGrammarCards = new Set([
+  "lesson6-chart-letter-changes",
+]);
+
 describe("Classical Greek course audio", () => {
-  it("defines one permanent audio asset for every active Groton vocabulary and grammar card", () => {
+  it("defines one permanent audio asset for every pronounceable active Groton vocabulary and grammar card", () => {
     for (let lesson = 3; lesson <= 12; lesson += 1) {
       for (const kind of ["vocab", "grammar"] as const) {
         for (const card of lessonCards(lesson, kind)) {
+          if (intentionallyNonPhoneticGrammarCards.has(card.id)) {
+            expect(resolveBuiltinGreekAsset(card.id), `${lesson} ${kind} ${card.id}`).toBeNull();
+            continue;
+          }
           expect(resolveBuiltinGreekAsset(card.id), `${lesson} ${kind} ${card.id}`).not.toBeNull();
         }
       }
@@ -75,14 +83,14 @@ describe("Classical Greek course audio", () => {
 
   it("uses Groton's explicit course-level segmental rules", () => {
     expect(resolveBuiltinGreekAsset("cap-zeta")?.canonicalIpa).toBe("/zd/");
-    expect(greekToClassicalIpa("εἰμί")).toContain("ei̯");
-    expect(greekToClassicalIpa("οἶκος")).toContain("oi̯");
-    expect(greekToClassicalIpa("εὖ")).toContain("ey̯");
-    expect(greekToClassicalIpa("ηὖ")).toContain("ɛːy̯");
-    expect(greekToClassicalIpa("φυλάττω")).toContain("tt");
-    expect(greekToClassicalIpa("ἄγγελος")).toContain("ŋɡ");
-    expect(greekToClassicalIpa("βασιλεία")).toContain("ei̯");
-    expect(greekToClassicalIpa("χάρις")).toContain("kʰ");
+    expect(withoutPitchMarks(greekToClassicalIpa("εἰμί"))).toContain("ei̯");
+    expect(withoutPitchMarks(greekToClassicalIpa("οἶκος"))).toContain("oi̯");
+    expect(withoutPitchMarks(greekToClassicalIpa("εὖ"))).toContain("ey̯");
+    expect(withoutPitchMarks(greekToClassicalIpa("ηὖ"))).toContain("ɛːy̯");
+    expect(withoutPitchMarks(greekToClassicalIpa("φυλάττω"))).toContain("tt");
+    expect(withoutPitchMarks(greekToClassicalIpa("ἄγγελος"))).toContain("ŋɡ");
+    expect(withoutPitchMarks(greekToClassicalIpa("βασιλεία"))).toContain("ei̯");
+    expect(withoutPitchMarks(greekToClassicalIpa("χάρις"))).toContain("kʰ");
   });
 
   it("limits gamma nasalization to Smyth's gamma/kappa/chi/xi environment", () => {
