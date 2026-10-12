@@ -96,6 +96,20 @@
   box-shadow: 0 4px 12px color-mix(in srgb, var(--burgundy) 9%, transparent);
 }
 
+.right-choice[aria-pressed="true"] {
+  border-color: var(--good);
+  outline-color: var(--good);
+  background: color-mix(in srgb, var(--good) 18%, var(--panel));
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--good) 24%, transparent);
+}
+
+.wrong-choice[aria-pressed="true"] {
+  border-color: var(--bad);
+  outline-color: var(--bad);
+  background: color-mix(in srgb, var(--bad) 18%, var(--panel));
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--bad) 24%, transparent);
+}
+
 .three-choices > .rating-choice:nth-child(1)[aria-pressed="true"] {
   border-color: var(--good);
   outline-color: var(--good);
