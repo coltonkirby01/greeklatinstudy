@@ -1,5 +1,6 @@
 .study-panel {
   position: relative;
+  --flashcard-primary-text-size: clamp(2.1rem, 4.6vw, 3.25rem);
 }
 
 .study-panel.is-gated .study-toolbar {
@@ -23,6 +24,17 @@
 .study-panel .flashcard-face:hover {
   border-color: color-mix(in srgb, var(--burgundy) 38%, var(--border));
   box-shadow: 0 14px 34px color-mix(in srgb, var(--foreground) 7%, transparent);
+}
+
+/* Ordinary flashcard prompts and answers share one visual scale across
+   Greek, Latin, forward, and reverse study. Dense charts keep their own
+   smaller fit-to-content typography below. */
+.study-panel .greek-front,
+.study-panel .latin-front,
+.study-panel .study-prompt,
+.study-panel .study-answer {
+  font-size: var(--flashcard-primary-text-size);
+  line-height: 1.18;
 }
 
 .study-controls {
