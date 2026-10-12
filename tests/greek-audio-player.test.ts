@@ -32,7 +32,7 @@ describe("Greek study audio player", () => {
   });
 
   it("keeps repeat playback fast while periodically revalidating built-in and uploaded Greek audio", () => {
-    expect(source).toContain('storageCacheVersion = "classical-greek-audio-v4"');
+    expect(source).toContain('storageCacheVersion = "classical-greek-audio-v5"');
     expect(source).toContain("persistentPathMaxAgeMs = 5 * 60 * 1_000");
     expect(source).toContain("Date.now() - cached.checkedAt <= persistentPathMaxAgeMs");
     expect(source).toContain("Every Greek course recording, built-in or uploaded");
