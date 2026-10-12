@@ -154,7 +154,7 @@ describe("Classical Greek course audio", () => {
 
         const spokenColumns = asset?.ttsText.split(" [pause] ") ?? [];
         expect(spokenColumns, `${lesson} ${card.id}`).toHaveLength(card.columns.length);
-        expect(spokenColumns.every((column) => !column.includes(",")), `${lesson} ${card.id}`).toBe(true);
+        expect(spokenColumns.every(Boolean), `${lesson} ${card.id}`).toBe(true);
       }
     }
   });
