@@ -1,8 +1,8 @@
 const baseMap: Record<string, string> = {
-  α: "a", β: "b", γ: "g", δ: "d", ε: "e", ζ: "z", η: "ē", θ: "th",
+  α: "a", β: "b", γ: "g", δ: "d", ε: "e", ζ: "zd", η: "ē", θ: "th",
   ι: "i", κ: "k", λ: "l", μ: "m", ν: "n", ξ: "x", ο: "o", π: "p",
   ρ: "r", σ: "s", ς: "s", τ: "t", υ: "y", φ: "ph", χ: "kh", ψ: "ps", ω: "ō",
-  Α: "A", Β: "B", Γ: "G", Δ: "D", Ε: "E", Ζ: "Z", Η: "Ē", Θ: "Th",
+  Α: "A", Β: "B", Γ: "G", Δ: "D", Ε: "E", Ζ: "Zd", Η: "Ē", Θ: "Th",
   Ι: "I", Κ: "K", Λ: "L", Μ: "M", Ν: "N", Ξ: "X", Ο: "O", Π: "P",
   Ρ: "R", Σ: "S", Τ: "T", Υ: "Y", Φ: "Ph", Χ: "Kh", Ψ: "Ps", Ω: "Ō",
 };
@@ -38,16 +38,35 @@ function transliterateCluster(base: string, marks: string[]) {
   return value;
 }
 
-function normalizeUpsilonDiphthongs(value: string) {
-  const upsilon: Record<string, string> = { y: "u", ý: "ú", ỳ: "ù", ŷ: "û", Y: "U", Ý: "Ú", Ỳ: "Ù", Ŷ: "Û" };
-  return value.replace(/([aeoēAEOĒ])([yýỳŷYÝỲŶ])/gu, (_match, first: string, second: string) => `${first}${upsilon[second] ?? second}`);
+function normalizeGrotonDiphthongs(value: string) {
+  // Groton's proper diphthongs retain two audible vowel elements. In particular,
+  // ευ/ηυ keep the front-rounded upsilon value (French u), while αυ and ου use
+  // the familiar u/off-glide spellings in this compact learner-facing guide.
+  const uOffglide: Record<string, string> = {
+    y: "u", ý: "ú", ỳ: "ù", ŷ: "û",
+    Y: "U", Ý: "Ú", Ỳ: "Ù", Ŷ: "Û",
+  };
+  return value
+    .replace(/([aA])([yýỳŷYÝỲŶ])/gu, (_match, first: string, second: string) => `${first}${uOffglide[second] ?? second}`)
+    .replace(/([oO])([yýỳŷYÝỲŶ])/gu, (_match, first: string, second: string) => `${first}${uOffglide[second] ?? second}`);
+}
+
+function applyContextualConsonants(value: string) {
+  return value
+    // γ is nasal before γ, κ, χ, ξ (Groton; Smyth §19). The following letter
+    // remains visible, so ng/nk/nkh/nx represent the cluster compactly.
+    .replace(/g(?=(?:g|k|kh|x))/gu, "n")
+    .replace(/G(?=(?:g|k|kh|x|G|K|Kh|X))/gu, "N")
+    // Groton voices sigma before β, γ, δ, μ.
+    .replace(/s(?=[bgdm])/gu, "z")
+    .replace(/S(?=[bgdmBGDM])/gu, "Z");
 }
 
 /**
- * Produces a compact Classical-Greek pronunciation guide using the same basic
- * reconstructed pronunciation conventions taught in From Alpha to Omega.
- * It intentionally stays close to scholarly romanization so it remains useful
- * for any future vocabulary lesson without maintaining a hand-written lookup.
+ * Produces the learner-facing pronunciation text shown on Greek vocabulary
+ * answers. Groton's explicit course conventions are authoritative; Allen,
+ * Smyth, and the Open University reconstruction supplement cases Groton leaves
+ * implicit. This is intentionally a readable romanized guide, not canonical IPA.
  */
 export function classicalGreekPronunciation(text: string) {
   const normalized = text.normalize("NFD");
@@ -61,5 +80,5 @@ export function classicalGreekPronunciation(text: string) {
     output += transliterateCluster(base, marks);
     index = cursor;
   }
-  return normalizeUpsilonDiphthongs(output.normalize("NFC"));
+  return applyContextualConsonants(normalizeGrotonDiphthongs(output.normalize("NFC")));
 }
