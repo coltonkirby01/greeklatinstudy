@@ -97,6 +97,18 @@ describe("Translation Helper", () => {
     expect(supabaseConfig).toContain("verify_jwt = false");
   });
 
+  it("collapses each dictionary interpretation under its English meaning and abbreviated part of speech", () => {
+    const saver = fs.readFileSync("src/features/translation/translation-vocab-saver.tsx", "utf8");
+
+    expect(saver).toContain('<details className="translation-vocab-definition"');
+    expect(saver).toContain("translation-vocab-summary-meaning");
+    expect(saver).toContain("translation-vocab-summary-pos");
+    expect(saver).toContain('verb: "V."');
+    expect(saver).toContain('noun: "N."');
+    expect(saver).toContain('adjective: "Adj."');
+    expect(saver).not.toContain('<details className="translation-vocab-definition" open');
+  });
+
   it("keeps the clickable passage and lookup as the primary reader workspace", () => {
     const page = fs.readFileSync("src/pages/translation-helper-page.tsx", "utf8");
     expect(page).toContain("translation-source-editor");
