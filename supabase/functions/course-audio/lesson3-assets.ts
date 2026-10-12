@@ -5,7 +5,10 @@ import {
 } from "./greek-ipa.ts";
 
 export const LESSON3_PRONUNCIATION_SYSTEM = CLASSICAL_GREEK_PRONUNCIATION_SYSTEM;
-export const LESSON3_AUDIO_MODEL = "eleven_v3";
+// Eleven v4 has the provider's strongest current native IPA support. The
+// course sends explicit IPA rather than asking the model to infer Ancient
+// Greek pronunciation from Greek orthography.
+export const LESSON3_AUDIO_MODEL = "eleven_v4";
 export const DEFAULT_ELEVENLABS_VOICE_ID = "JBFqnCBsd6RMkjVDRZzb";
 
 export type Lesson3CourseAudioAsset = {
