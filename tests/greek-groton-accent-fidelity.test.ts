@@ -122,7 +122,7 @@ describe("Groton acute/grave source fidelity", () => {
     expect(classicalGreekPronunciation("καὶ … καί")).toBe("kaì … kaí");
   });
 
-  it("preserves grave in canonical pitch IPA and leaves grave unstressed for TTS", () => {
+  it("preserves acute/grave pitch distinction canonically while stressing either accented syllable for Groton-style TTS", () => {
     const acuteCanonical = greekToClassicalIpa("ἀγαθά").normalize("NFD");
     const graveCanonical = greekToClassicalIpa("ἀγαθὰ").normalize("NFD");
     expect(acuteCanonical).toContain("\u0301");
@@ -130,6 +130,6 @@ describe("Groton acute/grave source fidelity", () => {
     expect(acuteCanonical).not.toBe(graveCanonical);
 
     expect(greekToElevenLabsIpa("ἀγαθά")).toContain("ˈ");
-    expect(greekToElevenLabsIpa("ἀγαθὰ")).not.toContain("ˈ");
+    expect(greekToElevenLabsIpa("ἀγαθὰ")).toContain("ˈ");
   });
 });
