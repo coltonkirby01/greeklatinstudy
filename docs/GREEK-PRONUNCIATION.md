@@ -89,6 +89,20 @@ The visible guide is deliberately readable romanization rather than IPA. It pres
 
 All built-in Groton vocabulary decks must derive this answer-side line from the shared helper. Do not maintain a separate pronunciation convention for the visible text and the ElevenLabs audio.
 
+## Chart reading pace
+
+Greek morphology charts are read **down each vertical column**, never across rows.
+
+Within a column, successive forms must remain clearly distinct: use a **small punctuation pause between individual forms** so ElevenLabs does not blend them together. The production script currently uses commas for this short separation because Eleven v4 treats punctuation as a pacing cue.
+
+Between vertical columns, use exactly one **`[pause]`** audio tag. This is the longer, deliberate break marking the transition from one column to the next. Do not replace all inter-form spacing with `[pause]`; the intended hierarchy is:
+
+`form, form, form [pause] form, form, form`
+
+For a chart with one column, there is no column-level `[pause]`. For a one-form column, there is no inter-form comma pause to add.
+
+This pacing convention applies to every active Groton chart, including Lesson 12 εἰμί form charts, and should be inherited by future lessons. Changing this script must invalidate stale generated chart audio so the corrected pacing is actually heard.
+
 ## ElevenLabs policy
 
 Course Greek uses explicit IPA input rather than asking ElevenLabs to infer Ancient Greek pronunciation from Greek spelling. The preferred model is **Eleven v4** because ElevenLabs documents improved native IPA support in v4 and recommends testing important pronunciations with the chosen voice.
