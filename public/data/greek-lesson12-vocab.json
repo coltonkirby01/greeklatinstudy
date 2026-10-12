@@ -1,0 +1,12 @@
+[
+  { "id": "lesson12-v1", "greek": "εἰμί, ἔσομαι", "meaning": "be, exist; (third-person singular + accusative + infinitive) it is possible (to)", "part_of_speech": "verb", "lesson": 12, "source_ref": "Groton 12.81" },
+  { "id": "lesson12-v2", "greek": "λῡ́ω, λῡ́σω", "meaning": "loosen, release, destroy", "part_of_speech": "verb", "lesson": 12, "source_ref": "Groton 12.81" },
+  { "id": "lesson12-v3", "greek": "ἀρχή, -ῆς, ἡ", "meaning": "beginning, power, rule, political office", "part_of_speech": "noun", "lesson": 12, "source_ref": "Groton 12.81" },
+  { "id": "lesson12-v4", "greek": "εἰρήνη, -ης, ἡ", "meaning": "peace", "part_of_speech": "noun", "lesson": 12, "source_ref": "Groton 12.81" },
+  { "id": "lesson12-v5", "greek": "λόγος, -ου, ὁ", "meaning": "word, speech, story, argument, reasoning", "part_of_speech": "noun", "lesson": 12, "source_ref": "Groton 12.81" },
+  { "id": "lesson12-v6", "greek": "πόλεμος, -ου, ὁ", "meaning": "war", "part_of_speech": "noun", "lesson": 12, "source_ref": "Groton 12.81" },
+  { "id": "lesson12-v7", "greek": "ἐχθρός, -ᾱ́, -όν", "meaning": "(+ dative) hateful (to), hostile (to); (as a substantive) enemy (personal)", "part_of_speech": "adjective", "lesson": 12, "source_ref": "Groton 12.81" },
+  { "id": "lesson12-v8", "greek": "πολέμιος, -ᾱ, -ον", "meaning": "(+ dative) at war (with), hostile (to); (as a substantive, usually plural) enemy (in war)", "part_of_speech": "adjective", "lesson": 12, "source_ref": "Groton 12.81" },
+  { "id": "lesson12-v9", "greek": "διά (δι᾽)", "meaning": "(preposition + genitive) through, throughout; (preposition + accusative) on account of", "part_of_speech": "preposition", "lesson": 12, "source_ref": "Groton 12.81" },
+  { "id": "lesson12-v10", "greek": "γε (γ᾽)", "meaning": "(enclitic particle) at least, at any rate", "part_of_speech": "particle", "lesson": 12, "source_ref": "Groton 12.81" }
+]
