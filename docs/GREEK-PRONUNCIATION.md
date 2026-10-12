@@ -76,6 +76,19 @@ The application therefore maintains two representations:
 
 This distinction must remain explicit. We should never describe ElevenLabs's stress-based rendering as a literal recreation of Classical pitch accent.
 
+## Answer-side pronunciation text
+
+Vocabulary cards also show a compact learner-facing `Pronunciation:` line on the answer side. It is generated centrally by `classicalGreekPronunciation()` and must follow the same Groton-first course policy as the audio rather than an older generic transliteration scheme.
+
+The visible guide is deliberately readable romanization rather than IPA. It preserves vowel quantity (for example `ā`, `ī`, `ȳ`, `ē`, `ō`), breathings, and accent marks, while reflecting the course's audible distinctions. In particular:
+
+- ει remains `ei`, οι remains `oi`, and ου is shown as `ou`.
+- ευ is shown with front-rounded upsilon as `ey`, and ηυ as `ēy`, rather than misleading `eu`/`ēu` spellings that suggest English /u/.
+- ζ is shown as `zd` under the course reconstruction.
+- Nasal γ before γ/κ/χ/ξ and voiced σ before β/γ/δ/μ are reflected contextually.
+
+All built-in Groton vocabulary decks must derive this answer-side line from the shared helper. Do not maintain a separate pronunciation convention for the visible text and the ElevenLabs audio.
+
 ## ElevenLabs policy
 
 Course Greek uses explicit IPA input rather than asking ElevenLabs to infer Ancient Greek pronunciation from Greek spelling. The preferred model is **Eleven v4** because ElevenLabs documents improved native IPA support in v4 and recommends testing important pronunciations with the chosen voice.
