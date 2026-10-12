@@ -31,12 +31,12 @@ describe("Greek study audio player", () => {
     expect(source).toContain("onClick={togglePlayback}");
   });
 
-  it("keeps repeat playback fast while periodically checking for revised shared audio", () => {
-    expect(source).toContain('storageCacheVersion = "classical-greek-audio-v3"');
+  it("keeps repeat playback fast while periodically revalidating built-in and uploaded Greek audio", () => {
+    expect(source).toContain('storageCacheVersion = "classical-greek-audio-v4"');
     expect(source).toContain("persistentPathMaxAgeMs = 5 * 60 * 1_000");
     expect(source).toContain("Date.now() - cached.checkedAt <= persistentPathMaxAgeMs");
-    expect(source).toContain("if (request.cloudCardId)");
-    expect(source).toContain("generateCourseAudio(request)");
-    expect(source).toContain("fetchCourseAudioAsset(request.assetId, true)");
+    expect(source).toContain("Every Greek course recording, built-in or uploaded");
+    expect(source).toContain("if (!await generateCourseAudio(request)) return fetchCourseAudioAsset(request.assetId, true);");
+    expect(source).toContain("return fetchCourseAudioAsset(request.assetId, true);");
   });
 });
