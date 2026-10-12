@@ -8,7 +8,7 @@ function paradigm(id: string, label: string, forms: readonly string[]): Lesson3C
 
 function endingChart(id: string, label: string, columns: readonly (readonly string[])[]): Lesson3CourseAudioAsset {
   const forms = columns.flat();
-  const spokenColumns = columns.map((column) => column.map((form) => greekToElevenLabsIpa(form)).filter(Boolean).join(" "));
+  const spokenColumns = columns.map((column) => column.flatMap((form) => form.split("/").map((alternative) => greekToElevenLabsIpa(alternative)).filter(Boolean)).join(" "));
   return {
     id,
     label,
