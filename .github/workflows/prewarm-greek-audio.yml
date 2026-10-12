@@ -1,36 +1,33 @@
 name: Prewarm shared Greek audio
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      asset_ids:
+        description: Space-separated built-in Greek audio asset IDs to generate/cache
+        required: true
+        type: string
 
 jobs:
   prewarm:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - name: Generate and cache every built-in Greek audio asset
+      - name: Generate and cache requested built-in Greek audio assets
         env:
           SUPABASE_URL: https://wqgvpgmudouftyhnvvpr.supabase.co
           SUPABASE_PUBLISHABLE_KEY: sb_publishable_s4DGueytgij3zvSce1D1hQ_jtEf1X1e
+          ASSET_IDS: ${{ inputs.asset_ids }}
         shell: bash
         run: |
           set -euo pipefail
-          letters=(alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau upsilon phi chi psi omega)
-          ids=()
-          for letter in "${letters[@]}"; do
-            ids+=("cap-$letter" "low-$letter")
-          done
-          ids+=(punct-1 punct-2 punct-3 punct-4 accent-1 accent-2 accent-3)
-          ids+=(lesson3-v1 lesson3-v2 lesson3-v3 lesson3-v4 lesson3-v5 lesson3-v6 lesson3-v7 lesson3-v8 lesson3-v9 lesson3-v10 lesson3-v11)
-          ids+=(lesson3-chart-present-active-indicative-endings lesson3-chart-present-active-infinitive-endings lesson3-chart-present-active-imperative-endings)
-          ids+=(lesson3-chart-present-active-indicative lesson3-chart-present-active-infinitive lesson3-chart-present-active-imperative)
-          ids+=(lesson4-v1 lesson4-v2 lesson4-v3 lesson4-v4 lesson4-v5 lesson4-v6 lesson4-v7 lesson4-v8 lesson4-v9 lesson4-v10 lesson4-v11)
-          ids+=(lesson4-chart-first-declension-endings-alpha lesson4-chart-first-declension-endings-eta)
-          ids+=(lesson4-chart-first-declension-thea lesson4-chart-first-declension-hesychia lesson4-chart-first-declension-chora lesson4-chart-first-declension-skene)
-          ids+=(lesson4-chart-definite-article-feminine-singular lesson4-chart-definite-article-feminine-plural)
+          read -r -a ids <<< "$ASSET_IDS"
+          if [[ "${#ids[@]}" -eq 0 ]]; then
+            echo "No Greek audio asset IDs were supplied." >&2
+            exit 1
+          fi
 
-          echo "Prewarming ${#ids[@]} Greek audio assets"
+          echo "Prewarming ${#ids[@]} requested Greek audio assets"
           for id in "${ids[@]}"; do
             success=0
             for attempt in 1 2 3 4 5; do
