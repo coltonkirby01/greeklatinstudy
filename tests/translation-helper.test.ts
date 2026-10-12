@@ -97,15 +97,15 @@ describe("Translation Helper", () => {
     expect(supabaseConfig).toContain("verify_jwt = false");
   });
 
-  it("collapses each dictionary interpretation under its English meaning and abbreviated part of speech", () => {
+  it("collapses each dictionary interpretation under its English meaning and full part of speech", () => {
     const saver = fs.readFileSync("src/features/translation/translation-vocab-saver.tsx", "utf8");
 
     expect(saver).toContain('<details className="translation-vocab-definition"');
     expect(saver).toContain("translation-vocab-summary-meaning");
     expect(saver).toContain("translation-vocab-summary-pos");
-    expect(saver).toContain('verb: "V."');
-    expect(saver).toContain('noun: "N."');
-    expect(saver).toContain('adjective: "Adj."');
+    expect(saver).toContain('verb: "Verb"');
+    expect(saver).toContain('noun: "Noun"');
+    expect(saver).toContain('adjective: "Adjective"');
     expect(saver).not.toContain('<details className="translation-vocab-definition" open');
   });
 
