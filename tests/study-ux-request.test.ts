@@ -21,6 +21,30 @@ describe("requested Greek and Latin study workflow", () => {
     expect(session).not.toContain('className="toolbar-timer-shortcut"');
   });
 
+  it("keeps standard and multi-source flashcard apps on one refined shared visual system", () => {
+    const gate = fs.readFileSync("src/features/study/study-gate.css", "utf8");
+    const standardSession = fs.readFileSync("src/features/study/study-session.tsx", "utf8");
+    const multiSourceSession = fs.readFileSync("src/features/study/multi-source-study-session.tsx", "utf8");
+    const sidebar = fs.readFileSync("src/features/study/study-session-ui.tsx", "utf8");
+
+    expect(standardSession).toContain('import "./study-gate.css"');
+    expect(multiSourceSession).toContain('import "./study-gate.css"');
+    expect(sidebar).toContain('className="primary-button wrong-bank-flash"');
+    expect(sidebar).toContain('className="study-start-card"');
+    expect(sidebar).toContain('className="rating-choice');
+
+    expect(gate).toContain(".study-primary,");
+    expect(gate).toContain(".study-start-button,");
+    expect(gate).toContain(".wrong-bank-flash {");
+    expect(gate).toContain(".study-start-card::before");
+    expect(gate).toContain(".current-selected-details,");
+    expect(gate).toContain(".wrong-bank-details,");
+    expect(gate).toContain(".wrong-bank-item {");
+    expect(gate).toContain(".rating-choice:hover:not([aria-pressed=\"true\"])");
+    expect(gate).toContain(".wrong-bank-modal-backdrop {");
+    expect(gate).toContain("backdrop-filter: blur(6px)");
+  });
+
   it("routes Greek to direct vocabulary words and endings but no paradigm selector", () => {
     const route = fs.readFileSync("src/route-preload.ts", "utf8");
     const page = fs.readFileSync("src/pages/greek-page-v2.tsx", "utf8");
