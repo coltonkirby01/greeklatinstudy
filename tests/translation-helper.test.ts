@@ -1,7 +1,15 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
-import { normalizeDictionaryKey, tokenizeTranslationText } from "../src/features/translation/dictionary-sources";
+import {
+  buildGreekTranslationIndex,
+  lookupDictionaryWord,
+  normalizeDictionaryKey,
+  tokenizeTranslationText,
+  translationGreekRegistrations,
+} from "../src/features/translation/dictionary-sources";
 import { pdfTextItemsToString, translationFileKind } from "../src/features/translation/file-extraction";
+import { BUILTIN_STUDY_DECKS } from "../src/features/study/builtin-study-catalog";
+import type { DeckDefinition } from "../src/features/study/types";
 
 describe("Translation Helper", () => {
   it("normalizes Greek accents and Latin macrons for tolerant source lookup", () => {
@@ -126,13 +134,85 @@ describe("Translation Helper", () => {
     expect(privacy).toContain("Translation Helper texts");
   });
 
-  it("keeps Greek restricted to Groton and Kubo", () => {
+  it("derives Greek Groton knowledge from the built-in catalog, newest lesson first", () => {
     const sources = fs.readFileSync("src/features/translation/dictionary-sources.ts", "utf8");
     const page = fs.readFileSync("src/pages/translation-helper-page.tsx", "utf8");
+    const registrations = translationGreekRegistrations();
+    const catalogVocabularyIds = BUILTIN_STUDY_DECKS
+      .filter((registration) => /^alpha-omega-lesson\d+-vocab$/u.test(registration.id))
+      .map((registration) => registration.id)
+      .sort();
+    const helperVocabularyIds = registrations.grotonVocabulary.map((registration) => registration.id).sort();
+    const catalogGrammarIds = BUILTIN_STUDY_DECKS
+      .filter((registration) => /^alpha-omega-lesson\d+-grammar$/u.test(registration.id))
+      .map((registration) => registration.id)
+      .sort();
+    const helperGrammarIds = registrations.grotonGrammar.map((registration) => registration.id).sort();
 
-    expect(sources).toContain("loadGreekNewTestamentVocabularyDeck");
-    expect(sources).toContain("loadGreekLesson10VocabularyDeck");
+    expect(helperVocabularyIds).toEqual(catalogVocabularyIds);
+    expect(helperGrammarIds).toEqual(catalogGrammarIds);
+    expect(registrations.grotonVocabulary[0]?.id).toBe("alpha-omega-lesson12-vocab");
+    expect(registrations.grotonGrammar[0]?.id).toBe("alpha-omega-lesson12-grammar");
+    expect(registrations.kubo?.id).toBe("kubo-new-testament-vocab");
+    expect(sources).toContain("BUILTIN_STUDY_DECKS");
+    expect(sources).not.toContain("loadGreekLesson10VocabularyDeck");
     expect(page).toContain("Groton");
     expect(page).toContain("Kubo");
+  });
+
+  it("uses concrete Groton grammar-chart forms as Greek lookup aliases", () => {
+    const vocabularyDeck: DeckDefinition = {
+      id: "alpha-omega-lesson12-vocab",
+      slug: "greek",
+      title: "Lesson 12 vocabulary",
+      eyebrow: "Lesson 12",
+      description: "Test vocabulary",
+      language: "greek",
+      supportsReverse: true,
+      cards: [{
+        id: "lesson12-v1",
+        deckId: "alpha-omega-lesson12-vocab",
+        front: "εἰμί, ἔσομαι",
+        back: "be, exist",
+        source: "From Alpha to Omega, Lesson 12",
+        metadata: { sourceRef: "Groton 12.81" },
+      }],
+    };
+    const grammarDeck: DeckDefinition = {
+      id: "alpha-omega-lesson12-grammar",
+      slug: "greek",
+      title: "Lesson 12 grammar",
+      eyebrow: "Lesson 12",
+      description: "Test grammar",
+      language: "greek",
+      supportsReverse: false,
+      cards: [{
+        id: "lesson12-chart-eimi-imperfect-active-indicative-forms",
+        deckId: "alpha-omega-lesson12-grammar",
+        front: "εἰμί — Imperfect Active Indicative Forms",
+        back: "εἰμί — Imperfect Active Indicative Forms",
+        category: "εἰμί — Imperfect Active Indicative Forms",
+        source: "From Alpha to Omega, Lesson 12",
+        metadata: {
+          sourceRef: "Groton 12.79, pp. 71–72",
+          grammarGroup: "εἰμί — Imperfect Active Indicative Forms",
+          chartColumns: ["Singular", "Plural"],
+          chartRows: [
+            { label: "1st person", cells: ["ἦ / ἦν", "ἦμεν"] },
+            { label: "2nd person", cells: ["ἦσθα", "ἦτε / ἦστε"] },
+            { label: "3rd person", cells: ["ἦν", "ἦσαν"] },
+          ],
+        },
+      }],
+    };
+
+    const index = buildGreekTranslationIndex([vocabularyDeck], [grammarDeck]);
+    const match = lookupDictionaryWord(index, "ἦσθα")[0];
+
+    expect(match?.headword).toBe("εἰμί, ἔσομαι");
+    expect(match?.definition).toBe("be, exist");
+    expect(match?.sourceRef).toBe("Groton 12.79, pp. 71–72");
+    expect(match?.morphology?.[0]).toContain("2nd person");
+    expect(match?.morphology?.[0]).toContain("Singular");
   });
 });
