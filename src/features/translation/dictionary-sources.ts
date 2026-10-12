@@ -3,6 +3,19 @@ import type { DeckDefinition, StudyCard } from "../study/types";
 
 export type TranslationHelperLanguage = "greek" | "latin";
 
+export type WhitakerMetadata = {
+  partOfSpeech?: string;
+  dictionaryDetails?: string;
+  code?: string;
+  age?: string;
+  area?: string;
+  geography?: string;
+  frequency?: string;
+  dictionarySource?: string;
+  rawEntry?: string;
+  rawAnalyses?: string[];
+};
+
 export type DictionaryMatch = {
   headword: string;
   definition: string;
@@ -10,6 +23,7 @@ export type DictionaryMatch = {
   sourceRef?: string;
   externalUrl?: string;
   morphology?: string[];
+  whitaker?: WhitakerMetadata;
 };
 
 const ignoredHeadwordTokens = new Set([
