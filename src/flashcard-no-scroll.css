@@ -1,0 +1,23 @@
+/* Keep study-card answers fully visible without internal card scrolling. */
+.study-panel .flashcard-inner {
+  display: grid;
+  height: auto;
+}
+
+.study-panel .flashcard-face {
+  position: relative;
+  inset: auto;
+  grid-area: 1 / 1;
+  height: auto;
+  overflow: visible;
+}
+
+/* Chart cards previously forced overflow hidden in the shared study polish. */
+.study-panel .flashcard-face:has(.chart-scroll) {
+  overflow: visible;
+}
+
+/* Only the visible side should receive pointer input while the two faces share a grid cell. */
+.study-panel .flashcard-face[aria-hidden="true"] {
+  pointer-events: none;
+}
