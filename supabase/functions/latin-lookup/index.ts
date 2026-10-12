@@ -31,12 +31,116 @@ const posMap: Record<string, string> = {
   TACKON: "enclitic", PREFIX: "prefix", SUFFIX: "suffix",
 };
 
+const ageMap: Record<string, string> = {
+  X: "All periods / unknown",
+  A: "Archaic — very early; obsolete by classical times",
+  B: "Early Latin — pre-classical",
+  C: "Classical — approximately 150 BC to AD 200",
+  D: "Late Latin — 3rd to 5th centuries",
+  E: "Later Latin — 6th to 10th centuries; Christian",
+  F: "Medieval — 11th to 15th centuries",
+  G: "Scholarly / scientific Latin — 16th to 18th centuries",
+  H: "Modern — 19th to 20th centuries",
+};
+
+const areaMap: Record<string, string> = {
+  X: "General / none specified",
+  A: "Agriculture, flora, fauna, land, equipment, rural life",
+  B: "Biology, medicine, body parts",
+  D: "Drama, music, theater, art, painting, sculpture",
+  E: "Ecclesiastical, Biblical, religious",
+  G: "Grammar, rhetoric, logic, literature, schools",
+  L: "Legal, government, tax, financial, political, titles",
+  P: "Poetic",
+  S: "Science, philosophy, mathematics, units and measures",
+  T: "Technical, architecture, topography, surveying",
+  W: "War, military, naval, ships, armor",
+  Y: "Mythology",
+};
+
+const geographyMap: Record<string, string> = {
+  X: "General / none specified",
+  A: "Africa",
+  B: "Britain",
+  C: "China",
+  D: "Scandinavia",
+  E: "Egypt",
+  F: "France / Gaul",
+  G: "Germany",
+  H: "Greece",
+  I: "Italy / Rome",
+  J: "India",
+  K: "Balkans",
+  N: "Netherlands",
+  P: "Persia",
+  Q: "Near East",
+  R: "Russia",
+  S: "Spain / Iberia",
+  U: "Eastern Europe",
+};
+
+const frequencyMap: Record<string, string> = {
+  X: "Unknown / unspecified",
+  A: "Very frequent",
+  B: "Frequent",
+  C: "Common",
+  D: "Lesser frequency",
+  E: "Uncommon",
+  F: "Very rare",
+  I: "Only citation is an inscription",
+  M: "Graffiti",
+  N: "Only dictionary citation is Pliny's Natural History",
+};
+
+const sourceMap: Record<string, string> = {
+  X: "General / unknown source",
+  A: "Source code A — undocumented",
+  B: "C. H. Beeson, A Primer of Medieval Latin (1925)",
+  C: "Charles Beard, Cassell's Latin Dictionary (1892)",
+  D: "J. N. Adams, Latin Sexual Vocabulary (1982)",
+  E: "L. F. Stelten, Dictionary of Ecclesiastical Latin (1995)",
+  F: "Roy J. Deferrari, Dictionary of St. Thomas Aquinas (1960)",
+  G: "Gildersleeve & Lodge, Latin Grammar (1895)",
+  H: "Collatinus Dictionary by Yves Ouvrard",
+  I: "F. P. Leverett, Lexicon of the Latin Language (1845)",
+  J: "Source code J — undocumented",
+  K: "Calepinus Novus, modern Latin, by Guy Licoppe",
+  L: "C. S. Lewis, Elementary Latin Dictionary (1891)",
+  M: "Latham, Revised Medieval Word List (1980)",
+  N: "Lynn Nelson, Wordlist",
+  O: "Oxford Latin Dictionary (1982)",
+  P: "Souter, A Glossary of Later Latin to 600 A.D. (1949)",
+  Q: "Other cited or unspecified dictionaries",
+  R: "Plater & White, A Grammar of the Vulgate (1926)",
+  S: "Lewis and Short, A Latin Dictionary (1879)",
+  T: "Found in a translation; no dictionary reference",
+  U: "Du Cange",
+  V: "Vademecum in opus Saxonis — Franz Blatt",
+  W: "Whitaker's personal guess",
+  Y: "Temporary special code",
+  Z: "Sent by a user; no dictionary reference",
+};
+
+type WhitakerMetadata = {
+  partOfSpeech?: string;
+  dictionaryDetails?: string;
+  code?: string;
+  age?: string;
+  area?: string;
+  geography?: string;
+  frequency?: string;
+  dictionarySource?: string;
+  rawEntry?: string;
+  rawAnalyses?: string[];
+};
+
 type LookupMatch = {
   headword: string;
   definition: string;
   source: string;
   sourceRef: string;
   morphology?: string[];
+  whitaker?: WhitakerMetadata;
 };
 
 type ParsedGroup = {
@@ -44,6 +148,10 @@ type ParsedGroup = {
   headword: string;
   definitions: string[];
   modifier: boolean;
+  pos: string;
+  dictionaryDetails: string;
+  code?: string;
+  rawEntry: string;
 };
 
 function normalizeLatin(value: string) {
@@ -65,6 +173,28 @@ function json(body: unknown, status = 200, maxAge = 86400) {
       "Cache-Control": `public, max-age=${maxAge}, s-maxage=${maxAge}`,
     },
   });
+}
+
+function configuredPublishableKeys() {
+  const raw = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS");
+  if (!raw) return [] as string[];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(parsed)) return parsed.filter((value): value is string => typeof value === "string");
+    if (parsed && typeof parsed === "object") {
+      return Object.values(parsed as Record<string, unknown>).filter((value): value is string => typeof value === "string");
+    }
+  } catch {
+    // Fall through to the legacy anon-key compatibility check below.
+  }
+  return [] as string[];
+}
+
+function hasValidProjectKey(req: Request) {
+  const supplied = req.headers.get("apikey");
+  if (!supplied) return false;
+  const legacyAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  return configuredPublishableKeys().includes(supplied) || Boolean(legacyAnonKey && supplied === legacyAnonKey);
 }
 
 async function requestedWord(req: Request) {
@@ -128,8 +258,17 @@ function headwordParts(line: string) {
   const pos = match[2];
   const rest = match[3] ?? "";
   const modifier = modifierPartsOfSpeech.has(pos);
-  if (!modifier && !/\[[A-Z0-9]+\]/.test(rest)) return null;
-  return { headword: match[1].trim(), pos, modifier };
+  const code = rest.match(/\[([A-Z0-9]+)\]/)?.[1];
+  if (!modifier && !code) return null;
+  const dictionaryDetails = rest.replace(/\[[A-Z0-9]+\]/g, " ").replace(/\s+/g, " ").trim();
+  return {
+    headword: match[1].trim(),
+    pos,
+    modifier,
+    dictionaryDetails,
+    code,
+    rawEntry: line.trim(),
+  };
 }
 
 function parseGroups(text: string) {
@@ -155,6 +294,10 @@ function parseGroups(text: string) {
         headword: headword.headword,
         definitions: [],
         modifier: headword.modifier,
+        pos: headword.pos,
+        dictionaryDetails: headword.dictionaryDetails,
+        code: headword.code,
+        rawEntry: headword.rawEntry,
       };
       pendingAnalyses = [];
       continue;
@@ -208,6 +351,24 @@ function humanizeAnalysis(line: string) {
   return [posMap[parsed.pos] ?? parsed.pos.toLowerCase(), ...labels].filter(Boolean).join(" · ");
 }
 
+function dictionaryMetadata(group: ParsedGroup): WhitakerMetadata {
+  const code = group.code;
+  return {
+    partOfSpeech: posMap[group.pos] ?? group.pos.toLowerCase(),
+    ...(group.dictionaryDetails ? { dictionaryDetails: group.dictionaryDetails } : {}),
+    ...(code ? {
+      code,
+      age: ageMap[code[0]] ?? `Age code ${code[0] ?? "?"}`,
+      area: areaMap[code[1]] ?? `Area code ${code[1] ?? "?"}`,
+      geography: geographyMap[code[2]] ?? `Geography code ${code[2] ?? "?"}`,
+      frequency: frequencyMap[code[3]] ?? `Frequency code ${code[3] ?? "?"}`,
+      dictionarySource: sourceMap[code[4]] ?? `Source code ${code[4] ?? "?"}`,
+    } : {}),
+    rawEntry: group.rawEntry,
+    rawAnalyses: group.analyses.map((line) => line.trim()).filter(Boolean),
+  };
+}
+
 function toMatches(text: string): LookupMatch[] {
   const output: LookupMatch[] = [];
   const seen = new Set<string>();
@@ -217,13 +378,14 @@ function toMatches(text: string): LookupMatch[] {
     const definition = group.definitions.join(" ").replace(/\s+/g, " ").trim();
     if (!definition) continue;
     const morphology = [...new Set(group.analyses.map(humanizeAnalysis).filter(Boolean))];
-    const key = `${group.headword}\u0000${definition}\u0000${morphology.join("|")}`;
+    const key = `${group.headword}\u0000${definition}\u0000${group.code ?? ""}\u0000${morphology.join("|")}`;
     if (seen.has(key)) continue;
     seen.add(key);
     output.push({
       headword: group.headword,
       definition,
       morphology,
+      whitaker: dictionaryMetadata(group),
       source: "Whitaker's Words Online",
       sourceRef: "Whitaker's Words Online · latin-words.com",
     });
@@ -255,6 +417,7 @@ async function fetchLatinWords(word: string) {
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (!hasValidProjectKey(req)) return json({ error: "Unauthorized" }, 401, 0);
   if (req.method !== "GET" && req.method !== "POST") return json({ error: "Method not allowed" }, 405, 0);
 
   const surface = await requestedWord(req);
