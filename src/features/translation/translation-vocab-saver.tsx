@@ -1,11 +1,11 @@
 import type { User } from "@supabase/supabase-js";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { DictionaryMatch, TranslationHelperLanguage } from "./dictionary-sources";
 import { deleteTranslationVocabEntry, listTranslationVocabEntries, saveTranslationVocabEntry } from "./translation-vocab-repository";
 import { dictionaryChoiceKey, distinctDictionaryChoices, vocabEntryKey, type TranslationVocabEntry } from "./translation-vocab-model";
 
-const vocabSaverCss = `.translation-vocab-saver{display:grid;gap:.55rem;padding-top:.78rem;border-top:1px solid var(--border)}.translation-vocab-saver-head{display:grid;gap:.22rem}.translation-vocab-saver-head strong{font-size:.88rem}.translation-vocab-saver-head span{font-size:.76rem;line-height:1.4;color:var(--muted-foreground)}.translation-vocab-choices{display:grid;gap:.38rem}.translation-vocab-choice{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.55rem;align-items:start;padding:.55rem .6rem;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);cursor:pointer;background:color-mix(in srgb,var(--primary) 3%,var(--panel))}.translation-vocab-choice:has(input:checked){border-color:color-mix(in srgb,var(--primary) 52%,var(--border));background:color-mix(in srgb,var(--primary) 8%,var(--panel))}.translation-vocab-choice input{margin-top:.18rem}.translation-vocab-choice-copy{display:grid;gap:.12rem}.translation-vocab-choice-copy strong{font-family:var(--font-serif);font-size:.98rem}.translation-vocab-choice-copy span{font-size:.82rem;line-height:1.35}.translation-vocab-choice-copy small{font-size:.7rem;color:var(--muted-foreground)}.translation-vocab-message{margin:0;font-size:.76rem;color:var(--muted-foreground)}.translation-vocab-message a{font-weight:750;color:var(--primary)}.translation-vocab-message.is-error{color:#b42318}`;
+const vocabSaverCss = `.translation-vocab-saver{display:grid;gap:.8rem}.translation-definition:has(> .translation-vocab-saver)>.translation-definition-header,.translation-definition:has(> .translation-vocab-saver)>.translation-result-section,.translation-definition:has(> .translation-vocab-saver)>.translation-source-line,.translation-definition:has(> .translation-vocab-saver)>.translation-alternatives{display:none}.translation-vocab-selected{display:grid;gap:.14rem}.translation-vocab-selected span{font-size:.7rem;font-weight:850;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-foreground)}.translation-vocab-selected h2{margin:0;font-family:var(--font-serif);font-size:2rem;line-height:1.1}.translation-vocab-definition{display:grid;gap:0;border:1px solid var(--border);border-radius:var(--radius);background:color-mix(in srgb,var(--primary) 2%,var(--panel));overflow:hidden}.translation-vocab-definition-head{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.72rem .78rem;background:color-mix(in srgb,var(--primary) 5%,var(--panel));border-bottom:1px solid var(--border)}.translation-vocab-analysis-label{font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted-foreground)}.translation-vocab-save{display:inline-flex;align-items:center;gap:.42rem;cursor:pointer;font-size:.8rem;font-weight:800;white-space:nowrap}.translation-vocab-save input{margin:0}.translation-vocab-save:has(input:disabled){cursor:not-allowed;opacity:.62}.translation-vocab-save:has(input:checked){color:var(--primary)}.translation-vocab-info{display:grid;gap:.3rem;padding:.68rem .78rem;border-top:1px solid var(--border)}.translation-vocab-definition-head+.translation-vocab-info{border-top:0}.translation-vocab-info-label{font-size:.67rem;font-weight:850;letter-spacing:.09em;text-transform:uppercase;color:var(--muted-foreground)}.translation-vocab-info p{margin:0;line-height:1.48;font-size:.91rem}.translation-vocab-headword{font-family:var(--font-serif);font-size:1.08rem;line-height:1.35}.translation-vocab-form-list,.translation-vocab-raw-list{display:grid;gap:.32rem;margin:0;padding:0;list-style:none}.translation-vocab-form-list li{padding:.42rem .5rem;border-radius:calc(var(--radius) - 4px);background:color-mix(in srgb,var(--primary) 6%,var(--panel));font-size:.86rem;line-height:1.4}.translation-vocab-raw,.translation-vocab-raw-list code{display:block;max-width:100%;padding:.42rem .5rem;border-radius:calc(var(--radius) - 4px);background:color-mix(in srgb,var(--foreground) 5%,var(--panel));font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:.72rem;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}.translation-vocab-message{margin:0;font-size:.76rem;color:var(--muted-foreground)}.translation-vocab-message a{font-weight:750;color:var(--primary)}.translation-vocab-message.is-error{color:#b42318}`;
 
 type Props = {
   language: TranslationHelperLanguage;
@@ -13,6 +13,23 @@ type Props = {
   matches: readonly DictionaryMatch[];
   user: User | null;
 };
+
+function InfoSection({ label, children }: { label: string; children?: ReactNode }) {
+  if (children === undefined || children === null || children === "") return null;
+  return <section className="translation-vocab-info">
+    <span className="translation-vocab-info-label">{label}</span>
+    {typeof children === "string" ? <p>{children}</p> : children}
+  </section>;
+}
+
+function ListSection({ label, values, raw = false }: { label: string; values?: readonly string[]; raw?: boolean }) {
+  if (!values?.length) return null;
+  return <InfoSection label={label}>
+    <ul className={raw ? "translation-vocab-raw-list" : "translation-vocab-form-list"}>
+      {values.map((value, index) => <li key={`${value}-${index}`}>{raw ? <code>{value}</code> : value}</li>)}
+    </ul>
+  </InfoSection>;
+}
 
 export function TranslationVocabSaver({ language, surfaceWord, matches, user }: Props) {
   const [entries, setEntries] = useState<TranslationVocabEntry[]>([]);
@@ -72,32 +89,49 @@ export function TranslationVocabSaver({ language, surfaceWord, matches, user }: 
 
   if (!surfaceWord || choices.length === 0) return null;
 
-  return <section className="translation-vocab-saver" aria-label="Save word to vocabulary flash cards">
+  return <section className="translation-vocab-saver" aria-label="Dictionary definitions and vocabulary saving">
     <style>{vocabSaverCss}</style>
-    <div className="translation-vocab-saver-head">
-      <strong>Save to vocab flash cards</strong>
-      <span>Choose the dictionary entry or sense you want to study. Different grammatical analyses of the same dictionary entry are combined, so declension or conjugation forms do not create separate choices.</span>
+    <div className="translation-vocab-selected">
+      <span>{language === "latin" ? "Selected word" : "Dictionary entry"}</span>
+      <h2>{surfaceWord}</h2>
     </div>
-    <div className="translation-vocab-choices">
-      {choices.map((choice) => {
-        const key = dictionaryChoiceKey(choice);
-        const saved = entryByKey.has(key);
-        return <label className="translation-vocab-choice" key={key}>
-          <input
-            type="checkbox"
-            checked={saved}
-            disabled={!user || loading || pending.has(key)}
-            onChange={(event) => void toggleChoice(choice, event.target.checked)}
-          />
-          <span className="translation-vocab-choice-copy">
-            <strong>{choice.headword}</strong>
-            <span>{choice.definition}</span>
-            <small>{choice.sourceRef ? `${choice.source} · ${choice.sourceRef}` : choice.source}</small>
-          </span>
-        </label>;
-      })}
-    </div>
-    {!user && <p className="translation-vocab-message"><Link to="/account">Sign in</Link> to keep these vocabulary cards in your cloud account and study them in the Greek or Latin app.</p>}
+
+    {choices.map((choice, index) => {
+      const key = dictionaryChoiceKey(choice);
+      const saved = entryByKey.has(key);
+      const whitaker = choice.whitaker;
+      return <article className="translation-vocab-definition" key={key}>
+        <div className="translation-vocab-definition-head">
+          <span className="translation-vocab-analysis-label">{index === 0 ? "Primary interpretation" : `Alternative interpretation ${index + 1}`}</span>
+          <label className="translation-vocab-save">
+            <input
+              type="checkbox"
+              checked={saved}
+              disabled={!user || loading || pending.has(key)}
+              onChange={(event) => void toggleChoice(choice, event.target.checked)}
+            />
+            <span>{saved ? "Saved" : "Save word"}</span>
+          </label>
+        </div>
+
+        <InfoSection label="Headword"><div className="translation-vocab-headword">{choice.headword}</div></InfoSection>
+        <InfoSection label="Part of speech">{whitaker?.partOfSpeech}</InfoSection>
+        <InfoSection label="Meaning"><p>{choice.definition}</p></InfoSection>
+        <ListSection label={(choice.morphology?.length ?? 0) > 1 ? "Possible forms" : "Form"} values={choice.morphology} />
+        <InfoSection label="Dictionary details">{whitaker?.dictionaryDetails}</InfoSection>
+        <InfoSection label="Age">{whitaker?.age}</InfoSection>
+        <InfoSection label="Subject area">{whitaker?.area}</InfoSection>
+        <InfoSection label="Geography">{whitaker?.geography}</InfoSection>
+        <InfoSection label="Frequency">{whitaker?.frequency}</InfoSection>
+        <InfoSection label="Dictionary source">{whitaker?.dictionarySource}</InfoSection>
+        <InfoSection label="Whitaker code">{whitaker?.code ? <code className="translation-vocab-raw">[{whitaker.code}]</code> : null}</InfoSection>
+        <InfoSection label="Raw dictionary entry">{whitaker?.rawEntry ? <code className="translation-vocab-raw">{whitaker.rawEntry}</code> : null}</InfoSection>
+        <ListSection label="Raw Whitaker analysis" values={whitaker?.rawAnalyses} raw />
+        <InfoSection label={language === "latin" ? "Lookup source" : "Source"}>{choice.sourceRef || choice.source}</InfoSection>
+      </article>;
+    })}
+
+    {!user && <p className="translation-vocab-message"><Link to="/account">Sign in</Link> to enable the Save word checkboxes and keep the selected definitions in your cloud vocabulary deck.</p>}
     {user && loading && <p className="translation-vocab-message">Checking your saved vocabulary…</p>}
     {error && <p className="translation-vocab-message is-error" role="alert">{error}</p>}
   </section>;
