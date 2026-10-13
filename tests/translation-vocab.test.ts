@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { DictionaryMatch } from "../src/features/translation/dictionary-sources";
+import { grammaticalPreview } from "../src/features/translation/translation-vocab-saver";
 import { distinctDictionaryChoices, translationVocabDeck, type TranslationVocabEntry } from "../src/features/translation/translation-vocab-model";
 
 describe("Translation Helper vocabulary", () => {
@@ -26,6 +27,17 @@ describe("Translation Helper vocabulary", () => {
       "present · active · indicative · first person · singular",
       "future · active · indicative · third person · plural",
     ]);
+  });
+
+  it("shows case and gender in collapsed dictionary previews", () => {
+    expect(grammaticalPreview([
+      "noun · nominative · singular · neuter",
+      "noun · accusative · singular · neuter",
+    ])).toBe("Nominative / Accusative · Neuter");
+    expect(grammaticalPreview(["Second Declension Masculine Endings · Genitive · Singular"]))
+      .toBe("Genitive · Masculine");
+    expect(grammaticalPreview(["verb · present · active · indicative · third person · singular"]))
+      .toBeNull();
   });
 
   it("keeps genuine lexical alternatives as separate choices", () => {
