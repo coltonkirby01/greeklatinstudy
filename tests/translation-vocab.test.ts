@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { DictionaryMatch } from "../src/features/translation/dictionary-sources";
-import { grammaticalPreview } from "../src/features/translation/translation-vocab-saver";
+import { definitionPreview, grammaticalPreview } from "../src/features/translation/translation-vocab-saver";
 import { distinctDictionaryChoices, translationVocabDeck, type TranslationVocabEntry } from "../src/features/translation/translation-vocab-model";
 
 describe("Translation Helper vocabulary", () => {
@@ -38,6 +38,12 @@ describe("Translation Helper vocabulary", () => {
       .toBe("Genitive · Masculine");
     expect(grammaticalPreview(["verb · present · active · indicative · third person · singular"]))
       .toBeNull();
+  });
+
+  it("limits collapsed English meaning headings to three words", () => {
+    expect(definitionPreview("word, speech, story, argument, reasoning")).toBe("word, speech, story…");
+    expect(definitionPreview("be in motion")).toBe("be in motion");
+    expect(definitionPreview("land, country, countryside, space, position")).toBe("land, country, countryside…");
   });
 
   it("keeps genuine lexical alternatives as separate choices", () => {
