@@ -29,14 +29,16 @@ describe("Translation Helper vocabulary", () => {
     ]);
   });
 
-  it("shows case and gender in collapsed dictionary previews", () => {
+  it("shows case and number for noun previews without gender", () => {
     expect(grammaticalPreview([
       "noun · nominative · singular · neuter",
       "noun · accusative · singular · neuter",
-    ])).toBe("Nominative / Accusative · Neuter");
+    ], "noun")).toBe("Nominative / Accusative · Singular");
     expect(grammaticalPreview(["Second Declension Masculine Endings · Genitive · Singular"]))
+      .toBe("Genitive · Singular");
+    expect(grammaticalPreview(["adjective · genitive · singular · masculine"], "adjective"))
       .toBe("Genitive · Masculine");
-    expect(grammaticalPreview(["verb · present · active · indicative · third person · singular"]))
+    expect(grammaticalPreview(["verb · present · active · indicative · third person · singular"], "verb"))
       .toBeNull();
   });
 
