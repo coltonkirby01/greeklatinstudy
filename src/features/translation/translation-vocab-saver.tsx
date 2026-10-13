@@ -32,6 +32,7 @@ const partOfSpeechLabels: Record<string, string> = {
 };
 
 const caseLabels = ["nominative", "genitive", "dative", "accusative", "ablative", "vocative", "locative"] as const;
+const numberLabels = ["singular", "plural"] as const;
 const genderLabels = ["masculine", "feminine", "neuter", "common gender", "gender unspecified"] as const;
 
 function displayPartOfSpeech(partOfSpeech?: string) {
@@ -44,13 +45,27 @@ function titleCase(value: string) {
   return `${value.charAt(0).toLocaleUpperCase()}${value.slice(1)}`;
 }
 
-export function grammaticalPreview(forms?: readonly string[]) {
+function isNounAnalysis(normalizedForms: readonly string[], partOfSpeech?: string) {
+  if (partOfSpeech?.trim().toLocaleLowerCase() === "noun") return true;
+  if (normalizedForms.some((form) => /(?:^| · )noun(?: · |$)/u.test(form))) return true;
+  return normalizedForms.some((form) => form.includes("declension") && form.includes("endings") && !form.includes("adjective"));
+}
+
+export function grammaticalPreview(forms?: readonly string[], partOfSpeech?: string) {
   if (!forms?.length) return null;
   const normalized = forms.map((form) => form.toLocaleLowerCase());
   const cases = caseLabels.filter((label) => normalized.some((form) => form.includes(label)));
+  const caseText = cases.map(titleCase).join(" / ");
+
+  if (isNounAnalysis(normalized, partOfSpeech)) {
+    const numbers = numberLabels.filter((label) => normalized.some((form) => form.includes(label)));
+    const numberText = numbers.map(titleCase).join(" / ");
+    if (!cases.length && !numbers.length) return null;
+    return [caseText, numberText].filter(Boolean).join(" · ");
+  }
+
   const genders = genderLabels.filter((label) => normalized.some((form) => form.includes(label)));
   if (!cases.length && !genders.length) return null;
-  const caseText = cases.map(titleCase).join(" / ");
   const genderText = genders.map(titleCase).join(" / ");
   return [caseText, genderText].filter(Boolean).join(" · ");
 }
@@ -148,7 +163,7 @@ export function TranslationVocabSaver({ language, surfaceWord, matches, user }: 
       const saved = entryByKey.has(key);
       const whitaker = choice.whitaker;
       const partOfSpeechLabel = displayPartOfSpeech(whitaker?.partOfSpeech);
-      const grammarPreview = grammaticalPreview(choice.morphology);
+      const grammarPreview = grammaticalPreview(choice.morphology, whitaker?.partOfSpeech);
       const meaningPreview = definitionPreview(choice.definition);
       return <details className="translation-vocab-definition" key={key}>
         <summary>
