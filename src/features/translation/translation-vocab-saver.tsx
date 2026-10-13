@@ -55,6 +55,12 @@ export function grammaticalPreview(forms?: readonly string[]) {
   return [caseText, genderText].filter(Boolean).join(" · ");
 }
 
+export function definitionPreview(definition: string, maxWords = 3) {
+  const words = definition.trim().replace(/\s+/gu, " ").split(" ").filter(Boolean);
+  if (words.length <= maxWords) return words.join(" ");
+  return `${words.slice(0, maxWords).join(" ").replace(/[;,.:]+$/u, "")}…`;
+}
+
 function InfoSection({ label, children }: { label: string; children?: ReactNode }) {
   if (children === undefined || children === null || children === "") return null;
   return <section className="translation-vocab-info">
@@ -143,10 +149,11 @@ export function TranslationVocabSaver({ language, surfaceWord, matches, user }: 
       const whitaker = choice.whitaker;
       const partOfSpeechLabel = displayPartOfSpeech(whitaker?.partOfSpeech);
       const grammarPreview = grammaticalPreview(choice.morphology);
+      const meaningPreview = definitionPreview(choice.definition);
       return <details className="translation-vocab-definition" key={key}>
         <summary>
           <span className="translation-vocab-summary-copy">
-            <span className="translation-vocab-summary-meaning">{choice.definition}</span>
+            <span className="translation-vocab-summary-meaning">{meaningPreview}</span>
             {partOfSpeechLabel && <span className="translation-vocab-summary-pos">{partOfSpeechLabel}</span>}
             {grammarPreview && <span className="translation-vocab-summary-grammar">{grammarPreview}</span>}
           </span>
