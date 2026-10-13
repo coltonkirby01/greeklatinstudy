@@ -45,27 +45,45 @@ jobs:
     if: github.event_name != 'pull_request'
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.initial-deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: check
     steps:
+      - name: Deploy tested artifact immediately
+        id: initial-deployment
+        uses: actions/deploy-pages@v4
+
       - name: Wait for any legacy Pages deployment
+        id: legacy-pages
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # This repository can still receive GitHub's legacy branch-publishing
-          # job. That job may finish several minutes after the custom Vite build
-          # and overwrite the working site. Always let it finish first, then make
-          # the tested custom artifact the final Pages deployment.
-          for attempt in {1..120}; do
-            status=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}" --jq '[.workflow_runs[] | select(.path == "dynamic/pages/pages-build-deployment")][0].status // "completed"')
-            if [ "$status" = "completed" ]; then
+          # This repository is still configured to receive GitHub's legacy
+          # branch/Jekyll Pages job. Keep the tested Vite site live while that
+          # job runs, then restore this same tested artifact immediately after
+          # legacy finishes so legacy can never remain the final deployment.
+          legacy_seen=false
+          for attempt in {1..600}; do
+            status=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}" --jq '[.workflow_runs[] | select(.path == "dynamic/pages/pages-build-deployment")][0].status // "missing"')
+            if [ "$status" = "missing" ]; then
+              echo "Legacy Pages workflow is not enabled for this commit."
+              echo "redeploy=false" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            sleep 5
+            legacy_seen=true
+            if [ "$status" = "completed" ]; then
+              echo "redeploy=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 1
           done
-          echo "Legacy Pages deployment did not finish within 10 minutes." >&2
-          exit 1
-      - name: Deploy
+          if [ "$legacy_seen" = "true" ]; then
+            echo "Legacy Pages deployment did not finish within 10 minutes." >&2
+            exit 1
+          fi
+          echo "redeploy=false" >> "$GITHUB_OUTPUT"
+
+      - name: Restore tested artifact after legacy Pages
+        if: steps.legacy-pages.outputs.redeploy == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
