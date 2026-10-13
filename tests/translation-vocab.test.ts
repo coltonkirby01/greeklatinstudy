@@ -34,7 +34,7 @@ describe("Translation Helper vocabulary", () => {
       "noun · nominative · singular · neuter",
       "noun · accusative · singular · neuter",
     ], "noun")).toBe("Nominative / Accusative · Singular");
-    expect(grammaticalPreview(["Second Declension Masculine Endings · Genitive · Singular"]))
+    expect(grammaticalPreview(["Second Declension Masculine · Genitive · Singular"]))
       .toBe("Genitive · Singular");
     expect(grammaticalPreview(["adjective · genitive · singular · masculine"], "adjective"))
       .toBe("Genitive · Masculine");
