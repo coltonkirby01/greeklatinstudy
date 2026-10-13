@@ -48,7 +48,7 @@ function titleCase(value: string) {
 function isNounAnalysis(normalizedForms: readonly string[], partOfSpeech?: string) {
   if (partOfSpeech?.trim().toLocaleLowerCase() === "noun") return true;
   if (normalizedForms.some((form) => /(?:^| · )noun(?: · |$)/u.test(form))) return true;
-  return normalizedForms.some((form) => form.includes("declension") && form.includes("endings") && !form.includes("adjective"));
+  return normalizedForms.some((form) => form.includes("declension") && !form.includes("adjective"));
 }
 
 export function grammaticalPreview(forms?: readonly string[], partOfSpeech?: string) {
