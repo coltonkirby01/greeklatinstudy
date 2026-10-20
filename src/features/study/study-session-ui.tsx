@@ -39,7 +39,7 @@ export function StudyCardFaces({ revealed, showingAnswer, backtracking, onReveal
   back: ReactNode;
   frontControls?: ReactNode;
 }) {
-  return <div className={`flashcard-scene ${showingAnswer ? "is-flipped" : ""} ${backtracking ? "is-backtracking" : ""}`}>
+  return <div className={`flashcard-scene ${showingAnswer ? "is-flipped" : ""} ${backtracking ? "is-backtracking" : ""}`} data-answer-revealed={revealed ? "true" : "false"}>
     {frontControls && <div className={`flashcard-card-controls ${showingAnswer ? "is-answer" : "is-question"}`}>{frontControls}</div>}
     <div className="flashcard-inner">
       <button type="button" className="flashcard-face flashcard-front-face" onClick={() => revealed ? onFlip() : onReveal()} aria-label={revealed ? "Return to answer" : "Reveal answer"} aria-hidden={showingAnswer} tabIndex={showingAnswer ? -1 : 0}>{front}</button>
