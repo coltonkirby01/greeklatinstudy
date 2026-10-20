@@ -49,6 +49,11 @@ export function studyEnterShortcut({ key, shiftKey, revealed, result, typingTarg
   return { type: "result", value: result === "wrong" ? "right" : "wrong" };
 }
 
+/** Audio stays hidden before the first reveal, but is replayable on either face afterward. */
+export function studyAudioShortcutAllowed({ faceHidden, revealed }: { faceHidden: boolean; revealed: boolean }) {
+  return !faceHidden || revealed;
+}
+
 /** D is reserved for the built-in Greek/Latin answer-side Deselect card action. */
 export function studyDeselectShortcut({ key, showingAnswer, typingTarget, controlsTarget = false, editing = false }: DeselectShortcutContext) {
   return key.toLowerCase() === "d" && showingAnswer && !typingTarget && !controlsTarget && !editing;
