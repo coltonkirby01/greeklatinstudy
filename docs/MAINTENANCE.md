@@ -144,7 +144,7 @@ Do not fork timer, grading, card-face, or scheduler implementations by language.
 - R/W = intentionally unassigned.
 - 1/2/3 = Easy/Medium/Hard.
 - S = save/unsave a card in built-in Greek/Latin study.
-- A = audio play/pause/replay when audio is available.
+- A = audio play/pause/replay when audio is available, including on the question face after Reveal and flipping back; hidden answer audio must remain unavailable before Reveal.
 - Shift+Enter = unassigned.
 
 Any page click during active question-side timing pauses timing and reopens the Start gate. Global shortcuts must not interfere with typing/ordinary controls.

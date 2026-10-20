@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { studyDeselectShortcut, studyEnterShortcut, studyShortcut } from "../src/features/study/study-shortcuts";
+import { studyAudioShortcutAllowed, studyDeselectShortcut, studyEnterShortcut, studyShortcut } from "../src/features/study/study-shortcuts";
 
 const context = { startGateOpen: false, revealed: false, result: null, difficulty: null, typingTarget: false, controlsTarget: false } as const;
 
@@ -58,6 +58,12 @@ describe("study keyboard shortcuts", () => {
     expect(studyShortcut({ ...context, key: "1", revealed: true })).toEqual({ type: "difficulty", value: "easy" });
     expect(studyShortcut({ ...context, key: "2", revealed: true })).toEqual({ type: "difficulty", value: "medium" });
     expect(studyShortcut({ ...context, key: "3", revealed: true })).toEqual({ type: "difficulty", value: "hard" });
+  });
+
+  it("allows audio on either face after answer reveal, but not on the hidden answer before reveal", () => {
+    expect(studyAudioShortcutAllowed({ faceHidden: true, revealed: false })).toBe(false);
+    expect(studyAudioShortcutAllowed({ faceHidden: false, revealed: true })).toBe(true);
+    expect(studyAudioShortcutAllowed({ faceHidden: true, revealed: true })).toBe(true);
   });
 
   it("reserves D for answer-side card deselection without hijacking typing or correction", () => {

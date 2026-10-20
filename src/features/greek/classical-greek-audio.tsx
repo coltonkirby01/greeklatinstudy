@@ -1,5 +1,6 @@
 import { Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { studyAudioShortcutAllowed } from "../study/study-shortcuts";
 import { isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "../../lib/supabase-config";
 
 type CourseAudioAsset = {
@@ -138,7 +139,8 @@ export function ClassicalGreekAudio({ assetId, label, cloudCardId }: { assetId: 
       if (event.key.toLowerCase() !== "a" || event.altKey || event.ctrlKey || event.metaKey || isTypingTarget(event.target)) return;
       const control = controlRef.current;
       const face = control?.closest(".flashcard-face");
-      if (!control || !audioRef.current || face?.getAttribute("aria-hidden") === "true") return;
+      const revealed = face?.closest(".flashcard-scene")?.getAttribute("data-answer-revealed") === "true";
+      if (!control || !audioRef.current || !studyAudioShortcutAllowed({ faceHidden: face?.getAttribute("aria-hidden") === "true", revealed })) return;
       event.preventDefault();
       event.stopImmediatePropagation();
       togglePlayback();
