@@ -93,8 +93,8 @@ export function StudyRatingControls({ revealed, result, difficulty, editing, onR
   </div>;
 }
 
-function MarkedFlashTile({ title, count, cards, onFlash, active }: {
-  title: string; count: number; cards: SidebarStudyItem[]; onFlash?: () => void; active: boolean;
+function MarkedFlashTile({ title, count, cards, onFlash, active, unavailable }: {
+  title: string; count: number; cards: SidebarStudyItem[]; onFlash?: () => void; active: boolean; unavailable: boolean;
 }) {
   return <details className="stat-tile marked-flash-tile">
     <summary><span>{title}</span><strong>{count}</strong></summary>
@@ -104,7 +104,7 @@ function MarkedFlashTile({ title, count, cards, onFlash, active }: {
         {cards.length ? cards.map((item) => <div className="marked-flash-item" key={item.key}>{item.label}</div>)
           : <div className="wrong-bank-empty">No cards marked {title === "Ever wrong" ? "Wrong" : "Hard"} during this page visit.</div>}
       </div>
-      <button type="button" className="primary-button marked-flash-button" disabled={!cards.length || active} onClick={onFlash}>Flash These</button>
+      <button type="button" className="primary-button marked-flash-button" disabled={!cards.length || unavailable} onClick={onFlash}>Flash These</button>
     </div>
   </details>;
 }
@@ -153,7 +153,7 @@ export function StudySidebar({ copy, direction, stats, sessionId, initialProgres
           </div>
         </details>}
       </div>}
-      <div className="stats-grid"><div className="stat-tile"><span>Reviews</span><strong>{stats.totalReviews}</strong></div><div className="stat-tile"><span>Reviewed</span><strong>{stats.reviewed}</strong></div><div className="stat-tile"><span>Accuracy</span><strong>{percent(stats.accuracy)}</strong></div><MarkedFlashTile title="Ever wrong" count={stats.everWrong} cards={everWrongCards} onFlash={onFlashEverWrong} active={activeFlash === "Ever wrong"} /><MarkedFlashTile title="Marked hard" count={stats.markedHard} cards={markedHardCards} onFlash={onFlashMarkedHard} active={activeFlash === "Marked hard"} /><div className="stat-tile"><span>Avg. time</span><strong>{formatResponseTime(stats.averageResponseTimeMs)}</strong></div><div className="stat-tile"><span>Right once</span><strong>{stats.mastered}</strong></div><div className="stat-tile"><span>Best streak</span><strong>{stats.bestStreak}</strong></div></div>
+      <div className="stats-grid"><div className="stat-tile"><span>Reviews</span><strong>{stats.totalReviews}</strong></div><div className="stat-tile"><span>Reviewed</span><strong>{stats.reviewed}</strong></div><div className="stat-tile"><span>Accuracy</span><strong>{percent(stats.accuracy)}</strong></div><MarkedFlashTile title="Ever wrong" count={stats.everWrong} cards={everWrongCards} onFlash={onFlashEverWrong} active={activeFlash === "Ever wrong"} unavailable={activeFlash !== null} /><MarkedFlashTile title="Marked hard" count={stats.markedHard} cards={markedHardCards} onFlash={onFlashMarkedHard} active={activeFlash === "Marked hard"} unavailable={activeFlash !== null} /><div className="stat-tile"><span>Avg. time</span><strong>{formatResponseTime(stats.averageResponseTimeMs)}</strong></div><div className="stat-tile"><span>Right once</span><strong>{stats.mastered}</strong></div><div className="stat-tile"><span>Best streak</span><strong>{stats.bestStreak}</strong></div></div>
       <Link className="small-outline-button session-stats-link" to={sessionId ? `/stats?session=${encodeURIComponent(sessionId)}` : "/stats"}>Stats</Link>
       <details className="priority-details">
         <summary><span>Highest-Priority Review</span><span className="priority-summary-tail"><strong>{priority.length}</strong></span></summary>
