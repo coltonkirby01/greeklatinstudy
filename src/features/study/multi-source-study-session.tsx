@@ -8,7 +8,7 @@ import { deleteReviewEvent, loadLocalEnvelope, loadProgressEnvelope, mergeProgre
 import { savedCardRef } from "./saved-cards";
 import { intrinsicCardDifficulty } from "./scoring";
 import { builtinSessionId, displayManagedSessionName, managedSessionsForLanguage, sessionDeckIdsForLanguage, type BuiltinSessionKind, type ManagedSession } from "./session-management";
-import { autoReviewDefaults, visitProgressSummary } from "./session-review";
+import { autoReviewDefaults, visitProgressSummary, wasMarkedDuringVisit } from "./session-review";
 import { emptyShuffleCycle, nextShuffleKey, shuffledCycleOrder } from "./shuffle-cycle";
 import { beginStudyRound, markStudyRoundCard, nextSequentialStudyRoundKey, reconcileStudyRound, remainingStudyRoundKeys, studyRoundComplete, studyRoundSubset, undoStudyRoundCard, type StudyRound, type StudyRoundKind, type StudyRoundGrade } from "./study-rounds";
 import "./study-gate.css";
@@ -31,7 +31,7 @@ type MixedReviewTransaction = ReviewTransaction & { sourceId: string; deckId: st
 type SyncStatus = "loading" | "local" | "syncing" | "cloud" | "error";
 type SessionMeta = { id: string; startedAt: number; name?: string };
 type WarmupMeta = SessionMeta & { remaining: number; total: number };
-type WrongBankRun = { cards: Candidate[] };
+type MarkedFlashRun = { cards: Candidate[]; label: "Ever wrong" | "Marked hard" };
 const WARMUP_CARDS = 5;
 
 function StudyRoundGate({ round, onStartRound }: {
@@ -178,9 +178,8 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   const [current, setCurrent] = useState<Candidate | null>(null);
   const [pendingDeselectKey, setPendingDeselectKey] = useState<string | null>(null);
   const [forcedNextKey, setForcedNextKey] = useState<string | null>(null);
-  const [wrongBank, setWrongBank] = useState<Candidate[]>([]);
-  const [wrongBankRun, setWrongBankRun] = useState<WrongBankRun | null>(null);
-  const [wrongBankComplete, setWrongBankComplete] = useState(false);
+  const [markedFlashRun, setMarkedFlashRun] = useState<MarkedFlashRun | null>(null);
+  const [markedFlashComplete, setMarkedFlashComplete] = useState(false);
   const [revealed, setRevealed] = useState(false), [reviewFront, setReviewFront] = useState(false), [result, setResult] = useState<ReviewResult | null>(null), [difficulty, setDifficulty] = useState<ReviewDifficulty | null>(null);
   const [capturedTimeMs, setCapturedTimeMs] = useState<number | null>(null), [lastTransaction, setLastTransaction] = useState<MixedReviewTransaction | null>(null), [editingTransaction, setEditingTransaction] = useState<MixedReviewTransaction | null>(null);
   const [, setSyncStatus] = useState<SyncStatus>("loading"), [notice, setNotice] = useState<string | null>(() => resumeSession ? "Continuing the selected past session. Your long-term memory and adaptive priorities are unchanged." : null);
@@ -308,7 +307,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   }
 
   function allCandidates() {
-    return wrongBankRun ? [...wrongBankRun.cards] : regularCandidates();
+    return markedFlashRun ? [...markedFlashRun.cards] : regularCandidates();
   }
 
   function resetOriginalRound(mode: SelectionMode = selectionMode) {
@@ -391,7 +390,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     let candidates = explicitPool ? [...explicitPool] : allCandidates();
     if (!candidates.length) return null;
 
-    if (!personalized && !wrongBankRun && !explicitPool && forcedNextRef.current) {
+    if (!personalized && !markedFlashRun && !explicitPool && forcedNextRef.current) {
       const forced = candidates.find((candidate) => candidateKey(candidate) === forcedNextRef.current);
       if (forced && (!exclude || candidateKey(forced) !== candidateKey(exclude) || candidates.length === 1)) {
         clearForcedNext();
@@ -468,7 +467,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
       setCurrent(retained);
       return;
     }
-    if (wrongBankRun) return;
+    if (markedFlashRun) return;
     resetOriginalRound();
     resetUi(); setLastTransaction(null); setWarmup(null);
     if (!internalSelectionChange) setStartGateOpen(true);
@@ -493,7 +492,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
 
   const currentState = current ? modeFor(current.source) : null;
   const copy = current ? directionalCopy(current.card, current.source.direction) : null;
-  const timer = useResponseTimer(current && currentState ? `${current.source.deck.id}:${current.source.studyKey}:${current.card.id}:${currentState.updatedAt}` : null, Boolean(current && currentState && !revealed && !editingTransaction && !startGateOpen && !wrongBankComplete));
+  const timer = useResponseTimer(current && currentState ? `${current.source.deck.id}:${current.source.studyKey}:${current.card.id}:${currentState.updatedAt}` : null, Boolean(current && currentState && !revealed && !editingTransaction && !startGateOpen && !markedFlashComplete));
 
   const states = useMemo(() => {
     const map = new Map<string, StudyModeState>();
@@ -515,12 +514,19 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     .filter((candidate) => candidateKey(candidate) !== (current ? candidateKey(current) : ""))
     .filter(({ source, card }) => !reviewedDuringVisit(states.get(source.id) ?? modeFor(source), card.id, visitStartedAtRef.current))
     .map((candidate) => ({ key: candidateKey(candidate), label: compactText(candidate.card.front) })), [current, modeFor, states, visibleCandidates]);
-  const wrongBankItems = useMemo<SidebarStudyItem[]>(() => wrongBank.map((candidate) => ({ key: candidateKey(candidate), label: canonicalWrongBankLabel(candidate) })), [wrongBank]);
+  const everWrongCandidates = useMemo(() => visibleCandidates.filter(({ source, card }) =>
+    wasMarkedDuringVisit(getCardProgress(states.get(source.id) ?? modeFor(source), card.id), visitStartedAtRef.current, "wrong")), [visibleCandidates, states, modeFor]);
+  const markedHardCandidates = useMemo(() => visibleCandidates.filter(({ source, card }) =>
+    wasMarkedDuringVisit(getCardProgress(states.get(source.id) ?? modeFor(source), card.id), visitStartedAtRef.current, "hard")), [visibleCandidates, states, modeFor]);
+  const everWrongCards = useMemo<SidebarStudyItem[]>(() => everWrongCandidates.map((candidate) =>
+    ({ key: candidateKey(candidate), label: canonicalWrongBankLabel(candidate) })), [everWrongCandidates]);
+  const markedHardCards = useMemo<SidebarStudyItem[]>(() => markedHardCandidates.map((candidate) =>
+    ({ key: candidateKey(candidate), label: canonicalWrongBankLabel(candidate) })), [markedHardCandidates]);
   const currentSaved = Boolean(current && savedCardRefs?.has(savedCardRef(current.source.deck.id, current.card.id)));
   const currentPendingDeselected = Boolean(current && pendingDeselectKey === candidateKey(current));
 
   function reveal() {
-    if (clickPausedTimerRef.current || !current || revealed || editingTransaction || startGateOpen || wrongBankComplete || roundGate) return;
+    if (clickPausedTimerRef.current || !current || revealed || editingTransaction || startGateOpen || markedFlashComplete || roundGate) return;
     setBacktracking(false); setReviewFront(false);
     const responseTimeMs = timer.capture();
     const suggested = autoReviewDefaults(responseTimeMs, currentState ? getCardProgress(currentState, current.card.id) : undefined);
@@ -528,7 +534,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   }
   function toggleReviewFace() { if (revealed) setReviewFront((value) => !value); }
   function changeOrder(next: SelectionMode) {
-    if (wrongBankRun) return;
+    if (markedFlashRun) return;
     setSelectionMode(next);
     resetOriginalRound(next);
     shuffleCycleRef.current = emptyShuffleCycle();
@@ -539,29 +545,29 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
       : chooseNext(current, next, Boolean(warmup));
     if (selected) present(selected);
   }
-  function finishWrongBankRun() {
-    setWrongBankComplete(true);
+  function finishMarkedFlashRun() {
+    setMarkedFlashComplete(true);
     setStartGateOpen(true);
-    setNotice("Wrong Bank flash complete. Repeat it or return to the larger study pool.");
+    setNotice(`${markedFlashRun?.label ?? "Marked cards"} flash complete. Repeat it or return to your selected cards.`);
   }
-  function advanceWrongBank(from: Candidate) {
-    if (!wrongBankRun) return false;
-    const index = wrongBankRun.cards.findIndex((candidate) => candidateKey(candidate) === candidateKey(from));
-    if (index < 0 || index + 1 >= wrongBankRun.cards.length) {
-      finishWrongBankRun();
+  function advanceMarkedFlash(from: Candidate) {
+    if (!markedFlashRun) return false;
+    const index = markedFlashRun.cards.findIndex((candidate) => candidateKey(candidate) === candidateKey(from));
+    if (index < 0 || index + 1 >= markedFlashRun.cards.length) {
+      finishMarkedFlashRun();
       return true;
     }
-    const next = wrongBankRun.cards[index + 1];
+    const next = markedFlashRun.cards[index + 1];
     present(next);
-    setNotice(`Wrong Bank flash · ${index + 2} of ${wrongBankRun.cards.length}`);
+    setNotice(`${markedFlashRun.label} flash · ${index + 2} of ${markedFlashRun.cards.length}`);
     return true;
   }
   function skip() {
-    if (!current || editingTransaction || wrongBankComplete || roundGate) return;
+    if (!current || editingTransaction || markedFlashComplete || roundGate) return;
     const previous = current;
-    if (wrongBankRun) {
+    if (markedFlashRun) {
       resetUi();
-      advanceWrongBank(previous);
+      advanceMarkedFlash(previous);
       return;
     }
     if (!warmup && advanceRound(previous)) { resetUi(); return; }
@@ -577,7 +583,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     onToggleSavedCard(current.source.deck.id, current.card.id);
   }
   function deselectCurrentCard() {
-    if (!current || !onDeselectCard || editingTransaction || !revealed || reviewFront || wrongBankRun) return;
+    if (!current || !onDeselectCard || editingTransaction || !revealed || reviewFront || markedFlashRun) return;
     const key = candidateKey(current);
     setPendingDeselectKey((value) => value === key ? null : key);
   }
@@ -592,19 +598,19 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     if (!previous) return;
     sessionChoiceInitialized.current = true;
     clearResumeUrl();
-    setWrongBankRun(null); setWrongBankComplete(false); resetOriginalRound(); setWarmup(null); setSession({ id: previous.id, startedAt: previous.startedAt || Date.now(), name: previous.builtin ? sessionLabel(previous) : previous.name }); setLastTransaction(null); resetUi(); setStartGateOpen(true);
+    setMarkedFlashRun(null); setMarkedFlashComplete(false); resetOriginalRound(); setWarmup(null); setSession({ id: previous.id, startedAt: previous.startedAt || Date.now(), name: previous.builtin ? sessionLabel(previous) : previous.name }); setLastTransaction(null); resetUi(); setStartGateOpen(true);
     setNotice(`Continuing ${sessionLabel(previous)}. Adaptive review still uses your full long-term history.`);
   }
   function startNewSession() {
     sessionChoiceInitialized.current = true;
     clearResumeUrl();
-    setWrongBankRun(null); setWrongBankComplete(false); resetOriginalRound(); setWarmup(null); setSession(makeCustomSession()); setLastTransaction(null); resetUi(); setStartGateOpen(true);
+    setMarkedFlashRun(null); setMarkedFlashComplete(false); resetOriginalRound(); setWarmup(null); setSession(makeCustomSession()); setLastTransaction(null); resetUi(); setStartGateOpen(true);
     const selected = chooseNext(current, selectionMode, false, regularCandidates());
     if (selected) present(selected);
     setNotice("New session started. Card priorities still use your full long-term history.");
   }
   function startWarmup() {
-    if (!current || wrongBankRun) return;
+    if (!current || markedFlashRun) return;
     const meta = { ...makeCustomSession(), remaining: WARMUP_CARDS, total: WARMUP_CARDS };
     setWarmup(meta); setLastTransaction(null); resetUi(); setStartGateOpen(false);
     const selected = chooseNext(current, "adaptive", true);
@@ -612,8 +618,8 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     setNotice("Personalized warm-up started: five high-priority cards before the ranked session.");
   }
   function back() {
-    if (!lastTransaction || wrongBankComplete || roundGate) return;
-    const source = sources.find((item) => item.id === lastTransaction.sourceId) ?? wrongBankRun?.cards.find((candidate) => candidate.source.id === lastTransaction.sourceId)?.source;
+    if (!lastTransaction || markedFlashComplete || roundGate) return;
+    const source = sources.find((item) => item.id === lastTransaction.sourceId) ?? markedFlashRun?.cards.find((candidate) => candidate.source.id === lastTransaction.sourceId)?.source;
     if (!source) return;
     const card = source.deck.cards.find((item) => item.id === lastTransaction.cardId);
     if (!card) return;
@@ -624,16 +630,8 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     requestAnimationFrame(() => requestAnimationFrame(() => setRevealed(true)));
     setNotice("Previous grade undone. Choose the corrected result and save it.");
   }
-  function updateWrongBank(candidate: Candidate, previousResult: ReviewResult | null, nextResult: ReviewResult) {
-    const key = candidateKey(candidate);
-    setWrongBank((bank) => {
-      if (nextResult === "wrong") return bank.some((item) => candidateKey(item) === key) ? bank : [...bank, candidate];
-      if (previousResult === "wrong") return bank.filter((item) => candidateKey(item) !== key);
-      return bank;
-    });
-  }
   function saveNext() {
-    if (!current || !result || !difficulty || wrongBankComplete || roundGate) return;
+    if (!current || !result || !difficulty || markedFlashComplete || roundGate) return;
     const source = current.source, state = modeFor(source), reviewedAt = Date.now(), reviewId = editingTransaction?.reviewId ?? crypto.randomUUID(), responseTimeMs = capturedTimeMs ?? timer.capture();
     const beforeState = editingTransaction?.beforeState ?? structuredClone(state);
     const activityKind: StudyActivityKind = editingTransaction?.activityKind ?? (warmup ? "warmup" : "study");
@@ -643,10 +641,8 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     next = maybeUnlockNextBatch(next, source.deck.cards, source.deck.staged, reviewedAt);
     const transaction: MixedReviewTransaction = { reviewId, cardId: current.card.id, result, difficulty, responseTimeMs, beforeState, sourceId: source.id, deckId: source.deck.id, studyKey: source.studyKey, sessionId, sessionStartedAt, sessionName, activityKind };
     const corrected = Boolean(editingTransaction), unlocked = next.lastUnlock?.at === reviewedAt ? next.lastUnlock : null;
-    const previousResult = editingTransaction?.result ?? null;
     const shouldDeselect = Boolean(onDeselectCard && pendingDeselectKey === candidateKey(current));
     saveMode(source, next, { review: transaction }); setLastTransaction(transaction);
-    if (activityKind === "study") updateWrongBank(current, previousResult, result);
     if (shouldDeselect && onDeselectCard) {
       deselectSelectionPendingRef.current = true;
       onDeselectCard(source.deck.id, current.card.id);
@@ -654,8 +650,8 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     const reviewedCandidate = current;
     resetUi();
 
-    if (wrongBankRun) {
-      advanceWrongBank(reviewedCandidate);
+    if (markedFlashRun) {
+      advanceMarkedFlash(reviewedCandidate);
       return;
     }
 
@@ -687,68 +683,66 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     setNotice(`${compactText(candidate.card.front)} is queued as the next card.`);
   }
 
-  function startWrongBankFlash() {
-    if (!wrongBank.length) return;
+  function startMarkedFlash(label: MarkedFlashRun["label"]) {
+    const cards = label === "Ever wrong" ? everWrongCandidates : markedHardCandidates;
+    if (!cards.length || markedFlashRun) return;
     roundRef.current = null; setRoundGate(null);
     clearForcedNext();
     setWarmup(null);
-    setWrongBankComplete(false);
-    setWrongBankRun({ cards: [...wrongBank] });
+    setMarkedFlashComplete(false);
+    setMarkedFlashRun({ cards: [...cards], label });
     setLastTransaction(null);
     resetUi();
     setStartGateOpen(true);
-    present(wrongBank[0]);
-    setNotice(`Wrong Bank flash · 1 of ${wrongBank.length}`);
+    present(cards[0]);
+    setNotice(`${label} flash · 1 of ${cards.length}`);
   }
 
-  function repeatWrongBankFlash() {
-    const cards = wrongBank.length ? [...wrongBank] : wrongBankRun?.cards ?? [];
-    if (!cards.length) returnToLargerSessions();
-    else {
-      setWrongBankRun({ cards });
-      setWrongBankComplete(false);
-      setLastTransaction(null);
-      resetUi();
-      setStartGateOpen(true);
-      present(cards[0]);
-      setNotice(`Wrong Bank flash · 1 of ${cards.length}`);
-    }
+  function repeatMarkedFlash() {
+    const run = markedFlashRun;
+    if (!run?.cards.length) { returnToLargerSessions(); return; }
+    setMarkedFlashComplete(false);
+    setLastTransaction(null);
+    resetUi();
+    setStartGateOpen(true);
+    present(run.cards[0]);
+    setNotice(`${run.label} flash · 1 of ${run.cards.length}`);
   }
 
   function returnToLargerSessions() {
     const pool = regularCandidates();
     resetOriginalRound();
-    setWrongBankRun(null);
-    setWrongBankComplete(false);
+    setMarkedFlashRun(null);
+    setMarkedFlashComplete(false);
     setLastTransaction(null);
     resetUi();
     setStartGateOpen(true);
     const selected = chooseNext(current, selectionMode, false, pool);
     if (selected) present(selected);
-    setNotice("Returned to the larger study pool.");
+    setNotice("Returned to the original selected study pool.");
   }
 
   useEffect(() => {
-    function requireRestart() { if (!revealed && !editingTransaction && !wrongBankComplete) setStartGateOpen(true); }
+    function requireRestart() { if (!revealed && !editingTransaction && !markedFlashComplete) setStartGateOpen(true); }
     function visibility() { if (document.visibilityState === "hidden") requireRestart(); }
     window.addEventListener("blur", requireRestart); document.addEventListener("visibilitychange", visibility);
     return () => { window.removeEventListener("blur", requireRestart); document.removeEventListener("visibilitychange", visibility); };
-  }, [editingTransaction, revealed, wrongBankComplete]);
+  }, [editingTransaction, revealed, markedFlashComplete]);
 
   useEffect(() => {
     function pauseForPageClick() {
-      if (revealed || editingTransaction || startGateOpen || wrongBankComplete) return;
+      if (revealed || editingTransaction || startGateOpen || markedFlashComplete) return;
       clickPausedTimerRef.current = true;
       setStartGateOpen(true);
       queueMicrotask(() => { clickPausedTimerRef.current = false; });
     }
     document.addEventListener("click", pauseForPageClick, true);
     return () => document.removeEventListener("click", pauseForPageClick, true);
-  }, [editingTransaction, revealed, startGateOpen, wrongBankComplete]);
+  }, [editingTransaction, revealed, startGateOpen, markedFlashComplete]);
 
   useEffect(() => {
     function keydown(event: KeyboardEvent) {
-      if (wrongBankComplete) return;
+      if (markedFlashComplete) return;
       const target = event.target as HTMLElement | null;
       if (roundGate) {
         if (!target?.closest(".study-start-card") && (event.key === " " || event.key === "Spacebar" || event.key === "Enter")) event.preventDefault();
@@ -787,20 +781,20 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   if (!ready) return <div className="study-loading panel-surface" role="status"><span className="loading-mark">A</span><p>Preparing study…</p></div>;
   if (!current || !copy) return <div className="study-loading panel-surface" role="status"><span className="loading-mark">A</span><p>No cards match these selections. Open Choose cards and widen the study set.</p></div>;
   const showingAnswer = revealed && !reviewFront;
-  const gated = (startGateOpen || Boolean(roundGate)) && !revealed && !editingTransaction && !wrongBankComplete;
+  const gated = (startGateOpen || Boolean(roundGate)) && !revealed && !editingTransaction && !markedFlashComplete;
   const sessionControlValue = "__current__";
   const selectableSessions = sessionCatalog.filter((item) => item.id !== session.id).sort((a, b) => Number(Boolean(b.builtin)) - Number(Boolean(a.builtin)) || b.lastReviewedAt - a.lastReviewedAt);
   const displayedTimer = timerDigits(capturedTimeMs ?? timer.elapsedMs);
-  const timerToggleDisabled = revealed || Boolean(editingTransaction) || !currentState || wrongBankComplete || Boolean(roundGate);
+  const timerToggleDisabled = revealed || Boolean(editingTransaction) || !currentState || markedFlashComplete || Boolean(roundGate);
   const front = <><span className="card-side">Question</span>{renderFront ? renderFront(current.card, copy, current.source) : <span className="study-prompt">{copy.prompt}</span>}</>;
   const backFace = <><span className="card-side">Answer</span>{renderBack ? renderBack(current.card, copy, current.source) : <span className="answer-block"><strong className="study-answer">{copy.answer}</strong>{current.card.notes && <span className="answer-notes">{current.card.notes}</span>}</span>}</>;
   const frontControls = <>
     <div className="card-overlay-actions">
-      <button type="button" className="small-outline-button card-overlay-button" data-study-control="back" disabled={!lastTransaction || wrongBankComplete} onClick={back}><ArrowLeft /> Back <kbd>Enter</kbd></button>
-      <button type="button" className="small-outline-button card-overlay-button" data-study-control="skip" disabled={Boolean(editingTransaction) || wrongBankComplete} onClick={skip}>Skip <SkipForward /></button>
+      <button type="button" className="small-outline-button card-overlay-button" data-study-control="back" disabled={!lastTransaction || markedFlashComplete} onClick={back}><ArrowLeft /> Back <kbd>Enter</kbd></button>
+      <button type="button" className="small-outline-button card-overlay-button" data-study-control="skip" disabled={Boolean(editingTransaction) || markedFlashComplete} onClick={skip}>Skip <SkipForward /></button>
     </div>
     {onDeselectCard && <div className="card-overlay-actions">
-      <button type="button" className="small-outline-button card-overlay-button deselect-card-button" data-study-control="deselect-card" aria-pressed={currentPendingDeselected} disabled={Boolean(editingTransaction) || Boolean(wrongBankRun)} onClick={deselectCurrentCard} title="Mark this card to leave the current Choose cards pool when you advance (D)"><ListMinus aria-hidden="true" /> {currentPendingDeselected ? "Deselected" : "Deselect card"} <kbd>D</kbd></button>
+      <button type="button" className="small-outline-button card-overlay-button deselect-card-button" data-study-control="deselect-card" aria-pressed={currentPendingDeselected} disabled={Boolean(editingTransaction) || Boolean(markedFlashRun)} onClick={deselectCurrentCard} title="Mark this card to leave the current Choose cards pool when you advance (D)"><ListMinus aria-hidden="true" /> {currentPendingDeselected ? "Deselected" : "Deselect card"} <kbd>D</kbd></button>
     </div>}
     {onToggleSavedCard && <div className="card-overlay-actions">
       <button type="button" className="small-outline-button card-overlay-button save-card-button" data-study-control="save-card" aria-pressed={currentSaved} onClick={toggleSavedCard} title="Save or unsave this card (S)"><Bookmark aria-hidden="true" /> {currentSaved ? "Saved" : "Save card"} <kbd>S</kbd></button>
@@ -810,31 +804,31 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   return <>
     <div className="study-grid" data-testid="study-session" data-study-key={current.source.studyKey}>
       <section className={`study-panel panel-surface ${gated ? "is-gated" : ""}`} aria-label={`${deck.title} study card`}>
-        {gated && (roundGate ? <StudyRoundGate round={roundGate} onStartRound={startReviewRound} /> : <StudyStartGate onStart={() => setStartGateOpen(false)} onWarmup={wrongBankRun ? undefined : startWarmup} />)}
+        {gated && (roundGate ? <StudyRoundGate round={roundGate} onStartRound={startReviewRound} /> : <StudyStartGate onStart={() => setStartGateOpen(false)} onWarmup={markedFlashRun ? undefined : startWarmup} />)}
         <div className="study-toolbar session-toolbar">
           <div className="toolbar-control-group">
             <div className="toolbar-timer" aria-label={`Front-card response time ${displayedTimer} seconds`}>
               <span className="toolbar-timer-value">{displayedTimer}</span>
               <button type="button" className="toolbar-timer-toggle" data-study-control="timer" onClick={() => setStartGateOpen(startGateOpen ? false : true)} disabled={timerToggleDisabled} aria-label={startGateOpen ? "Play timer" : "Pause timer"} title={startGateOpen ? "Play timer" : "Pause timer"}>{startGateOpen ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}</button>
             </div>
-            <label className="compact-select-label"><span className="sr-only">Card order</span><select value={selectionMode} disabled={Boolean(wrongBankRun)} onChange={(event) => changeOrder(event.target.value as SelectionMode)}><option value="adaptive">Adaptive</option><option value="sequential">Sequential</option><option value="shuffle">Shuffle</option></select></label>
-            {selectionMode === "adaptive" ? <label className="compact-select-label"><span className="sr-only">Adaptive repetition strength</span><select value={adaptiveStrength} disabled={Boolean(wrongBankRun)} onChange={(event) => setAdaptiveStrength(Number(event.target.value) as AdaptiveStrength)}><option value={1}>1: Diverse</option><option value={2}>2: Standard</option><option value={3}>3: Concentrated</option></select></label> : <span aria-hidden="true" />}
-            <label className="compact-select-label"><span className="sr-only">Study session</span><select value={sessionControlValue} disabled={Boolean(editingTransaction) || Boolean(wrongBankRun)} onChange={(event) => { const value = event.target.value; if (value === "__new__") startNewSession(); else if (value !== "__current__") continueSession(value); }}><option value="__current__">{wrongBankRun ? "Wrong Bank flash" : currentSessionName}</option><option value="__new__">Start new custom session</option>{selectableSessions.map((item) => <option key={item.id} value={item.id} disabled={item.inferred}>{sessionLabel(item)}</option>)}</select></label>
+            <label className="compact-select-label"><span className="sr-only">Card order</span><select value={selectionMode} disabled={Boolean(markedFlashRun)} onChange={(event) => changeOrder(event.target.value as SelectionMode)}><option value="adaptive">Adaptive</option><option value="sequential">Sequential</option><option value="shuffle">Shuffle</option></select></label>
+            {selectionMode === "adaptive" ? <label className="compact-select-label"><span className="sr-only">Adaptive repetition strength</span><select value={adaptiveStrength} disabled={Boolean(markedFlashRun)} onChange={(event) => setAdaptiveStrength(Number(event.target.value) as AdaptiveStrength)}><option value={1}>1: Diverse</option><option value={2}>2: Standard</option><option value={3}>3: Concentrated</option></select></label> : <span aria-hidden="true" />}
+            <label className="compact-select-label"><span className="sr-only">Study session</span><select value={sessionControlValue} disabled={Boolean(editingTransaction) || Boolean(markedFlashRun)} onChange={(event) => { const value = event.target.value; if (value === "__new__") startNewSession(); else if (value !== "__current__") continueSession(value); }}><option value="__current__">{markedFlashRun ? `${markedFlashRun.label} flash` : currentSessionName}</option><option value="__new__">Start new custom session</option>{selectableSessions.map((item) => <option key={item.id} value={item.id} disabled={item.inferred}>{sessionLabel(item)}</option>)}</select></label>
           </div>
         </div>
         {notice && <button className="inline-notice" type="button" onClick={() => setNotice(null)}>{notice}</button>}
         <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} frontControls={frontControls} />
         <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
       </section>
-      <StudySidebar copy={copy} direction={direction} stats={stats} sessionId={session.id} progressScope="visit" initialProgress={{ reviewed: sessionProgress.initialReviewed, total: sessionProgress.initialTotal, percent: sessionProgress.initialPercent, mastered: sessionProgress.initialMastered, masteryPercent: sessionProgress.initialMasteryPercent }} coverageRemaining={coverageRemaining} queuedCoverageKey={forcedNextKey} onQueueCoverage={queueCoverageCard} wrongBank={wrongBankItems} onFlashWrongBank={startWrongBankFlash} wrongBankActive={Boolean(wrongBankRun)} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
+      <StudySidebar copy={copy} direction={direction} stats={stats} sessionId={session.id} progressScope="visit" initialProgress={{ reviewed: sessionProgress.initialReviewed, total: sessionProgress.initialTotal, percent: sessionProgress.initialPercent, mastered: sessionProgress.initialMastered, masteryPercent: sessionProgress.initialMasteryPercent }} coverageRemaining={coverageRemaining} queuedCoverageKey={forcedNextKey} onQueueCoverage={queueCoverageCard} everWrongCards={everWrongCards} markedHardCards={markedHardCards} onFlashEverWrong={() => startMarkedFlash("Ever wrong")} onFlashMarkedHard={() => startMarkedFlash("Marked hard")} activeFlash={markedFlashRun?.label ?? null} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
     </div>
-    {wrongBankComplete && wrongBankRun && <div className="wrong-bank-modal-backdrop" role="presentation">
+    {markedFlashComplete && markedFlashRun && <div className="wrong-bank-modal-backdrop" role="presentation">
       <section className="wrong-bank-modal" role="dialog" aria-modal="true" aria-labelledby="wrong-bank-complete-title">
-        <p className="eyebrow">Wrong Bank</p>
+        <p className="eyebrow">{markedFlashRun.label}</p>
         <h2 id="wrong-bank-complete-title">Flash session complete</h2>
-        <p>You worked through all {wrongBankRun.cards.length} card{wrongBankRun.cards.length === 1 ? "" : "s"} in this Wrong Bank run.</p>
+        <p>You worked through all {markedFlashRun.cards.length} card{markedFlashRun.cards.length === 1 ? "" : "s"} in this {markedFlashRun.label} run.</p>
         <div className="wrong-bank-modal-actions">
-          <button type="button" className="primary-button" onClick={repeatWrongBankFlash}>Do it again</button>
+          <button type="button" className="primary-button" onClick={repeatMarkedFlash}>Do it again</button>
           <button type="button" className="small-outline-button" onClick={returnToLargerSessions}>Return to larger sessions</button>
         </div>
       </section>
