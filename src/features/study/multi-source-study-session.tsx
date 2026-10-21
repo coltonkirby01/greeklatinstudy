@@ -85,7 +85,7 @@ type Props = {
 function candidateKey(candidate: Candidate) { return `${candidate.source.id}:${candidate.card.id}`; }
 function timerDigits(ms: number) { return (ms / 1_000).toFixed(2); }
 function compactText(value: string) { return value.replace(/\s+/g, " ").trim(); }
-function canonicalWrongBankLabel(candidate: Candidate) {
+function markedFlashCardLabel(candidate: Candidate) {
   const prompt = compactText(candidate.card.front);
   const answer = compactText(candidate.card.back.split("\n").find((line) => line.trim()) ?? candidate.card.back);
   return `${prompt} — ${answer}`;
@@ -519,9 +519,9 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   const markedHardCandidates = useMemo(() => visibleCandidates.filter(({ source, card }) =>
     wasMarkedDuringVisit(getCardProgress(states.get(source.id) ?? modeFor(source), card.id), visitStartedAtRef.current, "hard")), [visibleCandidates, states, modeFor]);
   const everWrongCards = useMemo<SidebarStudyItem[]>(() => everWrongCandidates.map((candidate) =>
-    ({ key: candidateKey(candidate), label: canonicalWrongBankLabel(candidate) })), [everWrongCandidates]);
+    ({ key: candidateKey(candidate), label: markedFlashCardLabel(candidate) })), [everWrongCandidates]);
   const markedHardCards = useMemo<SidebarStudyItem[]>(() => markedHardCandidates.map((candidate) =>
-    ({ key: candidateKey(candidate), label: canonicalWrongBankLabel(candidate) })), [markedHardCandidates]);
+    ({ key: candidateKey(candidate), label: markedFlashCardLabel(candidate) })), [markedHardCandidates]);
   const currentSaved = Boolean(current && savedCardRefs?.has(savedCardRef(current.source.deck.id, current.card.id)));
   const currentPendingDeselected = Boolean(current && pendingDeselectKey === candidateKey(current));
 
