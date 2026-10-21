@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("requested Greek and Latin study workflow", () => {
-  it("adds adaptive strength levels, Enter backtracking, coverage queue, and Wrong Bank flash sessions", () => {
+  it("adds adaptive strength levels, Enter backtracking, coverage queue, and in-page marked-card flash sessions", () => {
     const session = fs.readFileSync("src/features/study/multi-source-study-session.tsx", "utf8");
     const sidebar = fs.readFileSync("src/features/study/study-session-ui.tsx", "utf8");
 
@@ -12,12 +12,17 @@ describe("requested Greek and Latin study workflow", () => {
     expect(session).toContain('event.key === "Enter"');
     expect(session).toContain("back();");
     expect(sidebar).toContain("Words/forms left");
-    expect(sidebar).toContain("Wrong Bank");
+    expect(sidebar).toContain('<MarkedFlashTile title="Ever wrong"');
+    expect(sidebar).toContain('<MarkedFlashTile title="Marked hard"');
+    expect(sidebar).toContain('className="stat-tile marked-flash-tile"');
+    expect(sidebar).not.toContain("<summary><span>Wrong Bank");
     expect(sidebar).toContain("Flash These");
     expect(sidebar).toContain('className="priority-details"');
     expect(sidebar.indexOf('className="priority-details"')).toBeLessThan(sidebar.indexOf("</section>", sidebar.indexOf('className="panel-surface stats-panel"')));
     expect(session).toContain("Do it again");
     expect(session).toContain("Return to larger sessions");
+    expect(session).toContain('onFlashEverWrong={() => startMarkedFlash("Ever wrong")}');
+    expect(session).toContain('onFlashMarkedHard={() => startMarkedFlash("Marked hard")}');
     expect(session).not.toContain('className="toolbar-timer-shortcut"');
   });
 
@@ -29,17 +34,17 @@ describe("requested Greek and Latin study workflow", () => {
 
     expect(standardSession).toContain('import "./study-gate.css"');
     expect(multiSourceSession).toContain('import "./study-gate.css"');
-    expect(sidebar).toContain('className="primary-button wrong-bank-flash"');
+    expect(sidebar).toContain('className="primary-button marked-flash-button"');
     expect(sidebar).toContain('className="study-start-card"');
     expect(sidebar).toContain('className="rating-choice');
 
     expect(gate).toContain(".study-primary,");
     expect(gate).toContain(".study-start-button,");
-    expect(gate).toContain(".wrong-bank-flash {");
+    expect(gate).toContain(".marked-flash-button {");
     expect(gate).toContain(".study-start-card::before");
     expect(gate).toContain(".current-selected-details,");
-    expect(gate).toContain(".wrong-bank-details,");
-    expect(gate).toContain(".wrong-bank-item {");
+    expect(gate).toContain(".marked-flash-tile {");
+    expect(gate).toContain(".marked-flash-item {");
     expect(gate).toContain(".rating-choice:hover:not([aria-pressed=\"true\"])");
     expect(gate).toContain(".wrong-bank-modal-backdrop {");
     expect(gate).toContain("backdrop-filter: blur(6px)");
