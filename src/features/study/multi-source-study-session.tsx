@@ -10,6 +10,7 @@ import { intrinsicCardDifficulty } from "./scoring";
 import { builtinSessionId, displayManagedSessionName, managedSessionsForLanguage, sessionDeckIdsForLanguage, type BuiltinSessionKind, type ManagedSession } from "./session-management";
 import { autoReviewDefaults, visitProgressSummary } from "./session-review";
 import { emptyShuffleCycle, nextShuffleKey } from "./shuffle-cycle";
+import { beginStudyRound, markStudyRoundCard, nextSequentialStudyRoundKey, reconcileStudyRound, remainingStudyRoundKeys, studyRoundComplete, studyRoundSubset, undoStudyRoundCard, type StudyRound, type StudyRoundKind, type StudyRoundGrade } from "./study-rounds";
 import "./study-gate.css";
 import { StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate, type SidebarStudyItem } from "./study-session-ui";
 import { studyDeselectShortcut, studyShortcut } from "./study-shortcuts";
@@ -32,6 +33,37 @@ type SessionMeta = { id: string; startedAt: number; name?: string };
 type WarmupMeta = SessionMeta & { remaining: number; total: number };
 type WrongBankRun = { cards: Candidate[] };
 const WARMUP_CARDS = 5;
+
+function StudyRoundGate({ round, onStartRound }: {
+  round: StudyRound;
+  onStartRound: (kind: StudyRoundKind, keys: string[]) => void;
+}) {
+  const needs = studyRoundSubset(round, "needs");
+  const hard = studyRoundSubset(round, "hard");
+  const isOriginal = round.kind === "original";
+  const isNeeds = round.kind === "needs";
+
+  return <div className="study-start-gate" role="region" aria-label="Study round complete">
+    <div className="study-start-card">
+      <p className="eyebrow">Round complete · Timer paused</p>
+      <h2>{isOriginal ? "All selected cards reviewed" : isNeeds ? "Focused review complete" : "Wrong / Hard review complete"}</h2>
+      <p>You finished {round.keys.length} card{round.keys.length === 1 ? "" : "s"} in this round. Choose what to study next. Your study session, progress, and selected cards are preserved.</p>
+      <div className="study-start-actions">
+        {isOriginal ? <>
+          <button type="button" className="primary-button study-start-button" onClick={() => onStartRound("original", [])}>Redo all selected cards</button>
+          <button type="button" className="small-outline-button study-warmup-button" disabled={!needs.length} onClick={() => onStartRound("needs", needs)}>Review Wrong / Medium / Hard ({needs.length})</button>
+        </> : isNeeds ? <>
+          <button type="button" className="primary-button study-start-button" disabled={!hard.length} onClick={() => onStartRound("hard", hard)}>Review Wrong / Hard only ({hard.length})</button>
+          <button type="button" className="small-outline-button study-warmup-button" onClick={() => onStartRound("original", [])}>Return to original selection</button>
+        </> : <>
+          <button type="button" className="primary-button study-start-button" onClick={() => onStartRound("hard", round.keys)}>Redo this Wrong / Hard round ({round.keys.length})</button>
+          <button type="button" className="small-outline-button study-warmup-button" onClick={() => onStartRound("original", [])}>Return to original selection</button>
+        </>}
+      </div>
+      <span>Choose a round to continue</span>
+    </div>
+  </div>;
+}
 const makeCustomSession = (): SessionMeta => ({ id: crypto.randomUUID(), startedAt: Date.now() });
 const makeBuiltinSession = (language: "Greek" | "Latin", kind: BuiltinSessionKind): SessionMeta => ({ id: builtinSessionId(language, kind), startedAt: Date.now(), name: kind === "learner" ? "Learner" : "Reviewer" });
 
@@ -133,6 +165,8 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   const savedTogglePendingRef = useRef(false);
   const deselectSelectionPendingRef = useRef(false);
   const shuffleCycleRef = useRef(emptyShuffleCycle());
+  const roundRef = useRef<StudyRound | null>(null);
+  const [roundGate, setRoundGate] = useState<StudyRound | null>(null);
   const clickPausedTimerRef = useRef(false);
   const visitStartedAtRef = useRef(Date.now());
   const forcedNextRef = useRef<string | null>(null);
@@ -275,6 +309,51 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     return wrongBankRun ? [...wrongBankRun.cards] : regularCandidates();
   }
 
+  function resetOriginalRound(mode: SelectionMode = selectionMode) {
+    roundRef.current = mode === "adaptive" ? null : beginStudyRound("original", regularCandidates().map(candidateKey));
+    setRoundGate(null);
+  }
+
+  function startReviewRound(kind: StudyRoundKind, selectedKeys: string[]) {
+    const available = regularCandidates();
+    const byKey = new Map(available.map((candidate) => [candidateKey(candidate), candidate]));
+    const pool = kind === "original" ? available : selectedKeys.map((key) => byKey.get(key)).filter((candidate): candidate is Candidate => Boolean(candidate));
+    if (!pool.length) return;
+    roundRef.current = beginStudyRound(kind, pool.map(candidateKey));
+    setRoundGate(null);
+    setWarmup(null);
+    setLastTransaction(null);
+    clearForcedNext();
+    shuffleCycleRef.current = emptyShuffleCycle();
+    resetUi();
+    setStartGateOpen(true);
+    setNotice(null);
+    const selected = selectionMode === "sequential" ? pool[0] : chooseNext(null, "shuffle", false, pool);
+    if (selected) present(selected);
+  }
+
+  function advanceRound(previous: Candidate, grade?: StudyRoundGrade) {
+    const round = roundRef.current;
+    if (!round || selectionMode === "adaptive") return false;
+    const updated = markStudyRoundCard(round, candidateKey(previous), grade);
+    if (updated === round) return false;
+    roundRef.current = updated;
+    if (studyRoundComplete(updated)) {
+      setRoundGate(updated);
+      setStartGateOpen(true);
+      setNotice(null);
+      return true;
+    }
+    const remaining = new Set(remainingStudyRoundKeys(updated));
+    const eligible = regularCandidates().filter((candidate) => remaining.has(candidateKey(candidate)));
+    const selected = selectionMode === "sequential"
+      ? eligible.find((candidate) => candidateKey(candidate) === nextSequentialStudyRoundKey(updated, candidateKey(previous)))
+      : chooseNext(previous, "shuffle", false, eligible);
+    if (selected) { setNotice(null); present(selected); }
+    else { setRoundGate(updated); setStartGateOpen(true); }
+    return true;
+  }
+
   function persistedCurrentCandidate() {
     let latest: { candidate: Candidate; updatedAt: number } | null = null;
     for (const source of sources) {
@@ -370,10 +449,12 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     const forcedStillVisible = forcedNextRef.current && regularCandidates().some((candidate) => candidateKey(candidate) === forcedNextRef.current);
     if (forcedNextRef.current && !forcedStillVisible) clearForcedNext();
     if (internalSelectionChange && retained) {
+      if (roundRef.current) roundRef.current = reconcileStudyRound(roundRef.current, regularCandidates().map(candidateKey));
       setCurrent(retained);
       return;
     }
     if (wrongBankRun) return;
+    resetOriginalRound();
     resetUi(); setLastTransaction(null); setWarmup(null);
     if (!internalSelectionChange) setStartGateOpen(true);
     if (retained) { recentSourceIdsRef.current = [retained.source.id]; setCurrent(retained); return; }
@@ -424,7 +505,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   const currentPendingDeselected = Boolean(current && pendingDeselectKey === candidateKey(current));
 
   function reveal() {
-    if (clickPausedTimerRef.current || !current || revealed || editingTransaction || startGateOpen || wrongBankComplete) return;
+    if (clickPausedTimerRef.current || !current || revealed || editingTransaction || startGateOpen || wrongBankComplete || roundGate) return;
     setBacktracking(false); setReviewFront(false);
     const responseTimeMs = timer.capture();
     const suggested = autoReviewDefaults(responseTimeMs, currentState ? getCardProgress(currentState, current.card.id) : undefined);
@@ -434,6 +515,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   function changeOrder(next: SelectionMode) {
     if (wrongBankRun) return;
     setSelectionMode(next);
+    resetOriginalRound(next);
     shuffleCycleRef.current = emptyShuffleCycle();
     if (!current) return;
     resetUi(); setStartGateOpen(true);
@@ -458,13 +540,14 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     return true;
   }
   function skip() {
-    if (!current || editingTransaction || wrongBankComplete) return;
+    if (!current || editingTransaction || wrongBankComplete || roundGate) return;
     const previous = current;
     if (wrongBankRun) {
       resetUi();
       advanceWrongBank(previous);
       return;
     }
+    if (!warmup && advanceRound(previous)) { resetUi(); return; }
     const selected = chooseNext(previous, selectionMode, Boolean(warmup));
     if (!selected) return;
     resetUi();
@@ -492,13 +575,13 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     if (!previous) return;
     sessionChoiceInitialized.current = true;
     clearResumeUrl();
-    setWrongBankRun(null); setWrongBankComplete(false); setWarmup(null); setSession({ id: previous.id, startedAt: previous.startedAt || Date.now(), name: previous.builtin ? sessionLabel(previous) : previous.name }); setLastTransaction(null); resetUi(); setStartGateOpen(true);
+    setWrongBankRun(null); setWrongBankComplete(false); resetOriginalRound(); setWarmup(null); setSession({ id: previous.id, startedAt: previous.startedAt || Date.now(), name: previous.builtin ? sessionLabel(previous) : previous.name }); setLastTransaction(null); resetUi(); setStartGateOpen(true);
     setNotice(`Continuing ${sessionLabel(previous)}. Adaptive review still uses your full long-term history.`);
   }
   function startNewSession() {
     sessionChoiceInitialized.current = true;
     clearResumeUrl();
-    setWrongBankRun(null); setWrongBankComplete(false); setWarmup(null); setSession(makeCustomSession()); setLastTransaction(null); resetUi(); setStartGateOpen(true);
+    setWrongBankRun(null); setWrongBankComplete(false); resetOriginalRound(); setWarmup(null); setSession(makeCustomSession()); setLastTransaction(null); resetUi(); setStartGateOpen(true);
     const selected = chooseNext(current, selectionMode, false, regularCandidates());
     if (selected) present(selected);
     setNotice("New session started. Card priorities still use your full long-term history.");
@@ -512,12 +595,13 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     setNotice("Personalized warm-up started: five high-priority cards before the ranked session.");
   }
   function back() {
-    if (!lastTransaction || wrongBankComplete) return;
+    if (!lastTransaction || wrongBankComplete || roundGate) return;
     const source = sources.find((item) => item.id === lastTransaction.sourceId) ?? wrongBankRun?.cards.find((candidate) => candidate.source.id === lastTransaction.sourceId)?.source;
     if (!source) return;
     const card = source.deck.cards.find((item) => item.id === lastTransaction.cardId);
     if (!card) return;
     const transaction = lastTransaction;
+    if (roundRef.current) roundRef.current = undoStudyRoundCard(roundRef.current, candidateKey({ source, card }));
     setLastTransaction(null); setEditingTransaction(transaction); setResult(transaction.result); setDifficulty(transaction.difficulty); setCapturedTimeMs(transaction.responseTimeMs); setBacktracking(true); setRevealed(false); setReviewFront(false); setPendingDeselectKey(null); setCurrent({ source, card });
     saveMode(source, transaction.beforeState, { deleteReviewId: transaction.reviewId });
     requestAnimationFrame(() => requestAnimationFrame(() => setRevealed(true)));
@@ -532,7 +616,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     });
   }
   function saveNext() {
-    if (!current || !result || !difficulty || wrongBankComplete) return;
+    if (!current || !result || !difficulty || wrongBankComplete || roundGate) return;
     const source = current.source, state = modeFor(source), reviewedAt = Date.now(), reviewId = editingTransaction?.reviewId ?? crypto.randomUUID(), responseTimeMs = capturedTimeMs ?? timer.capture();
     const beforeState = editingTransaction?.beforeState ?? structuredClone(state);
     const activityKind: StudyActivityKind = editingTransaction?.activityKind ?? (warmup ? "warmup" : "study");
@@ -571,6 +655,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
       return;
     }
 
+    if (advanceRound(reviewedCandidate, { result, difficulty })) return;
     const selected = chooseNext(current); if (selected) present(selected);
     if (unlocked) setNotice(`New vocabulary cards unlocked: ${unlocked.start}–${unlocked.end}.`);
     else if (corrected) setNotice("Previous grade corrected.");
@@ -587,6 +672,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
 
   function startWrongBankFlash() {
     if (!wrongBank.length) return;
+    roundRef.current = null; setRoundGate(null);
     clearForcedNext();
     setWarmup(null);
     setWrongBankComplete(false);
@@ -614,6 +700,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
 
   function returnToLargerSessions() {
     const pool = regularCandidates();
+    resetOriginalRound();
     setWrongBankRun(null);
     setWrongBankComplete(false);
     setLastTransaction(null);
@@ -646,6 +733,10 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     function keydown(event: KeyboardEvent) {
       if (wrongBankComplete) return;
       const target = event.target as HTMLElement | null;
+      if (roundGate) {
+        if (!target?.closest(".study-start-card") && (event.key === " " || event.key === "Spacebar" || event.key === "Enter")) event.preventDefault();
+        return;
+      }
       const typingTarget = Boolean(target?.closest("input, textarea, select, [contenteditable='true'], [role='textbox'], [role='listbox']"));
       const controlsTarget = Boolean(target?.closest(".session-toolbar, .study-start-card"));
       if (event.key === "Enter" && !event.shiftKey && !typingTarget && !controlsTarget && !revealed && !editingTransaction && !startGateOpen && lastTransaction) {
@@ -679,11 +770,11 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   if (!ready) return <div className="study-loading panel-surface" role="status"><span className="loading-mark">A</span><p>Preparing study…</p></div>;
   if (!current || !copy) return <div className="study-loading panel-surface" role="status"><span className="loading-mark">A</span><p>No cards match these selections. Open Choose cards and widen the study set.</p></div>;
   const showingAnswer = revealed && !reviewFront;
-  const gated = startGateOpen && !revealed && !editingTransaction && !wrongBankComplete;
+  const gated = (startGateOpen || Boolean(roundGate)) && !revealed && !editingTransaction && !wrongBankComplete;
   const sessionControlValue = "__current__";
   const selectableSessions = sessionCatalog.filter((item) => item.id !== session.id).sort((a, b) => Number(Boolean(b.builtin)) - Number(Boolean(a.builtin)) || b.lastReviewedAt - a.lastReviewedAt);
   const displayedTimer = timerDigits(capturedTimeMs ?? timer.elapsedMs);
-  const timerToggleDisabled = revealed || Boolean(editingTransaction) || !currentState || wrongBankComplete;
+  const timerToggleDisabled = revealed || Boolean(editingTransaction) || !currentState || wrongBankComplete || Boolean(roundGate);
   const front = <><span className="card-side">Question</span>{renderFront ? renderFront(current.card, copy, current.source) : <span className="study-prompt">{copy.prompt}</span>}</>;
   const backFace = <><span className="card-side">Answer</span>{renderBack ? renderBack(current.card, copy, current.source) : <span className="answer-block"><strong className="study-answer">{copy.answer}</strong>{current.card.notes && <span className="answer-notes">{current.card.notes}</span>}</span>}</>;
   const frontControls = <>
@@ -702,7 +793,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   return <>
     <div className="study-grid" data-testid="study-session" data-study-key={current.source.studyKey}>
       <section className={`study-panel panel-surface ${gated ? "is-gated" : ""}`} aria-label={`${deck.title} study card`}>
-        {gated && <StudyStartGate onStart={() => setStartGateOpen(false)} onWarmup={wrongBankRun ? undefined : startWarmup} />}
+        {gated && (roundGate ? <StudyRoundGate round={roundGate} onStartRound={startReviewRound} /> : <StudyStartGate onStart={() => setStartGateOpen(false)} onWarmup={wrongBankRun ? undefined : startWarmup} />)}
         <div className="study-toolbar session-toolbar">
           <div className="toolbar-control-group">
             <div className="toolbar-timer" aria-label={`Front-card response time ${displayedTimer} seconds`}>
