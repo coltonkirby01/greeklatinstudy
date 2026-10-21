@@ -145,6 +145,7 @@ Do not fork timer, grading, card-face, or scheduler implementations by language.
 - 1/2/3 = Easy/Medium/Hard.
 - S = save/unsave a card in built-in Greek/Latin study.
 - A = audio play/pause/replay when audio is available, including on the question face after Reveal and flipping back; hidden answer audio must remain unavailable before Reveal.
+- Sequential/Shuffle rounds in the main Greek/Latin study pages are temporary page-local passes. The original pool completion offers repeat-all versus Wrong/Medium/Hard from that pass. The next completion offers Wrong/Hard from that pass versus original selection. The final completion offers repeat Wrong/Hard versus original selection. The choice opens the Start gate, never another persistent Stats session. Grade history, session IDs, and mastery remain intact.
 - Shift+Enter = unassigned.
 
 Any page click during active question-side timing pauses timing and reopens the Start gate. Global shortcuts must not interfere with typing/ordinary controls.
