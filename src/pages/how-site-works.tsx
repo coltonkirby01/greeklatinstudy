@@ -54,10 +54,10 @@ export function HowSiteWorks() {
         </details>
 
         <details className="site-guide-section">
-          <summary>Wrong Bank and page-visit review tools</summary>
+          <summary>Ever wrong, Marked hard, and page-visit review tools</summary>
           <div>
-            <p>The Current page visit panel keeps a page-visit <strong>Wrong Bank</strong>. <strong>Highest-Priority Review</strong> is a dropdown inside that same box, so long-term Adaptive review suggestions stay available without occupying a separate sidebar panel. A card enters the bank when it is saved Wrong and leaves if that same review is corrected to Right with Back. The bank resets when the page is reloaded or re-entered; it does not alter permanent review history.</p>
-            <p>Open Wrong Bank to see each missed Greek or Latin form with its English answer. <strong>Flash These</strong> starts a temporary run containing only those missed cards. When the run finishes, the popup lets you repeat the same bank or return to the larger selected study pool.</p>
+            <p>The Current page visit panel has expandable <strong>Ever wrong</strong> and <strong>Marked hard</strong> statistic tiles in place of the old standalone Wrong Bank. Each dropdown shows its counted selected cards from the current page visit, with their Greek or Latin prompt and English answer. Ever wrong includes any card answered Wrong during the visit even if subsequently answered Right; Marked hard includes any card rated Hard. Correcting a saved grade with Back updates the lists and counts. They reset on page reload or re-entry without erasing review history. <strong>Highest-Priority Review</strong> remains a separate long-term Adaptive review dropdown.</p>
+            <p>Expand either Ever wrong or Marked hard and select <strong>Flash These</strong> to work through just those cards. At the end, choose to repeat that set or return to the original selection. Both flash modes stay inside the same page and persistent study session; they do not create a new Stats session.</p>
           </div>
         </details>
 

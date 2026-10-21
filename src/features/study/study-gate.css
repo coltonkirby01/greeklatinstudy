@@ -67,8 +67,7 @@
 }
 
 .study-primary,
-.study-start-button,
-.wrong-bank-flash {
+.study-start-button {
   min-height: 46px;
   border-radius: 0.78rem;
   border-color: var(--burgundy);
@@ -81,8 +80,7 @@
 }
 
 .study-primary:hover:not(:disabled),
-.study-start-button:hover:not(:disabled),
-.wrong-bank-flash:hover:not(:disabled) {
+.study-start-button:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--burgundy) 88%, black);
   background: color-mix(in srgb, var(--burgundy) 90%, black);
   box-shadow: 0 9px 22px color-mix(in srgb, var(--burgundy) 22%, transparent);
@@ -90,8 +88,7 @@
 }
 
 .study-primary:disabled,
-.study-start-button:disabled,
-.wrong-bank-flash:disabled {
+.study-start-button:disabled {
   opacity: 0.48;
   box-shadow: none;
   cursor: not-allowed;
@@ -260,7 +257,6 @@
 /* Sidebar disclosures ---------------------------------------------------- */
 .current-selected-details,
 .coverage-details,
-.wrong-bank-details,
 .priority-details {
   overflow: hidden;
   border-color: color-mix(in srgb, var(--burgundy) 14%, var(--border)) !important;
@@ -270,7 +266,6 @@
 
 .current-selected-details > summary,
 .coverage-details > summary,
-.wrong-bank-details > summary,
 .priority-details > summary {
   min-height: 42px;
   transition: background 140ms ease, color 140ms ease;
@@ -278,14 +273,12 @@
 
 .current-selected-details > summary:hover,
 .coverage-details > summary:hover,
-.wrong-bank-details > summary:hover,
 .priority-details > summary:hover {
   background: color-mix(in srgb, var(--burgundy) 5%, var(--panel));
 }
 
 .current-selected-details[open] > summary,
 .coverage-details[open] > summary,
-.wrong-bank-details[open] > summary,
 .priority-details[open] > summary {
   border-bottom: 1px solid var(--border);
   background: color-mix(in srgb, var(--burgundy) 4%, var(--panel));
@@ -293,7 +286,6 @@
 
 .current-selected-details > summary strong,
 .coverage-details > summary strong,
-.wrong-bank-details > summary strong,
 .priority-details > summary strong {
   min-width: 1.7rem;
   padding: 0.16rem 0.43rem;
@@ -315,29 +307,73 @@
   font-weight: 800;
 }
 
-.wrong-bank-list {
-  gap: 0.4rem !important;
-  padding: 0.55rem !important;
-}
-
-.wrong-bank-item {
-  padding: 0.48rem 0.55rem !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 0.55rem;
-  background: var(--panel);
-  font-size: 0.8rem !important;
-  line-height: 1.38 !important;
-}
-
 .wrong-bank-empty {
   padding: 0.2rem 0.15rem 0.35rem !important;
   line-height: 1.45;
 }
 
-.wrong-bank-flash {
-  width: calc(100% - 1.1rem) !important;
-  margin: 0 0.55rem 0.6rem !important;
-  font-size: 0.86rem;
+/* The existing Ever wrong and Marked hard statistic tiles now expand in place
+   instead of using a separate Wrong Bank panel below Stats. */
+.marked-flash-tile {
+  min-width: 0;
+  align-self: start;
+}
+
+.marked-flash-tile > summary {
+  position: relative;
+  display: grid;
+  gap: 0.25rem;
+  padding-right: 0.8rem;
+  list-style: none;
+  cursor: pointer;
+}
+
+.marked-flash-tile > summary::-webkit-details-marker { display: none; }
+.marked-flash-tile > summary::after {
+  content: "⌄";
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.marked-flash-tile[open] > summary::after { content: "⌃"; }
+.marked-flash-tile > summary:focus-visible {
+  outline: 2px solid var(--burgundy);
+  outline-offset: 3px;
+  border-radius: 0.3rem;
+}
+
+.marked-flash-content {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  min-width: 0;
+}
+
+.marked-flash-list {
+  display: grid;
+  gap: 0.32rem;
+  max-height: 13rem;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+
+.marked-flash-item {
+  padding: 0.38rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.76rem;
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+.marked-flash-button {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 0.65rem;
+  font-size: 0.78rem;
 }
 
 .coverage-item {
@@ -349,7 +385,7 @@
   transform: translateY(-1px);
 }
 
-/* Wrong Bank completion dialog ----------------------------------------- */
+/* In-page marked-card flash completion dialog ---------------------------- */
 .wrong-bank-modal-backdrop {
   background: color-mix(in srgb, var(--foreground) 32%, transparent) !important;
   backdrop-filter: blur(6px);
