@@ -80,7 +80,7 @@
 }
 
 .study-primary:hover:not(:disabled),
-.study-start-button:hover:not(:disabled):hover:not(:disabled) {
+.study-start-button:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--burgundy) 88%, black);
   background: color-mix(in srgb, var(--burgundy) 90%, black);
   box-shadow: 0 9px 22px color-mix(in srgb, var(--burgundy) 22%, transparent);
@@ -88,7 +88,7 @@
 }
 
 .study-primary:disabled,
-.study-start-button:disabled:disabled {
+.study-start-button:disabled {
   opacity: 0.48;
   box-shadow: none;
   cursor: not-allowed;
