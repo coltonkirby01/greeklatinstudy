@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { blankCardProgress } from "../src/features/study/engine";
-import { INITIAL_AUTO_WRONG_REVIEWS, INITIAL_COVERAGE_MULTIPLIER, RECENT_AUTO_GRADE_WINDOW, autoReviewDefaults, autoReviewResult, constrainAdaptiveInitialCoverage, sessionProgressSummary } from "../src/features/study/session-review";
+import { INITIAL_AUTO_WRONG_REVIEWS, INITIAL_COVERAGE_MULTIPLIER, RECENT_AUTO_GRADE_WINDOW, autoReviewDefaults, autoReviewResult, constrainAdaptiveInitialCoverage, sessionProgressSummary, visitProgressSummary, wasMarkedDuringVisit } from "../src/features/study/session-review";
 import type { CardProgress, ReviewRecord } from "../src/features/study/types";
 
 function progressWith(...history: ReviewRecord[]): CardProgress {
@@ -125,5 +125,36 @@ describe("session progress summary", () => {
     expect(summary.stats.totalReviews).toBe(0);
     expect(summary.initialReviewed).toBe(0);
     expect(summary.initialMastered).toBe(0);
+  });
+});
+
+describe("page-visit Ever wrong and Marked hard flash lists", () => {
+  it("matches the sidebar tile counts, including cards later answered right", () => {
+    const first = progressWith(
+      review("before", 90, "wrong", "hard", 12_000),
+      review("a", 120, "wrong", "easy", 2_000),
+      review("b", 140, "right", "easy", 1_000),
+    );
+    const second = progressWith(review("c", 125, "right", "hard", 12_000));
+    const warmup = progressWith({ ...review("w", 130, "wrong", "hard", 12_000), activityKind: "warmup" });
+    const excluded = progressWith({ ...review("x", 130, "wrong", "hard", 12_000), statsExcluded: true });
+    const cards = [first, second, warmup, excluded];
+    const summary = visitProgressSummary(cards.map((progress) => ({ progress })), 100);
+    expect(cards.filter((progress) => wasMarkedDuringVisit(progress, 100, "wrong"))).toHaveLength(summary.stats.everWrong);
+    expect(cards.filter((progress) => wasMarkedDuringVisit(progress, 100, "hard"))).toHaveLength(summary.stats.markedHard);
+    expect(summary.stats.everWrong).toBe(1);
+    expect(summary.stats.markedHard).toBe(1);
+    expect(wasMarkedDuringVisit(first, 100, "wrong")).toBe(true);
+    expect(wasMarkedDuringVisit(first, 100, "hard")).toBe(false);
+  });
+
+  it("does not count old, excluded, or warm-up-only marks", () => {
+    const old = progressWith(review("old", 20, "wrong", "hard", 10_000));
+    const warmup = progressWith({ ...review("warm", 150, "wrong", "hard", 10_000), activityKind: "warmup" });
+    const excluded = progressWith({ ...review("excluded", 150, "wrong", "hard", 10_000), statsExcluded: true });
+    for (const progress of [old, warmup, excluded]) {
+      expect(wasMarkedDuringVisit(progress, 100, "wrong")).toBe(false);
+      expect(wasMarkedDuringVisit(progress, 100, "hard")).toBe(false);
+    }
   });
 });
