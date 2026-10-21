@@ -148,6 +148,15 @@ export function sessionProgressSummary(items: readonly SessionProgressItem[], se
  * leaving and re-entering the page creates a new visit start time, so this live
  * progress resets without deleting or rewriting any persisted review history.
  */
+/** Use precisely the same page-visit review predicate as the Ever wrong/Marked hard tiles. */
+export function wasMarkedDuringVisit(progress: CardProgress, visitStartedAt: number, kind: "wrong" | "hard"): boolean {
+  return progress.history.some((review) =>
+    review.reviewedAt >= visitStartedAt &&
+    (review.activityKind ?? "study") === "study" &&
+    !review.statsExcluded &&
+    (kind === "wrong" ? review.result === "wrong" : review.difficulty === "hard"));
+}
+
 export function visitProgressSummary(items: readonly SessionProgressItem[], visitStartedAt: number): SessionProgressSummary {
   return progressSummary(items, (review) => review.reviewedAt >= visitStartedAt && (review.activityKind ?? "study") === "study" && !review.statsExcluded);
 }
