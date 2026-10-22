@@ -54,7 +54,8 @@ describe("Translation Helper", () => {
     expect(app).toContain('path="translation-helper"');
     expect(route).toContain('"/translation-helper"');
     expect(nav).toContain('label: "Translation Helper"');
-    expect(page).toContain("does not generate a sentence translation");
+    expect(page).not.toContain("Read directly from your text and click any word for dictionary information.");
+    expect(page).not.toContain("does not generate a sentence translation or contextual paraphrase");
     expect(page).not.toContain("contextual meaning");
     expect(page).not.toContain("grammar explanation");
   });

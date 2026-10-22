@@ -268,7 +268,6 @@ export function TranslationHelperPage() {
     <section className="translation-helper-heading">
       <p className="eyebrow">Reading tool</p>
       <h1>Translation Helper</h1>
-      <p>Read directly from your text and click any word for dictionary information. Latin uses Whitaker's Words Online for definitions and forms. This helper does not generate a sentence translation or contextual paraphrase.</p>
     </section>
 
     <details className="translation-source-editor panel-surface" open={inputOpen} onToggle={(event) => setInputOpen(event.currentTarget.open)}>
