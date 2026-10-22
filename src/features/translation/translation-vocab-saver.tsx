@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { DictionaryMatch, TranslationHelperLanguage } from "./dictionary-sources";
+import { latinWordsEntryUrl } from "./latin-words-lookup";
 import { deleteTranslationVocabEntry, listTranslationVocabEntries, saveTranslationVocabEntry } from "./translation-vocab-repository";
 import { dictionaryChoiceKey, distinctDictionaryChoices, vocabEntryKey, type TranslationVocabEntry } from "./translation-vocab-model";
 
@@ -201,7 +202,11 @@ export function TranslationVocabSaver({ language, surfaceWord, matches, user }: 
           <InfoSection label="Whitaker code">{whitaker?.code ? <code className="translation-vocab-raw">[{whitaker.code}]</code> : null}</InfoSection>
           <InfoSection label="Raw dictionary entry">{whitaker?.rawEntry ? <code className="translation-vocab-raw">{whitaker.rawEntry}</code> : null}</InfoSection>
           <ListSection label="Raw Whitaker analysis" values={whitaker?.rawAnalyses} raw />
-          <InfoSection label={language === "latin" ? "Lookup source" : "Source"}>{choice.sourceRef || choice.source}</InfoSection>
+          <InfoSection label={language === "latin" ? "Lookup source" : "Source"}>
+            {language === "latin" && latinWordsEntryUrl(surfaceWord)
+              ? <a href={latinWordsEntryUrl(surfaceWord) ?? undefined} target="_blank" rel="noopener noreferrer" className="translation-source-link">Open {surfaceWord} in Whitaker's Words ↗</a>
+              : choice.sourceRef || choice.source}
+          </InfoSection>
         </div>
       </details>;
     })}

@@ -8,6 +8,7 @@ import {
   translationGreekRegistrations,
 } from "../src/features/translation/dictionary-sources";
 import { pdfTextItemsToString, translationFileKind } from "../src/features/translation/file-extraction";
+import { latinWordsEntryUrl } from "../src/features/translation/latin-words-lookup";
 import { BUILTIN_STUDY_DECKS } from "../src/features/study/builtin-study-catalog";
 import type { DeckDefinition } from "../src/features/study/types";
 
@@ -68,6 +69,23 @@ describe("Translation Helper", () => {
     expect(extraction).toContain("pdf.min.js");
     expect(extraction).toContain("scanned/image-only PDF");
     expect(page).toContain("Image/scanned-PDF OCR later");
+  });
+
+  it("deep-links clicked Latin forms directly to Whitaker entries, stripping macrons", () => {
+    expect(latinWordsEntryUrl("amārent")).toBe("https://latin-words.com/word/latin/amarent");
+    expect(latinWordsEntryUrl("Crēdit")).toBe("https://latin-words.com/word/latin/credit");
+    expect(latinWordsEntryUrl("præmia")).toBe("https://latin-words.com/word/latin/praemia");
+    expect(latinWordsEntryUrl("œconomia")).toBe("https://latin-words.com/word/latin/oeconomia");
+    expect(latinWordsEntryUrl("?! 123")).toBeNull();
+
+    const page = fs.readFileSync("src/pages/translation-helper-page.tsx", "utf8");
+    const saver = fs.readFileSync("src/features/translation/translation-vocab-saver.tsx", "utf8");
+    expect(page).toContain('selectedLatinEntryUrl = language === "latin" && selectedWord ? latinWordsEntryUrl(selectedWord) : null');
+    expect(page).toContain('href={selectedLatinEntryUrl}');
+    expect(page).not.toContain('href="https://latin-words.com/"');
+    expect(saver).toContain("latinWordsEntryUrl(surfaceWord)");
+    expect(saver).toContain('label={language === "latin" ? "Lookup source" : "Source"}');
+    expect(saver).toContain('href={latinWordsEntryUrl(surfaceWord) ?? undefined}');
   });
 
   it("uses latin-words.com as the sole Latin helper source and preserves morphology", () => {
