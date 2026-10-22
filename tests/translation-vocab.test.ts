@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { DictionaryMatch } from "../src/features/translation/dictionary-sources";
 import { comparisonPreview, definitionPreview, grammaticalPreview } from "../src/features/translation/translation-vocab-saver";
 import { latinInflectionClass } from "../src/features/translation/latin-grammar-display";
+import { latinGrammaticalPreview } from "../src/features/translation/latin-morphology-preview";
 import { distinctDictionaryChoices, translationVocabDeck, type TranslationVocabEntry } from "../src/features/translation/translation-vocab-model";
 
 describe("Translation Helper vocabulary", () => {
@@ -117,7 +118,8 @@ describe("Translation Helper vocabulary", () => {
 
   it("keeps only learner-relevant details inside each Latin dictionary choice", () => {
     const saver = fs.readFileSync("src/features/translation/translation-vocab-saver.tsx", "utf8");
-    expect(saver).toContain('className="translation-vocab-summary-class"');
+    expect(saver).not.toContain('className="translation-vocab-summary-class"');
+    expect(saver).toContain('latinGrammaticalPreview(choice.morphology, whitaker?.partOfSpeech)');
     expect(saver).toContain('<InfoSection label={inflectionClass.label}>{inflectionClass.value}</InfoSection>');
     expect(saver).toContain('label={(choice.morphology?.length ?? 0) > 1 ? "Possible forms" : "Form"}');
     for (const obsoleteLabel of [
@@ -128,10 +130,52 @@ describe("Translation Helper vocabulary", () => {
     expect(saver).toContain('language === "greek" && <InfoSection label="Source">');
   });
 
-  it("limits collapsed English meaning headings to three words", () => {
-    expect(definitionPreview("word, speech, story, argument, reasoning")).toBe("word, speech, story…");
+  it("shows up to five English definition words in the collapsed entry", () => {
+    expect(definitionPreview("word, speech, story, argument, reasoning, discussion")).toBe("word, speech, story, argument, reasoning…");
     expect(definitionPreview("be in motion")).toBe("be in motion");
-    expect(definitionPreview("land, country, countryside, space, position")).toBe("land, country, countryside…");
+    expect(definitionPreview("land, country, countryside, space, position")).toBe("land, country, countryside, space, position");
+    expect(definitionPreview("to know or understand or comprehend fully", 3)).toBe("to know or…");
+  });
+
+  it("renders Latin noun case, number, and gender in that order as short codes", () => {
+    expect(latinGrammaticalPreview(["noun · nominative · singular · masculine"], "noun")).toBe("Nom S M");
+    expect(latinGrammaticalPreview(["noun · genitive · plural · feminine"], "noun")).toBe("Gen P F");
+    expect(latinGrammaticalPreview(["noun · dative · singular · neuter"], "noun")).toBe("Dat S N");
+    expect(latinGrammaticalPreview(["noun · accusative · plural · neuter"], "noun")).toBe("Acc P N");
+    expect(latinGrammaticalPreview(["noun · ablative · singular · masculine"], "noun")).toBe("Abl S M");
+    expect(latinGrammaticalPreview(["noun · vocative · plural · feminine"], "noun")).toBe("Voc P F");
+    expect(latinGrammaticalPreview(["adjective · nominative · singular · common gender · comparative"], "adjective")).toBe("Nom S M/F");
+  });
+
+  it("renders Latin verb tense, person-number, voice, and mood in that order", () => {
+    expect(latinGrammaticalPreview(["verb · present · active · indicative · third person · plural"], "verb")).toBe("Pres 3P Act Ind");
+    expect(latinGrammaticalPreview(["verb · imperfect · passive · subjunctive · first person · singular"], "verb")).toBe("Impf 1S Pass Sub");
+    expect(latinGrammaticalPreview(["verb · perfect · active · indicative · second person · singular"], "verb")).toBe("Perf 2S Act Ind");
+    expect(latinGrammaticalPreview(["verb · future perfect · passive · indicative · third person · singular"], "verb")).toBe("Fut Perf 3S Pass Ind");
+    expect(latinGrammaticalPreview(["verb · pluperfect · active · subjunctive · first person · plural"], "verb")).toBe("Plup 1P Act Sub");
+    expect(latinGrammaticalPreview(["verb · future · active · indicative · second person · plural"], "verb")).toBe("Fut 2P Act Ind");
+  });
+
+  it("keeps ambiguous Latin forms separate and never mixes noun/supine interpretations", () => {
+    expect(latinGrammaticalPreview([
+      "noun · accusative · singular · masculine",
+      "supine · accusative · singular · neuter",
+      "noun · nominative · singular · masculine",
+    ], "noun")).toBe("Acc S M / Nom S M");
+    expect(latinGrammaticalPreview([
+      "verb · present · active · indicative · third person · plural",
+      "verb · future · passive · subjunctive · first person · singular",
+    ], "verb")).toBe("Pres 3P Act Ind / Fut 1S Pass Sub");
+    expect(latinGrammaticalPreview([
+      "noun · nominative · singular · feminine",
+      "noun · genitive · singular · feminine",
+      "noun · dative · singular · feminine",
+      "noun · accusative · singular · feminine",
+      "noun · vocative · singular · feminine",
+    ], "noun")).toBe("Nom S F / Gen S F / Dat S F / +2 more");
+    expect(latinGrammaticalPreview(["supine · accusative · singular · neuter"], "noun")).toBeNull();
+    expect(latinGrammaticalPreview(["noun · nominative · singular · masculine"], "verb")).toBeNull();
+    expect(latinGrammaticalPreview([])).toBeNull();
   });
 
   it("keeps genuine lexical alternatives as separate choices", () => {
