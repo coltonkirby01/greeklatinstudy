@@ -9,7 +9,7 @@ const CACHE_PREFIX = "translation-helper-latin-words-v3:";
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const memoryCache = new Map<string, DictionaryMatch[]>();
 
-function normalizeLatinSurface(value: string) {
+export function normalizeLatinSurface(value: string) {
   return value
     .normalize("NFD")
     .replace(/\p{M}+/gu, "")
@@ -17,6 +17,12 @@ function normalizeLatinSurface(value: string) {
     .replace(/æ/g, "ae")
     .replace(/œ/g, "oe")
     .replace(/[^a-z]/g, "");
+}
+
+/** Deep-link to the actual Whitaker analysis for the clicked Latin form. */
+export function latinWordsEntryUrl(surface: string): string | null {
+  const word = normalizeLatinSurface(surface);
+  return word ? `https://latin-words.com/word/latin/${encodeURIComponent(word)}` : null;
 }
 
 function isStringArray(value: unknown) {
