@@ -84,7 +84,7 @@ Authenticated users have a private `translation_texts` collection in Supabase. R
 - Words are rendered as clickable tokens while punctuation and whitespace are preserved.
 - The lookup panel remains visible beside the text on desktop and below it on narrow screens.
 - The lookup panel includes the lexical vocabulary chooser whenever the source returns one or more dictionary entries.
-- The Latin lookup panel prominently identifies Whitaker's Words Online and links to latin-words.com.
+- The Latin lookup panel prominently identifies Whitaker's Words Online. When a Latin word is selected, the header Source link and each expanded definition\'s Lookup source link must point directly to `https://latin-words.com/word/latin/{normalized-selected-form}` (e.g. `amārent` → `/word/latin/amarent`), not the general homepage or search form. Before a word is selected, do not show a misleading generic Source link.
 - Latin results come only from latin-words.com and show meaning plus form analysis when available.
 - Ambiguous Latin forms remain visible as multiple possible analyses, while morphology-only duplicates collapse to one vocabulary-saving choice.
 - Successful Latin lookups are cached locally for seven days.
