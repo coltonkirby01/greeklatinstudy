@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { DictionaryMatch } from "../src/features/translation/dictionary-sources";
 import { comparisonPreview, definitionPreview, grammaticalPreview } from "../src/features/translation/translation-vocab-saver";
+import { latinInflectionClass } from "../src/features/translation/latin-grammar-display";
 import { distinctDictionaryChoices, translationVocabDeck, type TranslationVocabEntry } from "../src/features/translation/translation-vocab-model";
 
 describe("Translation Helper vocabulary", () => {
@@ -71,6 +72,60 @@ describe("Translation Helper vocabulary", () => {
     expect(comparisonPreview(["adjective · nominative · singular · masculine"])).toBeNull();
     expect(comparisonPreview(undefined, ["infirmior, -ius ADJ [XXXAO]"])).toBeNull();
     expect(comparisonPreview(undefined, ["unrelated noun N 3 1 NOM S C"])).toBeNull();
+  });
+
+  it("shows source-backed noun declensions and verb conjugations, without mixing analyses", () => {
+    const noun: DictionaryMatch = {
+      headword: "gustatus, gustatus",
+      definition: "taste, tasting",
+      source: "Whitaker's Words Online",
+      morphology: ["noun · accusative · singular · masculine", "supine · accusative · singular · neuter"],
+      whitaker: {
+        partOfSpeech: "noun",
+        dictionaryDetails: "(4th) M",
+        rawAnalyses: [
+          "gustat.um            SUPINE 1 1 ACC S N",
+          "gustat.um            N      4 1 ACC S M",
+        ],
+      },
+    };
+    expect(latinInflectionClass(noun)).toEqual({ label: "Declension", value: "4th declension" });
+    expect(latinInflectionClass({ whitaker: { partOfSpeech: "verb", dictionaryDetails: "(1st) TRANS" } }))
+      .toEqual({ label: "Conjugation", value: "1st conjugation" });
+    expect(latinInflectionClass({ whitaker: { partOfSpeech: "adjective", dictionaryDetails: "(1st/2nd)" } }))
+      .toEqual({ label: "Declension", value: "1st/2nd declension" });
+    expect(latinInflectionClass({ whitaker: { partOfSpeech: "noun", dictionaryDetails: "(3rd)" } }))
+      .toEqual({ label: "Declension", value: "3rd declension" });
+  });
+
+  it("uses matching Whitaker source analyses only when lexical metadata omits a class", () => {
+    expect(latinInflectionClass({ whitaker: {
+      partOfSpeech: "noun",
+      rawAnalyses: ["gustat.um            SUPINE 1 1 ACC S N", "gustat.um            N      4 1 ACC S M"],
+    } })).toEqual({ label: "Declension", value: "4th declension" });
+    expect(latinInflectionClass({ whitaker: {
+      partOfSpeech: "supine",
+      rawAnalyses: ["gustat.um            N 4 1 ACC S M", "gustat.um            SUPINE 1 1 ACC S N"],
+    } })).toEqual({ label: "Conjugation", value: "1st conjugation" });
+    expect(latinInflectionClass({ whitaker: { partOfSpeech: "verb", rawAnalyses: ["amav.it            V 1 1 PERF ACTIVE IND 3 S"] } }))
+      .toEqual({ label: "Conjugation", value: "1st conjugation" });
+    expect(latinInflectionClass({ whitaker: { partOfSpeech: "noun", rawAnalyses: ["gustat.um SUPINE 1 1 ACC S N"] } })).toBeNull();
+    expect(latinInflectionClass({ whitaker: { partOfSpeech: "adjective", rawAnalyses: ["infirmi.or       ADJ 1 1 NOM S C COMP"] } })).toBeNull();
+    expect(latinInflectionClass({ whitaker: { partOfSpeech: "pronoun", dictionaryDetails: "(1st)" } })).toBeNull();
+    expect(latinInflectionClass({ whitaker: {} })).toBeNull();
+  });
+
+  it("keeps only learner-relevant details inside each Latin dictionary choice", () => {
+    const saver = fs.readFileSync("src/features/translation/translation-vocab-saver.tsx", "utf8");
+    expect(saver).toContain('className="translation-vocab-summary-class"');
+    expect(saver).toContain('<InfoSection label={inflectionClass.label}>{inflectionClass.value}</InfoSection>');
+    expect(saver).toContain('label={(choice.morphology?.length ?? 0) > 1 ? "Possible forms" : "Form"}');
+    for (const obsoleteLabel of [
+      'label="Age"', 'label="Subject area"', 'label="Geography"', 'label="Frequency"',
+      'label="Dictionary source"', 'label="Whitaker code"', 'label="Raw dictionary entry"',
+      'label="Raw Whitaker analysis"', 'label="Dictionary details"', 'label="Lookup source"',
+    ]) expect(saver).not.toContain(obsoleteLabel);
+    expect(saver).toContain('language === "greek" && <InfoSection label="Source">');
   });
 
   it("limits collapsed English meaning headings to three words", () => {

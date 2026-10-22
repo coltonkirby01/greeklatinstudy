@@ -83,9 +83,9 @@ describe("Translation Helper", () => {
     expect(page).toContain('selectedLatinEntryUrl = language === "latin" && selectedWord ? latinWordsEntryUrl(selectedWord) : null');
     expect(page).toContain('href={selectedLatinEntryUrl}');
     expect(page).not.toContain('href="https://latin-words.com/"');
-    expect(saver).toContain("latinWordsEntryUrl(surfaceWord)");
-    expect(saver).toContain('label={language === "latin" ? "Lookup source" : "Source"}');
-    expect(saver).toContain('href={latinWordsEntryUrl(surfaceWord) ?? undefined}');
+    expect(page).toContain('href={selectedLatinEntryUrl}');
+    expect(saver).not.toContain('href={latinWordsEntryUrl(surfaceWord) ?? undefined}');
+    expect(saver).not.toContain('label="Lookup source"');
   });
 
   it("uses latin-words.com as the sole Latin helper source and preserves morphology", () => {

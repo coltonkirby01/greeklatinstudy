@@ -38,6 +38,10 @@ When latin-words.com returns more than one valid analysis, the helper must prese
 
 Morphology labels are expanded for readability from the abbreviations returned by Whitaker's Words. For example, `ACC S F` is displayed as `accusative · singular · feminine`, while a verb analysis can display tense, voice, mood, person, and number. Latin adjective/adverb degree markers `POS`, `COMP`, and `SUPER` appear prominently as **Positive**, **Comparative**, and **Superlative** both in the collapsed word-choice summary and the expanded *Degree of comparison* field. For example, when Whitaker labels *infirmior* `ADJ … COMP`, display **Comparative**, not just its case and gender. Derive degrees from returned morphology, falling back to raw Whitaker analyses when necessary; never infer degree merely from a Latin ending or headword. The site must not invent a grammatical analysis that is not present in the source output.
 
+The expanded Latin dictionary choice is intentionally a compact reading aid, not a full bibliographic/debug report. Show **headword, part of speech, meaning, inflected form(s), comparison degree (when supplied), and declension/conjugation (when Whitaker explicitly supplies it)**. For example, *gustatum* as a noun with `N (4th) M` displays **4th declension**; a verb with `V (1st)` displays **1st conjugation**. Put the class in the collapsed heading as well as the expanded information. Use the lexical dictionary class before falling back to matching numbered raw form analyses; never mistake the variant number for the class, conflate an unrelated supine with a noun, or guess a class from an ending. If the source does not give a reliable class, omit it.
+
+Do not render the following in the learner dropdown: age, subject area, geography, frequency, dictionary-source bibliography, raw Whitaker code, raw dictionary entry, raw analyses, or miscellaneous dictionary details. Keep source metadata in the lookup result for parsing/diagnostics, but not visible in the normal UI. Do not duplicate the direct Whitaker word link in every expanded choice: the lookup header already links to the selected word's exact Whitaker entry. Greek source attribution remains unchanged.
+
 ## Saved vocabulary flash cards
 
 Authenticated users can save a lookup result into a private vocabulary deck from the Translation Helper. The chooser is deliberately **lexical**, not morphological.
@@ -84,7 +88,7 @@ Authenticated users have a private `translation_texts` collection in Supabase. R
 - Words are rendered as clickable tokens while punctuation and whitespace are preserved.
 - The lookup panel remains visible beside the text on desktop and below it on narrow screens.
 - The lookup panel includes the lexical vocabulary chooser whenever the source returns one or more dictionary entries.
-- The Latin lookup panel prominently identifies Whitaker's Words Online. When a Latin word is selected, the header Source link and each expanded definition\'s Lookup source link must point directly to `https://latin-words.com/word/latin/{normalized-selected-form}` (e.g. `amārent` → `/word/latin/amarent`), not the general homepage or search form. Before a word is selected, do not show a misleading generic Source link.
+- The Latin lookup panel prominently identifies Whitaker's Words Online. When a Latin word is selected, the header Word source link must point directly to `https://latin-words.com/word/latin/{normalized-selected-form}` (e.g. `amārent` → `/word/latin/amarent`), not the general homepage or search form. Do not duplicate the link inside every definition disclosure. Before a word is selected, do not show a misleading generic Source link.
 - Latin results come only from latin-words.com and show meaning plus form analysis when available.
 - Ambiguous Latin forms remain visible as multiple possible analyses, while morphology-only duplicates collapse to one vocabulary-saving choice.
 - Successful Latin lookups are cached locally for seven days.
