@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { DictionaryMatch } from "../src/features/translation/dictionary-sources";
-import { definitionPreview, grammaticalPreview } from "../src/features/translation/translation-vocab-saver";
+import { comparisonPreview, definitionPreview, grammaticalPreview } from "../src/features/translation/translation-vocab-saver";
 import { distinctDictionaryChoices, translationVocabDeck, type TranslationVocabEntry } from "../src/features/translation/translation-vocab-model";
 
 describe("Translation Helper vocabulary", () => {
@@ -40,6 +40,37 @@ describe("Translation Helper vocabulary", () => {
       .toBe("Genitive · Masculine");
     expect(grammaticalPreview(["verb · present · active · indicative · third person · singular"], "verb"))
       .toBeNull();
+  });
+
+  it("labels infirmior as a comparative in the Latin summary and full details", () => {
+    expect(comparisonPreview([
+      "adjective · nominative · singular · common gender · comparative",
+      "adjective · vocative · singular · common gender · comparative",
+    ])).toBe("Comparative");
+    expect(comparisonPreview(
+      undefined,
+      ["infirmi.or             ADJ    1 1 NOM S C COMP", "infirmi.or             ADJ    1 1 VOC S C COMP"],
+    )).toBe("Comparative");
+    expect(comparisonPreview(undefined, ["melius               ADV    COMP"])).toBe("Comparative");
+    const saver = fs.readFileSync("src/features/translation/translation-vocab-saver.tsx", "utf8");
+    expect(saver).toContain('className="translation-vocab-summary-degree"');
+    expect(saver).toContain('<InfoSection label="Degree of comparison">{degreePreview}</InfoSection>');
+    const parser = fs.readFileSync("supabase/functions/latin-lookup/index.ts", "utf8");
+    expect(parser).toContain('COMP: "comparative"');
+    expect(parser).toContain('SUPER: "superlative"');
+    expect(parser).toContain('POS: "positive"');
+  });
+
+  it("shows positive and superlative degree without inferring it from spelling", () => {
+    expect(comparisonPreview(["adjective · nominative · singular · masculine · positive"])).toBe("Positive");
+    expect(comparisonPreview(["adjective · nominative · singular · masculine · superlative"])).toBe("Superlative");
+    expect(comparisonPreview([
+      "adjective · nominative · singular · masculine · comparative",
+      "adjective · genitive · singular · masculine · positive",
+    ])).toBe("Positive / Comparative");
+    expect(comparisonPreview(["adjective · nominative · singular · masculine"])).toBeNull();
+    expect(comparisonPreview(undefined, ["infirmior, -ius ADJ [XXXAO]"])).toBeNull();
+    expect(comparisonPreview(undefined, ["unrelated noun N 3 1 NOM S C"])).toBeNull();
   });
 
   it("limits collapsed English meaning headings to three words", () => {
