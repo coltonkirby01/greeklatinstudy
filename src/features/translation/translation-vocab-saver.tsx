@@ -83,7 +83,7 @@ export function comparisonPreview(forms?: readonly string[], rawAnalyses?: reado
   }
   if (!degrees.size) {
     for (const line of rawAnalyses ?? []) {
-      const match = line.match(/\\b(?:ADJ|ADV)\\b[^\\r\\n]*\\b(POS|COMP|SUPER)\\s*$/u);
+      const match = line.match(/\b(?:ADJ|ADV)\b[^\r\n]*\b(POS|COMP|SUPER)\s*$/u);
       if (match) degrees.add({ POS: "positive", COMP: "comparative", SUPER: "superlative" }[match[1]] ?? "");
     }
   }
