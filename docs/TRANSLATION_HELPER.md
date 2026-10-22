@@ -36,7 +36,7 @@ The lookup panel presents the source output in a learner-readable order:
 
 When latin-words.com returns more than one valid analysis, the helper must preserve the ambiguity instead of choosing one. The first result is shown cleanly and additional analyses are available under an `Other possible analyses` disclosure.
 
-Morphology labels are expanded for readability from the abbreviations returned by Whitaker's Words. For example, `ACC S F` is displayed as `accusative · singular · feminine`, while a verb analysis can display tense, voice, mood, person, and number. The site must not invent a grammatical analysis that is not present in the source output.
+Morphology labels are expanded for readability from the abbreviations returned by Whitaker's Words. For example, `ACC S F` is displayed as `accusative · singular · feminine`, while a verb analysis can display tense, voice, mood, person, and number. Latin adjective/adverb degree markers `POS`, `COMP`, and `SUPER` appear prominently as **Positive**, **Comparative**, and **Superlative** both in the collapsed word-choice summary and the expanded *Degree of comparison* field. For example, when Whitaker labels *infirmior* `ADJ … COMP`, display **Comparative**, not just its case and gender. Derive degrees from returned morphology, falling back to raw Whitaker analyses when necessary; never infer degree merely from a Latin ending or headword. The site must not invent a grammatical analysis that is not present in the source output.
 
 ## Saved vocabulary flash cards
 
