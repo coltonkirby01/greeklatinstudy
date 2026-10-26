@@ -182,8 +182,8 @@ describe("Translation Helper", () => {
 
     expect(helperVocabularyIds).toEqual(catalogVocabularyIds);
     expect(helperGrammarIds).toEqual(catalogGrammarIds);
-    expect(registrations.grotonVocabulary[0]?.id).toBe("alpha-omega-lesson12-vocab");
-    expect(registrations.grotonGrammar[0]?.id).toBe("alpha-omega-lesson12-grammar");
+    expect(registrations.grotonVocabulary[0]?.id).toBe("alpha-omega-lesson14-vocab");
+    expect(registrations.grotonGrammar[0]?.id).toBe("alpha-omega-lesson14-grammar");
     expect(registrations.kubo?.id).toBe("kubo-new-testament-vocab");
     expect(sources).toContain("BUILTIN_STUDY_DECKS");
     expect(sources).not.toContain("loadGreekLesson10VocabularyDeck");
