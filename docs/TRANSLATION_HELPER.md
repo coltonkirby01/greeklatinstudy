@@ -17,6 +17,12 @@ Definitions and recognized vocabulary are restricted to:
 
 Do not add an outside Greek dictionary or model-generated gloss without an explicit product decision.
 
+### Groton vocabulary and case forms
+
+The Greek index automatically includes all vocabulary sources registered for Groton Lessons 3–14 and the Kubo list. It also uses existing Groton grammar charts to recognize source-derived noun, adjective, and verb forms. Groton Lesson 13's **ὅδε, οὗτος, ἐκεῖνος** paradigms are indexed for every singular/plural case and masculine/feminine/neuter form. Lesson 14's **ἐγώ / ἡμεῖς**, **σύ / ὑμεῖς**, and **αὐτός** charts are indexed for every listed case/number/gender, including the emphatic and enclitic oblique variants. The first- and second-person charts have English headings, so their singular and plural columns must map to separate source vocabulary headwords before indexing.
+
+Groton's explicit Lesson 14 compound note for ἐπιπλήττω (“rebuke,” + dative) supplies a source-backed lexical form and productive regular present/imperfect inflections, including ἐπιπλήττετε. The Lesson 14 exercise spelling ἔμοιγ᾽ is indexed as the dative ἐμοί with the emphatic particle γε; it is not a new case. Do not infer unlisted irregular principal parts or obtain forms from an outside lexicon. In tests, verify every listed cell and slash alternative in the ten original Lesson 13–14 chart files rather than validating only a handful of common examples.
+
 ### Latin
 
 The Translation Helper uses **Whitaker's Words Online at https://latin-words.com/** as its only Latin dictionary and morphology source.

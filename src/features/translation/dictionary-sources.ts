@@ -340,6 +340,24 @@ function addVerbInflections(index: Map<string, DictionaryMatch[]>, card: StudyCa
   }
 }
 
+/**
+ * Some Groton vocabulary glosses explicitly introduce compound verbs, e.g.
+ * ἐπιπλήττω "rebuke" in Lesson 14's πλήττω entry. Index the source-attested
+ * lemma and generate only its regular present/imperfect forms from Groton's
+ * existing ending tables, without guessing unlisted principal parts.
+ */
+function addGrotonGlossedVerbCompounds(index: Map<string, DictionaryMatch[]>, card: StudyCard, grammarCards: StudyCard[]) {
+  const compound = card.back.match(/([\p{Script=Greek}\p{M}]+)\s*\(\+\s*dative\)\s*means\s*rebuke/u)?.[1];
+  if (!compound) return;
+  const match: DictionaryMatch = {
+    ...vocabularyMatch(card, "Groton, From Alpha to Omega"),
+    headword: compound,
+    definition: "rebuke (+ dative)",
+  };
+  addMatch(index, compound, match);
+  addVerbInflections(index, { ...card, front: compound }, match, grammarCards);
+}
+
 function addProductiveGrotonForms(index: Map<string, DictionaryMatch[]>, vocabularyDecks: DeckDefinition[], grammarDecks: DeckDefinition[]) {
   const grammarCards = grammarDecks.flatMap((deck) => deck.cards);
   for (const deck of vocabularyDecks) {
@@ -349,7 +367,10 @@ function addProductiveGrotonForms(index: Map<string, DictionaryMatch[]>, vocabul
       const match = vocabularyMatch(card, "Groton, From Alpha to Omega");
       if (pos.includes("noun")) addNounInflections(index, card, match, grammarCards);
       if (pos.includes("adjective")) addAdjectiveInflections(index, card, match, grammarCards);
-      if (pos.includes("verb")) addVerbInflections(index, card, match, grammarCards);
+      if (pos.includes("verb")) {
+        addVerbInflections(index, card, match, grammarCards);
+        addGrotonGlossedVerbCompounds(index, card, grammarCards);
+      }
     }
   }
 }
@@ -374,8 +395,63 @@ function addStandaloneArticleForms(index: Map<string, DictionaryMatch[]>, card: 
   }
 }
 
+/**
+ * Groton's Lesson 14 personal-pronoun charts use English chart titles, not
+ * Greek headwords. Link each column to the correct *lexical* singular/plural
+ * pronoun, rather than treating the whole chart as a single lemma.
+ */
+function personalPronounColumnLemma(card: StudyCard, columnIndex: number): string | null {
+  const group = grammarGroup(card);
+  const columns = chartColumns(card);
+  const number = columns[columnIndex]?.toLocaleLowerCase();
+  if (number !== "singular" && number !== "plural") return null;
+  if (group === "First-Person Personal Pronoun Forms") return number === "singular" ? "ἐγώ" : "ἡμεῖς";
+  if (group === "Second-Person Personal Pronoun Forms") return number === "singular" ? "σύ" : "ὑμεῖς";
+  return null;
+}
+
+function groupIsFirstPersonDative(card: StudyCard, rowLabel: string, column: string, form: string) {
+  return grammarGroup(card) === "First-Person Personal Pronoun Forms" &&
+    rowLabel === "Dative" && column === "Singular" && normalizeDictionaryKey(form) === "εμοι";
+}
+
+function addPersonalPronounChartForms(index: Map<string, DictionaryMatch[]>, card: StudyCard) {
+  const columns = chartColumns(card);
+  for (const [columnIndex, column] of columns.entries()) {
+    const lemma = personalPronounColumnLemma(card, columnIndex);
+    if (!lemma) continue;
+    const lexical = index.get(normalizeDictionaryKey(lemma))?.find((match) =>
+      normalizeDictionaryKey(headwordForms(match.headword)[0] ?? "") === normalizeDictionaryKey(lemma));
+    if (!lexical) continue;
+    for (const row of chartRows(card)) {
+      for (const form of expandKnownForms(row.cells[columnIndex] ?? "")) {
+        const match: DictionaryMatch = {
+          ...lexical,
+          sourceRef: combinedSourceRef(lexical, card),
+          morphology: [[grammarGroup(card), row.label, column].filter(Boolean).join(" · ")],
+        };
+        addMatch(index, form, match, true);
+        // Groton Lesson 14 exercise 10 contracts ἐμοί + γε to ἔμοιγ᾽.
+        // The added suffix is an emphatic particle, not a new pronoun case.
+        if (groupIsFirstPersonDative(card, row.label, column, form)) {
+          for (const suffix of ["γ", "γε"]) {
+            addMatch(index, `${form}${suffix}`, {
+              ...match,
+              morphology: [`${match.morphology?.[0]} · with emphatic γε`],
+            }, true);
+          }
+        }
+      }
+    }
+  }
+}
+
 function addGrammarForms(index: Map<string, DictionaryMatch[]>, deck: DeckDefinition) {
   for (const card of deck.cards) {
+    if (grammarGroup(card) === "First-Person Personal Pronoun Forms" || grammarGroup(card) === "Second-Person Personal Pronoun Forms") {
+      addPersonalPronounChartForms(index, card);
+      continue;
+    }
     const lemma = grammarLemma(card);
     const lexicalMatch = lemma ? index.get(normalizeDictionaryKey(lemma))?.[0] : null;
     if (!lexicalMatch) {
