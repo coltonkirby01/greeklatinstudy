@@ -10,7 +10,7 @@ import { savedCardRef } from "./saved-cards";
 import { intrinsicCardDifficulty } from "./scoring";
 import { builtinSessionId, displayManagedSessionName, managedSessionsForLanguage, sessionDeckIdsForLanguage, type BuiltinSessionKind, type ManagedSession } from "./session-management";
 import { autoReviewDefaults, selectedPoolVisitProgress, wasMarkedDuringVisit } from "./session-review";
-import { emptyShuffleCycle, nextShuffleKey, shuffledCycleOrder } from "./shuffle-cycle";
+import { emptyShuffleCycle, nextShuffleKey } from "./shuffle-cycle";
 import { beginStudyRound, markStudyRoundCard, nextSequentialStudyRoundKey, reconcileStudyRound, remainingStudyRoundKeys, studyRoundComplete, studyRoundSubset, undoStudyRoundCard, type StudyRound, type StudyRoundKind, type StudyRoundGrade } from "./study-rounds";
 import "./study-gate.css";
 import { StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate, type SidebarStudyItem } from "./study-session-ui";
@@ -167,8 +167,6 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   const deselectSelectionPendingRef = useRef(false);
   const shuffleCycleRef = useRef(emptyShuffleCycle());
   const roundRef = useRef<StudyRound | null>(null);
-  const roundShuffleOrderRef = useRef<string[]>([]);
-  const previousRoundShuffleOrderRef = useRef<string[]>([]);
   const [roundGate, setRoundGate] = useState<StudyRound | null>(null);
   const clickPausedTimerRef = useRef(false);
   const visitStartedAtRef = useRef(Date.now());
@@ -311,71 +309,48 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     return markedFlashRun ? [...markedFlashRun.cards] : regularCandidates();
   }
 
+  // Only Sequential uses round-completion review gates. Shuffle has its own
+  // stateful equal-coverage cycle and must never enter this round system.
   function resetOriginalRound(mode: SelectionMode = selectionMode) {
-    const keys = regularCandidates().map(candidateKey);
-    roundRef.current = mode === "adaptive" ? null : beginStudyRound("original", keys);
-    roundShuffleOrderRef.current = mode === "shuffle" ? shuffledCycleOrder(keys, previousRoundShuffleOrderRef.current, current ? candidateKey(current) : undefined) : [];
-    if (mode === "shuffle") previousRoundShuffleOrderRef.current = roundShuffleOrderRef.current;
+    roundRef.current = mode === "sequential"
+      ? beginStudyRound("original", regularCandidates().map(candidateKey))
+      : null;
     setRoundGate(null);
   }
 
   function startReviewRound(kind: StudyRoundKind, selectedKeys: string[]) {
+    if (selectionMode !== "sequential") return;
     const available = regularCandidates();
     const byKey = new Map(available.map((candidate) => [candidateKey(candidate), candidate]));
     const pool = kind === "original" ? available : selectedKeys.map((key) => byKey.get(key)).filter((candidate): candidate is Candidate => Boolean(candidate));
     if (!pool.length) return;
-    const keys = pool.map(candidateKey);
-    roundRef.current = beginStudyRound(kind, keys);
-    roundShuffleOrderRef.current = selectionMode === "shuffle" ? shuffledCycleOrder(keys, previousRoundShuffleOrderRef.current, current ? candidateKey(current) : undefined) : [];
-    if (selectionMode === "shuffle") previousRoundShuffleOrderRef.current = roundShuffleOrderRef.current;
+    roundRef.current = beginStudyRound(kind, pool.map(candidateKey));
     setRoundGate(null);
     setWarmup(null);
     setLastTransaction(null);
     clearForcedNext();
-    shuffleCycleRef.current = emptyShuffleCycle();
     resetUi();
-    setStartGateOpen(selectionMode !== "shuffle");
+    setStartGateOpen(true);
     setNotice(null);
-    const selected = selectionMode === "sequential" ? pool[0] : pool.find((candidate) => candidateKey(candidate) === roundShuffleOrderRef.current[0]);
-    if (selected) present(selected);
+    present(pool[0]);
   }
 
   function advanceRound(previous: Candidate, grade?: StudyRoundGrade) {
     const round = roundRef.current;
-    if (!round || selectionMode === "adaptive") return false;
+    if (!round || selectionMode !== "sequential") return false;
     const updated = markStudyRoundCard(round, candidateKey(previous), grade);
     if (updated === round) return false;
     roundRef.current = updated;
     if (studyRoundComplete(updated)) {
-      if (selectionMode === "shuffle") {
-        // Shuffle is continuous: a completed pass immediately starts a new
-        // permutation, without either the round-choice or Start gate.
-        resetOriginalRound("shuffle");
-        shuffleCycleRef.current = emptyShuffleCycle();
-        const firstKey = roundShuffleOrderRef.current[0];
-        const nextCard = regularCandidates().find((candidate) => candidateKey(candidate) === firstKey);
-        if (nextCard) present(nextCard);
-        setStartGateOpen(false);
-      } else {
-        setRoundGate(updated);
-        setStartGateOpen(true);
-      }
+      setRoundGate(updated);
+      setStartGateOpen(true);
       setNotice(null);
       return true;
     }
-    const remaining = new Set(remainingStudyRoundKeys(updated));
-    const eligible = regularCandidates().filter((candidate) => remaining.has(candidateKey(candidate)));
-    const selected = selectionMode === "sequential"
-      ? eligible.find((candidate) => candidateKey(candidate) === nextSequentialStudyRoundKey(updated, candidateKey(previous)))
-      : eligible.find((candidate) => candidateKey(candidate) === roundShuffleOrderRef.current.find((key) => remaining.has(key)));
-    if (selected) { setNotice(null); present(selected); }
-    else if (selectionMode === "shuffle") {
-      resetOriginalRound("shuffle");
-      const firstKey = roundShuffleOrderRef.current[0];
-      const nextCard = regularCandidates().find((candidate) => candidateKey(candidate) === firstKey);
-      if (nextCard) present(nextCard);
-      setStartGateOpen(false);
-    } else { setRoundGate(updated); setStartGateOpen(true); }
+    const nextKey = nextSequentialStudyRoundKey(updated, candidateKey(previous));
+    const nextCard = regularCandidates().find((candidate) => candidateKey(candidate) === nextKey);
+    if (nextCard) { setNotice(null); present(nextCard); }
+    else { setRoundGate(updated); setStartGateOpen(true); }
     return true;
   }
 
@@ -477,10 +452,6 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
       if (roundRef.current) {
         const keys = regularCandidates().map(candidateKey);
         roundRef.current = reconcileStudyRound(roundRef.current, keys);
-        if (selectionMode === "shuffle") {
-          const existing = roundShuffleOrderRef.current.filter((key) => keys.includes(key));
-          roundShuffleOrderRef.current = [...existing, ...keys.filter((key) => !existing.includes(key))];
-        }
       }
       setCurrent(retained);
       return;
@@ -561,9 +532,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     shuffleCycleRef.current = emptyShuffleCycle();
     if (!current) return;
     resetUi(); setStartGateOpen(next !== "shuffle");
-    const selected = next === "shuffle" && roundShuffleOrderRef.current.length
-      ? regularCandidates().find((candidate) => candidateKey(candidate) === roundShuffleOrderRef.current[0])
-      : chooseNext(current, next, Boolean(warmup));
+    const selected = chooseNext(current, next, Boolean(warmup));
     if (selected) present(selected);
   }
   function finishMarkedFlashRun() {
@@ -755,11 +724,12 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   function returnToLargerSessions() {
     const pool = regularCandidates();
     resetOriginalRound();
+    shuffleCycleRef.current = emptyShuffleCycle();
     setMarkedFlashRun(null);
     setMarkedFlashComplete(false);
     setLastTransaction(null);
     resetUi();
-    setStartGateOpen(true);
+    setStartGateOpen(selectionMode !== "shuffle");
     const selected = chooseNext(current, selectionMode, false, pool);
     if (selected) present(selected);
     setNotice("Returned to the original selected study pool.");

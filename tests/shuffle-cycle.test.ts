@@ -18,6 +18,36 @@ describe("shuffle study order", () => {
     expect(firstCycle).toHaveLength(keys.length);
   });
 
+  it("moves directly into another full cycle, without a completion-gate reset", () => {
+    const keys = ["a", "b", "c", "d", "e"];
+    let state = emptyShuffleCycle();
+    const visits: string[] = [];
+    for (let i = 0; i < keys.length * 3; i += 1) {
+      const next = nextShuffleKey(keys, state, { avoidKey: visits.at(-1), random: () => 0.31 });
+      expect(next.key).not.toBeNull();
+      state = next.state;
+      visits.push(next.key!);
+    }
+    for (let i = 0; i < 3; i += 1) {
+      const pass = visits.slice(i * keys.length, (i + 1) * keys.length);
+      expect(new Set(pass)).toEqual(new Set(keys));
+      expect(pass).toHaveLength(keys.length);
+    }
+    for (let i = 1; i < visits.length; i += 1) {
+      expect(visits[i]).not.toBe(visits[i - 1]);
+    }
+  });
+
+  it("restarts a fresh randomized pool when the selected set changes", () => {
+    let state = emptyShuffleCycle();
+    const first = nextShuffleKey(["a", "b", "c"], state, { random: () => 0 });
+    state = first.state;
+    const changed = nextShuffleKey(["a", "c", "d"], state, { avoidKey: first.key ?? undefined, random: () => 0 });
+    expect(changed.state.signature).toBe("a|c|d");
+    expect(changed.key).not.toBe(first.key);
+    expect([changed.key, ...changed.state.remaining].sort()).toEqual(["a", "c", "d"]);
+  });
+
   it("forces a fresh pattern when the random source would repeat the prior cycle", () => {
     const keys = ["a", "b", "c", "d"];
     const first = shuffledCycleOrder(keys, [], undefined, () => 0.25);

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { beginStudyRound, markStudyRoundCard, nextSequentialStudyRoundKey, reconcileStudyRound, remainingStudyRoundKeys, studyRoundComplete, studyRoundSubset, undoStudyRoundCard } from "../src/features/study/study-rounds";
 
-describe("in-page sequential/shuffle review rounds", () => {
+describe("in-page Sequential review rounds", () => {
   const rightEasy = { result: "right", difficulty: "easy" } as const;
   const wrongEasy = { result: "wrong", difficulty: "easy" } as const;
   const rightMedium = { result: "right", difficulty: "medium" } as const;
