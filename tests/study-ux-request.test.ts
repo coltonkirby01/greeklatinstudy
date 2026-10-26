@@ -20,6 +20,10 @@ describe("requested Greek and Latin study workflow", () => {
     expect(sidebar).toContain('className="priority-details"');
     expect(sidebar.indexOf('className="priority-details"')).toBeLessThan(sidebar.indexOf("</section>", sidebar.indexOf('className="panel-surface stats-panel"')));
     expect(session).toContain("Do it again");
+    expect(session).toContain("Reflash all (");
+    expect(session).toContain("Reflash wrong again (");
+    expect(session).toContain("Return to main deck");
+    expect(session).toContain('markedFlashRun.cycle.wrongKeys.length === 0');
     expect(session).toContain("Return to larger sessions");
     expect(session).toContain('onFlashEverWrong={() => startMarkedFlash("Ever wrong")}');
     expect(session).toContain('onFlashMarkedHard={() => startMarkedFlash("Marked hard")}');

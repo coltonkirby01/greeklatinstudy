@@ -128,6 +128,7 @@ The cards placed into each active `StudySourceDefinition` are the selected card 
 - `src/features/study/study-session.tsx` — ordinary/imported single-deck controller.
 - `src/features/study/study-session-ui.tsx` — shared card faces, grading controls, Start gate, Enter/F interaction, sidebar.
 - `src/features/study/session-review.ts` — automatic reveal defaults, active-session calculations, and the shared per-visit Ever wrong/Marked hard predicates used to build expandable flash lists that match those counts.
+- `src/features/study/marked-flash-cycle.ts` — temporary Ever wrong flash-pass tracking. Wrong-only repeat uses saved Wrong answers from the completed pass, not historical wrong counts; the original flash cohort remains available for Reflash all. Corrections remove the old grade; skipped cards never count as wrong.
 - `src/features/study/study-shortcuts.ts` — keyboard semantics.
 - `src/features/study/use-response-timer.ts` — recall timer and focus/visibility handling.
 - `src/features/study/engine.ts` — adaptive scheduling, review recording, staged unlocking, Back/Skip, priority.

@@ -5,6 +5,7 @@ import { useAuth } from "../auth/auth-context";
 import { ADAPTIVE_PROFILES, adaptiveNeedBoost, constrainAdaptiveCoverage, type AdaptiveStrength } from "./adaptive-settings";
 import { createEnvelope, createModeState, directionalCopy, getCardProgress, maybeUnlockNextBatch, nextSequentialIndex, presentCard, priorityScore, recordReview } from "./engine";
 import { deleteReviewEvent, loadLocalEnvelope, loadProgressEnvelope, mergeProgressEnvelopes, saveProgressEnvelope, upsertReviewEvent } from "./progress-repository";
+import { beginMarkedFlashCycle, recordMarkedFlashGrade, restartMarkedFlashCycle, type MarkedFlashCycle } from "./marked-flash-cycle";
 import { savedCardRef } from "./saved-cards";
 import { intrinsicCardDifficulty } from "./scoring";
 import { builtinSessionId, displayManagedSessionName, managedSessionsForLanguage, sessionDeckIdsForLanguage, type BuiltinSessionKind, type ManagedSession } from "./session-management";
@@ -31,7 +32,7 @@ type MixedReviewTransaction = ReviewTransaction & { sourceId: string; deckId: st
 type SyncStatus = "loading" | "local" | "syncing" | "cloud" | "error";
 type SessionMeta = { id: string; startedAt: number; name?: string };
 type WarmupMeta = SessionMeta & { remaining: number; total: number };
-type MarkedFlashRun = { cards: Candidate[]; label: "Ever wrong" | "Marked hard" };
+type MarkedFlashRun = { cards: Candidate[]; allCards: Candidate[]; cycle: MarkedFlashCycle; label: "Ever wrong" | "Marked hard" };
 const WARMUP_CARDS = 5;
 
 function StudyRoundGate({ round, onStartRound }: {
@@ -565,7 +566,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   function finishMarkedFlashRun() {
     setMarkedFlashComplete(true);
     setStartGateOpen(true);
-    setNotice(`${markedFlashRun?.label ?? "Marked cards"} flash complete. Repeat it or return to your selected cards.`);
+    setNotice(`${markedFlashRun?.label ?? "Marked cards"} flash complete. Choose which cards to flash next or return to the main deck.`);
   }
   function advanceMarkedFlash(from: Candidate) {
     if (!markedFlashRun) return false;
@@ -641,6 +642,12 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     const card = source.deck.cards.find((item) => item.id === lastTransaction.cardId);
     if (!card) return;
     const transaction = lastTransaction;
+    if (markedFlashRun) {
+      // A Back correction removes the superseded answer from the current flash pass.
+      setMarkedFlashRun((run) => run
+        ? { ...run, cycle: recordMarkedFlashGrade(run.cycle, candidateKey({ source, card }), null) }
+        : null);
+    }
     if (roundRef.current) roundRef.current = undoStudyRoundCard(roundRef.current, candidateKey({ source, card }));
     setLastTransaction(null); setEditingTransaction(transaction); setResult(transaction.result); setDifficulty(transaction.difficulty); setCapturedTimeMs(transaction.responseTimeMs); setBacktracking(true); setRevealed(false); setReviewFront(false); setPendingDeselectKey(null); setCurrent({ source, card });
     saveMode(source, transaction.beforeState, { deleteReviewId: transaction.reviewId });
@@ -668,6 +675,11 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     resetUi();
 
     if (markedFlashRun) {
+      // Count only saved Wrong grades from this particular flash pass.
+      // A later correction or Right answer removes the card from its wrong-only subset.
+      setMarkedFlashRun((run) => run
+        ? { ...run, cycle: recordMarkedFlashGrade(run.cycle, candidateKey(reviewedCandidate), result) }
+        : null);
       advanceMarkedFlash(reviewedCandidate);
       return;
     }
@@ -707,7 +719,12 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     clearForcedNext();
     setWarmup(null);
     setMarkedFlashComplete(false);
-    setMarkedFlashRun({ cards: [...cards], label });
+    setMarkedFlashRun({
+      cards: [...cards],
+      allCards: [...cards],
+      cycle: beginMarkedFlashCycle(cards.map(candidateKey)),
+      label,
+    });
     setLastTransaction(null);
     resetUi();
     setStartGateOpen(true);
@@ -715,15 +732,21 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     setNotice(`${label} flash · 1 of ${cards.length}`);
   }
 
-  function repeatMarkedFlash() {
+  function repeatMarkedFlash(scope: "all" | "wrong" = "all") {
     const run = markedFlashRun;
-    if (!run?.cards.length) { returnToLargerSessions(); return; }
+    if (!run) return;
+    const cycle = restartMarkedFlashCycle(run.cycle, scope);
+    if (!cycle) return; // Never start an empty wrong-only pass.
+    const byKey = new Map(run.allCards.map((candidate) => [candidateKey(candidate), candidate]));
+    const cards = cycle.activeKeys.map((key) => byKey.get(key)).filter((candidate): candidate is Candidate => Boolean(candidate));
+    if (!cards.length) return;
+    setMarkedFlashRun({ ...run, cards, cycle });
     setMarkedFlashComplete(false);
     setLastTransaction(null);
     resetUi();
     setStartGateOpen(true);
-    present(run.cards[0]);
-    setNotice(`${run.label} flash · 1 of ${run.cards.length}`);
+    present(cards[0]);
+    setNotice(`${run.label} flash · 1 of ${cards.length}`);
   }
 
   function returnToLargerSessions() {
@@ -843,10 +866,16 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
       <section className="wrong-bank-modal" role="dialog" aria-modal="true" aria-labelledby="wrong-bank-complete-title">
         <p className="eyebrow">{markedFlashRun.label}</p>
         <h2 id="wrong-bank-complete-title">Flash session complete</h2>
-        <p>You worked through all {markedFlashRun.cards.length} card{markedFlashRun.cards.length === 1 ? "" : "s"} in this {markedFlashRun.label} run.</p>
+        <p>You worked through all {markedFlashRun.cards.length} card{markedFlashRun.cards.length === 1 ? "" : "s"} in this {markedFlashRun.label} run. {markedFlashRun.label === "Ever wrong" ? `${markedFlashRun.cycle.wrongKeys.length} graded Wrong during this pass. You can repeat the original Ever wrong set, focus only on these new mistakes, or return to the main deck.` : "Repeat this set or return to the main deck."}</p>
         <div className="wrong-bank-modal-actions">
-          <button type="button" className="primary-button" onClick={repeatMarkedFlash}>Do it again</button>
-          <button type="button" className="small-outline-button" onClick={returnToLargerSessions}>Return to larger sessions</button>
+          {markedFlashRun.label === "Ever wrong" ? <>
+            <button type="button" className="primary-button" onClick={() => repeatMarkedFlash("all")}>Reflash all ({markedFlashRun.allCards.length})</button>
+            <button type="button" className="small-outline-button" disabled={markedFlashRun.cycle.wrongKeys.length === 0} onClick={() => repeatMarkedFlash("wrong")}>Reflash wrong again ({markedFlashRun.cycle.wrongKeys.length})</button>
+            <button type="button" className="small-outline-button" onClick={returnToLargerSessions}>Return to main deck</button>
+          </> : <>
+            <button type="button" className="primary-button" onClick={() => repeatMarkedFlash("all")}>Do it again</button>
+            <button type="button" className="small-outline-button" onClick={returnToLargerSessions}>Return to larger sessions</button>
+          </>}
         </div>
       </section>
     </div>}
