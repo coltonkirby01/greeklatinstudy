@@ -39,7 +39,8 @@ describe("How this site works guide", () => {
   it("documents exact selection and deferred answer-side deselection", () => {
     const guide = fs.readFileSync("src/pages/how-site-works.tsx", "utf8");
     expect(guide).toContain("Every built-in card can also be selected or deselected individually");
-    expect(guide).toContain("10-card ranges");
+    expect(guide).toContain("published frequency-rank bands");
+    expect(guide).toContain("nested 10-rank ranges");
     expect(guide).toContain("press <strong>D</strong>");
     expect(guide).toContain("the current card stays visible and the Start gate does not reopen");
     expect(guide).toContain("Space to Save &amp; Next");
@@ -81,7 +82,8 @@ describe("How this site works guide", () => {
     expect(instructions).toContain("MUST update this guide in the same change");
     expect(instructions).toContain("Adaptive/Sequential/Shuffle");
     expect(instructions).toContain("page-visit Progress");
-    expect(instructions).toContain("10-card ranges");
+    expect(instructions).toContain("50-rank selection disclosures");
+    expect(instructions).toContain("nested 10-rank disclosures");
     expect(instructions).toContain("D = Deselect card");
     expect(instructions).toContain("card-exclusions.ts");
     expect(instructions).toContain("stem - ending");
