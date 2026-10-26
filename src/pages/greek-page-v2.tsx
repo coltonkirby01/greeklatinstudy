@@ -24,6 +24,10 @@ import {
   loadGreekLesson11VocabularyDeck,
   loadGreekLesson12GrammarDeck,
   loadGreekLesson12VocabularyDeck,
+  loadGreekLesson13GrammarDeck,
+  loadGreekLesson13VocabularyDeck,
+  loadGreekLesson14GrammarDeck,
+  loadGreekLesson14VocabularyDeck,
 } from "../data/greek-lessons-9-10";
 import { NEW_TESTAMENT_FREQUENCY_GROUPS, loadGreekNewTestamentVocabularyDeck, newTestamentFrequencyGroupForCard } from "../data/greek-new-testament-vocab";
 import { useAuth } from "../features/auth/auth-context";
@@ -96,6 +100,18 @@ const keys = {
   eimiPresentActiveImperativeForms: "lesson12-eimi-present-active-imperative-forms",
   eimiPresentActiveInfinitiveForm: "lesson12-eimi-present-active-infinitive-form",
   eimiFutureMiddleInfinitiveForm: "lesson12-eimi-future-middle-infinitive-form",
+  lesson13Vocabulary: "lesson13-vocabulary",
+  hodeSingularForms: "lesson13-hode-singular-forms",
+  hodePluralForms: "lesson13-hode-plural-forms",
+  houtosSingularForms: "lesson13-houtos-singular-forms",
+  houtosPluralForms: "lesson13-houtos-plural-forms",
+  ekeinosSingularForms: "lesson13-ekeinos-singular-forms",
+  ekeinosPluralForms: "lesson13-ekeinos-plural-forms",
+  lesson14Vocabulary: "lesson14-vocabulary",
+  firstPersonForms: "lesson14-first-person-forms",
+  secondPersonForms: "lesson14-second-person-forms",
+  autosSingularForms: "lesson14-autos-singular-forms",
+  autosPluralForms: "lesson14-autos-plural-forms",
 } as const;
 
 type KeyValue = (typeof keys)[keyof typeof keys];
@@ -123,6 +139,10 @@ type LoadedDecks = {
   lesson11Grammar: DeckDefinition;
   lesson12Vocabulary: DeckDefinition;
   lesson12Grammar: DeckDefinition;
+  lesson13Vocabulary: DeckDefinition;
+  lesson13Grammar: DeckDefinition;
+  lesson14Vocabulary: DeckDefinition;
+  lesson14Grammar: DeckDefinition;
   newTestamentVocabulary: DeckDefinition;
 };
 
@@ -194,6 +214,21 @@ const lesson12CategoryByKey = new Map<string, string>([
   [keys.eimiFutureMiddleInfinitiveForm, "εἰμί — Future Middle Infinitive Form"],
 ]);
 
+const lesson13CategoryByKey = new Map<string, string>([
+  [keys.hodeSingularForms, "ὅδε — Singular Demonstrative Forms"],
+  [keys.hodePluralForms, "ὅδε — Plural Demonstrative Forms"],
+  [keys.houtosSingularForms, "οὗτος — Singular Demonstrative Forms"],
+  [keys.houtosPluralForms, "οὗτος — Plural Demonstrative Forms"],
+  [keys.ekeinosSingularForms, "ἐκεῖνος — Singular Demonstrative Forms"],
+  [keys.ekeinosPluralForms, "ἐκεῖνος — Plural Demonstrative Forms"],
+]);
+const lesson14CategoryByKey = new Map<string, string>([
+  [keys.firstPersonForms, "First-Person Personal Pronoun Forms"],
+  [keys.secondPersonForms, "Second-Person Personal Pronoun Forms"],
+  [keys.autosSingularForms, "αὐτός — Singular Pronoun/Intensive Forms"],
+  [keys.autosPluralForms, "αὐτός — Plural Pronoun/Intensive Forms"],
+]);
+
 const lessonConfigs: LessonConfig[] = [
   { lesson: 3, vocabularyKey: keys.lesson3Vocabulary, vocabularyDeck: "lesson3Vocabulary", grammarDeck: "lesson3Grammar", endingKeys: [keys.presentActiveIndicativeEndings, keys.presentActiveInfinitiveEndings, keys.presentActiveImperativeEndings], categoryByKey: lesson3CategoryByKey },
   { lesson: 4, vocabularyKey: keys.lesson4Vocabulary, vocabularyDeck: "lesson4Vocabulary", grammarDeck: "lesson4Grammar", endingKeys: [keys.firstDeclensionEndingsAlpha, keys.firstDeclensionEndingsEta, keys.feminineArticleSingular, keys.feminineArticlePlural], categoryByKey: lesson4CategoryByKey },
@@ -205,6 +240,8 @@ const lessonConfigs: LessonConfig[] = [
   { lesson: 10, vocabularyKey: keys.lesson10Vocabulary, vocabularyDeck: "lesson10Vocabulary", grammarDeck: "lesson10Grammar", endingKeys: [keys.imperfectActiveIndicativeEndings], categoryByKey: lesson10CategoryByKey },
   { lesson: 11, vocabularyKey: keys.lesson11Vocabulary, vocabularyDeck: "lesson11Vocabulary", grammarDeck: "lesson11Grammar", endingKeys: [keys.presentMiddlePassiveIndicativeEndings, keys.presentMiddlePassiveInfinitiveEndings, keys.futureMiddleIndicativeEndings, keys.futureMiddleInfinitiveEndings, keys.imperfectMiddlePassiveIndicativeEndings, keys.presentMiddlePassiveImperativeEndings], categoryByKey: lesson11CategoryByKey },
   { lesson: 12, vocabularyKey: keys.lesson12Vocabulary, vocabularyDeck: "lesson12Vocabulary", grammarDeck: "lesson12Grammar", endingKeys: [keys.eimiPresentActiveIndicativeForms, keys.eimiFutureMiddleIndicativeForms, keys.eimiImperfectActiveIndicativeForms, keys.eimiPresentActiveImperativeForms, keys.eimiPresentActiveInfinitiveForm, keys.eimiFutureMiddleInfinitiveForm], categoryByKey: lesson12CategoryByKey },
+  { lesson: 13, vocabularyKey: keys.lesson13Vocabulary, vocabularyDeck: "lesson13Vocabulary", grammarDeck: "lesson13Grammar", endingKeys: [keys.hodeSingularForms, keys.hodePluralForms, keys.houtosSingularForms, keys.houtosPluralForms, keys.ekeinosSingularForms, keys.ekeinosPluralForms], categoryByKey: lesson13CategoryByKey },
+  { lesson: 14, vocabularyKey: keys.lesson14Vocabulary, vocabularyDeck: "lesson14Vocabulary", grammarDeck: "lesson14Grammar", endingKeys: [keys.firstPersonForms, keys.secondPersonForms, keys.autosSingularForms, keys.autosPluralForms], categoryByKey: lesson14CategoryByKey },
 ];
 
 const lessonVocabularyKeys = lessonConfigs.map((config) => config.vocabularyKey);
@@ -280,7 +317,7 @@ function deckList(decks: LoadedDecks) {
 
 export function GreekPage() {
   const { value: decks, error } = useAsync(async () => {
-    const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, lesson12Vocabulary, lesson12Grammar, newTestamentVocabulary] = await Promise.all([
+    const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, lesson12Vocabulary, lesson12Grammar, lesson13Vocabulary, lesson13Grammar, lesson14Vocabulary, lesson14Grammar, newTestamentVocabulary] = await Promise.all([
       loadGreekDeck(),
       loadGreekLesson3VocabularyDeck(), loadGreekLesson3GrammarDeck(),
       loadGreekLesson4VocabularyDeck(), loadGreekLesson4GrammarDeck(),
@@ -292,9 +329,11 @@ export function GreekPage() {
       loadGreekLesson10VocabularyDeck(), loadGreekLesson10GrammarDeck(),
       loadGreekLesson11VocabularyDeck(), loadGreekLesson11GrammarDeck(),
       loadGreekLesson12VocabularyDeck(), loadGreekLesson12GrammarDeck(),
+      loadGreekLesson13VocabularyDeck(), loadGreekLesson13GrammarDeck(),
+      loadGreekLesson14VocabularyDeck(), loadGreekLesson14GrammarDeck(),
       loadGreekNewTestamentVocabularyDeck(),
     ]);
-    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, lesson12Vocabulary, lesson12Grammar, newTestamentVocabulary } satisfies LoadedDecks;
+    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, lesson12Vocabulary, lesson12Grammar, lesson13Vocabulary, lesson13Grammar, lesson14Vocabulary, lesson14Grammar, newTestamentVocabulary } satisfies LoadedDecks;
   }, []);
   const { user } = useAuth();
   const savedCards = useSavedCards("greek", user);

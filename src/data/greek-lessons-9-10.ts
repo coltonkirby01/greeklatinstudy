@@ -2,7 +2,7 @@ import type { DeckDefinition, StudyCard } from "../features/study/types";
 import { classicalGreekPronunciation } from "../features/greek/greek-pronunciation";
 import { greekLesson3ParadigmSpeechText } from "./builtin-decks";
 
-type GrotonLesson = 9 | 10 | 11 | 12;
+type GrotonLesson = 9 | 10 | 11 | 12 | 13 | 14;
 
 type GreekVocabularySourceCard = {
   id: string;
@@ -35,7 +35,9 @@ function vocabularySourceNote(lesson: GrotonLesson) {
   if (lesson === 9) return "Groton 9.63.";
   if (lesson === 10) return "Groton 10.69.";
   if (lesson === 11) return "Groton 11.77.";
-  return "Groton 12.81.";
+  if (lesson === 12) return "Groton 12.81.";
+  if (lesson === 13) return "Groton 13.85.";
+  return "Groton 14.89.";
 }
 
 function vocabularyDeck(lesson: GrotonLesson, source: GreekVocabularySourceCard[]): DeckDefinition {
@@ -89,14 +91,14 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
       category: card.category,
       rank: index + 1,
       source: `From Alpha to Omega, Lesson ${lesson}`,
-      notes: [lesson === 12 ? "Irregular-form chart" : isEndingChart ? "Ending chart" : "Whole-paradigm chart", card.accent_note].filter(Boolean).join(" · "),
+      notes: [lesson === 12 ? "Irregular-form chart" : lesson >= 13 ? "Pronoun-form chart" : isEndingChart ? "Ending chart" : "Whole-paradigm chart", card.accent_note].filter(Boolean).join(" · "),
       metadata: {
         lesson,
         studySource: "grammar-chart",
         grammarGroup: card.category,
         chartColumns: card.columns,
         chartRows,
-        rowHeaderLabel: lesson === 9 ? "Case" : card.columns.length === 1 ? "Form" : "Person",
+        rowHeaderLabel: lesson === 9 || lesson >= 13 ? "Case" : card.columns.length === 1 ? "Form" : "Person",
         pronunciationText: greekLesson3ParadigmSpeechText(chartRows),
         accentNote: card.accent_note,
         sourceRef: card.source_ref ?? `Groton Lesson ${lesson}`,
@@ -122,11 +124,23 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
             description: "Six Lesson 11 ending charts covering present middle/passive, future middle, imperfect middle/passive, and present middle/passive imperative and infinitive forms.",
             sourceNote: "Groton Lesson 11, §§71–73, pp. 63–66.",
           }
-        : {
-            eyebrow: "εἰμί forms",
-            description: "Six Lesson 12 morphology charts for the irregular verb εἰμί: present, future, imperfect, imperative, and infinitive forms.",
-            sourceNote: "Groton Lesson 12, §79, pp. 71–72.",
-          };
+        : lesson === 12
+          ? {
+              eyebrow: "εἰμί forms",
+              description: "Six Lesson 12 morphology charts for the irregular verb εἰμί: present, future, imperfect, imperative, and infinitive forms.",
+              sourceNote: "Groton Lesson 12, §79, pp. 71–72.",
+            }
+          : lesson === 13
+            ? {
+                eyebrow: "Demonstratives",
+                description: "Six singular/plural form charts for ὅδε, οὗτος, and ἐκεῖνος.",
+                sourceNote: "Groton Lesson 13, pp. 77–80.",
+              }
+            : {
+                eyebrow: "Personal pronouns",
+                description: "Four first/second/third-person and intensive-pronoun form charts.",
+                sourceNote: "Groton Lesson 14, §§87–88, pp. 83–84.",
+              };
 
   return {
     id,
@@ -188,4 +202,26 @@ export function loadGreekLesson12VocabularyDeck() {
 export function loadGreekLesson12GrammarDeck() {
   lesson12GrammarPromise ??= fetchText("data/greek-lesson12-grammar.json").then((text) => grammarDeck(12, JSON.parse(text) as GreekGrammarSourceCard[]));
   return lesson12GrammarPromise;
+}
+
+let lesson13VocabularyPromise: Promise<DeckDefinition> | null = null;
+let lesson13GrammarPromise: Promise<DeckDefinition> | null = null;
+let lesson14VocabularyPromise: Promise<DeckDefinition> | null = null;
+let lesson14GrammarPromise: Promise<DeckDefinition> | null = null;
+
+export function loadGreekLesson13VocabularyDeck() {
+  lesson13VocabularyPromise ??= fetchText("data/greek-lesson13-vocab.json").then(text => vocabularyDeck(13, JSON.parse(text) as GreekVocabularySourceCard[]));
+  return lesson13VocabularyPromise;
+}
+export function loadGreekLesson13GrammarDeck() {
+  lesson13GrammarPromise ??= fetchText("data/greek-lesson13-grammar.json").then(text => grammarDeck(13, JSON.parse(text) as GreekGrammarSourceCard[]));
+  return lesson13GrammarPromise;
+}
+export function loadGreekLesson14VocabularyDeck() {
+  lesson14VocabularyPromise ??= fetchText("data/greek-lesson14-vocab.json").then(text => vocabularyDeck(14, JSON.parse(text) as GreekVocabularySourceCard[]));
+  return lesson14VocabularyPromise;
+}
+export function loadGreekLesson14GrammarDeck() {
+  lesson14GrammarPromise ??= fetchText("data/greek-lesson14-grammar.json").then(text => grammarDeck(14, JSON.parse(text) as GreekGrammarSourceCard[]));
+  return lesson14GrammarPromise;
 }

@@ -1,0 +1,278 @@
+[
+  {
+    "id": "lesson13-chart-hode-singular-forms",
+    "category": "ὅδε — Singular Demonstrative Forms",
+    "prompt": "ὅδε — Singular Demonstrative Forms",
+    "source_ref": "Groton Lesson 13, pp. 77–80",
+    "accent_note": "Full demonstrative case forms; distinguish singular and plural. The nominative, genitive, dative, and accusative cases are shown separately.",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "ὅδε",
+          "ἥδε",
+          "τόδε"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "τοῦδε",
+          "τῆσδε",
+          "τοῦδε"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "τῷδε",
+          "τῇδε",
+          "τῷδε"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "τόνδε",
+          "τήνδε",
+          "τόδε"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson13-chart-hode-plural-forms",
+    "category": "ὅδε — Plural Demonstrative Forms",
+    "prompt": "ὅδε — Plural Demonstrative Forms",
+    "source_ref": "Groton Lesson 13, pp. 77–80",
+    "accent_note": "Full demonstrative case forms; distinguish singular and plural. The nominative, genitive, dative, and accusative cases are shown separately.",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "οἵδε",
+          "αἵδε",
+          "τάδε"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "τῶνδε",
+          "τῶνδε",
+          "τῶνδε"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "τοῖσδε",
+          "ταῖσδε",
+          "τοῖσδε"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "τούσδε",
+          "τάσδε",
+          "τάδε"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson13-chart-houtos-singular-forms",
+    "category": "οὗτος — Singular Demonstrative Forms",
+    "prompt": "οὗτος — Singular Demonstrative Forms",
+    "source_ref": "Groton Lesson 13, pp. 77–80",
+    "accent_note": "Full demonstrative case forms; distinguish singular and plural. The nominative, genitive, dative, and accusative cases are shown separately.",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "οὗτος",
+          "αὕτη",
+          "τοῦτο"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "τούτου",
+          "ταύτης",
+          "τούτου"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "τούτῳ",
+          "ταύτῃ",
+          "τούτῳ"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "τοῦτον",
+          "ταύτην",
+          "τοῦτο"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson13-chart-houtos-plural-forms",
+    "category": "οὗτος — Plural Demonstrative Forms",
+    "prompt": "οὗτος — Plural Demonstrative Forms",
+    "source_ref": "Groton Lesson 13, pp. 77–80",
+    "accent_note": "Full demonstrative case forms; distinguish singular and plural. The nominative, genitive, dative, and accusative cases are shown separately.",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "οὗτοι",
+          "αὗται",
+          "ταῦτα"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "τούτων",
+          "τούτων",
+          "τούτων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "τούτοις",
+          "ταύταις",
+          "τούτοις"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "τούτους",
+          "ταύτᾱς",
+          "ταῦτα"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson13-chart-ekeinos-singular-forms",
+    "category": "ἐκεῖνος — Singular Demonstrative Forms",
+    "prompt": "ἐκεῖνος — Singular Demonstrative Forms",
+    "source_ref": "Groton Lesson 13, pp. 77–80",
+    "accent_note": "Full demonstrative case forms; distinguish singular and plural. The nominative, genitive, dative, and accusative cases are shown separately.",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "ἐκεῖνος",
+          "ἐκείνη",
+          "ἐκεῖνο"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "ἐκείνου",
+          "ἐκείνης",
+          "ἐκείνου"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "ἐκείνῳ",
+          "ἐκείνῃ",
+          "ἐκείνῳ"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "ἐκεῖνον",
+          "ἐκείνην",
+          "ἐκεῖνο"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson13-chart-ekeinos-plural-forms",
+    "category": "ἐκεῖνος — Plural Demonstrative Forms",
+    "prompt": "ἐκεῖνος — Plural Demonstrative Forms",
+    "source_ref": "Groton Lesson 13, pp. 77–80",
+    "accent_note": "Full demonstrative case forms; distinguish singular and plural. The nominative, genitive, dative, and accusative cases are shown separately.",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "ἐκεῖνοι",
+          "ἐκεῖναι",
+          "ἐκεῖνα"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "ἐκείνων",
+          "ἐκείνων",
+          "ἐκείνων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "ἐκείνοις",
+          "ἐκείναις",
+          "ἐκείνοις"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "ἐκείνους",
+          "ἐκείνᾱς",
+          "ἐκεῖνα"
+        ]
+      }
+    ]
+  }
+]

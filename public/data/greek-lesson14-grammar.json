@@ -1,0 +1,176 @@
+[
+  {
+    "id": "lesson14-chart-first-person-forms",
+    "category": "First-Person Personal Pronoun Forms",
+    "prompt": "First-Person Personal Pronoun Forms",
+    "source_ref": "Groton 14.87, p. 83",
+    "accent_note": "Singular oblique cases include both emphatic and enclitic alternatives.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "ἐγώ",
+          "ἡμεῖς"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "ἐμοῦ / μου",
+          "ἡμῶν"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "ἐμοί / μοι",
+          "ἡμῖν"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "ἐμέ / με",
+          "ἡμᾶς"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson14-chart-second-person-forms",
+    "category": "Second-Person Personal Pronoun Forms",
+    "prompt": "Second-Person Personal Pronoun Forms",
+    "source_ref": "Groton 14.87, p. 83",
+    "accent_note": "Singular oblique cases include both emphatic and enclitic alternatives.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "σύ",
+          "ὑμεῖς"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "σοῦ / σου",
+          "ὑμῶν"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "σοί / σοι",
+          "ὑμῖν"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "σέ / σε",
+          "ὑμᾶς"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson14-chart-autos-singular-forms",
+    "category": "αὐτός — Singular Pronoun/Intensive Forms",
+    "prompt": "αὐτός — Singular Pronoun/Intensive Forms",
+    "source_ref": "Groton 14.87, pp. 83–84",
+    "accent_note": "Nominative αὐτός is intensive or means same, not an ordinary third-person pronoun.",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "αὐτός",
+          "αὐτή",
+          "αὐτό"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "αὐτοῦ",
+          "αὐτῆς",
+          "αὐτοῦ"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "αὐτῷ",
+          "αὐτῇ",
+          "αὐτῷ"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "αὐτόν",
+          "αὐτήν",
+          "αὐτό"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson14-chart-autos-plural-forms",
+    "category": "αὐτός — Plural Pronoun/Intensive Forms",
+    "prompt": "αὐτός — Plural Pronoun/Intensive Forms",
+    "source_ref": "Groton 14.87, pp. 83–84",
+    "accent_note": "Nominative αὐτός is intensive or means same, not an ordinary third-person pronoun.",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "αὐτοί",
+          "αὐταί",
+          "αὐτά"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "αὐτῶν",
+          "αὐτῶν",
+          "αὐτῶν"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "αὐτοῖς",
+          "αὐταῖς",
+          "αὐτοῖς"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "αὐτούς",
+          "αὐτάς",
+          "αὐτά"
+        ]
+      }
+    ]
+  }
+]

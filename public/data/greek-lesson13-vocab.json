@@ -1,0 +1,90 @@
+[
+  {
+    "id": "lesson13-v1",
+    "greek": "βλέπω, βλέψομαι",
+    "meaning": "see, look at (+ εἰς and accusative)",
+    "part_of_speech": "verb",
+    "lesson": 13,
+    "source_ref": "Groton 13.85"
+  },
+  {
+    "id": "lesson13-v2",
+    "greek": "σοφίᾱ, -ᾱς, ἡ",
+    "meaning": "wisdom",
+    "part_of_speech": "noun",
+    "lesson": 13,
+    "source_ref": "Groton 13.85"
+  },
+  {
+    "id": "lesson13-v3",
+    "greek": "φιλοσοφίᾱ, -ᾱς, ἡ",
+    "meaning": "philosophy",
+    "part_of_speech": "noun",
+    "lesson": 13,
+    "source_ref": "Groton 13.85"
+  },
+  {
+    "id": "lesson13-v4",
+    "greek": "ἐκεῖνος, -η, -ο",
+    "meaning": "that, those; the former or well-known person or thing",
+    "part_of_speech": "demonstrative",
+    "lesson": 13,
+    "source_ref": "Groton 13.85"
+  },
+  {
+    "id": "lesson13-v5",
+    "greek": "ὅδε, ἥδε, τόδε",
+    "meaning": "this, these; the following",
+    "part_of_speech": "demonstrative",
+    "lesson": 13,
+    "source_ref": "Groton 13.85"
+  },
+  {
+    "id": "lesson13-v6",
+    "greek": "οὗτος, αὕτη, τοῦτο",
+    "meaning": "this, that, these, those; the latter, the previously mentioned",
+    "part_of_speech": "demonstrative",
+    "lesson": 13,
+    "source_ref": "Groton 13.85"
+  },
+  {
+    "id": "lesson13-v7",
+    "greek": "σοφός, -ή, -όν",
+    "meaning": "wise",
+    "part_of_speech": "adjective",
+    "lesson": 13,
+    "source_ref": "Groton 13.85"
+  },
+  {
+    "id": "lesson13-v8",
+    "greek": "φιλόσοφος, -ον",
+    "meaning": "philosophical; philosopher (as a noun)",
+    "part_of_speech": "adjective",
+    "lesson": 13,
+    "source_ref": "Groton 13.85"
+  },
+  {
+    "id": "lesson13-v9",
+    "greek": "νῦν",
+    "meaning": "now",
+    "part_of_speech": "adverb",
+    "lesson": 13,
+    "source_ref": "Groton 13.85"
+  },
+  {
+    "id": "lesson13-v10",
+    "greek": "τότε (τότ᾽, τόθ᾽)",
+    "meaning": "then, at that time",
+    "part_of_speech": "adverb",
+    "lesson": 13,
+    "source_ref": "Groton 13.85"
+  },
+  {
+    "id": "lesson13-v11",
+    "greek": "γάρ",
+    "meaning": "for, because (an explanatory postpositive conjunction)",
+    "part_of_speech": "conjunction",
+    "lesson": 13,
+    "source_ref": "Groton 13.85"
+  }
+]
