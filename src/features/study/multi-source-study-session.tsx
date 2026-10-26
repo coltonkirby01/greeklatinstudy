@@ -333,7 +333,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     clearForcedNext();
     shuffleCycleRef.current = emptyShuffleCycle();
     resetUi();
-    setStartGateOpen(true);
+    setStartGateOpen(selectionMode !== "shuffle");
     setNotice(null);
     const selected = selectionMode === "sequential" ? pool[0] : pool.find((candidate) => candidateKey(candidate) === roundShuffleOrderRef.current[0]);
     if (selected) present(selected);
@@ -346,8 +346,19 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     if (updated === round) return false;
     roundRef.current = updated;
     if (studyRoundComplete(updated)) {
-      setRoundGate(updated);
-      setStartGateOpen(true);
+      if (selectionMode === "shuffle") {
+        // Shuffle is continuous: a completed pass immediately starts a new
+        // permutation, without either the round-choice or Start gate.
+        resetOriginalRound("shuffle");
+        shuffleCycleRef.current = emptyShuffleCycle();
+        const firstKey = roundShuffleOrderRef.current[0];
+        const nextCard = regularCandidates().find((candidate) => candidateKey(candidate) === firstKey);
+        if (nextCard) present(nextCard);
+        setStartGateOpen(false);
+      } else {
+        setRoundGate(updated);
+        setStartGateOpen(true);
+      }
       setNotice(null);
       return true;
     }
@@ -357,7 +368,13 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
       ? eligible.find((candidate) => candidateKey(candidate) === nextSequentialStudyRoundKey(updated, candidateKey(previous)))
       : eligible.find((candidate) => candidateKey(candidate) === roundShuffleOrderRef.current.find((key) => remaining.has(key)));
     if (selected) { setNotice(null); present(selected); }
-    else { setRoundGate(updated); setStartGateOpen(true); }
+    else if (selectionMode === "shuffle") {
+      resetOriginalRound("shuffle");
+      const firstKey = roundShuffleOrderRef.current[0];
+      const nextCard = regularCandidates().find((candidate) => candidateKey(candidate) === firstKey);
+      if (nextCard) present(nextCard);
+      setStartGateOpen(false);
+    } else { setRoundGate(updated); setStartGateOpen(true); }
     return true;
   }
 
@@ -470,7 +487,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     if (markedFlashRun) return;
     resetOriginalRound();
     resetUi(); setLastTransaction(null); setWarmup(null);
-    if (!internalSelectionChange) setStartGateOpen(true);
+    if (!internalSelectionChange) setStartGateOpen(selectionMode !== "shuffle");
     if (retained) { recentSourceIdsRef.current = [retained.source.id]; setCurrent(retained); return; }
     recentSourceIdsRef.current = [];
     setCurrent(null);
@@ -539,7 +556,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     resetOriginalRound(next);
     shuffleCycleRef.current = emptyShuffleCycle();
     if (!current) return;
-    resetUi(); setStartGateOpen(true);
+    resetUi(); setStartGateOpen(next !== "shuffle");
     const selected = next === "shuffle" && roundShuffleOrderRef.current.length
       ? regularCandidates().find((candidate) => candidateKey(candidate) === roundShuffleOrderRef.current[0])
       : chooseNext(current, next, Boolean(warmup));
