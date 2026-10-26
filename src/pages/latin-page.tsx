@@ -12,12 +12,12 @@ import { LatinParadigmTable } from "../features/latin/latin-paradigm-table";
 import { TranslationVocabDeckFilter, useTranslationVocabStudy } from "../features/translation/translation-vocab-study";
 import { useCardExclusions } from "../features/study/card-exclusions";
 import { loadLatinFilterPreferences, saveLatinFilterPreferences, type LatinMaterial } from "../features/study/filter-preferences";
-import { matchesVocabularyCard, vocabularyFamily, type OptionalSelection } from "../features/study/latin-study-filters";
+import { groupDickinsonCardsByFrequencyRank, matchesVocabularyCard, vocabularyFamily, type OptionalSelection } from "../features/study/latin-study-filters";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
 import { loadIncludeSavedCards, saveIncludeSavedCards, savedCardRef, useSavedCards } from "../features/study/saved-cards";
 import { SavedCardsFilter, type SavedCardFilterItem } from "../features/study/saved-cards-filter";
 import { SelectedCardsProvider, type SelectedCardPanelItem } from "../features/study/selected-cards-context";
-import { ExactCardSelection, FilterCheckbox, FilterDirectionControl, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
+import { FilterCheckbox, FilterDirectionControl, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
 import type { DeckDefinition, StudyCard, StudyDirection } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
 
@@ -448,6 +448,10 @@ export function LatinPage() {
     return groups;
   }, [vocabularyDeck]);
 
+  const dickinsonFrequencyGroups = useMemo(
+    () => vocabularyDeck ? groupDickinsonCardsByFrequencyRank(vocabularyDeck.cards) : [],
+    [vocabularyDeck],
+  );
   const allVocabularyParts = useMemo(() => [...vocabularyGroups.values()].flat().map((item) => item.value), [vocabularyGroups]);
   const vocabularyActive = materials.has("vocabulary");
   const vocabularyState = selectionState(vocabularyParts, allVocabularyParts, vocabularyActive);
@@ -457,6 +461,11 @@ export function LatinPage() {
     mixed: exactVocabularySelectedCount > 0 && exactVocabularySelectedCount < (vocabularyDeck?.cards.length ?? 0),
     selectedCount: exactVocabularySelectedCount,
   };
+  const isDickinsonCardSelected = (card: StudyCard) => Boolean(
+    vocabularyDeck && vocabularyActive &&
+    matchesVocabularyCard(card, vocabularyParts) &&
+    !excludedCards.isExcluded(vocabularyDeck.id, card.id)
+  );
 
   const activeParadigmIds = useMemo(() => activeParadigmDeck?.cards.map((card) => card.id) ?? [], [activeParadigmDeck]);
   const activeSubjunctiveIds = useMemo(() => activeSubjunctiveDeck?.cards.map((card) => card.id) ?? [], [activeSubjunctiveDeck]);
@@ -854,16 +863,43 @@ export function LatinPage() {
               })}
             </FilterSection>
 
-            <FilterDisclosure title="Individual Dickinson cards" summary={`${exactVocabularyState.selectedCount} of ${vocabularyDeck.cards.length} selected`} count={vocabularyDeck.cards.length} nested checked={exactVocabularyState.checked} mixed={exactVocabularyState.mixed} onCheckedChange={(checked) => changeDickinsonCards(vocabularyDeck.cards, checked)}>
-              <ExactCardSelection
-                cards={vocabularyDeck.cards}
-                chunkSize={10}
-                sectionTitle="Exact cards"
-                isSelected={(card) => vocabularyActive && matchesVocabularyCard(card, vocabularyParts) && !excludedCards.isExcluded(vocabularyDeck.id, card.id)}
-                onCardChange={(card, checked) => changeDickinsonCards([card], checked)}
-                onCardsChange={changeDickinsonCards}
-                labelForCard={(card, index) => `${index + 1}. ${card.front}${card.rank ? ` · Dickinson #${card.rank}` : ""}`}
-              />
+            <FilterDisclosure title="By frequency rank" summary={`${exactVocabularyState.selectedCount} of ${vocabularyDeck.cards.length} selected`} count={vocabularyDeck.cards.length} nested checked={exactVocabularyState.checked} mixed={exactVocabularyState.mixed} onCheckedChange={(checked) => changeDickinsonCards(vocabularyDeck.cards, checked)}>
+              {dickinsonFrequencyGroups.map((band) => {
+                const selectedCount = band.cards.filter(isDickinsonCardSelected).length;
+                return <FilterDisclosure
+                  key={band.start}
+                  title={`Ranks ${band.start}–${band.end}`}
+                  summary={`${selectedCount} of ${band.cards.length} selected`}
+                  count={band.cards.length}
+                  nested
+                  checked={selectedCount === band.cards.length}
+                  mixed={selectedCount > 0 && selectedCount < band.cards.length}
+                  onCheckedChange={(checked) => changeDickinsonCards(band.cards, checked)}
+                >
+                  {groupDickinsonCardsByFrequencyRank(band.cards, 10).map((ten) => {
+                    const tenSelectedCount = ten.cards.filter(isDickinsonCardSelected).length;
+                    return <FilterDisclosure
+                      key={ten.start}
+                      title={`${ten.start}–${ten.end}`}
+                      summary={`${tenSelectedCount} of ${ten.cards.length} selected`}
+                      count={ten.cards.length}
+                      nested
+                      checked={tenSelectedCount === ten.cards.length}
+                      mixed={tenSelectedCount > 0 && tenSelectedCount < ten.cards.length}
+                      onCheckedChange={(checked) => changeDickinsonCards(ten.cards, checked)}
+                    >
+                      <FilterSection title="Exact cards">
+                        {ten.cards.map((card) => <FilterCheckbox
+                          key={card.id}
+                          label={`#${card.rank} · ${card.front}`}
+                          checked={isDickinsonCardSelected(card)}
+                          onChange={(checked) => changeDickinsonCards([card], checked)}
+                        />)}
+                      </FilterSection>
+                    </FilterDisclosure>;
+                  })}
+                </FilterDisclosure>;
+              })}
             </FilterDisclosure>
           </>}
         </FilterDisclosure>
