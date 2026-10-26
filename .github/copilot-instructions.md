@@ -46,7 +46,7 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 
 - Both Greek and Latin Choose cards menus must retain top-level **Select all** and **Deselect all** actions. Forward/Reverse direction for the main Greek/Latin apps lives inside Choose cards, not in the flashcard toolbar.
 - Every built-in card must be reachable as an exact individual checkbox in the language Choose cards menu. Per-card selection is not a separate temporary UI; it is another view of the same persistent per-card exclusion state used by the answer-side D control.
-- Greek may list exact cards directly under source/deck disclosures. Dickinson is large, so exact Dickinson cards MUST be grouped into nested 10-card ranges (`1–10`, `11–20`, and so on), with each range opening to the ten exact card checkboxes.
+- Greek may list exact cards directly under source/deck disclosures. Dickinson is large, so it uses 50-rank selection disclosures (`1–50`, `51–100`, etc.), nested 10-rank disclosures (`1–10`, `11–20`, etc.), and exact card checkboxes. Bucket by the published frequency rank, not the card's array index; missing or duplicate ranks must not misplace cards.
 - Exact Groton and Kubo Greek vocabulary checkboxes display the Greek headword together with a one-word English gloss derived from the existing source meaning. Preserve the full source meaning on the card itself; the selector gloss is only a compact scanning aid.
 - Keep selectors concise; hierarchy, checkbox labels, counts, and summaries carry the structure.
 - Parent checkbox selection and disclosure expansion are independent. Mixed states must remain correct when only some exact cards are selected, including cards excluded with D.
