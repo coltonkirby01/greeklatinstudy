@@ -41,7 +41,7 @@ export function HowSiteWorks() {
             <h3>Sequential</h3>
             <p>Sequential study follows the selected cards in their defined order and wraps to the beginning after the last card. It does not use Adaptive priority to choose the next card.</p>
             <h3>Shuffle</h3>
-            <p>Shuffle uses the same selected card pool as Sequential but randomizes the order. Every currently selected and available card appears exactly once before a new shuffle cycle begins. After the full pool has been covered, the site creates a fresh random order for the next cycle rather than repeating the same shuffle pattern.</p>
+            <p>Shuffle uses the same selected card pool as Sequential but randomizes the order. Every currently selected and available card appears exactly once before a new shuffle cycle begins. After the full pool has been covered, the site creates a fresh random order for the next cycle rather than repeating the same shuffle pattern. Shuffle starts immediately when selected and continues automatically between cycles, without a Start gate or round-choice screen; explicit Pause and other safety interruptions still pause the timer.</p>
           </div>
         </details>
 
