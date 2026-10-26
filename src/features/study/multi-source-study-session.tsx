@@ -9,7 +9,7 @@ import { beginMarkedFlashCycle, recordMarkedFlashGrade, restartMarkedFlashCycle,
 import { savedCardRef } from "./saved-cards";
 import { intrinsicCardDifficulty } from "./scoring";
 import { builtinSessionId, displayManagedSessionName, managedSessionsForLanguage, sessionDeckIdsForLanguage, type BuiltinSessionKind, type ManagedSession } from "./session-management";
-import { autoReviewDefaults, visitProgressSummary, wasMarkedDuringVisit } from "./session-review";
+import { autoReviewDefaults, selectedPoolVisitProgress, wasMarkedDuringVisit } from "./session-review";
 import { emptyShuffleCycle, nextShuffleKey, shuffledCycleOrder } from "./shuffle-cycle";
 import { beginStudyRound, markStudyRoundCard, nextSequentialStudyRoundKey, reconcileStudyRound, remainingStudyRoundKeys, studyRoundComplete, studyRoundSubset, undoStudyRoundCard, type StudyRound, type StudyRoundKind, type StudyRoundGrade } from "./study-rounds";
 import "./study-gate.css";
@@ -521,10 +521,13 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     return map;
   }, [envelopes, sources]);
   const visibleCandidates = useMemo(() => sources.flatMap((source) => { const state = states.get(source.id); return state ? availableCards(source, state).map((card) => ({ source, card })) : []; }), [sources, states]);
+  const selectedCardCount = useMemo(() => new Set(sources.flatMap((source) =>
+    source.cards.map((card) => `${source.deck.id}:${card.id}`))).size, [sources]);
+  const lockedSelectedCount = Math.max(0, selectedCardCount - visibleCandidates.length);
   const sessionProgress = useMemo(() => {
     const items = visibleCandidates.map(({ source, card }) => ({ progress: getCardProgress(states.get(source.id) ?? modeFor(source), card.id) }));
-    return visitProgressSummary(items, visitStartedAtRef.current);
-  }, [modeFor, states, visibleCandidates]);
+    return selectedPoolVisitProgress(items, visitStartedAtRef.current, selectedCardCount);
+  }, [modeFor, selectedCardCount, states, visibleCandidates]);
   const stats = sessionProgress.stats;
   const priority = useMemo(() => visibleCandidates.map(({ source, card }) => ({ card, progress: getCardProgress(states.get(source.id) ?? modeFor(source), card.id), score: priorityScore(card, states.get(source.id) ?? modeFor(source), { ignoreRecency: true }) })).sort((a, b) => b.score - a.score).slice(0, 10), [modeFor, states, visibleCandidates]);
   const sourceByCard = useMemo(() => new Map(sources.flatMap((source) => source.cards.map((card) => [`${card.deckId}:${card.id}`, source] as const))), [sources]);
@@ -860,7 +863,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
         <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} frontControls={frontControls} />
         <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onFlip={toggleReviewFace} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
       </section>
-      <StudySidebar copy={copy} direction={direction} stats={stats} sessionId={session.id} progressScope="visit" initialProgress={{ reviewed: sessionProgress.initialReviewed, total: sessionProgress.initialTotal, percent: sessionProgress.initialPercent, mastered: sessionProgress.initialMastered, masteryPercent: sessionProgress.initialMasteryPercent }} coverageRemaining={coverageRemaining} queuedCoverageKey={forcedNextKey} onQueueCoverage={queueCoverageCard} everWrongCards={everWrongCards} markedHardCards={markedHardCards} onFlashEverWrong={() => startMarkedFlash("Ever wrong")} onFlashMarkedHard={() => startMarkedFlash("Marked hard")} activeFlash={markedFlashRun?.label ?? null} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
+      <StudySidebar copy={copy} direction={direction} stats={stats} sessionId={session.id} progressScope="visit" initialProgress={{ reviewed: sessionProgress.initialReviewed, total: sessionProgress.initialTotal, percent: sessionProgress.initialPercent, mastered: sessionProgress.initialMastered, masteryPercent: sessionProgress.initialMasteryPercent }} lockedSelectedCount={lockedSelectedCount} coverageRemaining={coverageRemaining} queuedCoverageKey={forcedNextKey} onQueueCoverage={queueCoverageCard} everWrongCards={everWrongCards} markedHardCards={markedHardCards} onFlashEverWrong={() => startMarkedFlash("Ever wrong")} onFlashMarkedHard={() => startMarkedFlash("Marked hard")} activeFlash={markedFlashRun?.label ?? null} priority={priority} priorityPrompt={priorityPrompt} cardCopy={(card) => { const source = sourceByCard.get(`${card.deckId}:${card.id}`); return directionalCopy(card, source?.direction ?? direction); }} />
     </div>
     {markedFlashComplete && markedFlashRun && <div className="wrong-bank-modal-backdrop" role="presentation">
       <section className="wrong-bank-modal" role="dialog" aria-modal="true" aria-labelledby="wrong-bank-complete-title">

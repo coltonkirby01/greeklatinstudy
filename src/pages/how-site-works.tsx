@@ -48,7 +48,7 @@ export function HowSiteWorks() {
         <details className="site-guide-section">
           <summary>Visit completion and Visit mastery</summary>
           <div>
-            <p>The live progress bar first shows <strong>Visit completion</strong>: the share of the currently selected and unlocked cards reviewed at least once since this Greek or Latin page was loaded. When every selected card has been seen during that page visit, the same bar changes to <strong>Visit mastery</strong>.</p>
+            <p>The live progress bar first shows <strong>Visit completion</strong>: the share of all currently selected cards reviewed at least once since this Greek or Latin page was loaded. For Dickinson Latin, selected but still-locked cards count toward the total, and the panel reports how many are locked. The existing mastery-based unlocking rules still determine which cards can appear. When every selected card has been seen during that page visit, the same bar changes to <strong>Visit mastery</strong>.</p>
             <p>Visit mastery means the share of those selected cards that have received at least one <strong>Right</strong> answer during the current page visit. A hard reload or leaving and re-entering the study page starts this live progress at zero again. That reset affects only the on-page progress display; it does not erase saved reviews, mastery, scheduling, Stats, or long-term Adaptive memory. Changing filters changes the denominator to the cards currently selected.</p>
           </div>
         </details>

@@ -24,6 +24,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - Selecting a child beneath an unchecked parent activates only the necessary child path, not every sibling in that parent.
 - Every built-in card must also be individually selectable from the language-level Choose cards menu. Exact-card selection and the answer-side Deselect action use the same persistent per-card exclusion state; they are not parallel selection systems. There is no separate Individually deselected list.
 - A D-deselected card is restored either by reselecting its exact checkbox or by selecting any parent checkbox that contains it; parent mixed states must reflect excluded descendants. Selecting a parent restores all excluded cards beneath that parent without affecting learning history.
+- Each Dickinson Latin vocabulary flashcard shows the actual published frequency rank as a compact `#74`-style label on both question and answer faces, in Forward and Reverse. This badge must not change stable IDs, progress, glosses, or card prompts.
 - Dickinson's frequency-rank selector groups the published ranks in 50-rank bands (`1–50`, `51–100`, etc.), with nested ten-rank groups (`1–10`, `11–20`, etc.) and exact word checkboxes. Use the actual published ranks, not positional card indices: the source can contain gaps and ties. All 997 entries must remain individually reachable.
 - Filters narrow the current study pool only. Deselecting a source, child, or individual card must never erase or reset stored mastery, history, scheduling, timing, or statistics for those cards.
 - Greek and Latin filter selections persist when the user leaves and returns to the flashcard app. Do not reset filters merely because the route unmounted or the user navigated elsewhere.
@@ -79,7 +80,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - Keep existing active card IDs stable; retired IDs may remain only in historical progress storage and must never silently re-enter active study pools.
 - Preserve spelling, accents, breathing marks, macrons, principal parts, gender, and other source forms unless the task explicitly corrects source data.
 - Existing source decks remain independently persisted even when Greek or Latin UI sessions interleave cards from multiple sources.
-- Dickinson's staged introduction remains 100 cards initially and 25 additional cards at a time; filtering or mixing with grammar must not silently expose locked Dickinson cards.
+- Dickinson's staged introduction remains 100 cards initially and 25 additional cards at a time; filtering or mixing with grammar must not silently expose locked Dickinson cards. The Visit completion denominator includes the full selected pool, including still-locked Dickinson cards, and explicitly reports how many are locked. Ever wrong, coverage queues, and priority lists remain limited to available cards.
 
 ## Study directions and progress
 

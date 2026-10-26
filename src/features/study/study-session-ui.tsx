@@ -109,13 +109,14 @@ function MarkedFlashTile({ title, count, cards, onFlash, active, unavailable }: 
   </details>;
 }
 
-export function StudySidebar({ copy, direction, stats, sessionId, initialProgress, progressScope = "session", priority, priorityPrompt, cardCopy, coverageRemaining = [], queuedCoverageKey = null, onQueueCoverage, everWrongCards = [], markedHardCards = [], onFlashEverWrong, onFlashMarkedHard, activeFlash = null }: {
+export function StudySidebar({ copy, direction, stats, sessionId, initialProgress, progressScope = "session", lockedSelectedCount = 0, priority, priorityPrompt, cardCopy, coverageRemaining = [], queuedCoverageKey = null, onQueueCoverage, everWrongCards = [], markedHardCards = [], onFlashEverWrong, onFlashMarkedHard, activeFlash = null }: {
   copy: DirectionalCardCopy;
   direction: StudyDirection;
   stats: StudyStats;
   sessionId?: string;
   initialProgress?: InitialProgress;
   progressScope?: "session" | "visit";
+  lockedSelectedCount?: number;
   priority: Priority;
   priorityPrompt?: (card: StudyCard, copy: DirectionalCardCopy) => ReactNode;
   cardCopy?: (card: StudyCard, direction: StudyDirection) => DirectionalCardCopy;
@@ -146,10 +147,11 @@ export function StudySidebar({ copy, direction, stats, sessionId, initialProgres
         <div className="initial-completion-heading"><span>{progressLabel}</span><strong>{activeCount} / {initialProgress.total}</strong></div>
         <div className="initial-completion-track" role="progressbar" aria-label={progressAria} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(activePercent)}><span className="initial-completion-fill" style={{ width: `${activePercent}%` }} /></div>
         <span className="initial-completion-note">{activePercent.toFixed(activePercent >= 99.95 ? 0 : 1)}% {progressNote}</span>
+        {lockedSelectedCount > 0 && <span className="initial-completion-note">{lockedSelectedCount} selected card{lockedSelectedCount === 1 ? "" : "s"} still locked until earlier Dickinson vocabulary is mastered. They count toward the selected total but cannot be reviewed yet.</span>}
         {!completionDone && <details className="coverage-details">
           <summary><span>Words/forms left</span><strong>{coverageRemaining.length}</strong></summary>
           <div className="coverage-list">
-            {coverageRemaining.length ? coverageRemaining.map((item) => <button key={item.key} type="button" className="coverage-item" aria-pressed={queuedCoverageKey === item.key} onClick={() => onQueueCoverage?.(item.key)}>{item.label}</button>) : <span className="wrong-bank-empty">The current card is the last item awaiting initial coverage.</span>}
+            {coverageRemaining.length ? coverageRemaining.map((item) => <button key={item.key} type="button" className="coverage-item" aria-pressed={queuedCoverageKey === item.key} onClick={() => onQueueCoverage?.(item.key)}>{item.label}</button>) : <span className="wrong-bank-empty">{lockedSelectedCount ? "No unlocked cards remain unreviewed. More selected cards become available after Dickinson unlocks." : "The current card is the last item awaiting initial coverage."}</span>}
           </div>
         </details>}
       </div>}

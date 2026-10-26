@@ -160,3 +160,16 @@ export function wasMarkedDuringVisit(progress: CardProgress, visitStartedAt: num
 export function visitProgressSummary(items: readonly SessionProgressItem[], visitStartedAt: number): SessionProgressSummary {
   return progressSummary(items, (review) => review.reviewedAt >= visitStartedAt && (review.activityKind ?? "study") === "study" && !review.statsExcluded);
 }
+
+/** Count every selected card in visit coverage, while actual review stats
+ * remain restricted to the currently unlocked study candidates. */
+export function selectedPoolVisitProgress(items: readonly SessionProgressItem[], visitStartedAt: number, selectedTotal: number): SessionProgressSummary {
+  const summary = visitProgressSummary(items, visitStartedAt);
+  const total = Math.max(items.length, selectedTotal);
+  return {
+    ...summary,
+    initialTotal: total,
+    initialPercent: total ? summary.initialReviewed / total * 100 : 0,
+    initialMasteryPercent: total ? summary.initialMastered / total * 100 : 0,
+  };
+}

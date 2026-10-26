@@ -143,6 +143,20 @@ function ParadigmDeckFilters({
 
 
 const latinCardFitCss = `
+/* Published Dickinson frequency rank on both sides of each vocabulary card. */
+.flashcard-face .dickinson-rank-badge {
+  position: absolute;
+  right: clamp(.9rem, 2.3vw, 1.3rem);
+  bottom: clamp(.75rem, 1.8vw, 1.05rem);
+  color: var(--ink-soft);
+  font-family: var(--font-sans);
+  font-size: .87rem;
+  font-weight: 750;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
 /* Henle adjective and participle answer sides size themselves to their content.
    Both sides share one intrinsic CSS-grid row, so even narrow screens do not
    need an inner flashcard scrollbar or risk clipped Latin forms. */
@@ -1015,7 +1029,10 @@ export function LatinPage() {
               if (source.direction === "reverse") return <span className="henle-chart-face"><span className="chart-instruction">Identify this paradigm.</span><LatinParadigmTable card={card} revealed /></span>;
               return <span className="henle-chart-face"><strong className="henle-card-title">{card.front}</strong><span className="chart-instruction">Reconstruct the complete paradigm from memory.</span><LatinParadigmTable card={card} revealed={false} /></span>;
             }
-            return <span className={source.direction === "forward" ? "latin-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
+            return <>
+              {source.deck.id === vocabularyDeck.id && Number.isInteger(card.rank) && <span className="dickinson-rank-badge" aria-label={`Dickinson frequency rank ${card.rank}`}>#{card.rank}</span>}
+              <span className={source.direction === "forward" ? "latin-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>
+            </>;
           }}
           renderBack={(card, copy, source) => {
             if (source.deck.id === participlesDeck?.id) {
@@ -1048,7 +1065,10 @@ export function LatinPage() {
                 <LatinParadigmTable card={card} revealed />
               </span>;
             }
-            return <span className="answer-block"><strong className={source.direction === "reverse" ? "latin-front compact-latin" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>;
+            return <>
+              {source.deck.id === vocabularyDeck.id && Number.isInteger(card.rank) && <span className="dickinson-rank-badge" aria-label={`Dickinson frequency rank ${card.rank}`}>#{card.rank}</span>}
+              <span className="answer-block"><strong className={source.direction === "reverse" ? "latin-front compact-latin" : "study-answer"}>{copy.answer}</strong>{card.notes && <span className="answer-notes">{card.notes}</span>}</span>
+            </>;
           }}
         /></SelectedCardsProvider>
       ) : (
