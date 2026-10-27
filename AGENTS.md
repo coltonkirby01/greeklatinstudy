@@ -158,7 +158,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 
 - Space starts while the Start gate is open, reveals an unrevealed card during active study, and performs Save & Next after reveal.
 - After reveal, Enter toggles correctness between Right and Wrong without saving.
-- After reveal, F flips between question and answer without saving and without adding response time.
+- After reveal, F flips between question and answer without saving and without adding response time. The shared Flip card button is rendered only after Reveal at the bottom-left INSIDE the card on both faces, using the same small-outline/card-overlay visual treatment as Save card (icon, text, and F keycap). Do not show a second Flip button below the card; keyboard Enter on a focused Flip button should activate Flip rather than toggle the grade.
 - After reveal, R and W are intentionally unassigned. Enter toggles Right/Wrong without saving.
 - After reveal, 1 = Easy, 2 = Medium, and 3 = Hard and may override the automatic difficulty selection.
 - D = Deselect card on the visible answer side. It toggles a pending visual `Deselected` state only; it must not immediately mutate the active pool, change cards, or reopen the Start gate. The actual individual exclusion is committed when Space performs Save & Next.
