@@ -80,14 +80,14 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
 
   const modeState = envelope?.modes[studyKey] ?? null, current = modeState ? cards.find((card) => card.id === modeState.currentCardId) ?? null : null;
   const timer = useResponseTimer(current && modeState ? `${studyKey}:${current.id}:${modeState.cards[current.id]?.lastPresentedAt ?? 0}` : null, Boolean(current && modeState && !revealed && !editingTransaction && !startGateOpen));
-  const availableCards = useMemo(() => modeState ? cardsAvailableToState(cards, modeState) : [], [cards, modeState]);
+  const availableCards = useMemo(() => modeState ? cardsAvailableToState(cards, modeState, deck.staged) : [], [cards, modeState, deck.staged]);
   const sessionProgress = useMemo(() => modeState ? sessionProgressSummary(availableCards.map((card) => ({ progress: getCardProgress(modeState, card.id) })), session.id) : null, [availableCards, modeState, session.id]);
   const stats = sessionProgress?.stats ?? null;
   const priority = useMemo(() => modeState ? highestPriorityCards(cards, modeState, deck.staged, 5) : [], [cards, deck.staged, modeState]);
   const copy = current ? directionalCopy(current, direction) : null;
 
   function pickSessionCard(state: StudyModeState, mode: SelectionMode, excludeCardId?: string, sessionId = session.id) {
-    const available = cardsAvailableToState(cards, state);
+    const available = cardsAvailableToState(cards, state, deck.staged);
     if (mode === "shuffle") {
       const byId = new Map(available.map((card) => [card.id, card]));
       const next = nextShuffleKey([...byId.keys()], shuffleCycleRef.current, { avoidKey: excludeCardId });
@@ -123,7 +123,7 @@ export function StudySession({ deck, cards = deck.cards, studyKey, direction, on
     setNotice("New session started. Your long-term mastery and adaptive priorities were preserved.");
   }
   function pickWarmupCard(state: StudyModeState, excludeCardId?: string | null) {
-    let candidates = cardsAvailableToState(cards, state).filter((card) => card.id !== excludeCardId);
+    let candidates = cardsAvailableToState(cards, state, deck.staged).filter((card) => card.id !== excludeCardId);
     const reviewed = candidates.filter((card) => (state.cards[card.id]?.reviews ?? 0) > 0); if (reviewed.length) candidates = reviewed;
     return [...candidates].sort((a, b) => {
       const baseA = priorityScore(a, state), baseB = priorityScore(b, state);

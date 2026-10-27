@@ -85,7 +85,7 @@ Ordinary maintenance must preserve:
 - Correct/wrong and Easy/Medium/Hard aggregates.
 - Response-time history and averages.
 - Due dates, intervals, streaks, lapse history, adaptive-priority inputs, and recent presentation state.
-- Dickinson progressive unlock state.
+- Historic Dickinson `unlockedCount` fields (preserve as legacy data, but never use them to hide selected vocabulary cards).
 - Session IDs/names and Stats-exclusion/deletion behavior.
 - Guest/local progress and signed-in cloud progress.
 - Greek and Latin filter preferences.
@@ -127,11 +127,11 @@ The cards placed into each active `StudySourceDefinition` are the selected card 
 - `src/features/study/multi-source-study-session.tsx` — primary built-in Greek/Latin mixed-source controller.
 - `src/features/study/study-session.tsx` — ordinary/imported single-deck controller.
 - `src/features/study/study-session-ui.tsx` — shared card faces, grading controls, Start gate, Enter/F interaction, sidebar.
-- `src/features/study/session-review.ts` — automatic reveal defaults, active-session calculations, and the shared per-visit Ever wrong/Marked hard predicates used to build expandable flash lists that match those counts. Visit completion includes the total selected pool even when some Dickinson cards are locked; the review counts and flash lists only include available cards.
+- `src/features/study/session-review.ts` — automatic reveal defaults, active-session calculations, and the shared per-visit Ever wrong/Marked hard predicates used to build expandable flash lists that match those counts. Dickinson has no staged unlocking; Visit completion counts the complete selected pool. Review counts and flash lists remain limited to the active selection.
 - `src/features/study/marked-flash-cycle.ts` — temporary Ever wrong flash-pass tracking. Wrong-only repeat uses saved Wrong answers from the completed pass, not historical wrong counts; the original flash cohort remains available for Reflash all. Corrections remove the old grade; skipped cards never count as wrong.
 - `src/features/study/study-shortcuts.ts` — keyboard semantics.
 - `src/features/study/use-response-timer.ts` — recall timer and focus/visibility handling.
-- `src/features/study/engine.ts` — adaptive scheduling, review recording, staged unlocking, Back/Skip, priority.
+- `src/features/study/engine.ts` — adaptive scheduling, review recording, optional staging for decks that explicitly request it, Back/Skip, priority. Historic Dickinson unlock limits must not filter unstaged decks.
 - `src/features/study/types.ts` — persistent study-state types; migration-sensitive.
 
 Do not fork timer, grading, card-face, or scheduler implementations by language.

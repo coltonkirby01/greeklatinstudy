@@ -14,7 +14,14 @@ export function formatResponseTime(value: number) { return `${(normalizeResponse
 export function responseTimeIntervalFactor(responseTimeMs: number) { const seconds = normalizeResponseTime(responseTimeMs) / 1_000; return seconds <= 4 ? 1 : Math.max(0.4, 1 - Math.log2(seconds / 4) * 0.16); }
 export function responseTimePriorityScore(last: number, total: number, count: number) { if (!count) return 0; const seconds = Math.max(normalizeResponseTime(last), total / count) / 1_000; return seconds <= 4 ? 0 : Math.min(36, Math.log2(seconds / 4) * 9); }
 export function directionalCopy(card: StudyCard, direction: StudyDirection): DirectionalCardCopy { return direction === "reverse" ? { prompt: card.reverseFront ?? card.back, answer: card.reverseBack ?? card.front, sideLabel: "Reverse" } : { prompt: card.front, answer: card.back, sideLabel: "Forward" }; }
-export function cardsAvailableToState(cards: StudyCard[], state: StudyModeState) { return cards.slice(0, Math.min(cards.length, state.unlockedCount)); }
+/**
+ * Only explicitly staged decks should limit their active pool by unlockedCount.
+ * Historic Dickinson states still contain a persisted 100-card limit, but the
+ * Dickinson deck no longer opts into stages, so every selected card is usable.
+ */
+export function cardsAvailableToState(cards: StudyCard[], state: StudyModeState, staged?: StagedIntroduction) {
+  return staged ? cards.slice(0, Math.min(cards.length, state.unlockedCount)) : cards;
+}
 export function nextSequentialIndex(length: number, currentIndex: number) { if (length <= 0) return -1; return currentIndex >= 0 ? (currentIndex + 1) % length : 0; }
 
 export function priorityScore(card: StudyCard, state: StudyModeState, options: { ignoreRecency?: boolean; now?: number; staged?: StagedIntroduction } = {}) {
@@ -47,7 +54,7 @@ function avoidRecentAdaptiveCards(cards: StudyCard[], state: StudyModeState) {
 }
 
 export function pickNextCard(cards: StudyCard[], state: StudyModeState, selectionMode: SelectionMode, options: { excludeCardId?: string; random?: () => number; staged?: StagedIntroduction } = {}) {
-  let available = cardsAvailableToState(cards, state); if (!available.length) return null;
+  let available = cardsAvailableToState(cards, state, options.staged); if (!available.length) return null;
   if (selectionMode === "sequential") {
     const currentIndex = available.findIndex((card) => card.id === state.currentCardId);
     return available[nextSequentialIndex(available.length, currentIndex)] ?? null;
@@ -93,7 +100,7 @@ export function maybeUnlockNextBatch(state: StudyModeState, cards: StudyCard[], 
 }
 
 export function ensureCurrentCard(state: StudyModeState, cards: StudyCard[], selectionMode: SelectionMode, staged?: StagedIntroduction) {
-  const available = cardsAvailableToState(cards, state); if (state.currentCardId && available.some((card) => card.id === state.currentCardId)) return state;
+  const available = cardsAvailableToState(cards, state, staged); if (state.currentCardId && available.some((card) => card.id === state.currentCardId)) return state;
   const card = pickNextCard(cards, state, selectionMode, { staged }); return card ? presentCard(state, card) : state;
 }
 
@@ -106,11 +113,11 @@ export function reviewAndAdvance(state: StudyModeState, cards: StudyCard[], sele
 
 export function skipAndAdvance(state: StudyModeState, cards: StudyCard[], selectionMode: SelectionMode, staged?: StagedIntroduction) { const chosen = pickNextCard(cards, state, selectionMode, { excludeCardId: state.currentCardId ?? undefined, staged }); return chosen ? presentCard(state, chosen) : state; }
 
-export function studyStats(cards: StudyCard[], state: StudyModeState): StudyStats {
-  const available = cardsAvailableToState(cards, state); let reviewed = 0, everWrong = 0, markedHard = 0, mastered = 0, responseTotal = 0, responseCount = 0, bestStreak = 0;
+export function studyStats(cards: StudyCard[], state: StudyModeState, staged?: StagedIntroduction): StudyStats {
+  const available = cardsAvailableToState(cards, state, staged); let reviewed = 0, everWrong = 0, markedHard = 0, mastered = 0, responseTotal = 0, responseCount = 0, bestStreak = 0;
   for (const card of available) { const item = getCardProgress(state, card.id); if (item.reviews) reviewed += 1; if (item.wrong) everWrong += 1; if (item.hard) markedHard += 1; if (item.initialMastered) mastered += 1; responseTotal += item.responseTimeTotalMs; responseCount += item.responseTimeCount; bestStreak = Math.max(bestStreak, item.bestStreak); }
   return { available: available.length, reviewed, accuracy: state.totalReviews ? state.rightReviews / state.totalReviews : null, everWrong, markedHard, averageResponseTimeMs: responseCount ? responseTotal / responseCount : 0, mastered, totalReviews: state.totalReviews, bestStreak };
 }
 
-export function highestPriorityCards(cards: StudyCard[], state: StudyModeState, staged?: StagedIntroduction, limit = 5) { return cardsAvailableToState(cards, state).map((card) => ({ card, progress: getCardProgress(state, card.id), score: priorityScore(card, state, { ignoreRecency: true, staged }) })).sort((a, b) => b.score - a.score).slice(0, limit); }
+export function highestPriorityCards(cards: StudyCard[], state: StudyModeState, staged?: StagedIntroduction, limit = 5) { return cardsAvailableToState(cards, state, staged).map((card) => ({ card, progress: getCardProgress(state, card.id), score: priorityScore(card, state, { ignoreRecency: true, staged }) })).sort((a, b) => b.score - a.score).slice(0, limit); }
 export function priorityReason(item: CardProgress, now = Date.now()) { if (!item.presented) return "new"; if (!item.initialMastered) return "needs first correct"; if (item.lastResult === "wrong") return "recent mistake"; if (item.lastDifficulty === "hard") return "rated hard"; if (responseTimePriorityScore(item.lastResponseTimeMs, item.responseTimeTotalMs, item.responseTimeCount) >= 9) return "slow recall"; if (item.reviews && item.wrong / item.reviews >= 0.35) return "inconsistent"; if (!item.dueAt || item.dueAt <= now) return "due"; return "review"; }

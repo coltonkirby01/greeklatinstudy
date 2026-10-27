@@ -81,7 +81,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - Keep existing active card IDs stable; retired IDs may remain only in historical progress storage and must never silently re-enter active study pools.
 - Preserve spelling, accents, breathing marks, macrons, principal parts, gender, and other source forms unless the task explicitly corrects source data.
 - Existing source decks remain independently persisted even when Greek or Latin UI sessions interleave cards from multiple sources.
-- Dickinson's staged introduction remains 100 cards initially and 25 additional cards at a time; filtering or mixing with grammar must not silently expose locked Dickinson cards. The Visit completion denominator includes the full selected pool, including still-locked Dickinson cards, and explicitly reports how many are locked. Ever wrong, coverage queues, and priority lists remain limited to available cards.
+- Dickinson has NO staged unlocking or card locks: every individually selected entry, even beyond former rank/position 100, is immediately eligible for Forward/Reverse and Adaptive/Sequential/Shuffle; filters alone determine membership. Previously saved `unlockedCount` values must never hide selected Dickinson cards. Do not reset or rewrite historic mastery/review state just to remove the restriction. The Visit completion denominator reflects all selected cards. Ever wrong, coverage queues, and priority lists remain limited to the selected study pool.
 
 ## Study directions and progress
 
@@ -130,7 +130,7 @@ Cleanup, refactoring, performance optimization, dependency work, and file reorga
 - Never overwrite a user's manual Right/Wrong or Easy/Medium/Hard change after the default has been shown.
 - Response time is recorded independently and remains part of adaptive priority/scheduling in addition to the selected correctness and difficulty.
 - Review scheduling continues to consider correctness, difficulty, response time, recency, strength, and due state as implemented by the study engine.
-- Staged decks preserve their configured unlocking behavior. Do not expose locked cards early.
+- Only decks that explicitly define `staged` may restrict active cards by `unlockedCount`; Dickinson is never staged. Keep staging support for any other deck that deliberately opts in.
 - Mastered cards continue to recur according to the scheduling system; mastery must not remove them permanently from review.
 - Priority lists show prompts only and only from the currently selected/available card pool. Never reveal answers in Highest-Priority Review and never show a deselected card there.
 - Back restores the pre-review snapshot and reuses the review event ID; it must never count both the original grade and the corrected grade.

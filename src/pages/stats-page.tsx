@@ -94,7 +94,7 @@ function stateFor(source: StatsSource, envelopes: Record<string, DeckProgressEnv
 }
 
 function summarizeSource(source: StatsSource, state: StudyModeState) {
-  const stats = studyStats(source.cards, state);
+  const stats = studyStats(source.cards, state, source.deck.staged);
   let easy = 0, medium = 0, hard = 0, responseCount = 0, responseTotalMs = 0, lastReviewedAt = 0;
   for (const card of source.cards) {
     const progress = state.cards[card.id];
@@ -354,7 +354,7 @@ export function StatsPage() {
   async function deleteSession(session: SessionSummary) {
     if (session.builtin) return;
     const reviewIds = session.inferred ? reviewIdsForSession(session.id) : [];
-    const confirmed = window.confirm(`Delete “${session.name}”?\n\nWILL BE REMOVED:\n• The session itself\n• Its session-history entry\n• Its availability in the Greek and Latin flashcard session menus\n• All of this session's contribution to Stats\n\nWILL NOT BE REMOVED:\n• Accumulated card mastery and learned status\n• Difficulty/priority calculations and adaptive-review memory/history\n• Scheduling, strength, intervals, and due dates\n• Response-time learning memory\n• Dickinson progressive unlock status\n\nThe learning evidence stays available to the adaptive system, but it will no longer belong to a session or appear in Stats.`);
+    const confirmed = window.confirm(`Delete “${session.name}”?\n\nWILL BE REMOVED:\n• The session itself\n• Its session-history entry\n• Its availability in the Greek and Latin flashcard session menus\n• All of this session's contribution to Stats\n\nWILL NOT BE REMOVED:\n• Accumulated card mastery and learned status\n• Difficulty/priority calculations and adaptive-review memory/history\n• Scheduling, strength, intervals, and due dates\n• Response-time learning memory\n• Dickinson vocabulary selections and long-term review progress\n\nThe learning evidence stays available to the adaptive system, but it will no longer belong to a session or appear in Stats.`);
     if (!confirmed) return;
     setBusySessionId(session.id); setActionError(null);
     try {
