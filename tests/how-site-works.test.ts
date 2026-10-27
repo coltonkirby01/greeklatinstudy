@@ -13,12 +13,12 @@ describe("How this site works guide", () => {
 
   it("derives important numerical explanations from study constants", () => {
     const guide = fs.readFileSync("src/pages/how-site-works.tsx", "utf8");
-    expect(guide).toContain("INITIAL_COVERAGE_MULTIPLIER");
+    expect(guide).toContain("ADAPTIVE_PROFILES[2].coverageMultiplier");
     expect(guide).toContain("INITIAL_AUTO_WRONG_REVIEWS");
     expect(guide).toContain("RECENT_AUTO_GRADE_WINDOW");
     expect(guide).toContain("EASY_RECALL_LIMIT_MS");
     expect(guide).toContain("HARD_RECALL_START_MS");
-    expect(guide).toContain("20 selected cards, all 20 must appear by card 25");
+    expect(guide).toContain("20 selected cards, all 20 must receive a first review by the 22nd presentation");
     expect(guide).toContain("ADAPTIVE_PROFILES");
     expect(guide).toContain("1: Diverse");
     expect(guide).toContain("3: Concentrated");
@@ -87,9 +87,9 @@ describe("How this site works guide", () => {
     expect(instructions).toContain("D = Deselect card");
     expect(instructions).toContain("card-exclusions.ts");
     expect(instructions).toContain("stem - ending");
-    expect(instructions).toContain("Diverse uses 1.05×");
-    expect(instructions).toContain("Standard uses 1.25×");
-    expect(instructions).toContain("Concentrated uses 1.75×");
+    expect(instructions).toContain("Diverse uses 1.00×");
+    expect(instructions).toContain("Standard uses 1.10×");
+    expect(instructions).toContain("Concentrated uses 1.25×");
     expect(instructions).toContain("latin-adjective-paradigms");
     expect(instructions).toContain("grav-em (grav-e)");
     expect(instructions).toContain("docs/MEDIEVAL_LATIN_PRONUNCIATION.md");

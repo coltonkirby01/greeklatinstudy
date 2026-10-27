@@ -16,7 +16,7 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - `src/pages/how-site-works.tsx` is the canonical learner-facing explanation of consequential site behavior and appears on the Home page directly above the progress/cloud-sync callout.
 - Any change to Adaptive/Sequential/Shuffle selection, first-pass coverage, grading defaults, timing, keyboard controls, session behavior, page-visit Progress, staged unlocking, cloud-sync behavior, pronunciation/audio behavior, or other learner-visible study mechanics MUST update this guide in the same change when the explanation is affected.
 - Prefer importing shared implementation constants into the guide instead of duplicating numeric values. Keep the guide useful to learners; do not fill it with implementation trivia.
-- Tests should protect important examples and invariants described in the guide, including the 125% Adaptive initial-coverage rule.
+- Tests should protect important examples and invariants described in the guide, including the currently configured three Adaptive initial-coverage rules.
 
 ## Weekly card additions
 
@@ -69,7 +69,7 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 
 ## Study controls and grading
 
-- Card order exposes **Adaptive**, **Sequential**, and **Shuffle** in the shared study controller. Adaptive repetition strength is labeled **1: Diverse**, **2: Standard**, and **3: Concentrated**; do not prefix each option with the word Adaptive.
+- Card order exposes **Adaptive**, **Sequential**, **Shuffle**, and **Confusables** in the shared study controller. Adaptive repetition strength is labeled **1: Diverse**, **2: Standard**, and **3: Concentrated**; do not prefix each option with the word Adaptive.
 - Sequential follows the selected pool in order. Shuffle visits every currently selected/available card exactly once per cycle in randomized order, then creates a fresh permutation for the next cycle. Do not repeat the exact prior permutation when a new cycle begins, and avoid an immediate same-card repeat at the cycle boundary when more than one card exists.
 - Shuffle is equal-coverage random order, not adaptive weighting. Filtering changes the eligible pool and may start a new shuffle cycle; long-term progress is unaffected.
 - Space = Start while the Start gate is open; Reveal before answer; Save & Next after reveal. No other key may dismiss the Start gate.
@@ -81,7 +81,7 @@ Read `AGENTS.md` and `docs/MAINTENANCE.md` before nontrivial work. Preserve exis
 - Shift+Enter is unassigned.
 - Automatic correctness is per card + study mode/direction: attempts 1–3 default Wrong; from attempt 4 onward use the majority of the three most recent saved results. Difficulty remains time-based (<3s Easy, <10s Medium, otherwise Hard).
 - Back truly undoes/replaces the prior grade; Skip records no grade.
-- Main Greek/Latin Adaptive initial coverage varies by repetition level: Diverse uses 1.05×, Standard uses 1.25×, and Concentrated uses 1.75× the selected/unlocked pool before unseen cards become mandatory. Standard therefore preserves the familiar 125% example. The coverage dropdown lists unseen page-visit cards and may queue one as the next card.
+- Main Greek/Latin Adaptive initial coverage varies by repetition level: Diverse uses 1.00×, Standard uses 1.10×, and Concentrated uses 1.25× the selected/unlocked pool before unseen cards become mandatory. Standard therefore shows all 20 cards by at most 22 reviews of that selected pool. The coverage dropdown lists unseen page-visit cards and may queue one as the next card.
 
 ## Greek audio
 
