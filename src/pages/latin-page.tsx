@@ -143,7 +143,7 @@ function ParadigmDeckFilters({
 
 
 const latinCardFitCss = `
-/* Published Dickinson frequency rank on both sides of each vocabulary card. */
+/* Published Dickinson frequency rank on the answer side only. */
 .flashcard-face .dickinson-rank-badge {
   position: absolute;
   right: clamp(.9rem, 2.3vw, 1.3rem);
@@ -1029,10 +1029,7 @@ export function LatinPage() {
               if (source.direction === "reverse") return <span className="henle-chart-face"><span className="chart-instruction">Identify this paradigm.</span><LatinParadigmTable card={card} revealed /></span>;
               return <span className="henle-chart-face"><strong className="henle-card-title">{card.front}</strong><span className="chart-instruction">Reconstruct the complete paradigm from memory.</span><LatinParadigmTable card={card} revealed={false} /></span>;
             }
-            return <>
-              {source.deck.id === vocabularyDeck.id && Number.isInteger(card.rank) && <span className="dickinson-rank-badge" aria-label={`Dickinson frequency rank ${card.rank}`}>#{card.rank}</span>}
-              <span className={source.direction === "forward" ? "latin-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>
-            </>;
+            return <span className={source.direction === "forward" ? "latin-front" : "study-prompt reverse-text-prompt"}>{copy.prompt}</span>;
           }}
           renderBack={(card, copy, source) => {
             if (source.deck.id === participlesDeck?.id) {
