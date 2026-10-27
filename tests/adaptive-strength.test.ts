@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ADAPTIVE_PROFILES, adaptiveNeedBoost, constrainAdaptiveCoverage } from "../src/features/study/adaptive-settings";
+import { ADAPTIVE_PROFILES, adaptiveNeedBoost, adaptiveRepeatPenalty, constrainAdaptiveCoverage } from "../src/features/study/adaptive-settings";
 import { blankCardProgress } from "../src/features/study/engine";
 import type { CardProgress, ReviewRecord } from "../src/features/study/types";
 
@@ -30,12 +30,31 @@ describe("adaptive repetition strength", () => {
   it("forces unseen cards sooner at level 1 than level 3", () => {
     const items = Array.from({ length: 20 }, (_, id) => ({ id, progress: progress() }));
     for (let index = 0; index < 16; index += 1) items[index].progress.history.push(review(`first-${index}`, index + 1));
-    for (let index = 0; index < 5; index += 1) items[index].progress.history.push(review(`repeat-${index}`, 30 + index));
+    for (let index = 0; index < 3; index += 1) items[index].progress.history.push(review(`repeat-${index}`, 30 + index));
 
     const light = constrainAdaptiveCoverage(items, "session-a", (item) => item.progress, 1);
     const intensive = constrainAdaptiveCoverage(items, "session-a", (item) => item.progress, 3);
     expect(light.map((item) => item.id)).toEqual([16, 17, 18, 19]);
     expect(intensive).toHaveLength(20);
+  });
+
+  it("gives all levels broader pools, meaningful cooling off, and stronger coverage", () => {
+    for (const level of [1, 2, 3] as const) {
+      expect(ADAPTIVE_PROFILES[level].rankedPoolSize).toBeGreaterThanOrEqual(70);
+      expect(ADAPTIVE_PROFILES[level].recentAvoidance).toBeGreaterThanOrEqual(8);
+      expect(ADAPTIVE_PROFILES[level].temperature).toBeGreaterThanOrEqual(35);
+      expect(ADAPTIVE_PROFILES[level].coverageMultiplier).toBeLessThanOrEqual(1.25);
+    }
+  });
+
+  it("penalizes repeatedly seen cards during a session without affecting saved history", () => {
+    const seenTwice = progress(review("a", 1), review("b", 2));
+    const once = progress(review("c", 3));
+    const never = progress();
+    expect(adaptiveRepeatPenalty(seenTwice, "session-a", 2)).toBeGreaterThan(adaptiveRepeatPenalty(once, "session-a", 2));
+    expect(adaptiveRepeatPenalty(once, "session-a", 2)).toBeGreaterThan(adaptiveRepeatPenalty(never, "session-a", 2));
+    expect(adaptiveRepeatPenalty(seenTwice, "session-a", 1)).toBeGreaterThan(adaptiveRepeatPenalty(seenTwice, "session-a", 3));
+    expect(seenTwice.reviews).toBe(2);
   });
 
   it("amplifies recent wrong and hard reviews as adaptation rises", () => {

@@ -2,13 +2,12 @@ import {
   EASY_RECALL_LIMIT_MS,
   HARD_RECALL_START_MS,
   INITIAL_AUTO_WRONG_REVIEWS,
-  INITIAL_COVERAGE_MULTIPLIER,
   RECENT_AUTO_GRADE_WINDOW,
 } from "../features/study/session-review";
 import { ADAPTIVE_PROFILES } from "../features/study/adaptive-settings";
 import "./how-site-works.css";
 
-const coveragePercent = Math.round(INITIAL_COVERAGE_MULTIPLIER * 100);
+const coveragePercent = Math.round(ADAPTIVE_PROFILES[2].coverageMultiplier * 100);
 const diverseCoveragePercent = Math.round(ADAPTIVE_PROFILES[1].coverageMultiplier * 100);
 const concentratedCoveragePercent = Math.round(ADAPTIVE_PROFILES[3].coverageMultiplier * 100);
 const easySeconds = EASY_RECALL_LIMIT_MS / 1_000;
@@ -34,10 +33,12 @@ export function HowSiteWorks() {
           <summary>Adaptive, Sequential, and Shuffle study</summary>
           <div>
             <h3>Adaptive</h3>
-            <p>Adaptive study gives more attention to cards that need it. Priority is influenced by past Right/Wrong results, Easy/Medium/Hard ratings, response time, recency, current strength, whether a card is due, and whether it has been learned correctly before. The repetition control has three levels: <strong>1: Diverse</strong> favors breadth and fewer immediate repeats; <strong>2: Standard</strong> balances breadth and review; <strong>3: Concentrated</strong> focuses more aggressively on recently Wrong or Hard cards.</p>
+            <p>Adaptive study gives more attention to cards that need it. Priority is influenced by past Right/Wrong results, Easy/Medium/Hard ratings, response time, recency, current strength, whether a card is due, and whether it has been learned correctly before. The repetition control has three levels: <strong>1: Diverse</strong> favors breadth and fewer immediate repeats; <strong>2: Standard</strong> balances breadth and review; <strong>3: Concentrated</strong> gives more attention to recently Wrong or Hard cards. All three now use larger candidate pools, longer recent-card avoidance, gentler weighting of recent mistakes, and a penalty for repeated reviews of the same card within a session.</p>
             <h3>Initial coverage</h3>
-            <p>Difficult cards may repeat during initial coverage, but they cannot crowd out unseen cards indefinitely. In the main Greek and Latin apps, Diverse forces complete first coverage by about {diverseCoveragePercent}% of the selected pool, Standard by {coveragePercent}%, and Concentrated by about {concentratedCoveragePercent}%, each rounded up. For example, with Standard and 20 selected cards, all 20 must appear by card 25. Once every selected card has appeared, normal Adaptive selection takes over.</p>
+            <p>Difficult cards may repeat during initial coverage, but they cannot crowd out unseen cards indefinitely. In the main Greek and Latin apps, Diverse forces complete first coverage by about {diverseCoveragePercent}% of the selected pool, Standard by {coveragePercent}%, and Concentrated by about {concentratedCoveragePercent}%, each rounded up. For example, with Standard and 20 selected cards, all 20 must receive a first review by the 22nd presentation in that session. Once every selected card has appeared, normal Adaptive selection takes over.</p>
             <p>The Current page visit panel's <strong>Words/forms left</strong> dropdown lists selected cards not yet seen during the current page visit. Clicking one queues that word or form to be shown next without changing its long-term history.</p>
+            <h3>Confusables</h3>
+            <p>Confusables is a separate card-order mode. It searches only the currently selected vocabulary cards for near-matching Latin/Greek spellings or shared English glosses, then deliberately quizzes those candidates, sometimes putting contrasting forms next to each other. The answer side names another potentially confusing form and explains whether the connection is a similar spelling or overlapping meaning. It does not change vocabulary content, import new dictionary entries, or create duplicate cards. If fewer than two eligible cards are found, broaden the selection; the mode falls back to ordinary review if the selection changes during a session.</p>
             <h3>Sequential</h3>
             <p>Sequential study follows the selected cards in their defined order and automatically wraps to the beginning after the last card without a completion gate. It does not use Adaptive priority to choose the next card.</p>
             <h3>Shuffle</h3>

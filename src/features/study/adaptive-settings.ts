@@ -14,31 +14,31 @@ export type AdaptiveProfile = {
 
 export const ADAPTIVE_PROFILES: Record<AdaptiveStrength, AdaptiveProfile> = {
   1: {
-    coverageMultiplier: 1.05,
-    recentAvoidance: 6,
-    rankedPoolSize: 36,
-    temperature: 18,
-    wrongBoost: 0.5,
-    hardBoost: 0.25,
-    lastWrongBoost: 1,
+    coverageMultiplier: 1.0,
+    recentAvoidance: 14,
+    rankedPoolSize: 128,
+    temperature: 52,
+    wrongBoost: 0.25,
+    hardBoost: 0.1,
+    lastWrongBoost: 0.5,
   },
   2: {
-    coverageMultiplier: 1.25,
-    recentAvoidance: 4,
-    rankedPoolSize: 24,
-    temperature: 11,
-    wrongBoost: 1.5,
-    hardBoost: 0.75,
-    lastWrongBoost: 3,
+    coverageMultiplier: 1.1,
+    recentAvoidance: 11,
+    rankedPoolSize: 96,
+    temperature: 44,
+    wrongBoost: 0.75,
+    hardBoost: 0.35,
+    lastWrongBoost: 1.5,
   },
   3: {
-    coverageMultiplier: 1.75,
-    recentAvoidance: 2,
-    rankedPoolSize: 12,
-    temperature: 6,
-    wrongBoost: 5,
-    hardBoost: 2,
-    lastWrongBoost: 8,
+    coverageMultiplier: 1.25,
+    recentAvoidance: 8,
+    rankedPoolSize: 72,
+    temperature: 36,
+    wrongBoost: 2,
+    hardBoost: 0.8,
+    lastWrongBoost: 4,
   },
 };
 
@@ -77,4 +77,11 @@ export function adaptiveNeedBoost(progress: CardProgress, strength: AdaptiveStre
   const recentWrong = recent.filter((review) => review.result === "wrong").length;
   const recentHard = recent.filter((review) => review.difficulty === "hard").length;
   return recentWrong * profile.wrongBoost + recentHard * profile.hardBoost + (progress.lastResult === "wrong" ? profile.lastWrongBoost : 0);
+}
+
+// Across a large selected pool, repeated reviews of one card should slowly
+// yield to other selected cards without discarding long-term learning evidence.
+export function adaptiveRepeatPenalty(progress: CardProgress, sessionId: string, strength: AdaptiveStrength) {
+  const repetitions = rankedSessionReviews(progress, sessionId).length;
+  return Math.min(80, repetitions * ({ 1: 16, 2: 12, 3: 9 }[strength]));
 }

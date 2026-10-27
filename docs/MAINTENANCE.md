@@ -132,6 +132,8 @@ The cards placed into each active `StudySourceDefinition` are the selected card 
 - `src/features/study/study-shortcuts.ts` — keyboard semantics.
 - `src/features/study/use-response-timer.ts` — recall timer and focus/visibility handling.
 - `src/features/study/engine.ts` — adaptive scheduling, review recording, optional staging for decks that explicitly request it, Back/Skip, priority. Historic Dickinson unlock limits must not filter unstaged decks.
+- `src/features/study/adaptive-settings.ts` — shared three-level adaptive breadth, recency, and per-session repeat penalties.
+- `src/features/study/confusable-cards.ts` — find visually similar Latin/Greek headwords and matching English glosses strictly within the selected vocabulary, without creating or editing cards.
 - `src/features/study/types.ts` — persistent study-state types; migration-sensitive.
 
 Do not fork timer, grading, card-face, or scheduler implementations by language.

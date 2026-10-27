@@ -2,7 +2,8 @@ import { ArrowLeft, Bookmark, ListMinus, Pause, Play, SkipForward } from "lucide
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../auth/auth-context";
-import { ADAPTIVE_PROFILES, adaptiveNeedBoost, constrainAdaptiveCoverage, type AdaptiveStrength } from "./adaptive-settings";
+import { ADAPTIVE_PROFILES, adaptiveNeedBoost, adaptiveRepeatPenalty, constrainAdaptiveCoverage, type AdaptiveStrength } from "./adaptive-settings";
+import { buildConfusableIndex, confusablePartner, confusableSelectedKeys } from "./confusable-cards";
 import { createEnvelope, createModeState, directionalCopy, getCardProgress, maybeUnlockNextBatch, nextSequentialIndex, presentCard, priorityScore, recordReview } from "./engine";
 import { deleteReviewEvent, loadLocalEnvelope, loadProgressEnvelope, mergeProgressEnvelopes, saveProgressEnvelope, upsertReviewEvent } from "./progress-repository";
 import { beginMarkedFlashCycle, recordMarkedFlashGrade, restartMarkedFlashCycle, type MarkedFlashCycle } from "./marked-flash-cycle";
@@ -106,21 +107,22 @@ function availableCards(source: StudySourceDefinition, state: StudyModeState) {
   return source.cards.filter((card) => unlocked.has(card.id));
 }
 
-function avoidRecentlyPresentedCandidates(candidates: Candidate[], modeFor: (source: StudySourceDefinition) => StudyModeState, strength: AdaptiveStrength) {
+function avoidRecentlyPresentedCandidates(candidates: Candidate[], modeFor: (source: StudySourceDefinition) => StudyModeState, strength: AdaptiveStrength, recentPresented: readonly string[] = []) {
   if (candidates.length <= 2) return candidates;
   const profile = ADAPTIVE_PROFILES[strength];
-  const minimumPool = strength === 3 ? 1 : 3;
+  const minimumPool = Math.min(4, candidates.length - 1);
   const recentLimit = Math.min(profile.recentAvoidance, Math.max(0, candidates.length - minimumPool));
   if (!recentLimit) return candidates;
-  const recentKeys = new Set(
-    candidates
-      .map((candidate) => ({ key: candidateKey(candidate), at: getCardProgress(modeFor(candidate.source), candidate.card.id).lastPresentedAt }))
-      .filter((item) => item.at > 0)
-      .sort((a, b) => b.at - a.at)
-      .slice(0, recentLimit)
-      .map((item) => item.key),
-  );
-  if (!recentKeys.size) return candidates;
+  const availableKeys = new Set(candidates.map(candidateKey));
+  const recent = [...new Set([...recentPresented].reverse())]
+    .filter((key) => availableKeys.has(key)).slice(0, recentLimit);
+  const fallback = candidates
+    .map((candidate) => ({ key: candidateKey(candidate), at: getCardProgress(modeFor(candidate.source), candidate.card.id).lastPresentedAt }))
+    .filter(({ key, at }) => at > 0 && !recent.includes(key))
+    .sort((a, b) => b.at - a.at)
+    .slice(0, recentLimit - recent.length)
+    .map(({ key }) => key);
+  const recentKeys = new Set([...recent, ...fallback]);
   const filtered = candidates.filter((candidate) => !recentKeys.has(candidateKey(candidate)));
   return filtered.length >= minimumPool ? filtered : candidates;
 }
@@ -135,6 +137,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   const savedTogglePendingRef = useRef(false);
   const deselectSelectionPendingRef = useRef(false);
   const shuffleCycleRef = useRef(emptyShuffleCycle());
+  const recentCandidateKeysRef = useRef<string[]>([]);
   const clickPausedTimerRef = useRef(false);
   const visitStartedAtRef = useRef(Date.now());
   const forcedNextRef = useRef<string | null>(null);
@@ -263,6 +266,10 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     return () => { window.removeEventListener("storage", refreshSessionCatalog); window.removeEventListener("focus", refreshSessionCatalog); };
   }, [ready, sessionDeckIds]);
 
+  const confusableIndex = useMemo(() => buildConfusableIndex(
+    sources.flatMap((source) => source.cards.map((card) => ({ key: candidateKey({ source, card }), card }))),
+  ), [sources]);
+
   function regularCandidates() {
     const items: Candidate[] = [];
     for (const source of sources) {
@@ -325,7 +332,10 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
       shuffleCycleRef.current = next.state;
       return next.key ? byKey.get(next.key) ?? null : null;
     }
-    if (mode === "adaptive" && !personalized) {
+    const confusableKeys = confusableSelectedKeys(confusableIndex, candidates.map(candidateKey));
+    if (mode === "confusables" && !personalized && !markedFlashRun && confusableKeys.size >= 2) {
+      candidates = candidates.filter((candidate) => confusableKeys.has(candidateKey(candidate)));
+    } else if (mode === "adaptive" && !personalized) {
       candidates = constrainAdaptiveCoverage(candidates, session.id, (candidate) => getCardProgress(modeFor(candidate.source), candidate.card.id), adaptiveStrength);
     }
     if (exclude && candidates.length > 1) candidates = candidates.filter((candidate) => candidateKey(candidate) !== candidateKey(exclude));
@@ -333,18 +343,29 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
       const activeSourceIds = [...new Set(candidates.map((candidate) => candidate.source.id))];
       const coverage = new Set(sourceIdsNeedingCoverage(activeSourceIds, recentSourceIdsRef.current));
       if (coverage.size < activeSourceIds.length) candidates = candidates.filter((candidate) => coverage.has(candidate.source.id));
-      candidates = avoidRecentlyPresentedCandidates(candidates, modeFor, mode === "adaptive" ? adaptiveStrength : 2);
+      candidates = avoidRecentlyPresentedCandidates(candidates, modeFor, mode === "adaptive" ? adaptiveStrength : 2, recentCandidateKeysRef.current);
+    }
+    if (mode === "confusables" && !personalized && !markedFlashRun && exclude && candidates.length) {
+      const matches = confusableIndex.get(candidateKey(exclude)) ?? [];
+      const partners = new Set(matches.map((match) => match.key));
+      const eligiblePartners = candidates.filter((candidate) => partners.has(candidateKey(candidate)));
+      // Bring an easily confused partner into view, but do not bounce indefinitely
+      // between the same two cards when the selected set contains alternatives.
+      const recent = new Set(recentCandidateKeysRef.current.slice(-4));
+      const freshPartner = eligiblePartners.find((candidate) => !recent.has(candidateKey(candidate)));
+      if (freshPartner) return freshPartner;
     }
     if (personalized) {
       const reviewed = candidates.filter((candidate) => getCardProgress(modeFor(candidate.source), candidate.card.id).reviews > 0);
       const pool = reviewed.length ? reviewed : candidates;
       return [...pool].sort((a, b) => personalizedScore(b) - personalizedScore(a))[0] ?? null;
     }
-    const profile = ADAPTIVE_PROFILES[adaptiveStrength];
+    const strength = mode === "confusables" ? 2 : adaptiveStrength;
+    const profile = ADAPTIVE_PROFILES[strength];
     const ranked = candidates.map((candidate) => {
       const state = modeFor(candidate.source);
       const progress = getCardProgress(state, candidate.card.id);
-      return { candidate, score: priorityScore(candidate.card, state) + adaptiveNeedBoost(progress, adaptiveStrength) };
+      return { candidate, score: priorityScore(candidate.card, state) + adaptiveNeedBoost(progress, strength) - adaptiveRepeatPenalty(progress, session.id, strength) };
     }).sort((a, b) => b.score - a.score).slice(0, Math.min(profile.rankedPoolSize, candidates.length));
     const max = ranked[0].score, weights = ranked.map(({ score }) => Math.exp((score - max) / profile.temperature));
     let chance = Math.random() * weights.reduce((sum, weight) => sum + weight, 0);
@@ -356,6 +377,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     const state = modeFor(candidate.source);
     saveMode(candidate.source, presentCard(state, candidate.card));
     recentSourceIdsRef.current = [...recentSourceIdsRef.current, candidate.source.id].slice(-24);
+    recentCandidateKeysRef.current = [...recentCandidateKeysRef.current, candidateKey(candidate)].slice(-50);
     setCurrent(candidate);
   }
   function resetUi() { setRevealed(false); setReviewFront(false); setBacktracking(false); setResult(null); setDifficulty(null); setCapturedTimeMs(null); setEditingTransaction(null); setPendingDeselectKey(null); }
@@ -412,6 +434,9 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   const selectedCardCount = useMemo(() => new Set(sources.flatMap((source) =>
     source.cards.map((card) => `${source.deck.id}:${card.id}`))).size, [sources]);
   const lockedSelectedCount = Math.max(0, selectedCardCount - visibleCandidates.length);
+  const confusableCardCount = useMemo(() =>
+    confusableSelectedKeys(confusableIndex, visibleCandidates.map(candidateKey)).size,
+  [confusableIndex, visibleCandidates]);
   const sessionProgress = useMemo(() => {
     const items = visibleCandidates.map(({ source, card }) => ({ progress: getCardProgress(states.get(source.id) ?? modeFor(source), card.id) }));
     return selectedPoolVisitProgress(items, visitStartedAtRef.current, selectedCardCount);
@@ -446,6 +471,9 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     if (markedFlashRun) return;
     setSelectionMode(next);
     shuffleCycleRef.current = emptyShuffleCycle();
+    if (next === "confusables") {
+      setNotice("Confusables: reviews selected cards with similar original-language forms or overlapping English meanings. Existing grades and progress are preserved.");
+    }
     if (!current) return;
     resetUi(); setStartGateOpen(next !== "shuffle");
     const selected = chooseNext(current, next, Boolean(warmup));
@@ -708,8 +736,11 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   const selectableSessions = sessionCatalog.filter((item) => item.id !== session.id).sort((a, b) => Number(Boolean(b.builtin)) - Number(Boolean(a.builtin)) || b.lastReviewedAt - a.lastReviewedAt);
   const displayedTimer = timerDigits(capturedTimeMs ?? timer.elapsedMs);
   const timerToggleDisabled = revealed || Boolean(editingTransaction) || !currentState || markedFlashComplete;
+  const confusableOther = selectionMode === "confusables" && !markedFlashRun
+    ? confusablePartner(confusableIndex, candidateKey(current), visibleCandidates.map(candidateKey)) : null;
+  const confusableOtherCard = confusableOther ? visibleCandidates.find((candidate) => candidateKey(candidate) === confusableOther.key) : null;
   const front = <><span className="card-side">Question</span>{renderFront ? renderFront(current.card, copy, current.source) : <span className="study-prompt">{copy.prompt}</span>}</>;
-  const backFace = <><span className="card-side">Answer</span>{renderBack ? renderBack(current.card, copy, current.source) : <span className="answer-block"><strong className="study-answer">{copy.answer}</strong>{current.card.notes && <span className="answer-notes">{current.card.notes}</span>}</span>}</>;
+  const backFace = <><span className="card-side">Answer</span>{renderBack ? renderBack(current.card, copy, current.source) : <span className="answer-block"><strong className="study-answer">{copy.answer}</strong>{current.card.notes && <span className="answer-notes">{current.card.notes}</span>}</span>}{confusableOtherCard && <span className="answer-notes" style={{ fontSize: ".82rem" }}>Compare with: {confusableOtherCard.card.front} · {confusableOther?.reason}</span>}</>;
   const frontControls = <>
     <div className="card-overlay-actions">
       <button type="button" className="small-outline-button card-overlay-button" data-study-control="back" disabled={!lastTransaction || markedFlashComplete} onClick={back}><ArrowLeft /> Back <kbd>Enter</kbd></button>
@@ -733,12 +764,13 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
               <span className="toolbar-timer-value">{displayedTimer}</span>
               <button type="button" className="toolbar-timer-toggle" data-study-control="timer" onClick={() => setStartGateOpen(startGateOpen ? false : true)} disabled={timerToggleDisabled} aria-label={startGateOpen ? "Play timer" : "Pause timer"} title={startGateOpen ? "Play timer" : "Pause timer"}>{startGateOpen ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}</button>
             </div>
-            <label className="compact-select-label"><span className="sr-only">Card order</span><select value={selectionMode} disabled={Boolean(markedFlashRun)} onChange={(event) => changeOrder(event.target.value as SelectionMode)}><option value="adaptive">Adaptive</option><option value="sequential">Sequential</option><option value="shuffle">Shuffle</option></select></label>
+            <label className="compact-select-label"><span className="sr-only">Card order</span><select value={selectionMode} disabled={Boolean(markedFlashRun)} onChange={(event) => changeOrder(event.target.value as SelectionMode)}><option value="adaptive">Adaptive</option><option value="sequential">Sequential</option><option value="shuffle">Shuffle</option><option value="confusables" disabled={confusableCardCount < 2}>Confusables ({confusableCardCount})</option></select></label>
             {selectionMode === "adaptive" ? <label className="compact-select-label"><span className="sr-only">Adaptive repetition strength</span><select value={adaptiveStrength} disabled={Boolean(markedFlashRun)} onChange={(event) => setAdaptiveStrength(Number(event.target.value) as AdaptiveStrength)}><option value={1}>1: Diverse</option><option value={2}>2: Standard</option><option value={3}>3: Concentrated</option></select></label> : <span aria-hidden="true" />}
             <label className="compact-select-label"><span className="sr-only">Study session</span><select value={sessionControlValue} disabled={Boolean(editingTransaction) || Boolean(markedFlashRun)} onChange={(event) => { const value = event.target.value; if (value === "__new__") startNewSession(); else if (value !== "__current__") continueSession(value); }}><option value="__current__">{markedFlashRun ? `${markedFlashRun.label} flash` : currentSessionName}</option><option value="__new__">Start new custom session</option>{selectableSessions.map((item) => <option key={item.id} value={item.id} disabled={item.inferred}>{sessionLabel(item)}</option>)}</select></label>
           </div>
         </div>
         {notice && <button className="inline-notice" type="button" onClick={() => setNotice(null)}>{notice}</button>}
+        {selectionMode === "confusables" && confusableCardCount < 2 && !markedFlashRun && <p className="initial-completion-note" role="status">No matching vocabulary pairs remain in the selection. Broaden Choose cards or switch modes; regular Adaptive reviews continue in the meantime.</p>}
         <StudyCardFaces revealed={revealed} showingAnswer={showingAnswer} backtracking={backtracking} onReveal={reveal} onFlip={toggleReviewFace} front={front} back={backFace} frontControls={frontControls} />
         <StudyRatingControls revealed={revealed} result={result} difficulty={difficulty} editing={Boolean(editingTransaction)} onReveal={reveal} onResult={setResult} onDifficulty={setDifficulty} onSave={saveNext} />
       </section>
