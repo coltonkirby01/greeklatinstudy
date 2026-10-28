@@ -21,6 +21,9 @@ export const lesson14VocabularyAudio: Readonly<Record<string, {label: string; gr
 export const lesson14CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
   formChart("lesson14-chart-first-person-forms", "First-Person Personal Pronoun Forms", [["ἐγώ","ἐμοῦ, μου","ἐμοί, μοι","ἐμέ, με"],["ἡμεῖς","ἡμῶν","ἡμῖν","ἡμᾶς"]]),
   formChart("lesson14-chart-second-person-forms", "Second-Person Personal Pronoun Forms", [["σύ","σοῦ, σου","σοί, σοι","σέ, σε"],["ὑμεῖς","ὑμῶν","ὑμῖν","ὑμᾶς"]]),
-  formChart("lesson14-chart-autos-singular-forms", "αὐτός — Singular Pronoun/Intensive Forms", [["αὐτός","αὐτοῦ","αὐτῷ","αὐτόν"],["αὐτή","αὐτῆς","αὐτῇ","αὐτήν"],["αὐτό","αὐτοῦ","αὐτῷ","αὐτό"]]),
-  formChart("lesson14-chart-autos-plural-forms", "αὐτός — Plural Pronoun/Intensive Forms", [["αὐτοί","αὐτῶν","αὐτοῖς","αὐτούς"],["αὐταί","αὐτῶν","αὐταῖς","αὐτάς"],["αὐτά","αὐτῶν","αὐτοῖς","αὐτά"]]),
+  formChart("lesson14-chart-autos-singular-forms", "αὐτός — Third-Person/Intensive Forms (Singular & Plural)", [
+    ["αὐτός","αὐτοῦ","αὐτῷ","αὐτόν","αὐτοί","αὐτῶν","αὐτοῖς","αὐτούς"],
+    ["αὐτή","αὐτῆς","αὐτῇ","αὐτήν","αὐταί","αὐτῶν","αὐταῖς","αὐτάς"],
+    ["αὐτό","αὐτοῦ","αὐτῷ","αὐτό","αὐτά","αὐτῶν","αὐτοῖς","αὐτά"],
+  ]),
 ] as const;

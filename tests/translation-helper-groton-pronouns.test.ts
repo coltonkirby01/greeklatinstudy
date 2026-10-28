@@ -50,9 +50,9 @@ describe("Greek Translation Helper: Groton Lessons 13–14", () => {
     }
   });
 
-  it("indexes every case, number, gender and variant from all ten Groton pronoun/demonstrative charts", () => {
+  it("indexes every case, number, gender and variant from all nine Groton pronoun/demonstrative charts", () => {
     expect(forms13.cards).toHaveLength(6);
-    expect(forms14.cards).toHaveLength(4);
+    expect(forms14.cards).toHaveLength(3);
     let checked = 0;
     for (const chart of [...forms13.cards, ...forms14.cards]) {
       const columns = chart.metadata?.chartColumns as string[];
@@ -81,6 +81,13 @@ describe("Greek Translation Helper: Groton Lessons 13–14", () => {
       }
     }
     expect(checked).toBeGreaterThan(100);
+    const combined = forms14.cards.find(card => card.id === "lesson14-chart-autos-singular-forms");
+    expect(combined?.metadata?.chartRows).toHaveLength(8);
+    expect(combined?.metadata?.chartColumns).toEqual(["Masculine", "Feminine", "Neuter"]);
+    const singular = lookupDictionaryWord(index, "αὐτῷ").find(match => match.morphology?.some(value => value.includes("Singular · Dative")));
+    const plural = lookupDictionaryWord(index, "αὐτοῖς").find(match => match.morphology?.some(value => value.includes("Plural · Dative")));
+    expect(singular?.headword).toContain("αὐτός");
+    expect(plural?.headword).toContain("αὐτός");
   });
 
   it("recognizes the specific pronominal and demonstrative forms from the exercise page", () => {

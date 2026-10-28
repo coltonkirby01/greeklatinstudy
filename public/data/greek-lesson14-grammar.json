@@ -83,10 +83,10 @@
   },
   {
     "id": "lesson14-chart-autos-singular-forms",
-    "category": "αὐτός — Singular Pronoun/Intensive Forms",
-    "prompt": "αὐτός — Singular Pronoun/Intensive Forms",
+    "category": "αὐτός — Third-Person/Intensive Forms (Singular & Plural)",
+    "prompt": "αὐτός — Third-Person/Intensive Forms (Singular & Plural)",
     "source_ref": "Groton 14.87, pp. 83–84",
-    "accent_note": "Nominative αὐτός is intensive or means same, not an ordinary third-person pronoun.",
+    "accent_note": "Nominative αὐτός is intensive or means same, not an ordinary third-person pronoun. Both singular and plural forms are shown.",
     "columns": [
       "Masculine",
       "Feminine",
@@ -94,7 +94,7 @@
     ],
     "rows": [
       {
-        "label": "Nominative",
+        "label": "Singular · Nominative",
         "cells": [
           "αὐτός",
           "αὐτή",
@@ -102,7 +102,7 @@
         ]
       },
       {
-        "label": "Genitive",
+        "label": "Singular · Genitive",
         "cells": [
           "αὐτοῦ",
           "αὐτῆς",
@@ -110,7 +110,7 @@
         ]
       },
       {
-        "label": "Dative",
+        "label": "Singular · Dative",
         "cells": [
           "αὐτῷ",
           "αὐτῇ",
@@ -118,29 +118,15 @@
         ]
       },
       {
-        "label": "Accusative",
+        "label": "Singular · Accusative",
         "cells": [
           "αὐτόν",
           "αὐτήν",
           "αὐτό"
         ]
-      }
-    ]
-  },
-  {
-    "id": "lesson14-chart-autos-plural-forms",
-    "category": "αὐτός — Plural Pronoun/Intensive Forms",
-    "prompt": "αὐτός — Plural Pronoun/Intensive Forms",
-    "source_ref": "Groton 14.87, pp. 83–84",
-    "accent_note": "Nominative αὐτός is intensive or means same, not an ordinary third-person pronoun.",
-    "columns": [
-      "Masculine",
-      "Feminine",
-      "Neuter"
-    ],
-    "rows": [
+      },
       {
-        "label": "Nominative",
+        "label": "Plural · Nominative",
         "cells": [
           "αὐτοί",
           "αὐταί",
@@ -148,7 +134,7 @@
         ]
       },
       {
-        "label": "Genitive",
+        "label": "Plural · Genitive",
         "cells": [
           "αὐτῶν",
           "αὐτῶν",
@@ -156,7 +142,7 @@
         ]
       },
       {
-        "label": "Dative",
+        "label": "Plural · Dative",
         "cells": [
           "αὐτοῖς",
           "αὐταῖς",
@@ -164,7 +150,7 @@
         ]
       },
       {
-        "label": "Accusative",
+        "label": "Plural · Accusative",
         "cells": [
           "αὐτούς",
           "αὐτάς",

@@ -36,10 +36,20 @@ describe("Groton Lessons 13–14", () => {
   });
 
   it("includes first, second, and third-person case forms and enclitic alternates", () => {
-    expect(grammar14).toHaveLength(4);
+    expect(grammar14).toHaveLength(3);
     expect(grammar14.find(card => card.id==="lesson14-chart-first-person-forms")?.rows[1].cells).toEqual(["ἐμοῦ / μου","ἡμῶν"]);
     expect(grammar14.find(card => card.id==="lesson14-chart-second-person-forms")?.rows[2].cells).toEqual(["σοί / σοι","ὑμῖν"]);
-    expect(grammar14.find(card => card.id==="lesson14-chart-autos-singular-forms")?.rows[0].cells).toEqual(["αὐτός","αὐτή","αὐτό"]);
+    const thirdPerson = grammar14.find(card => card.id==="lesson14-chart-autos-singular-forms");
+    expect(thirdPerson?.category).toContain("Singular & Plural");
+    expect(thirdPerson?.columns).toEqual(["Masculine", "Feminine", "Neuter"]);
+    expect(thirdPerson?.rows.map(row => row.label)).toEqual([
+      "Singular · Nominative", "Singular · Genitive", "Singular · Dative", "Singular · Accusative",
+      "Plural · Nominative", "Plural · Genitive", "Plural · Dative", "Plural · Accusative",
+    ]);
+    expect(thirdPerson?.rows[0].cells).toEqual(["αὐτός","αὐτή","αὐτό"]);
+    expect(thirdPerson?.rows[4].cells).toEqual(["αὐτοί","αὐταί","αὐτά"]);
+    expect(thirdPerson?.rows[7].cells).toEqual(["αὐτούς","αὐτάς","αὐτά"]);
+    expect(grammar14.some(card => card.id === "lesson14-chart-autos-plural-forms")).toBe(false);
   });
 
   it("uses polytonic accents and registers cacheable Classical Greek audio", () => {

@@ -138,7 +138,7 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
               }
             : {
                 eyebrow: "Personal pronouns",
-                description: "Four first/second/third-person and intensive-pronoun form charts.",
+                description: "Three pronoun form charts: first person, second person, and combined singular/plural αὐτός.",
                 sourceNote: "Groton Lesson 14, §§87–88, pp. 83–84.",
               };
 
