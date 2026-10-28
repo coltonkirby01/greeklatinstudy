@@ -55,6 +55,8 @@ ${quidOutput}`));
     expect(matches[0].definition).toContain("what?");
     expect(matches[0].definition).not.toContain("which, how");
     expect(matches[0].morphology).toContain("pronoun · accusative · singular · neuter");
+    expect(matches[0].morphology).not.toContain("pronoun · accusative · singular · feminine");
+    expect(matches[0].whitaker?.rawAnalyses?.every((analysis) => analysis.startsWith("qu.id"))).toBe(true);
   });
 
   it("retries se without manufacturing a definition when no Whitaker output is supplied", async () => {

@@ -386,19 +386,19 @@ export function toMatches(text: string, requestedSurface?: string): LookupMatch[
   const groups = parseGroups(text).sort((a, b) => Number(a.modifier) - Number(b.modifier));
 
   for (const group of groups) {
-    if (requestedSurface) {
-      const target = normalizeLatin(requestedSurface);
-      // A recovery query may contain other words. Never return their
-      // definitions or morphology for the original clicked word.
-      const attested = group.analyses.some((line) => {
-        const analysis = line.match(/^\s*(\S+)\s{2,}[A-Z]+\b/);
-        return analysis && normalizeLatin(analysis[1]) === target;
-      });
-      if (!attested) continue;
-    }
+    // Compound retries can elicit several source-word analyses within one
+    // response; discard every companion analysis before rendering or saving.
+    const matchedAnalyses = requestedSurface
+      ? group.analyses.filter((line) => {
+          const analysis = line.match(/^\s*(\S+)\s{2,}[A-Z]+\b/);
+          return analysis && normalizeLatin(analysis[1]) === normalizeLatin(requestedSurface);
+        })
+      : group.analyses;
+    if (requestedSurface && !matchedAnalyses.length) continue;
+    const sourceGroup = { ...group, analyses: matchedAnalyses };
     const definition = group.definitions.join(" ").replace(/\s+/g, " ").trim();
     if (!definition) continue;
-    const morphology = [...new Set(group.analyses.map(humanizeAnalysis).filter(Boolean))];
+    const morphology = [...new Set(sourceGroup.analyses.map(humanizeAnalysis).filter(Boolean))];
     const key = `${group.headword}\u0000${definition}\u0000${group.code ?? ""}\u0000${morphology.join("|")}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -406,7 +406,7 @@ export function toMatches(text: string, requestedSurface?: string): LookupMatch[
       headword: group.headword,
       definition,
       morphology,
-      whitaker: dictionaryMetadata(group),
+      whitaker: dictionaryMetadata(sourceGroup),
       source: "Whitaker's Words Online",
       sourceRef: "Whitaker's Words Online · latin-words.com",
     });
