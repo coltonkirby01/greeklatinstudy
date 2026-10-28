@@ -13,7 +13,8 @@ const partsOfSpeech = new Set([
   "TACKON", "PREFIX", "SUFFIX",
 ]);
 const modifierPartsOfSpeech = new Set(["TACKON", "PREFIX", "SUFFIX"]);
-const posPattern = "N|V|VPAR|ADJ|ADV|PREP|CONJ|INTERJ|PRON|PACK|NUM|SUPINE|TACKON|PREFIX|SUFFIX";
+// X marks a valid Whitaker special/unique lexical entry (common for pronouns).
+const posPattern = "N|V|VPAR|ADJ|ADV|PREP|CONJ|INTERJ|PRON|PACK|NUM|SUPINE|TACKON|PREFIX|SUFFIX|X";
 
 const labelMap: Record<string, string> = {
   NOM: "nominative", GEN: "genitive", DAT: "dative", ACC: "accusative", ABL: "ablative", VOC: "vocative", LOC: "locative",
@@ -294,7 +295,11 @@ function parseGroups(text: string) {
         headword: headword.headword,
         definitions: [],
         modifier: headword.modifier,
-        pos: headword.pos,
+        // Whitaker's X entries inherit their grammatical part of speech
+        // from the adjacent source analysis rather than an invented label.
+        pos: headword.pos === "X"
+          ? (pendingAnalyses.map(analysisParts).find((item) => item && item.pos !== "X")?.pos ?? "X")
+          : headword.pos,
         dictionaryDetails: headword.dictionaryDetails,
         code: headword.code,
         rawEntry: headword.rawEntry,
@@ -305,7 +310,13 @@ function parseGroups(text: string) {
 
     if (analysisParts(line)) {
       if (current?.definitions.length) finish();
-      pendingAnalyses.push(line);
+      // Some Whitaker unique entries place the X headword between separate
+      // analyses of the same pronoun. Keep subsequent analyses together.
+      if (current && !current.definitions.length) {
+        current.analyses.push(line);
+      } else {
+        pendingAnalyses.push(line);
+      }
       continue;
     }
 
@@ -369,12 +380,22 @@ function dictionaryMetadata(group: ParsedGroup): WhitakerMetadata {
   };
 }
 
-function toMatches(text: string): LookupMatch[] {
+export function toMatches(text: string, requestedSurface?: string): LookupMatch[] {
   const output: LookupMatch[] = [];
   const seen = new Set<string>();
   const groups = parseGroups(text).sort((a, b) => Number(a.modifier) - Number(b.modifier));
 
   for (const group of groups) {
+    if (requestedSurface) {
+      const target = normalizeLatin(requestedSurface);
+      // A recovery query may contain other words. Never return their
+      // definitions or morphology for the original clicked word.
+      const attested = group.analyses.some((line) => {
+        const analysis = line.match(/^\s*(\S+)\s{2,}[A-Z]+\b/);
+        return analysis && normalizeLatin(analysis[1]) === target;
+      });
+      if (!attested) continue;
+    }
     const definition = group.definitions.join(" ").replace(/\s+/g, " ").trim();
     if (!definition) continue;
     const morphology = [...new Set(group.analyses.map(humanizeAnalysis).filter(Boolean))];
@@ -393,11 +414,11 @@ function toMatches(text: string): LookupMatch[] {
   return output;
 }
 
-async function fetchLatinWords(word: string) {
+async function fetchLatinWordsPage(query: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8000);
   try {
-    const url = `${LATIN_WORDS_BASE}/word/latin/${encodeURIComponent(word)}`;
+    const url = `${LATIN_WORDS_BASE}/word/latin/${encodeURIComponent(query)}`;
     const response = await fetch(url, {
       headers: {
         Accept: "text/html,application/xhtml+xml",
@@ -405,14 +426,39 @@ async function fetchLatinWords(word: string) {
       },
       signal: controller.signal,
     });
-    if (response.status === 404) return [];
+    if (response.status === 404) return { output: "", explicitNotFound: true, pageText: "" };
     if (!response.ok) throw new Error(`latin-words.com returned HTTP ${response.status}`);
-    const text = extractWordsOutput(await response.text());
-    if (!text) return [];
-    return toMatches(text);
+    const pageText = await response.text();
+    return { output: extractWordsOutput(pageText), explicitNotFound: false, pageText };
   } finally {
     clearTimeout(timeout);
   }
+}
+
+export async function fetchLatinWords(word: string): Promise<LookupMatch[]> {
+  const direct = await fetchLatinWordsPage(word);
+  const directMatches = toMatches(direct.output);
+  if (directMatches.length) return directMatches;
+  // The source sometimes returns an empty result for short valid words.
+  // Re-query the SAME Whitaker site with an adjacent common word, which
+  // can cause its input splitter to analyze the original short word.
+  // Strict surface matching prevents displaying the companion's gloss.
+  if (word.length <= 5 && !direct.explicitNotFound) {
+    for (const combined of [`quam${word}`, `${word}sanguine`]) {
+      try {
+        const retry = await fetchLatinWordsPage(combined);
+        const matches = toMatches(retry.output, word);
+        if (matches.length) return matches;
+      } catch (error) {
+        // Do not mask the original result when the optional recovery attempt fails.
+        console.warn("Whitaker combined-word recovery failed", error);
+      }
+    }
+  }
+  if (direct.explicitNotFound || /(?:no words found|no matches found|unknown latin word)/i.test(direct.pageText)) return [];
+  // A valid HTML page without usable Whitaker analysis is not proof that
+  // a Latin form is absent from the dictionary.
+  throw new Error("Whitaker's Words returned no usable analysis for this form. Its online results may be incomplete.");
 }
 
 Deno.serve(async (req: Request) => {
@@ -431,10 +477,10 @@ Deno.serve(async (req: Request) => {
 
   try {
     const matches = await fetchLatinWords(word);
-    memoryCache.set(word, { expiresAt: Date.now() + CACHE_MS, matches });
+    if (matches.length) memoryCache.set(word, { expiresAt: Date.now() + CACHE_MS, matches });
     return json({ word: surface, normalized: word, matches, source: LATIN_WORDS_BASE });
   } catch (error) {
     console.error("latin-words.com lookup failed", error);
-    return json({ error: "Whitaker's Words Online is temporarily unavailable." }, 502, 30);
+    return json({ error: error instanceof Error ? error.message : "Whitaker's Words Online is temporarily unavailable." }, 502, 30);
   }
 });

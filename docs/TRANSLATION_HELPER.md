@@ -29,7 +29,9 @@ The Translation Helper uses **Whitaker's Words Online at https://latin-words.com
 
 Do not use Dickinson, Henle, Moreland & Fleischer, Olivetti, the previous public JSON Latin API, or any other Latin dictionary/morphology source on this page. This restriction applies only to the Translation Helper. It does not remove or alter Dickinson vocabulary or other Latin material used elsewhere in the site's flashcards.
 
-The site's Supabase `latin-lookup` Edge Function requests the individual-word result page from latin-words.com and converts that result into a small structured response for the learner-facing panel. No Whitaker dictionary engine or bulk dictionary data is downloaded into the learner's browser.
+The site's Supabase `latin-lookup` Edge Function requests the individual-word result page from latin-words.com and converts that result into a small structured response for the learner-facing panel. No Whitaker dictionary engine or bulk dictionary data is downloaded into the learner's browser. Whitaker's unique/special entries may use an `X` dictionary part-of-speech field (including some pronouns); recognize this as a valid dictionary header and take the grammatical part of speech exclusively from Whitaker's adjacent inflection analyses. Retain analyses printed before **and** after the unique header.
+
+When the source returns a blank result for a short form such as *quid* or *sē*, retry the **same latin-words.com source** with a combined-word input, which may trigger Whitaker's own word-splitting recovery. Only use matches whose returned analysis explicitly matches the originally requested surface form; discard any companion word's interpretations. Never infer a headword, meaning, or morphology absent from returned Whitaker evidence. If the source still returns a blank/invalid result, report a lookup failure instead of incorrectly asserting that the word does not exist. Explicit upstream 404 or clearly reported absence remains a genuine no-match. Don't cache empty or failed results; bump the frontend lookup version after backend parser changes to avoid stale CDN/local results.
 
 ## Latin form display
 

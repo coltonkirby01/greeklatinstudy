@@ -5,7 +5,7 @@ type ProxyPayload = {
   error?: unknown;
 };
 
-const CACHE_PREFIX = "translation-helper-latin-words-v3:";
+const CACHE_PREFIX = "translation-helper-latin-words-v4:";
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const memoryCache = new Map<string, DictionaryMatch[]>();
 
@@ -136,7 +136,7 @@ export async function lookupLatinWords(surface: string): Promise<DictionaryMatch
   const supabaseApiKey = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined)
     ?? (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined);
   if (!supabaseUrl || !supabaseApiKey) throw new Error("The Whitaker's Words lookup service is not configured.");
-  const payload = await fetchJson(`${supabaseUrl}/functions/v1/latin-lookup?word=${encodeURIComponent(word)}&v=3`, supabaseApiKey);
+  const payload = await fetchJson(`${supabaseUrl}/functions/v1/latin-lookup?word=${encodeURIComponent(word)}&v=4`, supabaseApiKey);
   if (!payload || typeof payload !== "object") return [];
   const proxy = payload as ProxyPayload;
   if (typeof proxy.error === "string") throw new Error(proxy.error);
