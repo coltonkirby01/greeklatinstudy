@@ -31,6 +31,26 @@ export function shuffledCycleOrder(keys: readonly string[], previousOrder: reado
   return order;
 }
 
+/**
+ * A Greek/Latin filter edit can retain the visible card while changing the
+ * eligible keys. Count that already-visible card as the first card in the new
+ * cycle, rather than quietly putting it back among the unvisited cards.
+ * If the pool did not change, preserve the entire in-progress cycle.
+ */
+export function reconcileShuffleCycle(
+  keys: readonly string[],
+  state: ShuffleCycleState,
+  currentKey: string,
+  random: () => number = Math.random,
+): ShuffleCycleState {
+  const uniqueKeys = [...new Set(keys)];
+  const signature = [...uniqueKeys].sort().join("|");
+  if (signature === state.signature) return state;
+  if (!uniqueKeys.includes(currentKey)) return emptyShuffleCycle();
+  const remaining = shuffledCycleOrder(uniqueKeys.filter((key) => key !== currentKey), [], undefined, random);
+  return { signature, remaining, lastOrder: [currentKey, ...remaining] };
+}
+
 export function nextShuffleKey(
   keys: readonly string[],
   state: ShuffleCycleState,

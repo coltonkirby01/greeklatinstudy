@@ -11,7 +11,7 @@ import { savedCardRef } from "./saved-cards";
 import { intrinsicCardDifficulty } from "./scoring";
 import { builtinSessionId, displayManagedSessionName, managedSessionsForLanguage, sessionDeckIdsForLanguage, type BuiltinSessionKind, type ManagedSession } from "./session-management";
 import { autoReviewDefaults, selectedPoolVisitProgress, wasMarkedDuringVisit } from "./session-review";
-import { emptyShuffleCycle, nextShuffleKey } from "./shuffle-cycle";
+import { emptyShuffleCycle, nextShuffleKey, reconcileShuffleCycle } from "./shuffle-cycle";
 import "./study-gate.css";
 import { StudyCardFaces, StudyRatingControls, StudySidebar, StudyStartGate, type SidebarStudyItem } from "./study-session-ui";
 import { studyDeselectShortcut, studyShortcut } from "./study-shortcuts";
@@ -393,13 +393,21 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
     const forcedStillVisible = forcedNextRef.current && regularCandidates().some((candidate) => candidateKey(candidate) === forcedNextRef.current);
     if (forcedNextRef.current && !forcedStillVisible) clearForcedNext();
     if (internalSelectionChange && retained) {
+      if (selectionMode === "shuffle") shuffleCycleRef.current = reconcileShuffleCycle(
+        regularCandidates().map(candidateKey), shuffleCycleRef.current, candidateKey(retained),
+      );
       setCurrent(retained);
       return;
     }
     if (markedFlashRun) return;
     resetUi(); setLastTransaction(null); setWarmup(null);
     if (!internalSelectionChange) setStartGateOpen(selectionMode !== "shuffle");
-    if (retained) { recentSourceIdsRef.current = [retained.source.id]; setCurrent(retained); return; }
+    if (retained) {
+      if (selectionMode === "shuffle") shuffleCycleRef.current = reconcileShuffleCycle(
+        regularCandidates().map(candidateKey), shuffleCycleRef.current, candidateKey(retained),
+      );
+      recentSourceIdsRef.current = [retained.source.id]; setCurrent(retained); return;
+    }
     recentSourceIdsRef.current = [];
     setCurrent(null);
     const selected = chooseNext(persistedCurrentCandidate());
@@ -684,8 +692,12 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   }, [editingTransaction, revealed, markedFlashComplete]);
 
   useEffect(() => {
-    function pauseForPageClick() {
+    function pauseForPageClick(event: MouseEvent) {
       if (revealed || editingTransaction || startGateOpen || markedFlashComplete) return;
+      // Skip and Back are explicit study-navigation controls: let their
+      // handlers advance without leaving the NEXT card stuck at Start.
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest('[data-study-control="skip"], [data-study-control="back"], [data-study-control="card-order"]')) return;
       clickPausedTimerRef.current = true;
       setStartGateOpen(true);
       queueMicrotask(() => { clickPausedTimerRef.current = false; });
@@ -764,7 +776,7 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
               <span className="toolbar-timer-value">{displayedTimer}</span>
               <button type="button" className="toolbar-timer-toggle" data-study-control="timer" onClick={() => setStartGateOpen(startGateOpen ? false : true)} disabled={timerToggleDisabled} aria-label={startGateOpen ? "Play timer" : "Pause timer"} title={startGateOpen ? "Play timer" : "Pause timer"}>{startGateOpen ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}</button>
             </div>
-            <label className="compact-select-label"><span className="sr-only">Card order</span><select value={selectionMode} disabled={Boolean(markedFlashRun)} onChange={(event) => changeOrder(event.target.value as SelectionMode)}><option value="adaptive">Adaptive</option><option value="sequential">Sequential</option><option value="shuffle">Shuffle</option><option value="confusables" disabled={confusableCardCount < 2}>Confusables ({confusableCardCount})</option></select></label>
+            <label className="compact-select-label"><span className="sr-only">Card order</span><select data-study-control="card-order" value={selectionMode} disabled={Boolean(markedFlashRun)} onChange={(event) => changeOrder(event.target.value as SelectionMode)}><option value="adaptive">Adaptive</option><option value="sequential">Sequential</option><option value="shuffle">Shuffle</option><option value="confusables" disabled={confusableCardCount < 2}>Confusables ({confusableCardCount})</option></select></label>
             {selectionMode === "adaptive" ? <label className="compact-select-label"><span className="sr-only">Adaptive repetition strength</span><select value={adaptiveStrength} disabled={Boolean(markedFlashRun)} onChange={(event) => setAdaptiveStrength(Number(event.target.value) as AdaptiveStrength)}><option value={1}>1: Diverse</option><option value={2}>2: Standard</option><option value={3}>3: Concentrated</option></select></label> : <span aria-hidden="true" />}
             <label className="compact-select-label"><span className="sr-only">Study session</span><select value={sessionControlValue} disabled={Boolean(editingTransaction) || Boolean(markedFlashRun)} onChange={(event) => { const value = event.target.value; if (value === "__new__") startNewSession(); else if (value !== "__current__") continueSession(value); }}><option value="__current__">{markedFlashRun ? `${markedFlashRun.label} flash` : currentSessionName}</option><option value="__new__">Start new custom session</option>{selectableSessions.map((item) => <option key={item.id} value={item.id} disabled={item.inferred}>{sessionLabel(item)}</option>)}</select></label>
           </div>

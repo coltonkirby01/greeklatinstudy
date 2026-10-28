@@ -26,6 +26,13 @@ describe("continuous Greek/Latin study orders without a round-completion gate", 
     expect(controller).toContain('if (!internalSelectionChange) setStartGateOpen(selectionMode !== "shuffle");');
   });
 
+  it("lets Skip and Back navigate while Shuffle is running without triggering the document click pause", () => {
+    expect(controller).toContain('target?.closest(\'[data-study-control="skip"], [data-study-control="back"], [data-study-control="card-order"]\')');
+    expect(controller).toContain('document.addEventListener("click", pauseForPageClick, true)');
+    expect(controller).toContain("shuffleCycleRef.current = reconcileShuffleCycle(");
+    expect(controller).toContain('<select data-study-control="card-order" value={selectionMode}');
+  });
+
   it("keeps the pause/Start gate and separate Ever wrong flash-completion choices", () => {
     expect(controller).toContain('<StudyStartGate onStart={() => setStartGateOpen(false)}');
     expect(controller).toContain('onClick={() => setStartGateOpen(startGateOpen ? false : true)}');
