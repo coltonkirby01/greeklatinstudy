@@ -2,7 +2,7 @@ import type { DeckDefinition, StudyCard } from "../features/study/types";
 import { classicalGreekPronunciation } from "../features/greek/greek-pronunciation";
 import { greekLesson3ParadigmSpeechText } from "./builtin-decks";
 
-type GrotonLesson = 9 | 10 | 11 | 12 | 13 | 14;
+type GrotonLesson = 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 
 type GreekVocabularySourceCard = {
   id: string;
@@ -37,7 +37,9 @@ function vocabularySourceNote(lesson: GrotonLesson) {
   if (lesson === 11) return "Groton 11.77.";
   if (lesson === 12) return "Groton 12.81.";
   if (lesson === 13) return "Groton 13.85.";
-  return "Groton 14.89.";
+  if (lesson === 14) return "Groton 14.89.";
+  if (lesson === 15) return "Groton 15.95.";
+  return "Groton 16.100.";
 }
 
 function vocabularyDeck(lesson: GrotonLesson, source: GreekVocabularySourceCard[]): DeckDefinition {
@@ -91,7 +93,7 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
       category: card.category,
       rank: index + 1,
       source: `From Alpha to Omega, Lesson ${lesson}`,
-      notes: [lesson === 12 ? "Irregular-form chart" : lesson >= 13 ? "Pronoun-form chart" : isEndingChart ? "Ending chart" : "Whole-paradigm chart", card.accent_note].filter(Boolean).join(" · "),
+      notes: [lesson === 12 ? "Irregular-form chart" : lesson === 13 || lesson === 14 ? "Pronoun-form chart" : isEndingChart ? "Ending chart" : "Whole-paradigm chart", card.accent_note].filter(Boolean).join(" · "),
       metadata: {
         lesson,
         studySource: "grammar-chart",
@@ -136,11 +138,17 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
                 description: "Six singular/plural form charts for ὅδε, οὗτος, and ἐκεῖνος.",
                 sourceNote: "Groton Lesson 13, pp. 77–80.",
               }
-            : {
-                eyebrow: "Personal pronouns",
-                description: "Three pronoun form charts: first person, second person, and combined singular/plural αὐτός.",
-                sourceNote: "Groton Lesson 14, §§87–88, pp. 83–84.",
-              };
+            : lesson === 14
+        ? {
+            eyebrow: "Personal pronouns",
+            description: "Three pronoun form charts: first person, second person, and combined singular/plural αὐτός.",
+            sourceNote: "Groton Lesson 14, §§87–88, pp. 83–84.",
+          }
+        : {
+            eyebrow: "Third-declension endings",
+            description: "Masculine/feminine and neuter third-declension endings, with singular and plural on each chart.",
+            sourceNote: "Groton Lesson 16, §§97–99, pp. 95–97.",
+          };
 
   return {
     id,
@@ -224,4 +232,21 @@ export function loadGreekLesson14VocabularyDeck() {
 export function loadGreekLesson14GrammarDeck() {
   lesson14GrammarPromise ??= fetchText("data/greek-lesson14-grammar.json").then(text => grammarDeck(14, JSON.parse(text) as GreekGrammarSourceCard[]));
   return lesson14GrammarPromise;
+}
+
+let lesson15VocabularyPromise: Promise<DeckDefinition> | null = null;
+let lesson16VocabularyPromise: Promise<DeckDefinition> | null = null;
+let lesson16GrammarPromise: Promise<DeckDefinition> | null = null;
+
+export function loadGreekLesson15VocabularyDeck() {
+  lesson15VocabularyPromise ??= fetchText("data/greek-lesson15-vocab.json").then(text => vocabularyDeck(15, JSON.parse(text) as GreekVocabularySourceCard[]));
+  return lesson15VocabularyPromise;
+}
+export function loadGreekLesson16VocabularyDeck() {
+  lesson16VocabularyPromise ??= fetchText("data/greek-lesson16-vocab.json").then(text => vocabularyDeck(16, JSON.parse(text) as GreekVocabularySourceCard[]));
+  return lesson16VocabularyPromise;
+}
+export function loadGreekLesson16GrammarDeck() {
+  lesson16GrammarPromise ??= fetchText("data/greek-lesson16-grammar.json").then(text => grammarDeck(16, JSON.parse(text) as GreekGrammarSourceCard[]));
+  return lesson16GrammarPromise;
 }

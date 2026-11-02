@@ -1,0 +1,98 @@
+[
+  {
+    "id": "lesson16-chart-third-declension-masculine-feminine-endings",
+    "category": "Third Declension Masculine/Feminine Endings",
+    "prompt": "Third Declension — Masculine/Feminine Endings",
+    "source_ref": "Groton 16.98, p. 96",
+    "accent_note": "Nom./voc. singular can be a stem or altered stem. Acc. singular -ν occurs in certain stem classes. Before -ς and -σι(ν), stop consonants may combine or disappear.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "-ς / stem",
+          "-ες"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-ος",
+          "-ων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-ι",
+          "-σι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-α / -ν",
+          "-ας"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "stem / nominative",
+          "-ες"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson16-chart-third-declension-neuter-endings",
+    "category": "Third Declension Neuter Endings",
+    "prompt": "Third Declension — Neuter Endings",
+    "source_ref": "Groton 16.98, p. 96",
+    "accent_note": "Nom., acc. and voc. are identical within each number. The singular may lose an inadmissible final stem consonant, e.g. ὄνομα (stem ὀνοματ-).",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "stem",
+          "-α"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-ος",
+          "-ων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-ι",
+          "-σι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "stem",
+          "-α"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "stem",
+          "-α"
+        ]
+      }
+    ]
+  }
+]

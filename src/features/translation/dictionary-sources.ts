@@ -210,7 +210,7 @@ function addStemmedChartForms(index: Map<string, DictionaryMatch[]>, stem: strin
 
 function nounChartMatch(card: StudyCard, grammarCard: StudyCard) {
   const group = grammarGroup(grammarCard);
-  if (!group.includes("Declension") || !group.includes("Endings") || group.includes("Adjective")) return null;
+  if (!group.includes("Declension") || !group.includes("Endings") || group.includes("Adjective") || group.startsWith("Third Declension")) return null;
 
   const forms = headwordForms(card.front);
   const lemma = forms[0] ? normalizeDictionaryKey(forms[0]) : "";
@@ -358,6 +358,44 @@ function addGrotonGlossedVerbCompounds(index: Map<string, DictionaryMatch[]>, ca
   addVerbInflections(index, { ...card, front: compound }, match, grammarCards);
 }
 
+
+// Third-declension consonant stems are not formed by simply appending endings
+// to the nominative (e.g. ὄνομα has genitive ὀνόματος). Keep the source-
+ // attested Lesson 16 paradigms separate from the 1st/2nd declension builder.
+// Each row lists singular then plural; each half has Nom., Gen., Dat., Acc., Voc.
+const lesson16NounParadigms: Record<string, string[]> = {
+  "lesson16-v2": ["ἀγών", "ἀγῶνος", "ἀγῶνι", "ἀγῶνα", "ἀγών", "ἀγῶνες", "ἀγώνων", "ἀγῶσι(ν)", "ἀγῶνας", "ἀγῶνες"],
+  "lesson16-v3": ["ἀσπίς", "ἀσπίδος", "ἀσπίδι", "ἀσπίδα", "ἀσπί", "ἀσπίδες", "ἀσπίδων", "ἀσπίσι(ν)", "ἀσπίδας", "ἀσπίδες"],
+  "lesson16-v4": ["κλώψ", "κλωπός", "κλωπί", "κλῶπα", "κλώψ", "κλῶπες", "κλωπῶν", "κλωψί(ν)", "κλῶπας", "κλῶπες"],
+  "lesson16-v5": ["λέων", "λέοντος", "λέοντι", "λέοντα", "λέον", "λέοντες", "λεόντων", "λέουσι(ν)", "λέοντας", "λέοντες"],
+  "lesson16-v6": ["ὄνομα", "ὀνόματος", "ὀνόματι", "ὄνομα", "ὄνομα", "ὀνόματα", "ὀνομάτων", "ὀνόμασι(ν)", "ὀνόματα", "ὀνόματα"],
+  "lesson16-v7": ["ῥήτωρ", "ῥήτορος", "ῥήτορι", "ῥήτορα", "ῥῆτορ", "ῥήτορες", "ῥητόρων", "ῥήτορσι(ν)", "ῥήτορας", "ῥήτορες"],
+  "lesson16-v8": ["φύλαξ", "φύλακος", "φύλακι", "φύλακα", "φύλαξ", "φύλακες", "φυλάκων", "φύλαξι(ν)", "φύλακας", "φύλακες"],
+  "lesson16-v9": ["χάρις", "χάριτος", "χάριτι", "χάριν", "χάρι", "χάριτες", "χαρίτων", "χάρισι(ν)", "χάριτας", "χάριτες"],
+};
+function addLesson16NounForms(index: Map<string, DictionaryMatch[]>, vocabularyDecks: DeckDefinition[]) {
+  const cases = ["Nominative", "Genitive", "Dative", "Accusative", "Vocative"];
+  for (const deck of vocabularyDecks) {
+    if (deck.id !== "alpha-omega-lesson16-vocab") continue;
+    for (const card of deck.cards) {
+      const forms = lesson16NounParadigms[card.id];
+      if (!forms) continue;
+      const lexical = vocabularyMatch(card, "Groton, From Alpha to Omega");
+      for (let i = 0; i < forms.length; i += 1) {
+        const number = i < 5 ? "Singular" : "Plural";
+        const grammaticalCase = cases[i % 5];
+        const form = forms[i];
+        for (const variant of form.includes("(ν)") ? [form.replace("(ν)", ""), form.replace("(ν)", "ν")] : [form]) {
+          addMatch(index, variant, {
+            ...lexical,
+            morphology: [`Third Declension · ${grammaticalCase} · ${number}`],
+          }, true);
+        }
+      }
+    }
+  }
+}
+
 function addProductiveGrotonForms(index: Map<string, DictionaryMatch[]>, vocabularyDecks: DeckDefinition[], grammarDecks: DeckDefinition[]) {
   const grammarCards = grammarDecks.flatMap((deck) => deck.cards);
   for (const deck of vocabularyDecks) {
@@ -497,6 +535,7 @@ export function buildGreekTranslationIndex(grotonVocabularyDecks: DeckDefinition
   const index = new Map<string, DictionaryMatch[]>();
   for (const deck of grotonVocabularyDecks) addVocabularyDeck(index, deck, "Groton, From Alpha to Omega");
   addProductiveGrotonForms(index, grotonVocabularyDecks, grotonGrammarDecks);
+  addLesson16NounForms(index, grotonVocabularyDecks);
   for (const deck of grotonGrammarDecks) addGrammarForms(index, deck);
   if (kuboDeck) addVocabularyDeck(index, kuboDeck, "Kubo New Testament Vocabulary");
   return index;

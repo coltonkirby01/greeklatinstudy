@@ -28,6 +28,9 @@ import {
   loadGreekLesson13VocabularyDeck,
   loadGreekLesson14GrammarDeck,
   loadGreekLesson14VocabularyDeck,
+  loadGreekLesson15VocabularyDeck,
+  loadGreekLesson16VocabularyDeck,
+  loadGreekLesson16GrammarDeck,
 } from "../data/greek-lessons-9-10";
 import { NEW_TESTAMENT_FREQUENCY_GROUPS, loadGreekNewTestamentVocabularyDeck, newTestamentFrequencyGroupForCard } from "../data/greek-new-testament-vocab";
 import { useAuth } from "../features/auth/auth-context";
@@ -112,6 +115,10 @@ const keys = {
   secondPersonForms: "lesson14-second-person-forms",
   autosSingularForms: "lesson14-autos-singular-forms",
   autosPluralForms: "lesson14-autos-plural-forms",
+  lesson15Vocabulary: "lesson15-vocabulary",
+  lesson16Vocabulary: "lesson16-vocabulary",
+  thirdDeclensionMasculineFeminineEndings: "lesson16-third-declension-masculine-feminine-endings",
+  thirdDeclensionNeuterEndings: "lesson16-third-declension-neuter-endings",
 } as const;
 
 type KeyValue = (typeof keys)[keyof typeof keys];
@@ -143,6 +150,9 @@ type LoadedDecks = {
   lesson13Grammar: DeckDefinition;
   lesson14Vocabulary: DeckDefinition;
   lesson14Grammar: DeckDefinition;
+  lesson15Vocabulary: DeckDefinition;
+  lesson16Vocabulary: DeckDefinition;
+  lesson16Grammar: DeckDefinition;
   newTestamentVocabulary: DeckDefinition;
 };
 
@@ -150,7 +160,7 @@ type LessonConfig = {
   lesson: number;
   vocabularyKey: KeyValue;
   vocabularyDeck: keyof LoadedDecks;
-  grammarDeck: keyof LoadedDecks;
+  grammarDeck?: keyof LoadedDecks;
   endingKeys: readonly KeyValue[];
   categoryByKey: ReadonlyMap<string, string>;
 };
@@ -225,8 +235,11 @@ const lesson13CategoryByKey = new Map<string, string>([
 const lesson14CategoryByKey = new Map<string, string>([
   [keys.firstPersonForms, "First-Person Personal Pronoun Forms"],
   [keys.secondPersonForms, "Second-Person Personal Pronoun Forms"],
-  [keys.autosSingularForms, "αὐτός — Singular Pronoun/Intensive Forms"],
-  [keys.autosPluralForms, "αὐτός — Plural Pronoun/Intensive Forms"],
+  [keys.autosSingularForms, "αὐτός — Third-Person/Intensive Forms (Singular & Plural)"],
+]);
+const lesson16CategoryByKey = new Map<string, string>([
+  [keys.thirdDeclensionMasculineFeminineEndings, "Third Declension Masculine/Feminine Endings"],
+  [keys.thirdDeclensionNeuterEndings, "Third Declension Neuter Endings"],
 ]);
 
 const lessonConfigs: LessonConfig[] = [
@@ -241,7 +254,9 @@ const lessonConfigs: LessonConfig[] = [
   { lesson: 11, vocabularyKey: keys.lesson11Vocabulary, vocabularyDeck: "lesson11Vocabulary", grammarDeck: "lesson11Grammar", endingKeys: [keys.presentMiddlePassiveIndicativeEndings, keys.presentMiddlePassiveInfinitiveEndings, keys.futureMiddleIndicativeEndings, keys.futureMiddleInfinitiveEndings, keys.imperfectMiddlePassiveIndicativeEndings, keys.presentMiddlePassiveImperativeEndings], categoryByKey: lesson11CategoryByKey },
   { lesson: 12, vocabularyKey: keys.lesson12Vocabulary, vocabularyDeck: "lesson12Vocabulary", grammarDeck: "lesson12Grammar", endingKeys: [keys.eimiPresentActiveIndicativeForms, keys.eimiFutureMiddleIndicativeForms, keys.eimiImperfectActiveIndicativeForms, keys.eimiPresentActiveImperativeForms, keys.eimiPresentActiveInfinitiveForm, keys.eimiFutureMiddleInfinitiveForm], categoryByKey: lesson12CategoryByKey },
   { lesson: 13, vocabularyKey: keys.lesson13Vocabulary, vocabularyDeck: "lesson13Vocabulary", grammarDeck: "lesson13Grammar", endingKeys: [keys.hodeSingularForms, keys.hodePluralForms, keys.houtosSingularForms, keys.houtosPluralForms, keys.ekeinosSingularForms, keys.ekeinosPluralForms], categoryByKey: lesson13CategoryByKey },
-  { lesson: 14, vocabularyKey: keys.lesson14Vocabulary, vocabularyDeck: "lesson14Vocabulary", grammarDeck: "lesson14Grammar", endingKeys: [keys.firstPersonForms, keys.secondPersonForms, keys.autosSingularForms, keys.autosPluralForms], categoryByKey: lesson14CategoryByKey },
+  { lesson: 14, vocabularyKey: keys.lesson14Vocabulary, vocabularyDeck: "lesson14Vocabulary", grammarDeck: "lesson14Grammar", endingKeys: [keys.firstPersonForms, keys.secondPersonForms, keys.autosSingularForms], categoryByKey: lesson14CategoryByKey },
+  { lesson: 15, vocabularyKey: keys.lesson15Vocabulary, vocabularyDeck: "lesson15Vocabulary", endingKeys: [], categoryByKey: new Map() },
+  { lesson: 16, vocabularyKey: keys.lesson16Vocabulary, vocabularyDeck: "lesson16Vocabulary", grammarDeck: "lesson16Grammar", endingKeys: [keys.thirdDeclensionMasculineFeminineEndings, keys.thirdDeclensionNeuterEndings], categoryByKey: lesson16CategoryByKey },
 ];
 
 const lessonVocabularyKeys = lessonConfigs.map((config) => config.vocabularyKey);
@@ -311,13 +326,13 @@ function deckList(decks: LoadedDecks) {
   return [
     decks.foundation,
     decks.newTestamentVocabulary,
-    ...lessonConfigs.flatMap((config) => [decks[config.vocabularyDeck], decks[config.grammarDeck]]),
+    ...lessonConfigs.flatMap((config) => config.grammarDeck ? [decks[config.vocabularyDeck], decks[config.grammarDeck]] : [decks[config.vocabularyDeck]]),
   ];
 }
 
 export function GreekPage() {
   const { value: decks, error } = useAsync(async () => {
-    const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, lesson12Vocabulary, lesson12Grammar, lesson13Vocabulary, lesson13Grammar, lesson14Vocabulary, lesson14Grammar, newTestamentVocabulary] = await Promise.all([
+    const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, lesson12Vocabulary, lesson12Grammar, lesson13Vocabulary, lesson13Grammar, lesson14Vocabulary, lesson14Grammar, lesson15Vocabulary, lesson16Vocabulary, lesson16Grammar, newTestamentVocabulary] = await Promise.all([
       loadGreekDeck(),
       loadGreekLesson3VocabularyDeck(), loadGreekLesson3GrammarDeck(),
       loadGreekLesson4VocabularyDeck(), loadGreekLesson4GrammarDeck(),
@@ -331,9 +346,11 @@ export function GreekPage() {
       loadGreekLesson12VocabularyDeck(), loadGreekLesson12GrammarDeck(),
       loadGreekLesson13VocabularyDeck(), loadGreekLesson13GrammarDeck(),
       loadGreekLesson14VocabularyDeck(), loadGreekLesson14GrammarDeck(),
+      loadGreekLesson15VocabularyDeck(),
+      loadGreekLesson16VocabularyDeck(), loadGreekLesson16GrammarDeck(),
       loadGreekNewTestamentVocabularyDeck(),
     ]);
-    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, lesson12Vocabulary, lesson12Grammar, lesson13Vocabulary, lesson13Grammar, lesson14Vocabulary, lesson14Grammar, newTestamentVocabulary } satisfies LoadedDecks;
+    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, lesson12Vocabulary, lesson12Grammar, lesson13Vocabulary, lesson13Grammar, lesson14Vocabulary, lesson14Grammar, lesson15Vocabulary, lesson16Vocabulary, lesson16Grammar, newTestamentVocabulary } satisfies LoadedDecks;
   }, []);
   const { user } = useAuth();
   const savedCards = useSavedCards("greek", user);
@@ -363,7 +380,7 @@ export function GreekPage() {
     if (sourceDeck.id === decks.newTestamentVocabulary.id) return newTestamentFrequencyGroupForCard(card)?.key ?? null;
     for (const config of lessonConfigs) {
       if (sourceDeck.id === decks[config.vocabularyDeck].id) return config.vocabularyKey;
-      if (sourceDeck.id === decks[config.grammarDeck].id) return keyForCategory(config.categoryByKey, card.category);
+      if (config.grammarDeck && sourceDeck.id === decks[config.grammarDeck].id) return keyForCategory(config.categoryByKey, card.category);
     }
     return null;
   }
@@ -438,13 +455,13 @@ export function GreekPage() {
     if (!decks) return [];
     return lessonConfigs.map((config) => {
       const vocabularyDeck = decks[config.vocabularyDeck];
-      const grammarDeck = decks[config.grammarDeck];
+      const grammarDeck = config.grammarDeck ? decks[config.grammarDeck] : null;
       const vocabularyCards = selected.has(config.vocabularyKey)
         ? vocabularyDeck.cards.filter((card) => !excludedCards.refs.has(savedCardRef(vocabularyDeck.id, card.id)))
         : [];
-      const endingCards = grammarDeck.cards.filter((card) => {
+      const endingCards = (grammarDeck?.cards ?? []).filter((card) => {
         const key = keyForCategory(config.categoryByKey, card.category);
-        return Boolean(key && selected.has(key) && !excludedCards.refs.has(savedCardRef(grammarDeck.id, card.id)));
+        return Boolean(key && selected.has(key) && !excludedCards.refs.has(savedCardRef(grammarDeck!.id, card.id)));
       });
       return { config, vocabularyDeck, grammarDeck, vocabularyCards, endingCards };
     });
@@ -481,7 +498,7 @@ export function GreekPage() {
     if (foundationCards.length) next.push({ id: "lessons-1-2", label: "Lessons 1–2 foundations", deck: decks.foundation, cards: foundationCards, studyKey: direction, direction });
     for (const { config, vocabularyDeck, grammarDeck, vocabularyCards, endingCards } of lessonCardSets) {
       if (vocabularyCards.length) next.push({ id: `lesson${config.lesson}-vocabulary`, label: `Lesson ${config.lesson} vocabulary`, deck: vocabularyDeck, cards: vocabularyCards, studyKey: direction, direction });
-      if (endingCards.length) next.push({ id: `lesson${config.lesson}-endings`, label: `Lesson ${config.lesson} endings`, deck: grammarDeck, cards: endingCards, studyKey: "forward", direction: "forward" });
+      if (grammarDeck && endingCards.length) next.push({ id: `lesson${config.lesson}-endings`, label: `Lesson ${config.lesson} endings`, deck: grammarDeck, cards: endingCards, studyKey: "forward", direction: "forward" });
     }
     if (newTestamentCards.length) next.push({ id: "new-testament-vocabulary", label: "New Testament Vocab (Kubo)", deck: decks.newTestamentVocabulary, cards: newTestamentCards, studyKey: direction, direction });
     if (translationVocab.source) next.push(translationVocab.source);
@@ -500,7 +517,7 @@ export function GreekPage() {
       appendSaved("saved-lessons-1-2", decks.foundation, direction, direction, (card) => Boolean(groupKeyForCard(decks.foundation, card)));
       for (const { config, vocabularyDeck, grammarDeck } of lessonCardSets) {
         appendSaved(`saved-lesson${config.lesson}-vocabulary`, vocabularyDeck, direction, direction, () => true);
-        appendSaved(`saved-lesson${config.lesson}-endings`, grammarDeck, "forward", "forward", (card) => Boolean(keyForCategory(config.categoryByKey, card.category)));
+        if (grammarDeck) appendSaved(`saved-lesson${config.lesson}-endings`, grammarDeck, "forward", "forward", (card) => Boolean(keyForCategory(config.categoryByKey, card.category)));
       }
       appendSaved("saved-new-testament-vocabulary", decks.newTestamentVocabulary, direction, direction, () => true);
       appendSaved("saved-translation-helper-vocab", translationVocab.deck, direction, direction, () => true);
@@ -595,13 +612,13 @@ export function GreekPage() {
             {vocabularyDeck.cards.map((card) => <FilterCheckbox key={card.id} label={`#${card.rank} · ${card.front} — ${oneWordVocabularyGloss(card.back)}`} checked={exactCardSelected(vocabularyDeck, card)} onChange={(checked) => changeExactCard(vocabularyDeck, card, checked)} />)}
           </FilterDisclosure>
 
-          <FilterDisclosure title="Endings" summary={`${endingState.selectedCount} of ${config.endingKeys.length} selected`} count={config.endingKeys.length} nested checked={endingState.checked} mixed={endingState.mixed} onCheckedChange={(checked) => changeGroups(config.endingKeys, checked)}>
+          {config.endingKeys.length > 0 && grammarDeck && <FilterDisclosure title="Endings" summary={`${endingState.selectedCount} of ${config.endingKeys.length} selected`} count={config.endingKeys.length} nested checked={endingState.checked} mixed={endingState.mixed} onCheckedChange={(checked) => changeGroups(config.endingKeys, checked)}>
             {config.endingKeys.map((key) => {
               const category = config.categoryByKey.get(key)!;
               const count = grammarDeck.cards.filter((card) => card.category === category).length;
               return <FilterCheckbox key={key} label={category} count={count} checked={groupSelectionState([key]).checked} mixed={groupSelectionState([key]).mixed} onChange={(checked) => changeGroups([key], checked)} />;
             })}
-          </FilterDisclosure>
+          </FilterDisclosure>}
         </FilterDisclosure>;
       })}
       </FilterDisclosure>

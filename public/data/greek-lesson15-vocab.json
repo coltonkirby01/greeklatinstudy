@@ -1,0 +1,82 @@
+[
+  {
+    "id": "lesson15-v1",
+    "greek": "ἁρπάζω, ἁρπάσω",
+    "meaning": "seize, snatch, plunder",
+    "part_of_speech": "verb",
+    "lesson": 15,
+    "source_ref": "Groton 15.95"
+  },
+  {
+    "id": "lesson15-v2",
+    "greek": "βάλλω, βαλῶ",
+    "meaning": "throw, hit (with a thrown weapon), shoot",
+    "part_of_speech": "verb",
+    "lesson": 15,
+    "source_ref": "Groton 15.95"
+  },
+  {
+    "id": "lesson15-v3",
+    "greek": "γελάω, γελάσομαι",
+    "meaning": "laugh; with ἐπί + dative: laugh at, ridicule",
+    "part_of_speech": "verb",
+    "lesson": 15,
+    "source_ref": "Groton 15.95"
+  },
+  {
+    "id": "lesson15-v4",
+    "greek": "δηλόω, δηλώσω",
+    "meaning": "make clear, show, explain",
+    "part_of_speech": "verb",
+    "lesson": 15,
+    "source_ref": "Groton 15.95"
+  },
+  {
+    "id": "lesson15-v5",
+    "greek": "κομίζω, κομιῶ",
+    "meaning": "care for, carry, escort; middle: acquire",
+    "part_of_speech": "verb",
+    "lesson": 15,
+    "source_ref": "Groton 15.95"
+  },
+  {
+    "id": "lesson15-v6",
+    "greek": "τῑμάω, τῑμήσω",
+    "meaning": "honor, value",
+    "part_of_speech": "verb",
+    "lesson": 15,
+    "source_ref": "Groton 15.95"
+  },
+  {
+    "id": "lesson15-v7",
+    "greek": "φιλέω, φιλήσω",
+    "meaning": "love, kiss; with infinitive: be fond of doing, be accustomed to",
+    "part_of_speech": "verb",
+    "lesson": 15,
+    "source_ref": "Groton 15.95"
+  },
+  {
+    "id": "lesson15-v8",
+    "greek": "ὠφελέω, ὠφελήσω",
+    "meaning": "help, aid",
+    "part_of_speech": "verb",
+    "lesson": 15,
+    "source_ref": "Groton 15.95"
+  },
+  {
+    "id": "lesson15-v9",
+    "greek": "τῑμή, -ῆς, ἡ",
+    "meaning": "honor, worth, price",
+    "part_of_speech": "noun",
+    "lesson": 15,
+    "source_ref": "Groton 15.95"
+  },
+  {
+    "id": "lesson15-v10",
+    "greek": "δῆλος, -η, -ον",
+    "meaning": "clear, visible, evident",
+    "part_of_speech": "adjective",
+    "lesson": 15,
+    "source_ref": "Groton 15.95"
+  }
+]
