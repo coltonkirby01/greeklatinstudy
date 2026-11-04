@@ -13,7 +13,7 @@
       {
         "label": "Nominative",
         "cells": [
-          "-ς / stem",
+          "-ς / --",
           "-ες"
         ]
       },
@@ -41,7 +41,7 @@
       {
         "label": "Vocative",
         "cells": [
-          "stem / nominative",
+          "-- / nominative",
           "-ες"
         ]
       }
@@ -61,7 +61,7 @@
       {
         "label": "Nominative",
         "cells": [
-          "stem",
+          "--",
           "-α"
         ]
       },
@@ -82,14 +82,14 @@
       {
         "label": "Accusative",
         "cells": [
-          "stem",
+          "--",
           "-α"
         ]
       },
       {
         "label": "Vocative",
         "cells": [
-          "stem",
+          "--",
           "-α"
         ]
       }

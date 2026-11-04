@@ -62,8 +62,12 @@ describe("Groton Lessons 15 and 16", () => {
       expect(chart.rows.every(row=>row.cells.length===2 && row.cells.every(Boolean))).toBe(true);
     }
     expect(endings16[0].rows[3].cells).toEqual(["-α / -ν","-ας"]);
-    expect(endings16[1].rows[0].cells).toEqual(["stem","-α"]);
-    expect(endings16[1].rows[3].cells).toEqual(["stem","-α"]);
+    expect(endings16[0].rows[0].cells).toEqual(["-ς / --", "-ες"]);
+    expect(endings16[0].rows[4].cells).toEqual(["-- / nominative", "-ες"]);
+    for (const rowIndex of [0, 3, 4]) {
+      expect(endings16[1].rows[rowIndex].cells).toEqual(["--", "-α"]);
+    }
+    expect(endings16.flatMap(chart => chart.rows.flatMap(row => row.cells)).every(cell => !cell.includes("stem"))).toBe(true);
   });
 
   it("wires both lessons into the existing Greek selector, Stats, and source loaders", () => {
