@@ -28,6 +28,7 @@ import {
   loadGreekLesson14GrammarDeck,
   loadGreekLesson14VocabularyDeck,
   loadGreekLesson15VocabularyDeck,
+  loadGreekLesson15ContractionsDeck,
   loadGreekLesson16VocabularyDeck,
   loadGreekLesson16GrammarDeck,
 } from "../../data/greek-lessons-9-10";
@@ -78,6 +79,7 @@ export const BUILTIN_STUDY_DECKS: readonly BuiltinDeckRegistration[] = [
   { id: "alpha-omega-lesson14-vocab", language: "Greek", source: "Lesson 14 Vocabulary", load: loadGreekLesson14VocabularyDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "alpha-omega-lesson14-grammar", language: "Greek", source: "Lesson 14 Grammar", load: loadGreekLesson14GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
   { id: "alpha-omega-lesson15-vocab", language: "Greek", source: "Lesson 15 Vocabulary", load: loadGreekLesson15VocabularyDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
+  { id: "alpha-omega-lesson15-contractions", language: "Greek", source: "Lesson 15 Contractions", load: loadGreekLesson15ContractionsDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
   { id: "alpha-omega-lesson16-vocab", language: "Greek", source: "Lesson 16 Vocabulary", load: loadGreekLesson16VocabularyDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "alpha-omega-lesson16-grammar", language: "Greek", source: "Lesson 16 Grammar", load: loadGreekLesson16GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
   { id: "kubo-new-testament-vocab", language: "Greek", source: "New Testament Vocab", load: loadGreekNewTestamentVocabularyDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },

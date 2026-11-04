@@ -1,0 +1,89 @@
+[
+  {
+    "id": "lesson15-contraction-long-alpha",
+    "result": "ᾱ",
+    "combinations": [
+      "α + ε",
+      "α + η"
+    ],
+    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+  },
+  {
+    "id": "lesson15-contraction-long-alpha-iota",
+    "result": "ᾱͅ",
+    "combinations": [
+      "α + ει",
+      "α + ῃ"
+    ],
+    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+  },
+  {
+    "id": "lesson15-contraction-ei",
+    "result": "ει",
+    "combinations": [
+      "ε + ε",
+      "ε + ει"
+    ],
+    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+  },
+  {
+    "id": "lesson15-contraction-eta",
+    "result": "η",
+    "combinations": [
+      "ε + η"
+    ],
+    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+  },
+  {
+    "id": "lesson15-contraction-eta-iota",
+    "result": "ῃ",
+    "combinations": [
+      "ε + ῃ"
+    ],
+    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+  },
+  {
+    "id": "lesson15-contraction-omega",
+    "result": "ω",
+    "combinations": [
+      "α + ο",
+      "α + ου",
+      "α + ω",
+      "ε + ω",
+      "ο + η",
+      "ο + ω"
+    ],
+    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+  },
+  {
+    "id": "lesson15-contraction-omega-iota",
+    "result": "ῳ",
+    "combinations": [
+      "α + οι"
+    ],
+    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+  },
+  {
+    "id": "lesson15-contraction-ou",
+    "result": "ου",
+    "combinations": [
+      "ε + ο",
+      "ε + ου",
+      "ο + ε",
+      "ο + ο",
+      "ο + ου"
+    ],
+    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+  },
+  {
+    "id": "lesson15-contraction-oi",
+    "result": "οι",
+    "combinations": [
+      "ε + οι",
+      "ο + ει",
+      "ο + ῃ",
+      "ο + οι"
+    ],
+    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+  }
+]

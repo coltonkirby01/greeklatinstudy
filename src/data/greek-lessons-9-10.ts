@@ -14,6 +14,13 @@ type GreekVocabularySourceCard = {
   accent_note?: string;
 };
 
+type GreekContractionSourceCard = {
+  id: string;
+  result: string;
+  combinations: string[];
+  source_ref: string;
+};
+
 type GreekGrammarSourceCard = {
   id: string;
   category: string;
@@ -77,6 +84,42 @@ function vocabularyDeck(lesson: GrotonLesson, source: GreekVocabularySourceCard[
     cards,
     supportsReverse: true,
     sourceNote: vocabularySourceNote(lesson),
+  };
+}
+
+/**
+ * Reverse of Groton §92: each DISTINCT resulting vowel/diphthong is a card,
+ * with all of its source combinations on the answer face. These are not
+ * vocabulary entries or lesson endings, so they use a separate study deck.
+ */
+function lesson15ContractionsDeck(source: GreekContractionSourceCard[]): DeckDefinition {
+  const id = "alpha-omega-lesson15-contractions";
+  const cards: StudyCard[] = source.map((entry, index) => ({
+    id: entry.id,
+    deckId: id,
+    front: entry.result,
+    back: entry.combinations.join("\n"),
+    category: "Contractions Found in Contract Verbs",
+    rank: index + 1,
+    source: "From Alpha to Omega, Lesson 15",
+    metadata: {
+      lesson: 15,
+      studySource: "contraction-rule",
+      sourceRef: entry.source_ref,
+      combinations: entry.combinations,
+      audioDisabled: true, // Isolated contraction symbols are written rules, not spoken words.
+    },
+  }));
+  return {
+    id,
+    slug: "greek",
+    title: "Greek Lesson 15 Contractions",
+    eyebrow: "Groton §92",
+    description: "Each contracted result, followed by all source vowel combinations that produce it.",
+    language: "greek",
+    cards,
+    supportsReverse: false,
+    sourceNote: "Groton §92 — Contractions Found in Contract Verbs.",
   };
 }
 
@@ -235,12 +278,17 @@ export function loadGreekLesson14GrammarDeck() {
 }
 
 let lesson15VocabularyPromise: Promise<DeckDefinition> | null = null;
+let lesson15ContractionsPromise: Promise<DeckDefinition> | null = null;
 let lesson16VocabularyPromise: Promise<DeckDefinition> | null = null;
 let lesson16GrammarPromise: Promise<DeckDefinition> | null = null;
 
 export function loadGreekLesson15VocabularyDeck() {
   lesson15VocabularyPromise ??= fetchText("data/greek-lesson15-vocab.json").then(text => vocabularyDeck(15, JSON.parse(text) as GreekVocabularySourceCard[]));
   return lesson15VocabularyPromise;
+}
+export function loadGreekLesson15ContractionsDeck() {
+  lesson15ContractionsPromise ??= fetchText("data/greek-lesson15-contractions.json").then(text => lesson15ContractionsDeck(JSON.parse(text) as GreekContractionSourceCard[]));
+  return lesson15ContractionsPromise;
 }
 export function loadGreekLesson16VocabularyDeck() {
   lesson16VocabularyPromise ??= fetchText("data/greek-lesson16-vocab.json").then(text => vocabularyDeck(16, JSON.parse(text) as GreekVocabularySourceCard[]));
