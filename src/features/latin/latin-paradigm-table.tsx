@@ -40,6 +40,6 @@ export function LatinParadigmTable({ card, revealed }: { card: StudyCard; reveal
         </tbody>
       </table>
     </div>
-    {revealed && card.metadata?.audioDisabled !== true && <MedievalLatinAudio assetId={card.id} label={card.front} />}
+    {revealed && <MedievalLatinAudio assetId={card.id} label={card.front} />}
   </>;
 }
