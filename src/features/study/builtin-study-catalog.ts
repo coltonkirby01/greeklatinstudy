@@ -39,6 +39,7 @@ import { loadLatinAdjectiveParadigmsDeck } from "../../data/latin-adjective-para
 import { loadLatinPassiveIndicativeParadigmsDeck } from "../../data/latin-passive-indicative-paradigms";
 import { loadLatinPassiveSubjunctiveParadigmsDeck } from "../../data/latin-passive-subjunctive-paradigms";
 import { loadLatinParticiplesDeck } from "../../data/latin-participles";
+import { loadLatinRelativePronounsDeck } from "../../data/latin-relative-pronouns";
 import type { DeckDefinition, StudyDirection } from "./types";
 
 export type BuiltinStudyLanguage = "Greek" | "Latin";
@@ -88,6 +89,7 @@ export const BUILTIN_STUDY_DECKS: readonly BuiltinDeckRegistration[] = [
   { id: "latin-active-subjunctive-paradigms", language: "Latin", source: "Active Subjunctive Paradigms", load: loadLatinActiveSubjunctiveParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "latin-adjective-paradigms", language: "Latin", source: "Adjective Paradigms", load: loadLatinAdjectiveParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "latin-participles", language: "Latin", source: "Participles", load: loadLatinParticiplesDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
+  { id: "latin-relative-pronouns", language: "Latin", source: "Relative Pronouns", load: loadLatinRelativePronounsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }] },
   { id: "latin-passive-indicative-paradigms", language: "Latin", source: "Passive Indicative Paradigms", load: loadLatinPassiveIndicativeParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "latin-passive-subjunctive-paradigms", language: "Latin", source: "Passive Subjunctive Paradigms", load: loadLatinPassiveSubjunctiveParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
 ] as const;

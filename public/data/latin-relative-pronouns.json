@@ -1,0 +1,137 @@
+[
+  {
+    "id": "latin-relative-pronoun-masculine",
+    "gender": "Masculine",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "quī",
+          "quī"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "cuius",
+          "quōrum"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "cui",
+          "quibus"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "quem",
+          "quōs"
+        ]
+      },
+      {
+        "label": "Ablative",
+        "cells": [
+          "quō",
+          "quibus"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "latin-relative-pronoun-feminine",
+    "gender": "Feminine",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "quae",
+          "quae"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "cuius",
+          "quārum"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "cui",
+          "quibus"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "quam",
+          "quās"
+        ]
+      },
+      {
+        "label": "Ablative",
+        "cells": [
+          "quā",
+          "quibus"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "latin-relative-pronoun-neuter",
+    "gender": "Neuter",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "quod",
+          "quae"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "cuius",
+          "quōrum"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "cui",
+          "quibus"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "quod",
+          "quae"
+        ]
+      },
+      {
+        "label": "Ablative",
+        "cells": [
+          "quō",
+          "quibus"
+        ]
+      }
+    ]
+  }
+]
