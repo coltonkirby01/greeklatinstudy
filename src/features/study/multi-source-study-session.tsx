@@ -51,6 +51,10 @@ type Props = {
   savedCardRefs?: ReadonlySet<string>;
   onToggleSavedCard?: (deckId: string, cardId: string) => void;
   onDeselectCard?: (deckId: string, cardId: string) => void;
+  reviewMode?: SelectionMode;
+  onReviewModeChange?: (mode: SelectionMode) => void;
+  reviewAdaptiveStrength?: AdaptiveStrength;
+  onReviewAdaptiveStrengthChange?: (strength: AdaptiveStrength) => void;
 };
 
 function candidateKey(candidate: Candidate) { return `${candidate.source.id}:${candidate.card.id}`; }
@@ -127,7 +131,7 @@ function avoidRecentlyPresentedCandidates(candidates: Candidate[], modeFor: (sou
   return filtered.length >= minimumPool ? filtered : candidates;
 }
 
-export function MultiSourceStudySession({ deck, sources, direction, resetKey, resumeSession, renderFront, renderBack, priorityPrompt, savedCardRefs, onToggleSavedCard, onDeselectCard }: Props) {
+export function MultiSourceStudySession({ deck, sources, direction, resetKey, resumeSession, renderFront, renderBack, priorityPrompt, savedCardRefs, onToggleSavedCard, onDeselectCard, reviewMode, onReviewModeChange, reviewAdaptiveStrength, onReviewAdaptiveStrengthChange }: Props) {
   const { user } = useAuth();
   const sessionLanguage: "Greek" | "Latin" = deck.language === "greek" ? "Greek" : "Latin";
   const [envelopes, setEnvelopes] = useState<Record<string, DeckProgressEnvelope>>({});
@@ -142,8 +146,12 @@ export function MultiSourceStudySession({ deck, sources, direction, resetKey, re
   const visitStartedAtRef = useRef(Date.now());
   const forcedNextRef = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
-  const [selectionMode, setSelectionMode] = useState<SelectionMode>("adaptive");
-  const [adaptiveStrength, setAdaptiveStrength] = useState<AdaptiveStrength>(2);
+  const [localReviewMode, setLocalReviewMode] = useState<SelectionMode>("adaptive");
+  const [localAdaptiveStrength, setLocalAdaptiveStrength] = useState<AdaptiveStrength>(2);
+  const selectionMode = reviewMode ?? localReviewMode;
+  const setSelectionMode = onReviewModeChange ?? setLocalReviewMode;
+  const adaptiveStrength = reviewAdaptiveStrength ?? localAdaptiveStrength;
+  const setAdaptiveStrength = onReviewAdaptiveStrengthChange ?? setLocalAdaptiveStrength;
   const [current, setCurrent] = useState<Candidate | null>(null);
   const [pendingDeselectKey, setPendingDeselectKey] = useState<string | null>(null);
   const [forcedNextKey, setForcedNextKey] = useState<string | null>(null);

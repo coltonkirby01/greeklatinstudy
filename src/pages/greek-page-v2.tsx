@@ -44,12 +44,13 @@ import { oneWordVocabularyGloss } from "../features/greek/vocabulary-selector-gl
 import { TranslationVocabDeckFilter, useTranslationVocabStudy } from "../features/translation/translation-vocab-study";
 import { useCardExclusions } from "../features/study/card-exclusions";
 import { loadGreekFilterSelection, saveGreekFilterSelection } from "../features/study/filter-preferences";
+import { loadLocalStudyReviewSetup, normalizeStudyReviewSetup, restoreCardExclusions, saveLocalStudyReviewSetup, useSyncedStudySettings, validStringList } from "../features/study/synced-study-settings";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
 import { loadIncludeSavedCards, saveIncludeSavedCards, savedCardRef, useSavedCards } from "../features/study/saved-cards";
 import { SavedCardsFilter, type SavedCardFilterItem } from "../features/study/saved-cards-filter";
 import { SelectedCardsProvider, type SelectedCardPanelItem } from "../features/study/selected-cards-context";
 import { FilterCheckbox, FilterDirectionControl, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
-import type { DeckDefinition, StudyCard, StudyDirection } from "../features/study/types";
+import type { DeckDefinition, SelectionMode, StudyCard, StudyDirection } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
 
 const categories = {
@@ -409,7 +410,10 @@ export function GreekPage() {
   const savedCards = useSavedCards("greek", user);
   const excludedCards = useCardExclusions("greek");
   const [searchParams] = useSearchParams();
-  const [direction, setDirection] = useState<StudyDirection>("forward");
+  const [initialReviewSetup] = useState(() => loadLocalStudyReviewSetup("greek"));
+  const [direction, setDirection] = useState<StudyDirection>(initialReviewSetup.direction);
+  const [reviewMode, setReviewMode] = useState<SelectionMode>(initialReviewSetup.reviewMode);
+  const [adaptiveStrength, setAdaptiveStrength] = useState<1 | 2 | 3>(initialReviewSetup.adaptiveStrength);
   const [selected, setSelected] = useState<Set<string>>(() => loadGreekFilterSelection(defaultKeys, undefined, allKeys));
   const [includeSavedCards, setIncludeSavedCards] = useState(() => loadIncludeSavedCards("greek"));
   const translationVocab = useTranslationVocabStudy("greek", user, direction, excludedCards);
@@ -420,6 +424,29 @@ export function GreekPage() {
 
   useEffect(() => { saveGreekFilterSelection(selected); }, [selected]);
   useEffect(() => { saveIncludeSavedCards("greek", includeSavedCards); }, [includeSavedCards]);
+  useEffect(() => { saveLocalStudyReviewSetup("greek", { direction, reviewMode, adaptiveStrength }); }, [direction, reviewMode, adaptiveStrength]);
+
+  const cloudSettings = useSyncedStudySettings("greek", user, {
+    version: 1,
+    selectedKeys: [...selected].sort(),
+    excludedCardRefs: [...excludedCards.refs].sort(),
+    includeSavedCards,
+    direction,
+    reviewMode,
+    adaptiveStrength,
+  }, (value) => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return;
+    const stored = value as Record<string, unknown>;
+    const keysFromCloud = validStringList(stored.selectedKeys);
+    if (keysFromCloud) setSelected(new Set(keysFromCloud.filter((key) => allKeys.includes(key))));
+    const exclusions = restoreCardExclusions(stored.excludedCardRefs);
+    if (exclusions) excludedCards.replace(exclusions);
+    if (typeof stored.includeSavedCards === "boolean") setIncludeSavedCards(stored.includeSavedCards);
+    const setup = normalizeStudyReviewSetup(stored);
+    setDirection(setup.direction);
+    setReviewMode(setup.reviewMode);
+    setAdaptiveStrength(setup.adaptiveStrength);
+  });
 
   function groupKeyForCard(sourceDeck: DeckDefinition, card: StudyCard) {
     if (!decks) return null;
@@ -690,11 +717,16 @@ export function GreekPage() {
       </FilterDisclosure>
     </StudyFilterMenu>}
 
-    {decks ? <SelectedCardsProvider items={currentlySelectedItems} onChange={(item, checked) => checked ? excludedCards.restore(item.deckId, item.cardId) : excludedCards.exclude(item.deckId, item.cardId)}><MultiSourceStudySession
+    {cloudSettings.error && <div className="inline-alert">Study preferences were not synced: {cloudSettings.error}</div>}
+    {decks && cloudSettings.ready ? <SelectedCardsProvider items={currentlySelectedItems} onChange={(item, checked) => checked ? excludedCards.restore(item.deckId, item.cardId) : excludedCards.exclude(item.deckId, item.cardId)}><MultiSourceStudySession
       deck={virtualDeck}
       sources={sources}
       resetKey={resetKey}
       direction={direction}
+      reviewMode={reviewMode}
+      onReviewModeChange={setReviewMode}
+      reviewAdaptiveStrength={adaptiveStrength}
+      onReviewAdaptiveStrengthChange={setAdaptiveStrength}
       resumeSession={resumeSession}
       savedCardRefs={savedCards.refs}
       onToggleSavedCard={savedCards.toggleSaved}

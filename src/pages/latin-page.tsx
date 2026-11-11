@@ -12,16 +12,18 @@ import { LatinParadigmTable } from "../features/latin/latin-paradigm-table";
 import { TranslationVocabDeckFilter, useTranslationVocabStudy } from "../features/translation/translation-vocab-study";
 import { useCardExclusions } from "../features/study/card-exclusions";
 import { loadLatinFilterPreferences, saveLatinFilterPreferences, type LatinMaterial } from "../features/study/filter-preferences";
+import { loadLocalStudyReviewSetup, normalizeStudyReviewSetup, restoreCardExclusions, saveLocalStudyReviewSetup, useSyncedStudySettings, validStringList } from "../features/study/synced-study-settings";
 import { groupDickinsonCardsByFrequencyRank, matchesVocabularyCard, vocabularyFamily, type OptionalSelection } from "../features/study/latin-study-filters";
 import { MultiSourceStudySession, type StudySourceDefinition } from "../features/study/multi-source-study-session";
 import { loadIncludeSavedCards, saveIncludeSavedCards, savedCardRef, useSavedCards } from "../features/study/saved-cards";
 import { SavedCardsFilter, type SavedCardFilterItem } from "../features/study/saved-cards-filter";
 import { SelectedCardsProvider, type SelectedCardPanelItem } from "../features/study/selected-cards-context";
 import { FilterCheckbox, FilterDirectionControl, FilterDisclosure, FilterSection, StudyFilterMenu } from "../features/study/study-filter-menu";
-import type { DeckDefinition, StudyCard, StudyDirection } from "../features/study/types";
+import type { DeckDefinition, SelectionMode, StudyCard, StudyDirection } from "../features/study/types";
 import { useAsync } from "../hooks/use-async";
 
 type Material = LatinMaterial;
+const supportedMaterials = new Set<Material>(["vocabulary", "active-indicative-paradigms", "active-subjunctive-paradigms", "passive-indicative-paradigms", "passive-subjunctive-paradigms", "adjective-paradigms", "participles"]);
 
 const activeParadigmTenses = ["Present Tense", "Imperfect Tense", "Future Tense", "Perfect Tense", "Pluperfect Tense", "Future Perfect Tense"] as const;
 const passiveParadigmTenses = ["Present Tense", "Imperfect Tense", "Future Tense"] as const;
@@ -425,7 +427,10 @@ export function LatinPage() {
   const excludedCards = useCardExclusions("latin");
   const [searchParams] = useSearchParams();
   const [initialFilters] = useState(loadLatinFilterPreferences);
-  const [direction, setDirection] = useState<StudyDirection>("forward");
+  const [initialReviewSetup] = useState(() => loadLocalStudyReviewSetup("latin"));
+  const [direction, setDirection] = useState<StudyDirection>(initialReviewSetup.direction);
+  const [reviewMode, setReviewMode] = useState<SelectionMode>(initialReviewSetup.reviewMode);
+  const [adaptiveStrength, setAdaptiveStrength] = useState<1 | 2 | 3>(initialReviewSetup.adaptiveStrength);
   const [materials, setMaterials] = useState<Set<Material>>(() => new Set(initialFilters.materials));
   const [vocabularyParts, setVocabularyParts] = useState<OptionalSelection>(() => initialFilters.vocabularyParts === null ? null : new Set(initialFilters.vocabularyParts));
   const [paradigmCards, setParadigmCards] = useState<OptionalSelection>(() => initialFilters.paradigmCards === null ? null : new Set(initialFilters.paradigmCards));
@@ -446,6 +451,35 @@ export function LatinPage() {
     });
   }, [materials, paradigmCards, vocabularyParts]);
   useEffect(() => { saveIncludeSavedCards("latin", includeSavedCards); }, [includeSavedCards]);
+  useEffect(() => { saveLocalStudyReviewSetup("latin", { direction, reviewMode, adaptiveStrength }); }, [direction, reviewMode, adaptiveStrength]);
+
+  const cloudSettings = useSyncedStudySettings("latin", user, {
+    version: 1,
+    materials: [...materials].sort(),
+    vocabularyParts: vocabularyParts === null ? null : [...vocabularyParts].sort(),
+    paradigmCards: paradigmCards === null ? null : [...paradigmCards].sort(),
+    excludedCardRefs: [...excludedCards.refs].sort(),
+    includeSavedCards,
+    direction,
+    reviewMode,
+    adaptiveStrength,
+  }, (value) => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return;
+    const stored = value as Record<string, unknown>;
+    const materialsFromCloud = validStringList(stored.materials);
+    if (materialsFromCloud) setMaterials(new Set(materialsFromCloud.filter((item): item is Material => supportedMaterials.has(item as Material))));
+    const vocabularyFromCloud = validStringList(stored.vocabularyParts);
+    if (stored.vocabularyParts === null || vocabularyFromCloud) setVocabularyParts(vocabularyFromCloud ? new Set(vocabularyFromCloud) : null);
+    const paradigmsFromCloud = validStringList(stored.paradigmCards);
+    if (stored.paradigmCards === null || paradigmsFromCloud) setParadigmCards(paradigmsFromCloud ? new Set(paradigmsFromCloud) : null);
+    const exclusions = restoreCardExclusions(stored.excludedCardRefs);
+    if (exclusions) excludedCards.replace(exclusions);
+    if (typeof stored.includeSavedCards === "boolean") setIncludeSavedCards(stored.includeSavedCards);
+    const setup = normalizeStudyReviewSetup(stored);
+    setDirection(setup.direction);
+    setReviewMode(setup.reviewMode);
+    setAdaptiveStrength(setup.adaptiveStrength);
+  });
 
   const vocabularyGroups = useMemo(() => {
     const groups = new Map<string, Array<{ value: string; count: number }>>();
@@ -1007,12 +1041,17 @@ export function LatinPage() {
         </FilterDisclosure>
       </StudyFilterMenu>
 
-      {vocabularyDeck ? (
+      {cloudSettings.error && <div className="inline-alert">Study preferences were not synced: {cloudSettings.error}</div>}
+      {vocabularyDeck && cloudSettings.ready ? (
         <SelectedCardsProvider items={currentlySelectedItems} onChange={(item, checked) => checked ? excludedCards.restore(item.deckId, item.cardId) : excludedCards.exclude(item.deckId, item.cardId)}><MultiSourceStudySession
           deck={virtualDeck}
           sources={sources}
           resetKey={resetKey}
           direction={direction}
+          reviewMode={reviewMode}
+          onReviewModeChange={setReviewMode}
+          reviewAdaptiveStrength={adaptiveStrength}
+          onReviewAdaptiveStrengthChange={setAdaptiveStrength}
           resumeSession={resumeSession}
           savedCardRefs={savedCards.refs}
           onToggleSavedCard={savedCards.toggleSaved}
