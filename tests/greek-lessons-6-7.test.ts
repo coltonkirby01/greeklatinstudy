@@ -26,7 +26,7 @@ describe("Groton Lessons 6 and 7 expansion", () => {
       { id: "lesson3-v6", greek: "σπεύδω, σπεύσω" },
       { id: "lesson3-v7", greek: "φυλάττω, φυλάξω" },
     ]);
-    expect(lesson4[0]).toMatchObject({ id: "lesson4-v1", greek: "πέμπω, πέμψω" });
+    expect({ id: lesson4[0].id, greek: originalGreek(lesson4[0]) }).toEqual({ id: "lesson4-v1", greek: "πέμπω, πέμψω" });
     expect(lesson5.slice(0, 3).map((card) => ({ id: card.id, greek: originalGreek(card) }))).toEqual([
       { id: "lesson5-v1", greek: "ἀκούω, ἀκούσω" },
       { id: "lesson5-v2", greek: "βλάπτω, βλάψω" },
