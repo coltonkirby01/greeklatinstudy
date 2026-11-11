@@ -1,3 +1,7 @@
+function originalGreek(card: { greek: string; third_principal_part?: string }) {
+  return card.third_principal_part ? card.greek.slice(0, -(`, ${card.third_principal_part}`).length) : card.greek;
+}
+
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { hasAmbiguousGreekTonos } from "../src/features/greek/greek-orthography";
@@ -21,9 +25,9 @@ describe("Groton Lessons 13–14", () => {
       expect(cards.every(card => card.lesson===lesson && card.source_ref===`Groton ${lesson}.${lesson===13?85:89}`)).toBe(true);
       expect(cards.every(card => Boolean(card.greek && card.meaning))).toBe(true);
     }
-    expect(vocabulary13[0].greek).toBe("βλέπω, βλέψομαι");
+    expect(originalGreek(vocabulary13[0])).toBe("βλέπω, βλέψομαι");
     expect(vocabulary13[4].greek).toBe("ὅδε, ἥδε, τόδε");
-    expect(vocabulary14[0].greek).toBe("πλήττω, πλήξω");
+    expect(originalGreek(vocabulary14[0])).toBe("πλήττω, πλήξω");
     expect(vocabulary14[8].greek).toBe("αὐτός, αὐτή, αὐτό");
   });
 

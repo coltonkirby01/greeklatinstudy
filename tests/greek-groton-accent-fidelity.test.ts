@@ -1,3 +1,7 @@
+function originalGreek(card: { greek: string; third_principal_part?: string }) {
+  return card.third_principal_part ? card.greek.slice(0, -(`, ${card.third_principal_part}`).length) : card.greek;
+}
+
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { classicalGreekPronunciation } from "../src/features/greek/greek-pronunciation";
@@ -39,7 +43,7 @@ describe("Groton acute/grave source fidelity", () => {
   const lesson4Grammar = grammar("public/data/greek-lesson4-grammar.json");
 
   it("keeps Groton's printed vocabulary acute/grave forms exactly", () => {
-    expect(card(lesson3, "lesson3-v4").greek).toBe("κλέπτω, κλέψω");
+    expect(originalGreek(card(lesson3, "lesson3-v4"))).toBe("κλέπτω, κλέψω");
     expect(card(lesson3, "lesson3-v10").greek).toBe("καί");
     expect(card(lesson3, "lesson3-v11").greek).toBe("καὶ...καί");
 

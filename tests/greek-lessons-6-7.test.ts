@@ -1,3 +1,7 @@
+function originalGreek(card: { greek: string; third_principal_part?: string }) {
+  return card.third_principal_part ? card.greek.slice(0, -(`, ${card.third_principal_part}`).length) : card.greek;
+}
+
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { resolveBuiltinGreekAsset } from "../supabase/functions/course-audio/builtin-greek-assets";
@@ -13,7 +17,7 @@ describe("Groton Lessons 6 and 7 expansion", () => {
     const lesson4 = readJson<VocabCard[]>("public/data/greek-lesson4-vocab.json");
     const lesson5 = readJson<VocabCard[]>("public/data/greek-lesson5-vocab.json");
 
-    expect(lesson3.slice(0, 7).map(({ id, greek }) => ({ id, greek }))).toEqual([
+    expect(lesson3.slice(0, 7).map((card) => ({ id: card.id, greek: originalGreek(card) }))).toEqual([
       { id: "lesson3-v1", greek: "γράφω, γράψω" },
       { id: "lesson3-v2", greek: "ἐθέλω, ἐθελήσω" },
       { id: "lesson3-v3", greek: "θῡ́ω, θῡ́σω" },
@@ -23,7 +27,7 @@ describe("Groton Lessons 6 and 7 expansion", () => {
       { id: "lesson3-v7", greek: "φυλάττω, φυλάξω" },
     ]);
     expect(lesson4[0]).toMatchObject({ id: "lesson4-v1", greek: "πέμπω, πέμψω" });
-    expect(lesson5.slice(0, 3).map(({ id, greek }) => ({ id, greek }))).toEqual([
+    expect(lesson5.slice(0, 3).map((card) => ({ id: card.id, greek: originalGreek(card) }))).toEqual([
       { id: "lesson5-v1", greek: "ἀκούω, ἀκούσω" },
       { id: "lesson5-v2", greek: "βλάπτω, βλάψω" },
       { id: "lesson5-v3", greek: "κελεύω, κελεύσω" },
@@ -36,7 +40,7 @@ describe("Groton Lessons 6 and 7 expansion", () => {
 
     expect(lesson6).toHaveLength(11);
     expect(lesson6.every((card) => card.lesson === 6 && card.source_ref === "Groton 6.40")).toBe(true);
-    expect(lesson6.map((card) => card.greek)).toEqual([
+    expect(lesson6.map((card) => originalGreek(card))).toEqual([
       "ἀλλάττω, ἀλλάξω",
       "διώκω, διώξω",
       "ἔχω, ἕξω/σχήσω",

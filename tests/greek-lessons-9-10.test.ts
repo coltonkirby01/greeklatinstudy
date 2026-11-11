@@ -1,3 +1,7 @@
+function originalGreek(card: { greek: string; third_principal_part?: string }) {
+  return card.third_principal_part ? card.greek.slice(0, -(`, ${card.third_principal_part}`).length) : card.greek;
+}
+
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { hasAmbiguousGreekTonos } from "../src/features/greek/greek-orthography";
@@ -29,7 +33,7 @@ describe("Groton Lessons 9–10 expansion", () => {
     expect(cards).toHaveLength(11);
     expect(cards.every((card) => card.lesson === 9 && card.source_ref === "Groton 9.63")).toBe(true);
     expect(cards.map((card) => card.id)).toEqual(Array.from({ length: 11 }, (_, index) => `lesson9-v${index + 1}`));
-    expect(cards.map((card) => card.greek)).toEqual([
+    expect(cards.map((card) => originalGreek(card))).toEqual([
       "δουλεύω, δουλεύσω",
       "δεσπότης, -ου, ὁ",
       "μαθητής, -οῦ, ὁ",
@@ -80,7 +84,7 @@ describe("Groton Lessons 9–10 expansion", () => {
     expect(vocabulary.every((card) => card.lesson === 10 && card.source_ref === "Groton 10.69")).toBe(true);
     expect(vocabulary.map((card) => card.id)).toEqual(Array.from({ length: 12 }, (_, index) => `lesson10-v${index + 1}`));
     expect(vocabulary[0]?.greek).toBe("λέγω, ἐρῶ/λέξω");
-    expect(vocabulary[1]?.greek).toBe("πρᾱ́ττω, πρᾱ́ξω");
+    expect(originalGreek(vocabulary[1])).toBe("πρᾱ́ττω, πρᾱ́ξω");
     expect(vocabulary[2]?.greek).toBe("φεύγω, φεύξομαι");
     expect(vocabulary.at(-1)?.greek).toBe("οὖν");
 

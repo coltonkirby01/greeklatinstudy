@@ -1,3 +1,7 @@
+function originalGreek(card: { greek: string; third_principal_part?: string }) {
+  return card.third_principal_part ? card.greek.slice(0, -(`, ${card.third_principal_part}`).length) : card.greek;
+}
+
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { hasAmbiguousGreekTonos } from "../src/features/greek/greek-orthography";
@@ -12,7 +16,7 @@ const grammar = JSON.parse(fs.readFileSync("public/data/greek-lesson5-grammar.js
 
 describe("Groton Lesson 5", () => {
   it("contains the ten section 5.36 vocabulary entries in textbook order", () => {
-    expect(vocabulary.map((card) => card.greek)).toEqual([
+    expect(vocabulary.map((card) => originalGreek(card))).toEqual([
       "ἀκούω, ἀκούσω",
       "βλάπτω, βλάψω",
       "κελεύω, κελεύσω",

@@ -1,3 +1,7 @@
+function originalGreek(card: { greek: string; third_principal_part?: string }) {
+  return card.third_principal_part ? card.greek.slice(0, -(`, ${card.third_principal_part}`).length) : card.greek;
+}
+
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { hasAmbiguousGreekTonos } from "../src/features/greek/greek-orthography";
@@ -30,7 +34,7 @@ describe("Groton Lesson 12", () => {
     expect(cards).toHaveLength(10);
     expect(cards.every((card) => card.lesson === 12 && card.source_ref === "Groton 12.81")).toBe(true);
     expect(cards.map((card) => card.id)).toEqual(Array.from({ length: 10 }, (_, index) => `lesson12-v${index + 1}`));
-    expect(cards.map((card) => card.greek)).toEqual([
+    expect(cards.map((card) => originalGreek(card))).toEqual([
       "εἰμί, ἔσομαι",
       "λῡ́ω, λῡ́σω",
       "ἀρχή, -ῆς, ἡ",

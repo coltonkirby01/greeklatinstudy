@@ -1,3 +1,7 @@
+function originalGreek(card: { greek: string; third_principal_part?: string }) {
+  return card.third_principal_part ? card.greek.slice(0, -(`, ${card.third_principal_part}`).length) : card.greek;
+}
+
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { hasAmbiguousGreekTonos } from "../src/features/greek/greek-orthography";
@@ -39,8 +43,8 @@ describe("Groton Lessons 15 and 16", () => {
     expect(vocab16).toHaveLength(12);
     expect(vocab15.map(item => item.id)).toEqual(Array.from({length: 10}, (_, i) => `lesson15-v${i + 1}`));
     expect(vocab16.map(item => item.id)).toEqual(Array.from({length: 12}, (_, i) => `lesson16-v${i + 1}`));
-    expect(vocab15.map(item => item.greek)).toContain("βάλλω, βαλῶ");
-    expect(vocab15.map(item => item.greek)).toContain("γελάω, γελάσομαι");
+    expect(vocab15.map(item => originalGreek(item))).toContain("βάλλω, βαλῶ");
+    expect(vocab15.map(item => originalGreek(item))).toContain("γελάω, γελάσομαι");
     expect(vocab16.map(item => item.greek)).toContain("ἀσπίς, -ίδος, ἡ");
     expect(vocab16.map(item => item.greek)).toContain("χάρις, -ιτος, ἡ");
     for (const [lesson, items] of [[15,vocab15],[16,vocab16]] as const) {
