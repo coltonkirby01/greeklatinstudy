@@ -14,7 +14,7 @@ function formChart(id: string, label: string, columns: readonly (readonly string
 
 export const lesson12VocabularyAudio: Readonly<Record<string, { label: string; greek: string }>> = {
   "lesson12-v1": { label: "εἰμί, ἔσομαι", greek: "εἰμί, ἔσομαι" },
-  "lesson12-v2": { label: "λῡ́ω, λῡ́σω", greek: "λῡ́ω, λῡ́σω" },
+  "lesson12-v2": { label: "λῡ́ω, λῡ́σω, ἔλῡσα", greek: "λῡ́ω, λῡ́σω, ἔλῡσα" },
   "lesson12-v3": { label: "ἀρχή", greek: "ἀρχή" },
   "lesson12-v4": { label: "εἰρήνη", greek: "εἰρήνη" },
   "lesson12-v5": { label: "λόγος", greek: "λόγος" },

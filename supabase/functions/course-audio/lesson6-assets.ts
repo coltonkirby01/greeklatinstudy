@@ -18,10 +18,10 @@ function endingChart(id: string, label: string, columns: readonly (readonly stri
 }
 
 export const lesson6VocabularyAudio: Readonly<Record<string, { label: string; greek: string }>> = {
-  "lesson6-v1": { label: "ἀλλάττω, ἀλλάξω", greek: "ἀλλάττω, ἀλλάξω" },
-  "lesson6-v2": { label: "διώκω, διώξω", greek: "διώκω, διώξω" },
+  "lesson6-v1": { label: "ἀλλάττω, ἀλλάξω, ἤλλαξα", greek: "ἀλλάττω, ἀλλάξω, ἤλλαξα" },
+  "lesson6-v2": { label: "διώκω, διώξω, ἐδίωξα", greek: "διώκω, διώξω, ἐδίωξα" },
   "lesson6-v3": { label: "ἔχω, ἕξω/σχήσω", greek: "ἔχω, ἕξω, σχήσω" },
-  "lesson6-v4": { label: "μέλλω, μελλήσω", greek: "μέλλω, μελλήσω" },
+  "lesson6-v4": { label: "μέλλω, μελλήσω, ἐμέλλησα", greek: "μέλλω, μελλήσω, ἐμέλλησα" },
   "lesson6-v5": { label: "κόρη", greek: "κόρη, κόρης, ἡ" },
   "lesson6-v6": { label: "οἰκίᾱ", greek: "οἰκίᾱ, οἰκίᾱς, ἡ" },
   "lesson6-v7": { label: "ἔτι", greek: "ἔτι" },

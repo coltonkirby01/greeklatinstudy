@@ -1,0 +1,160 @@
+[
+  {
+    "id": "lesson18-chart-first-aorist-active-indicative",
+    "category": "First Aorist Active Indicative Endings",
+    "prompt": "First Aorist Active Indicative Endings",
+    "source_ref": "Groton 18.109, p. 109",
+    "accent_note": "Only indicative forms take the past-tense augment; the third singular has -σε(ν).",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "1st person",
+        "cells": [
+          "-σα",
+          "-σαμεν"
+        ]
+      },
+      {
+        "label": "2nd person",
+        "cells": [
+          "-σας",
+          "-σατε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-σε(ν)",
+          "-σαν"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson18-chart-first-aorist-middle-indicative",
+    "category": "First Aorist Middle Indicative Endings",
+    "prompt": "First Aorist Middle Indicative Endings",
+    "source_ref": "Groton 18.109, p. 109",
+    "accent_note": "The second-person singular -σω is contracted from -σασο; the indicative takes the augment.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "1st person",
+        "cells": [
+          "-σαμην",
+          "-σαμεθα"
+        ]
+      },
+      {
+        "label": "2nd person",
+        "cells": [
+          "-σω",
+          "-σασθε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-σατο",
+          "-σαντο"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson18-chart-first-aorist-active-infinitive",
+    "category": "First Aorist Active Infinitive Endings",
+    "prompt": "First Aorist Active Infinitive Ending",
+    "source_ref": "Groton 18.109, p. 109",
+    "accent_note": "Aorist infinitives have no augment; accent is determined by the unaugmented form.",
+    "columns": [
+      "Ending"
+    ],
+    "rows": [
+      {
+        "label": "First Aorist Active Infinitive",
+        "cells": [
+          "-σαι"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson18-chart-first-aorist-middle-infinitive",
+    "category": "First Aorist Middle Infinitive Endings",
+    "prompt": "First Aorist Middle Infinitive Ending",
+    "source_ref": "Groton 18.109, p. 109",
+    "accent_note": "Aorist infinitives have no augment.",
+    "columns": [
+      "Ending"
+    ],
+    "rows": [
+      {
+        "label": "First Aorist Middle Infinitive",
+        "cells": [
+          "-σασθαι"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson18-chart-first-aorist-active-imperative",
+    "category": "First Aorist Active Imperative Endings",
+    "prompt": "First Aorist Active Imperative Endings",
+    "source_ref": "Groton 18.109, p. 109",
+    "accent_note": "First-aorist imperative forms have no augment.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "2nd person",
+        "cells": [
+          "-σον",
+          "-σατε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-σάτω",
+          "-σάντων"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson18-chart-first-aorist-middle-imperative",
+    "category": "First Aorist Middle Imperative Endings",
+    "prompt": "First Aorist Middle Imperative Endings",
+    "source_ref": "Groton 18.109, p. 109",
+    "accent_note": "First-aorist imperative forms have no augment.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "2nd person",
+        "cells": [
+          "-σαι",
+          "-σασθε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-σάσθω",
+          "-σάσθων"
+        ]
+      }
+    ]
+  }
+]

@@ -1,11 +1,12 @@
 [
   {
     "id": "lesson15-v1",
-    "greek": "ἁρπάζω, ἁρπάσω",
+    "greek": "ἁρπάζω, ἁρπάσω, ἥρπασα",
     "meaning": "seize, snatch, plunder",
     "part_of_speech": "verb",
     "lesson": 15,
-    "source_ref": "Groton 15.95"
+    "source_ref": "Groton 15.95",
+    "third_principal_part": "ἥρπασα"
   },
   {
     "id": "lesson15-v2",
@@ -17,51 +18,57 @@
   },
   {
     "id": "lesson15-v3",
-    "greek": "γελάω, γελάσομαι",
+    "greek": "γελάω, γελάσομαι, ἐγέλασα",
     "meaning": "laugh; with ἐπί + dative: laugh at, ridicule",
     "part_of_speech": "verb",
     "lesson": 15,
-    "source_ref": "Groton 15.95"
+    "source_ref": "Groton 15.95",
+    "third_principal_part": "ἐγέλασα"
   },
   {
     "id": "lesson15-v4",
-    "greek": "δηλόω, δηλώσω",
+    "greek": "δηλόω, δηλώσω, ἐδήλωσα",
     "meaning": "make clear, show, explain",
     "part_of_speech": "verb",
     "lesson": 15,
-    "source_ref": "Groton 15.95"
+    "source_ref": "Groton 15.95",
+    "third_principal_part": "ἐδήλωσα"
   },
   {
     "id": "lesson15-v5",
-    "greek": "κομίζω, κομιῶ",
+    "greek": "κομίζω, κομιῶ, ἐκόμισα",
     "meaning": "care for, carry, escort; middle: acquire",
     "part_of_speech": "verb",
     "lesson": 15,
-    "source_ref": "Groton 15.95"
+    "source_ref": "Groton 15.95",
+    "third_principal_part": "ἐκόμισα"
   },
   {
     "id": "lesson15-v6",
-    "greek": "τῑμάω, τῑμήσω",
+    "greek": "τῑμάω, τῑμήσω, ἐτίμησα",
     "meaning": "honor, value",
     "part_of_speech": "verb",
     "lesson": 15,
-    "source_ref": "Groton 15.95"
+    "source_ref": "Groton 15.95",
+    "third_principal_part": "ἐτίμησα"
   },
   {
     "id": "lesson15-v7",
-    "greek": "φιλέω, φιλήσω",
+    "greek": "φιλέω, φιλήσω, ἐφίλησα",
     "meaning": "love, kiss; with infinitive: be fond of doing, be accustomed to",
     "part_of_speech": "verb",
     "lesson": 15,
-    "source_ref": "Groton 15.95"
+    "source_ref": "Groton 15.95",
+    "third_principal_part": "ἐφίλησα"
   },
   {
     "id": "lesson15-v8",
-    "greek": "ὠφελέω, ὠφελήσω",
+    "greek": "ὠφελέω, ὠφελήσω, ὠφέλησα",
     "meaning": "help, aid",
     "part_of_speech": "verb",
     "lesson": 15,
-    "source_ref": "Groton 15.95"
+    "source_ref": "Groton 15.95",
+    "third_principal_part": "ὠφέλησα"
   },
   {
     "id": "lesson15-v9",

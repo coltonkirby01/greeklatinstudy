@@ -1,19 +1,21 @@
 [
   {
     "id": "lesson14-v1",
-    "greek": "πλήττω, πλήξω",
+    "greek": "πλήττω, πλήξω, ἔπληξα",
     "meaning": "strike; ἐπιπλήττω (+ dative) means rebuke",
     "part_of_speech": "verb",
     "lesson": 14,
-    "source_ref": "Groton 14.89"
+    "source_ref": "Groton 14.89",
+    "third_principal_part": "ἔπληξα"
   },
   {
     "id": "lesson14-v2",
-    "greek": "φέρω, οἴσω",
+    "greek": "φέρω, οἴσω, ἤνεγκα",
     "meaning": "bring, carry, bear",
     "part_of_speech": "verb",
     "lesson": 14,
-    "source_ref": "Groton 14.89"
+    "source_ref": "Groton 14.89",
+    "third_principal_part": "ἤνεγκα"
   },
   {
     "id": "lesson14-v3",

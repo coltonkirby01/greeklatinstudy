@@ -2,7 +2,7 @@ import type { DeckDefinition, StudyCard } from "../features/study/types";
 import { classicalGreekPronunciation } from "../features/greek/greek-pronunciation";
 
 type GreekSourceCard = { id: string; category: string; front: string; back_title: string; back: string };
-type GreekVocabularySourceCard = { id: string; greek: string; meaning: string; part_of_speech: string; lesson: number; source_ref?: string; accent_note?: string };
+type GreekVocabularySourceCard = { id: string; greek: string; meaning: string; part_of_speech: string; lesson: number; source_ref?: string; accent_note?: string; third_principal_part?: string };
 type GreekGrammarChartRow = { label: string; cells: string[] };
 type GreekGrammarSourceCard = { id: string; category: string; prompt: string; columns: string[]; rows: GreekGrammarChartRow[]; source_ref?: string; accent_note?: string };
 type LatinSourceCard = { id: string; headword: string; definition: string; partOfSpeech: string; semanticGroup: string; frequencyRank: number; deckPosition: number };
@@ -80,7 +80,7 @@ export function loadGreekLesson3VocabularyDeck() {
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 3",
         notes: [card.part_of_speech, card.accent_note ? `Accent: ${card.accent_note}` : "", `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
-        metadata: { lesson: card.lesson, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, accentNote: card.accent_note, sourceRef },
+        metadata: { lesson: card.lesson, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, thirdPrincipalPart: card.third_principal_part, accentNote: card.accent_note, sourceRef },
       };
     });
     return { id: "alpha-omega-lesson3-vocab", slug: "greek", title: "Greek Lesson 3 Vocabulary", eyebrow: "Lesson 3 vocabulary", description: "Eleven vocabulary entries supplied for Lesson 3, tracked separately from grammar forms.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 3.24." } satisfies DeckDefinition;
@@ -138,7 +138,7 @@ export function loadGreekLesson4VocabularyDeck() {
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 4",
         notes: [card.part_of_speech, card.accent_note ? `Accent: ${card.accent_note}` : "", `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
-        metadata: { lesson: 4, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, accentNote: card.accent_note, sourceRef },
+        metadata: { lesson: 4, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, thirdPrincipalPart: card.third_principal_part, accentNote: card.accent_note, sourceRef },
       };
     });
     return { id: "alpha-omega-lesson4-vocab", slug: "greek", title: "Greek Lesson 4 Vocabulary", eyebrow: "Lesson 4 vocabulary", description: "Lesson 4 vocabulary from Groton §4.32.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 4.32." } satisfies DeckDefinition;
@@ -195,7 +195,7 @@ export function loadGreekLesson5VocabularyDeck() {
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 5",
         notes: [card.part_of_speech, `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
-        metadata: { lesson: 5, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, sourceRef },
+        metadata: { lesson: 5, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, thirdPrincipalPart: card.third_principal_part, sourceRef },
       };
     });
     return { id: "alpha-omega-lesson5-vocab", slug: "greek", title: "Greek Lesson 5 Vocabulary", eyebrow: "Lesson 5 vocabulary", description: "Ten vocabulary entries from Groton §5.36.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 5.36." } satisfies DeckDefinition;
@@ -252,7 +252,7 @@ export function loadGreekLesson6VocabularyDeck() {
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 6",
         notes: [card.part_of_speech, `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
-        metadata: { lesson: 6, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, sourceRef },
+        metadata: { lesson: 6, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, thirdPrincipalPart: card.third_principal_part, sourceRef },
       };
     });
     return { id: "alpha-omega-lesson6-vocab", slug: "greek", title: "Greek Lesson 6 Vocabulary", eyebrow: "Lesson 6 vocabulary", description: "Eleven vocabulary entries from Groton §6.40, including second principal parts for verbs.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 6.40." } satisfies DeckDefinition;
@@ -312,7 +312,7 @@ export function loadGreekLesson7VocabularyDeck() {
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 7",
         notes: [card.part_of_speech, `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
-        metadata: { lesson: 7, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, sourceRef },
+        metadata: { lesson: 7, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, thirdPrincipalPart: card.third_principal_part, sourceRef },
       };
     });
     return { id: "alpha-omega-lesson7-vocab", slug: "greek", title: "Greek Lesson 7 Vocabulary", eyebrow: "Lesson 7 vocabulary", description: "Twelve vocabulary entries from Groton §7.47.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 7.47." } satisfies DeckDefinition;
@@ -370,7 +370,7 @@ export function loadGreekLesson8VocabularyDeck() {
         rank: index + 1,
         source: "From Alpha to Omega, Lesson 8",
         notes: [card.part_of_speech, `Pronunciation: ${pronunciation}`].filter(Boolean).join(" · "),
-        metadata: { lesson: 8, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, sourceRef },
+        metadata: { lesson: 8, studySource: "vocabulary", partOfSpeech: card.part_of_speech, pronunciation, thirdPrincipalPart: card.third_principal_part, sourceRef },
       };
     });
     return { id: "alpha-omega-lesson8-vocab", slug: "greek", title: "Greek Lesson 8 Vocabulary", eyebrow: "Lesson 8 vocabulary", description: "Eleven vocabulary entries from Groton §8.56.", language: "greek", cards, supportsReverse: true, sourceNote: "Groton 8.56." } satisfies DeckDefinition;

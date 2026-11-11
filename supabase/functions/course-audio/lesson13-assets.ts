@@ -7,7 +7,7 @@ function formChart(id: string, label: string, columns: readonly (readonly string
     ttsText: columns.map(column => column.map(greekToElevenLabsIpa).filter(Boolean).join(" ")).filter(Boolean).join(" [pause] ") };
 }
 export const lesson13VocabularyAudio: Readonly<Record<string, {label: string; greek: string}>> = {
-  "lesson13-v1": { label: "βλέπω, βλέψομαι", greek: "βλέπω, βλέψομαι" },
+  "lesson13-v1": { label: "βλέπω, βλέψομαι, ἔβλεψα", greek: "βλέπω, βλέψομαι, ἔβλεψα" },
   "lesson13-v2": { label: "σοφίᾱ, -ᾱς, ἡ", greek: "σοφίᾱ" },
   "lesson13-v3": { label: "φιλοσοφίᾱ, -ᾱς, ἡ", greek: "φιλοσοφίᾱ" },
   "lesson13-v4": { label: "ἐκεῖνος, -η, -ο", greek: "ἐκεῖνος, ἐκείνη, ἐκεῖνο" },

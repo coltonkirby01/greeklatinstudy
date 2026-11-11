@@ -1,0 +1,386 @@
+[
+  {
+    "id": "lesson17-chart-epsilon-sigma-masculine-feminine",
+    "category": "3rd Declension εσ-stem (m./f.)",
+    "prompt": "3rd Declension εσ-stem (m./f.)",
+    "source_ref": "Groton 17.103, pp. 102–103",
+    "accent_note": "Vocative singular shows the pure εσ-stem; accusative plural copies the nominative plural. Masculine εσ-stems are proper names; τριήρης is the one feminine example.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "-ης",
+          "-εις"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-ους",
+          "-ων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-ει",
+          "-εσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-η",
+          "-εις"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "-ες",
+          "-εις"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson17-chart-epsilon-sigma-neuter",
+    "category": "3rd Declension εσ-stem (n.)",
+    "prompt": "3rd Declension εσ-stem (n.)",
+    "source_ref": "Groton 17.103, pp. 102–103",
+    "accent_note": "Neuter nominative, accusative and vocative agree in each number; the nominative singular changes stem ε to ο.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "-ος",
+          "-η"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-ους",
+          "-ων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-ει",
+          "-εσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-ος",
+          "-η"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "-ος",
+          "-η"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson17-chart-alpha-sigma-neuter",
+    "category": "3rd Declension ασ-stem (n.)",
+    "prompt": "3rd Declension ασ-stem (n.)",
+    "source_ref": "Groton 17.103, pp. 102–103",
+    "accent_note": "Groton notes the long alpha in the alternative dative singular -ᾱͅ of γέρας is unexpected. Neuter nominative, accusative and vocative agree.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "-ας",
+          "-ᾱ"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-ως",
+          "-ῶν"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-ᾱͅ / -αι",
+          "-ασι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-ας",
+          "-ᾱ"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "-ας",
+          "-ᾱ"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson17-chart-omicron-sigma-feminine",
+    "category": "3rd Declension οσ-stem (f.)",
+    "prompt": "3rd Declension οσ-stem (f.)",
+    "source_ref": "Groton 17.103, pp. 102–103",
+    "accent_note": "αἰδώς is the sole οσ-stem noun; it has no plural forms.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "-ως",
+          "—"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-ους",
+          "—"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-οι",
+          "—"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-ω",
+          "—"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "-ως",
+          "—"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson17-chart-adjective-nasal-masculine-feminine",
+    "category": "3rd Declension Adjective — nasal stem (m./f.)",
+    "prompt": "3rd Declension Adjective — nasal stem (m./f.)",
+    "source_ref": "Groton 17.105, p. 104",
+    "accent_note": "Model: εὐδαίμων, -ον. The masculine/feminine vocative singular has recessive accent (εὔδαιμον).",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "-ων",
+          "-ονες"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-ονος",
+          "-ονων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-ονι",
+          "-οσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-ονα",
+          "-ονας"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "-ον",
+          "-ονες"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson17-chart-adjective-nasal-neuter",
+    "category": "3rd Declension Adjective — nasal stem (n.)",
+    "prompt": "3rd Declension Adjective — nasal stem (n.)",
+    "source_ref": "Groton 17.105, p. 104",
+    "accent_note": "Model: εὐδαίμων, -ον. Neuter nominative, accusative and vocative have identical forms within a number.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "-ον",
+          "-ονα"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-ονος",
+          "-ονων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-ονι",
+          "-οσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-ον",
+          "-ονα"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "-ον",
+          "-ονα"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson17-chart-adjective-sigma-masculine-feminine",
+    "category": "3rd Declension Adjective — εσ-stem (m./f.)",
+    "prompt": "3rd Declension Adjective — εσ-stem (m./f.)",
+    "source_ref": "Groton 17.105, p. 104",
+    "accent_note": "Model: ἀληθής, -ές. Masculine and feminine share the same forms; accents are persistent.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "-ης",
+          "-εις"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-ους",
+          "-ων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-ει",
+          "-εσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-η",
+          "-εις"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "-ες",
+          "-εις"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson17-chart-adjective-sigma-neuter",
+    "category": "3rd Declension Adjective — εσ-stem (n.)",
+    "prompt": "3rd Declension Adjective — εσ-stem (n.)",
+    "source_ref": "Groton 17.105, p. 104",
+    "accent_note": "Model: ἀληθής, -ές. Neuter nominative, accusative and vocative agree within each number.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "-ες",
+          "-η"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-ους",
+          "-ων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-ει",
+          "-εσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-ες",
+          "-η"
+        ]
+      },
+      {
+        "label": "Vocative",
+        "cells": [
+          "-ες",
+          "-η"
+        ]
+      }
+    ]
+  }
+]

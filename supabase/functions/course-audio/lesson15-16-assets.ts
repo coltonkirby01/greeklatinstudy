@@ -2,20 +2,20 @@ import { greekToClassicalIpa, greekToElevenLabsIpa } from "./greek-ipa.ts";
 import type { Lesson3CourseAudioAsset } from "./lesson3-assets.ts";
 
 export const lesson15VocabularyAudio: Readonly<Record<string, {label: string; greek: string}>> = {
-  "lesson15-v1": { label: "ἁρπάζω, ἁρπάσω", greek: "ἁρπάζω, ἁρπάσω" },
+  "lesson15-v1": { label: "ἁρπάζω, ἁρπάσω, ἥρπασα", greek: "ἁρπάζω, ἁρπάσω, ἥρπασα" },
   "lesson15-v2": { label: "βάλλω, βαλῶ", greek: "βάλλω, βαλῶ" },
-  "lesson15-v3": { label: "γελάω, γελάσομαι", greek: "γελάω, γελάσομαι" },
-  "lesson15-v4": { label: "δηλόω, δηλώσω", greek: "δηλόω, δηλώσω" },
-  "lesson15-v5": { label: "κομίζω, κομιῶ", greek: "κομίζω, κομιῶ" },
-  "lesson15-v6": { label: "τῑμάω, τῑμήσω", greek: "τῑμάω, τῑμήσω" },
-  "lesson15-v7": { label: "φιλέω, φιλήσω", greek: "φιλέω, φιλήσω" },
-  "lesson15-v8": { label: "ὠφελέω, ὠφελήσω", greek: "ὠφελέω, ὠφελήσω" },
+  "lesson15-v3": { label: "γελάω, γελάσομαι, ἐγέλασα", greek: "γελάω, γελάσομαι, ἐγέλασα" },
+  "lesson15-v4": { label: "δηλόω, δηλώσω, ἐδήλωσα", greek: "δηλόω, δηλώσω, ἐδήλωσα" },
+  "lesson15-v5": { label: "κομίζω, κομιῶ, ἐκόμισα", greek: "κομίζω, κομιῶ, ἐκόμισα" },
+  "lesson15-v6": { label: "τῑμάω, τῑμήσω, ἐτίμησα", greek: "τῑμάω, τῑμήσω, ἐτίμησα" },
+  "lesson15-v7": { label: "φιλέω, φιλήσω, ἐφίλησα", greek: "φιλέω, φιλήσω, ἐφίλησα" },
+  "lesson15-v8": { label: "ὠφελέω, ὠφελήσω, ὠφέλησα", greek: "ὠφελέω, ὠφελήσω, ὠφέλησα" },
   "lesson15-v9": { label: "τῑμή, -ῆς, ἡ", greek: "τῑμή" },
   "lesson15-v10": { label: "δῆλος, -η, -ον", greek: "δῆλος, δήλη, δῆλον" },
 };
 
 export const lesson16VocabularyAudio: Readonly<Record<string, {label: string; greek: string}>> = {
-  "lesson16-v1": { label: "ποιέω, ποιήσω", greek: "ποιέω, ποιήσω" },
+  "lesson16-v1": { label: "ποιέω, ποιήσω, ἐποίησα", greek: "ποιέω, ποιήσω, ἐποίησα" },
   "lesson16-v2": { label: "ἀγών, -ῶνος, ὁ", greek: "ἀγών" },
   "lesson16-v3": { label: "ἀσπίς, -ίδος, ἡ", greek: "ἀσπίς" },
   "lesson16-v4": { label: "κλώψ, κλωπός, ὁ", greek: "κλώψ" },

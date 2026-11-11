@@ -13,8 +13,8 @@ function endingChart(id: string, label: string, columns: readonly (readonly stri
 }
 
 export const lesson11VocabularyAudio: Readonly<Record<string, { label: string; greek: string }>> = {
-  "lesson11-v1": { label: "πείθω, πείσω", greek: "πείθω, πείσω" },
-  "lesson11-v2": { label: "τρέπω, τρέψω", greek: "τρέπω, τρέψω" },
+  "lesson11-v1": { label: "πείθω, πείσω, ἔπεισα", greek: "πείθω, πείσω, ἔπεισα" },
+  "lesson11-v2": { label: "τρέπω, τρέψω, ἔτρεψα", greek: "τρέπω, τρέψω, ἔτρεψα" },
   "lesson11-v3": { label: "ἅμαξα", greek: "ἅμαξα" },
   "lesson11-v4": { label: "λίμνη", greek: "λίμνη" },
   "lesson11-v5": { label: "τόπος", greek: "τόπος" },

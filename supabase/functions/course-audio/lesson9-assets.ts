@@ -18,7 +18,7 @@ function endingChart(id: string, label: string, columns: readonly (readonly stri
 }
 
 export const lesson9VocabularyAudio: Readonly<Record<string, { label: string; greek: string }>> = {
-  "lesson9-v1": { label: "δουλεύω, δουλεύσω", greek: "δουλεύω, δουλεύσω" },
+  "lesson9-v1": { label: "δουλεύω, δουλεύσω, ἐδούλευσα", greek: "δουλεύω, δουλεύσω, ἐδούλευσα" },
   "lesson9-v2": { label: "δεσπότης", greek: "δεσπότης, δεσπότου, ὁ" },
   "lesson9-v3": { label: "μαθητής", greek: "μαθητής, μαθητοῦ, ὁ" },
   "lesson9-v4": { label: "νεᾱνίᾱς", greek: "νεᾱνίᾱς, νεᾱνίου, ὁ" },

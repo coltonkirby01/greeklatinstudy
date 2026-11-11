@@ -12,17 +12,18 @@ import { lesson12CourseAudioAssets, lesson12VocabularyAudio } from "./lesson12-a
 import { lesson13CourseAudioAssets, lesson13VocabularyAudio } from "./lesson13-assets.ts";
 import { lesson14CourseAudioAssets, lesson14VocabularyAudio } from "./lesson14-assets.ts";
 import { lesson15VocabularyAudio, lesson16VocabularyAudio, lesson16CourseAudioAssets } from "./lesson15-16-assets.ts";
+import { lesson17VocabularyAudio, lesson18VocabularyAudio, lesson17And18CourseAudioAssets } from "./lesson17-18-assets.ts";
 
 export type GreekCourseAudioAsset = Lesson3CourseAudioAsset & { pronunciationSystem?: string };
 
 const lesson3Vocabulary: Record<string, { label: string; greek: string }> = {
-  "lesson3-v1": { label: "γράφω", greek: "γράφω" },
-  "lesson3-v2": { label: "ἐθέλω", greek: "ἐθέλω" },
-  "lesson3-v3": { label: "θῡ́ω", greek: "θῡ́ω" },
-  "lesson3-v4": { label: "κλέπτω", greek: "κλέπτω" },
-  "lesson3-v5": { label: "παιδεύω", greek: "παιδεύω" },
-  "lesson3-v6": { label: "σπεύδω", greek: "σπεύδω" },
-  "lesson3-v7": { label: "φυλάττω", greek: "φυλάττω" },
+  "lesson3-v1": { label: "γράφω, ἔγραψα", greek: "γράφω, ἔγραψα" },
+  "lesson3-v2": { label: "ἐθέλω, ἠθέλησα", greek: "ἐθέλω, ἠθέλησα" },
+  "lesson3-v3": { label: "θῡ́ω, ἔθῡσα", greek: "θῡ́ω, ἔθῡσα" },
+  "lesson3-v4": { label: "κλέπτω, ἔκλεψα", greek: "κλέπτω, ἔκλεψα" },
+  "lesson3-v5": { label: "παιδεύω, ἐπαίδευσα", greek: "παιδεύω, ἐπαίδευσα" },
+  "lesson3-v6": { label: "σπεύδω, ἔσπευσα", greek: "σπεύδω, ἔσπευσα" },
+  "lesson3-v7": { label: "φυλάττω, ἐφύλαξα", greek: "φυλάττω, ἐφύλαξα" },
   "lesson3-v8": { label: "μή", greek: "μή" },
   "lesson3-v9": { label: "οὐ (οὐκ, οὐχ)", greek: "οὐ, οὐκ, οὐχ" },
   "lesson3-v10": { label: "καί", greek: "καί" },
@@ -77,10 +78,10 @@ function addChartFormPacing(ttsText: string) {
 }
 
 export function resolveBuiltinGreekAsset(assetId: string): GreekCourseAudioAsset | null {
-  const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets, ...lesson5CourseAudioAssets, ...lesson6CourseAudioAssets, ...lesson7CourseAudioAssets, ...lesson8CourseAudioAssets, ...lesson9CourseAudioAssets, ...lesson10CourseAudioAssets, ...lesson11CourseAudioAssets, ...lesson12CourseAudioAssets, ...lesson13CourseAudioAssets, ...lesson14CourseAudioAssets, ...lesson16CourseAudioAssets].find((asset) => asset.id === assetId);
+  const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets, ...lesson5CourseAudioAssets, ...lesson6CourseAudioAssets, ...lesson7CourseAudioAssets, ...lesson8CourseAudioAssets, ...lesson9CourseAudioAssets, ...lesson10CourseAudioAssets, ...lesson11CourseAudioAssets, ...lesson12CourseAudioAssets, ...lesson13CourseAudioAssets, ...lesson14CourseAudioAssets, ...lesson16CourseAudioAssets, ...lesson17And18CourseAudioAssets].find((asset) => asset.id === assetId);
   if (paradigm) return { ...paradigm, ttsText: addChartFormPacing(paradigm.ttsText) };
 
-  const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId] ?? lesson6VocabularyAudio[assetId] ?? lesson7VocabularyAudio[assetId] ?? lesson8VocabularyAudio[assetId] ?? lesson9VocabularyAudio[assetId] ?? lesson10VocabularyAudio[assetId] ?? lesson11VocabularyAudio[assetId] ?? lesson12VocabularyAudio[assetId] ?? lesson13VocabularyAudio[assetId] ?? lesson14VocabularyAudio[assetId] ?? lesson15VocabularyAudio[assetId] ?? lesson16VocabularyAudio[assetId];
+  const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId] ?? lesson6VocabularyAudio[assetId] ?? lesson7VocabularyAudio[assetId] ?? lesson8VocabularyAudio[assetId] ?? lesson9VocabularyAudio[assetId] ?? lesson10VocabularyAudio[assetId] ?? lesson11VocabularyAudio[assetId] ?? lesson12VocabularyAudio[assetId] ?? lesson13VocabularyAudio[assetId] ?? lesson14VocabularyAudio[assetId] ?? lesson15VocabularyAudio[assetId] ?? lesson16VocabularyAudio[assetId] ?? lesson17VocabularyAudio[assetId] ?? lesson18VocabularyAudio[assetId];
   if (vocabulary) {
     const canonicalIpa = greekToClassicalIpa(vocabulary.greek);
     const ttsText = greekToElevenLabsIpa(vocabulary.greek);

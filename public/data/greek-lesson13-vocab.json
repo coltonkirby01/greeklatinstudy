@@ -1,11 +1,12 @@
 [
   {
     "id": "lesson13-v1",
-    "greek": "βλέπω, βλέψομαι",
+    "greek": "βλέπω, βλέψομαι, ἔβλεψα",
     "meaning": "see, look at (+ εἰς and accusative)",
     "part_of_speech": "verb",
     "lesson": 13,
-    "source_ref": "Groton 13.85"
+    "source_ref": "Groton 13.85",
+    "third_principal_part": "ἔβλεψα"
   },
   {
     "id": "lesson13-v2",
