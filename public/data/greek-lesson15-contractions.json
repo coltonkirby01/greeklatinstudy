@@ -3,10 +3,11 @@
     "id": "lesson15-contraction-long-alpha",
     "result": "ᾱ",
     "combinations": [
+      "α + α",
       "α + ε",
       "α + η"
     ],
-    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+    "source_ref": "Groton §92 (Lesson 15); Lesson 17 p. 101, Contractions Found in Sigma-Stem Nouns"
   },
   {
     "id": "lesson15-contraction-long-alpha-iota",
@@ -22,17 +23,19 @@
     "result": "ει",
     "combinations": [
       "ε + ε",
-      "ε + ει"
+      "ε + ει",
+      "ε + ι"
     ],
-    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+    "source_ref": "Groton §92 (Lesson 15); Lesson 17 p. 101, Contractions Found in Sigma-Stem Nouns"
   },
   {
     "id": "lesson15-contraction-eta",
     "result": "η",
     "combinations": [
+      "ε + α",
       "ε + η"
     ],
-    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+    "source_ref": "Groton §92 (Lesson 15); Lesson 17 p. 101, Contractions Found in Sigma-Stem Nouns"
   },
   {
     "id": "lesson15-contraction-eta-iota",
@@ -50,10 +53,11 @@
       "α + ου",
       "α + ω",
       "ε + ω",
+      "ο + α",
       "ο + η",
       "ο + ω"
     ],
-    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+    "source_ref": "Groton §92 (Lesson 15); Lesson 17 p. 101, Contractions Found in Sigma-Stem Nouns"
   },
   {
     "id": "lesson15-contraction-omega-iota",
@@ -82,8 +86,17 @@
       "ε + οι",
       "ο + ει",
       "ο + ῃ",
+      "ο + ι",
       "ο + οι"
     ],
-    "source_ref": "Groton §92, Contractions Found in Contract Verbs"
+    "source_ref": "Groton §92 (Lesson 15); Lesson 17 p. 101, Contractions Found in Sigma-Stem Nouns"
+  },
+  {
+    "id": "lesson15-contraction-ai",
+    "result": "αι",
+    "combinations": [
+      "α + ι"
+    ],
+    "source_ref": "Groton §92 (Lesson 15); Lesson 17 p. 101, Contractions Found in Sigma-Stem Nouns"
   }
 ]

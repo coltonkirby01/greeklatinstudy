@@ -9,30 +9,32 @@ type Source = { id: string; result: string; combinations: string[]; source_ref: 
 const source = JSON.parse(fs.readFileSync("public/data/greek-lesson15-contractions.json", "utf8")) as Source[];
 
 describe("Groton §92 — contraction results as separate recall cards", () => {
-  it("contains exactly nine distinct results and all 24 source pairings", () => {
-    expect(source).toHaveLength(9);
+  it("contains exactly ten distinct results and all 30 source pairings", () => {
+    expect(source).toHaveLength(10);
     const actual = new Map(source.map(({ result, combinations }) => [result, combinations]));
-    expect(actual.size).toBe(9);
+    expect(actual.size).toBe(10);
     const expected: Record<string, string[]> = {
-      "ᾱ": ["α + ε", "α + η"],
+      "ᾱ": ["α + α", "α + ε", "α + η"],
       "ᾱͅ": ["α + ει", "α + ῃ"],
-      "ει": ["ε + ε", "ε + ει"],
-      "η": ["ε + η"],
+      "ει": ["ε + ε", "ε + ει", "ε + ι"],
+      "η": ["ε + α", "ε + η"],
       "ῃ": ["ε + ῃ"],
-      "ω": ["α + ο", "α + ου", "α + ω", "ε + ω", "ο + η", "ο + ω"],
+      "ω": ["α + ο", "α + ου", "α + ω", "ε + ω", "ο + α", "ο + η", "ο + ω"],
       "ῳ": ["α + οι"],
       "ου": ["ε + ο", "ε + ου", "ο + ε", "ο + ο", "ο + ου"],
-      "οι": ["ε + οι", "ο + ει", "ο + ῃ", "ο + οι"],
+      "οι": ["ε + οι", "ο + ει", "ο + ῃ", "ο + ι", "ο + οι"],
+      "αι": ["α + ι"],
     };
     expect(Object.fromEntries(actual)).toEqual(expected);
-    expect(source.flatMap(item => item.combinations)).toHaveLength(24);
-    expect(new Set(source.flatMap(item => item.combinations)).size).toBe(24);
+    expect(source.flatMap(item => item.combinations)).toHaveLength(30);
+    expect(new Set(source.flatMap(item => item.combinations)).size).toBe(30);
     expect(source.every(item => item.source_ref.includes("Groton §92"))).toBe(true);
+    expect(source.filter(item => item.source_ref.includes("p. 101"))).toHaveLength(6);
     expect(hasAmbiguousGreekTonos(JSON.stringify(source))).toBe(false);
   });
 
   it("uses unique permanent card IDs and displays the RESULT on the front with ALL pairings on the answer", () => {
-    expect(new Set(source.map(item => item.id)).size).toBe(9);
+    expect(new Set(source.map(item => item.id)).size).toBe(10);
     expect(source.every(item => item.id.startsWith("lesson15-contraction-"))).toBe(true);
     const loaders = fs.readFileSync("src/data/greek-lessons-9-10.ts", "utf8");
     expect(loaders).toContain('front: entry.result');
