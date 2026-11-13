@@ -19,11 +19,12 @@
   },
   {
     "id": "lesson6-v3",
-    "greek": "ἔχω, ἕξω/σχήσω",
+    "greek": "ἔχω, ἕξω/σχήσω, ἔσχον",
     "meaning": "have, hold, possess; (+ infinitive) be able (to)",
     "part_of_speech": "verb",
     "lesson": 6,
-    "source_ref": "Groton 6.40"
+    "source_ref": "Groton 6.40",
+    "third_principal_part": "ἔσχον"
   },
   {
     "id": "lesson6-v4",
