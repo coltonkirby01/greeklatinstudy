@@ -113,10 +113,10 @@ describe("Groton Lesson 19: second aorist and reflexive pronouns", () => {
     const index=buildGreekTranslationIndex([vocabDeck()],[grammarDeck()]);
     for(const [form,headword,grammaticalCase] of [
       ["ἐμαυτῷ","ἐμαυτοῦ","Singular · Dative"],
-      ["ἡμᾶς","ἡμῶν","Plural · Accusative"],
+      ["ἡμᾶς αὐτούς","ἡμῶν","Plural · Accusative"],
       ["σεαυτῆς","σεαυτοῦ","Singular · Genitive"],
       ["σαυτῇ","σεαυτοῦ","Singular · Dative"],
-      ["ὑμῖν","ὑμῶν","Plural · Dative"],
+      ["ὑμῖν αὐτοῖς","ὑμῶν","Plural · Dative"],
       ["ἑαυτόν","ἑαυτοῦ","Singular · Accusative"],
       ["αὑτῆς","ἑαυτοῦ","Singular · Genitive"],
       ["ἑαυταῖς","ἑαυτοῦ","Plural · Dative"],
