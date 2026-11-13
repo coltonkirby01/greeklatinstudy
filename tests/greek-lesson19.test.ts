@@ -123,7 +123,7 @@ describe("Groton Lesson 19: second aorist and reflexive pronouns", () => {
       ["ἑαυτά","ἑαυτοῦ","Plural · Accusative"],
     ] as const){
       const matches=lookupDictionaryWord(index,form);
-      expect(matches.some(x=>normalizeDictionaryKey(x.headword.split(",")[0])===normalizeDictionaryKey(headword) &&
+      expect(matches.some(x=>normalizeDictionaryKey(x.headword.match(/[\p{Script=Greek}\p{M}]+/u)?.[0] ?? "")===normalizeDictionaryKey(headword) &&
         x.morphology?.some(v=>v.includes(grammaticalCase))),form).toBe(true);
     }
   });
