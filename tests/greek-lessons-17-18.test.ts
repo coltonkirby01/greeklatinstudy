@@ -26,16 +26,22 @@ const updatedParts: Record<string, string> = {
   "lesson5-v3": "ἐκέλευσα",
   "lesson6-v1": "ἤλλαξα",
   "lesson6-v2": "ἐδίωξα",
+  "lesson6-v3": "ἔσχον",
   "lesson6-v4": "ἐμέλλησα",
   "lesson9-v1": "ἐδούλευσα",
+  "lesson8-v1": "εὗρον",
+  "lesson8-v2": "ἔλιπον",
+  "lesson10-v1": "εἶπον/ἔλεξα",
   "lesson10-v2": "ἔπρᾱξα",
+  "lesson10-v3": "ἔφυγον",
   "lesson11-v1": "ἔπεισα",
   "lesson11-v2": "ἔτρεψα",
   "lesson12-v2": "ἔλῡσα",
   "lesson13-v1": "ἔβλεψα",
   "lesson14-v1": "ἔπληξα",
-  "lesson14-v2": "ἤνεγκα",
+  "lesson14-v2": "ἤνεγκον/ἤνεγκα",
   "lesson15-v1": "ἥρπασα",
+  "lesson15-v2": "ἔβαλον",
   "lesson15-v3": "ἐγέλασα",
   "lesson15-v4": "ἐδήλωσα",
   "lesson15-v5": "ἐκόμισα",
@@ -92,16 +98,16 @@ describe("Groton Lessons 17 and 18", () => {
     for (const path of ["public/data/greek-lesson17-vocab.json","public/data/greek-lesson17-grammar.json","public/data/greek-lesson18-vocab.json","public/data/greek-lesson18-grammar.json"])
       expect(hasAmbiguousGreekTonos(fs.readFileSync(path,"utf8")),path).toBe(false);
   });
-  it("adds the aorist as third principal part to exactly 30 prior cards, without changing any card ID", () => {
+  it("preserves all first-aorist cards and adds six second aorists without changing any card ID, without changing any card ID", () => {
     const originalCards=Array.from({length:14},(_,i)=>i+3).flatMap(lesson=>read<Vocab[]>(`public/data/greek-lesson${lesson}-vocab.json`));
     const updated=originalCards.filter(card=>Boolean(card.third_principal_part));
-    expect(Object.keys(updatedParts)).toHaveLength(30);
-    expect(updated).toHaveLength(30);
+    expect(Object.keys(updatedParts)).toHaveLength(36);
+    expect(updated).toHaveLength(36);
     for (const card of updated){
       expect(card.third_principal_part,card.id).toBe(updatedParts[card.id]);
       expect(card.greek.endsWith(`, ${updatedParts[card.id]}`),card.id).toBe(true);
     }
-    for(const id of ["lesson6-v3","lesson8-v1","lesson8-v2","lesson10-v1","lesson10-v3","lesson12-v1","lesson15-v2"]) {
+    for(const id of ["lesson12-v1"]) {
       expect(originalCards.find(card=>card.id===id)?.third_principal_part).toBeUndefined();
     }
   });
