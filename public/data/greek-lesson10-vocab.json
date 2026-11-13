@@ -1,11 +1,12 @@
 [
   {
     "id": "lesson10-v1",
-    "greek": "λέγω, ἐρῶ/λέξω",
+    "greek": "λέγω, ἐρῶ/λέξω, εἶπον/ἔλεξα",
     "meaning": "say, speak, tell",
     "part_of_speech": "verb",
     "lesson": 10,
-    "source_ref": "Groton 10.69"
+    "source_ref": "Groton 10.69",
+    "third_principal_part": "εἶπον/ἔλεξα"
   },
   {
     "id": "lesson10-v2",
@@ -18,11 +19,12 @@
   },
   {
     "id": "lesson10-v3",
-    "greek": "φεύγω, φεύξομαι",
+    "greek": "φεύγω, φεύξομαι, ἔφυγον",
     "meaning": "flee, avoid, escape, be in exile",
     "part_of_speech": "verb",
     "lesson": 10,
-    "source_ref": "Groton 10.69"
+    "source_ref": "Groton 10.69",
+    "third_principal_part": "ἔφυγον"
   },
   {
     "id": "lesson10-v4",
