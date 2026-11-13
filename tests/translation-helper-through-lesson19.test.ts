@@ -134,7 +134,7 @@ describe("Groton Translation Helper coverage through Lesson 19", () => {
     const examples = [
       ["τείχους", "lesson17-v5"], ["τείχη", "lesson17-v5"],
       ["τριήρεις", "lesson17-v6"], ["Σωκράτους", "lesson17-v4"],
-      ["γέρω", "lesson17-v2"], ["αἰδοῖ", "lesson17-v1"],
+      ["γέρως", "lesson17-v2"], ["αἰδοῖ", "lesson17-v1"],
       ["δαιμόνων", "lesson17-v3"], ["ἀληθεῖς", "lesson17-v7"],
       ["εὐδαίμονας", "lesson17-v8"], ["αἰτίαις", "lesson19-v3"],
       ["αἰτίᾳ", "lesson19-v3"], ["αἰτίων", "lesson19-v9"],
