@@ -1,0 +1,332 @@
+[
+  {
+    "id": "lesson19-chart-second-aorist-active-indicative",
+    "category": "Second Aorist Active Indicative Endings",
+    "prompt": "Second Aorist Active Indicative Endings",
+    "source_ref": "Groton 19.115, Summary of Second-Aorist Endings, pp. 116–117",
+    "accent_note": "Augment + second-aorist stem + thematic vowel + secondary active endings; accent normally recessive.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "1st person",
+        "cells": [
+          "-ον",
+          "-ομεν"
+        ]
+      },
+      {
+        "label": "2nd person",
+        "cells": [
+          "-ες",
+          "-ετε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-ε(ν)",
+          "-ον"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson19-chart-second-aorist-middle-indicative",
+    "category": "Second Aorist Middle Indicative Endings",
+    "prompt": "Second Aorist Middle Indicative Endings",
+    "source_ref": "Groton 19.115, Summary of Second-Aorist Endings, pp. 116–117",
+    "accent_note": "Indicative takes an augment; the second-person singular -ου contracts from -εσο; finite forms are normally recessive.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "1st person",
+        "cells": [
+          "-όμην",
+          "-όμεθα"
+        ]
+      },
+      {
+        "label": "2nd person",
+        "cells": [
+          "-ου (-εσο)",
+          "-εσθε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-ετο",
+          "-οντο"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson19-chart-second-aorist-active-infinitive",
+    "category": "Second Aorist Active Infinitive Endings",
+    "prompt": "Second Aorist Active Infinitive Endings",
+    "source_ref": "Groton 19.115, Summary of Second-Aorist Endings, pp. 116–117",
+    "accent_note": "No augment; the ending -εῖν is accented on the ultima.",
+    "columns": [
+      "Ending"
+    ],
+    "rows": [
+      {
+        "label": "Second Aorist Active Infinitive",
+        "cells": [
+          "-εῖν"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson19-chart-second-aorist-middle-infinitive",
+    "category": "Second Aorist Middle Infinitive Endings",
+    "prompt": "Second Aorist Middle Infinitive Endings",
+    "source_ref": "Groton 19.115, Summary of Second-Aorist Endings, pp. 116–117",
+    "accent_note": "No augment; -έσθαι is accented on the penult.",
+    "columns": [
+      "Ending"
+    ],
+    "rows": [
+      {
+        "label": "Second Aorist Middle Infinitive",
+        "cells": [
+          "-έσθαι"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson19-chart-second-aorist-active-imperative",
+    "category": "Second Aorist Active Imperative Endings",
+    "prompt": "Second Aorist Active Imperative Endings",
+    "source_ref": "Groton 19.115, Summary of Second-Aorist Endings, pp. 116–117",
+    "accent_note": "No augment; typically recessive, but certain verbs (e.g., λαβέ, ἐλθέ, εὑρέ) accent the second-person singular on the ultima.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "2nd person",
+        "cells": [
+          "-ε",
+          "-ετε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-έτω",
+          "-όντων"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson19-chart-second-aorist-middle-imperative",
+    "category": "Second Aorist Middle Imperative Endings",
+    "prompt": "Second Aorist Middle Imperative Endings",
+    "source_ref": "Groton 19.115, Summary of Second-Aorist Endings, pp. 116–117",
+    "accent_note": "No augment; second-person singular -οῦ (-εσο) is accented on the ultima; other forms are recessive.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "2nd person",
+        "cells": [
+          "-οῦ (-εσο)",
+          "-εσθε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-έσθω",
+          "-έσθων"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson19-chart-first-person-reflexive-pronouns",
+    "category": "First-Person Reflexive Pronoun Forms",
+    "prompt": "First-Person Reflexive Pronoun Forms",
+    "source_ref": "Groton 19.116, Reflexive Pronouns, pp. 118–119",
+    "accent_note": "No nominative forms; masculine and feminine forms are shown for singular and plural.",
+    "columns": [
+      "Masculine",
+      "Feminine"
+    ],
+    "rows": [
+      {
+        "label": "Singular · Genitive",
+        "cells": [
+          "ἐμαυτοῦ",
+          "ἐμαυτῆς"
+        ]
+      },
+      {
+        "label": "Singular · Dative",
+        "cells": [
+          "ἐμαυτῷ",
+          "ἐμαυτῇ"
+        ]
+      },
+      {
+        "label": "Singular · Accusative",
+        "cells": [
+          "ἐμαυτόν",
+          "ἐμαυτήν"
+        ]
+      },
+      {
+        "label": "Plural · Genitive",
+        "cells": [
+          "ἡμῶν αὐτῶν",
+          "ἡμῶν αὐτῶν"
+        ]
+      },
+      {
+        "label": "Plural · Dative",
+        "cells": [
+          "ἡμῖν αὐτοῖς",
+          "ἡμῖν αὐταῖς"
+        ]
+      },
+      {
+        "label": "Plural · Accusative",
+        "cells": [
+          "ἡμᾶς αὐτούς",
+          "ἡμᾶς αὐτάς"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson19-chart-second-person-reflexive-pronouns",
+    "category": "Second-Person Reflexive Pronoun Forms",
+    "prompt": "Second-Person Reflexive Pronoun Forms",
+    "source_ref": "Groton 19.116, Reflexive Pronouns, pp. 118–119",
+    "accent_note": "No nominative; contracted singular forms in parentheses are alternatives to the full form.",
+    "columns": [
+      "Masculine",
+      "Feminine"
+    ],
+    "rows": [
+      {
+        "label": "Singular · Genitive",
+        "cells": [
+          "σεαυτοῦ / σαυτοῦ",
+          "σεαυτῆς / σαυτῆς"
+        ]
+      },
+      {
+        "label": "Singular · Dative",
+        "cells": [
+          "σεαυτῷ / σαυτῷ",
+          "σεαυτῇ / σαυτῇ"
+        ]
+      },
+      {
+        "label": "Singular · Accusative",
+        "cells": [
+          "σεαυτόν / σαυτόν",
+          "σεαυτήν / σαυτήν"
+        ]
+      },
+      {
+        "label": "Plural · Genitive",
+        "cells": [
+          "ὑμῶν αὐτῶν",
+          "ὑμῶν αὐτῶν"
+        ]
+      },
+      {
+        "label": "Plural · Dative",
+        "cells": [
+          "ὑμῖν αὐτοῖς",
+          "ὑμῖν αὐταῖς"
+        ]
+      },
+      {
+        "label": "Plural · Accusative",
+        "cells": [
+          "ὑμᾶς αὐτούς",
+          "ὑμᾶς αὐτάς"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson19-chart-third-person-reflexive-pronouns",
+    "category": "Third-Person Reflexive Pronoun Forms",
+    "prompt": "Third-Person Reflexive Pronoun Forms",
+    "source_ref": "Groton 19.116, Reflexive Pronouns, pp. 118–119",
+    "accent_note": "No nominative. Contracted forms in the singular retain rough breathing (αὑ-); plural has three genders.",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Singular · Genitive",
+        "cells": [
+          "ἑαυτοῦ / αὑτοῦ",
+          "ἑαυτῆς / αὑτῆς",
+          "ἑαυτοῦ / αὑτοῦ"
+        ]
+      },
+      {
+        "label": "Singular · Dative",
+        "cells": [
+          "ἑαυτῷ / αὑτῷ",
+          "ἑαυτῇ / αὑτῇ",
+          "ἑαυτῷ / αὑτῷ"
+        ]
+      },
+      {
+        "label": "Singular · Accusative",
+        "cells": [
+          "ἑαυτόν / αὑτόν",
+          "ἑαυτήν / αὑτήν",
+          "ἑαυτό / αὑτό"
+        ]
+      },
+      {
+        "label": "Plural · Genitive",
+        "cells": [
+          "ἑαυτῶν",
+          "ἑαυτῶν",
+          "ἑαυτῶν"
+        ]
+      },
+      {
+        "label": "Plural · Dative",
+        "cells": [
+          "ἑαυτοῖς",
+          "ἑαυταῖς",
+          "ἑαυτοῖς"
+        ]
+      },
+      {
+        "label": "Plural · Accusative",
+        "cells": [
+          "ἑαυτούς",
+          "ἑαυτάς",
+          "ἑαυτά"
+        ]
+      }
+    ]
+  }
+]
