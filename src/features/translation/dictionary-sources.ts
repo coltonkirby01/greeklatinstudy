@@ -341,6 +341,72 @@ function addVerbInflections(index: Map<string, DictionaryMatch[]>, card: StudyCa
 }
 
 /**
+ * Aorists have their own principal part and cannot be derived from the
+ * present/future stems used by the earlier productive-form builder.
+ */
+function aoristPrincipalParts(card: StudyCard): string[] {
+  const supplied = typeof card.metadata?.thirdPrincipalPart === "string"
+    ? card.metadata.thirdPrincipalPart
+    : card.front.split(",").slice(2).join(",");
+  return supplied ? (supplied.match(greekTokenPattern) ?? []) : [];
+}
+
+/** An explanation such as -ου (-εσο) is a variant, not *-ουεσο*. */
+function aoristEndingVariants(cell: string): string[] {
+  return endingVariants(cell.replace(/\s+\((-[\p{Script=Greek}\p{M}]+)\)/gu, " / $1"));
+}
+
+function unaugmentedAoristStem(card: StudyCard, principalPart: string, augmented: string): string {
+  const special: Record<string, string> = {
+    "lesson6-v3": "σχ",       // ἔσχον → σχεῖν (initial ε is the augment)
+    "lesson8-v1": "ευρ",      // εὗρον → εὑρεῖν
+    "lesson10-v1": "ειπ",    // εἶπον → εἰπεῖν
+    "lesson14-v2": "ενεγκ", // ἤνεγκον → ἐνεγκεῖν
+  };
+  if (special[card.id] && /ον$/u.test(normalizeDictionaryKey(principalPart))) return special[card.id];
+  const lemma = normalizeDictionaryKey(headwordForms(card.front)[0] ?? "");
+  if (augmented.startsWith("ε") && !lemma.startsWith("ε")) return augmented.slice(1);
+  if (augmented.startsWith("η") && /^[αε]/u.test(lemma)) return lemma[0] + augmented.slice(1);
+  return augmented;
+}
+
+/** Generates keys only when a third principal part is explicitly supplied. */
+function addAoristInflections(index: Map<string, DictionaryMatch[]>, card: StudyCard, match: DictionaryMatch, grammarCards: StudyCard[]) {
+  for (const principalPart of aoristPrincipalParts(card)) {
+    const aorist = normalizeDictionaryKey(principalPart);
+    const isSecond = aorist.endsWith("ον");
+    if (!isSecond && !aorist.endsWith("α")) continue;
+    const hasSeparateSigma = !isSecond && aorist.endsWith("σα");
+    const augmentedBase = isSecond ? aorist.slice(0, -2)
+      : hasSeparateSigma ? aorist.slice(0, -2) : aorist.slice(0, -1);
+    if (!augmentedBase) continue;
+    const plainBase = unaugmentedAoristStem(card, principalPart, augmentedBase);
+
+    for (const chart of grammarCards) {
+      const group = grammarGroup(chart);
+      if (!group.startsWith(isSecond ? "Second Aorist " : "First Aorist ") || !group.includes("Endings")) continue;
+      // Avoid guessing middle forms of unsigmatic first aorists.
+      if (!isSecond && !hasSeparateSigma && !/[ξψ]α$/u.test(aorist) && group.includes("Middle")) continue;
+      const base = group.includes("Indicative") ? augmentedBase : plainBase;
+      for (const row of chartRows(chart)) {
+        row.cells.forEach((cell, columnIndex) => {
+          for (let ending of aoristEndingVariants(cell)) {
+            // -ψα/-ξα and unsigmatic -α already have no separate σ.
+            if (!isSecond && !hasSeparateSigma && ending.startsWith("σ")) ending = ending.slice(1);
+            if (!ending) continue;
+            addMatch(index, base + ending, {
+              ...match,
+              sourceRef: combinedSourceRef(match, chart),
+              morphology: [morphologyLabel(chart, row, columnIndex)],
+            });
+          }
+        });
+      }
+    }
+  }
+}
+
+/**
  * Some Groton vocabulary glosses explicitly introduce compound verbs, e.g.
  * ἐπιπλήττω "rebuke" in Lesson 14's πλήττω entry. Index the source-attested
  * lemma and generate only its regular present/imperfect forms from Groton's
@@ -396,6 +462,35 @@ function addLesson16NounForms(index: Map<string, DictionaryMatch[]>, vocabularyD
   }
 }
 
+/**
+ * Lesson 17 adds sigma-stem and nasal-stem models not covered by the
+ * first/second-declension builders. Index their forms from the actual charts.
+ */
+function addLesson17StemForms(index: Map<string, DictionaryMatch[]>, card: StudyCard, match: DictionaryMatch, grammarCards: StudyCard[]) {
+  const patternById: Record<string, { ending: string; groups: string[] }> = {
+    "lesson17-v1": { ending: "ως", groups: ["3rd Declension οσ-stem (f.)"] },
+    "lesson17-v2": { ending: "ας", groups: ["3rd Declension ασ-stem (n.)"] },
+    "lesson17-v3": { ending: "ων", groups: ["3rd Declension Adjective — nasal stem (m./f.)"] },
+    "lesson17-v4": { ending: "ης", groups: ["3rd Declension εσ-stem (m./f.)"] },
+    "lesson17-v5": { ending: "ος", groups: ["3rd Declension εσ-stem (n.)"] },
+    "lesson17-v6": { ending: "ης", groups: ["3rd Declension εσ-stem (m./f.)"] },
+    "lesson17-v7": { ending: "ης", groups: ["3rd Declension Adjective — εσ-stem (m./f.)", "3rd Declension Adjective — εσ-stem (n.)"] },
+    "lesson17-v8": { ending: "ων", groups: ["3rd Declension Adjective — nasal stem (m./f.)", "3rd Declension Adjective — nasal stem (n.)"] },
+  };
+  const model = patternById[card.id];
+  if (!model || card.deckId !== "alpha-omega-lesson17-vocab") return;
+  const lemma = normalizeDictionaryKey(headwordForms(card.front)[0] ?? "");
+  const suffix = normalizeDictionaryKey(model.ending);
+  if (!lemma.endsWith(suffix)) return;
+  const stem = lemma.slice(0, -suffix.length);
+  for (const group of model.groups) {
+    const chart = grammarCards.find((candidate) => grammarGroup(candidate) === group);
+    if (!chart) continue;
+    addStemmedChartForms(index, stem, match, chart,
+      [...columnIndexes(chart, "singular"), ...columnIndexes(chart, "plural")]);
+  }
+}
+
 function addProductiveGrotonForms(index: Map<string, DictionaryMatch[]>, vocabularyDecks: DeckDefinition[], grammarDecks: DeckDefinition[]) {
   const grammarCards = grammarDecks.flatMap((deck) => deck.cards);
   for (const deck of vocabularyDecks) {
@@ -405,8 +500,10 @@ function addProductiveGrotonForms(index: Map<string, DictionaryMatch[]>, vocabul
       const match = vocabularyMatch(card, "Groton, From Alpha to Omega");
       if (pos.includes("noun")) addNounInflections(index, card, match, grammarCards);
       if (pos.includes("adjective")) addAdjectiveInflections(index, card, match, grammarCards);
+      addLesson17StemForms(index, card, match, grammarCards);
       if (pos.includes("verb")) {
         addVerbInflections(index, card, match, grammarCards);
+        addAoristInflections(index, card, match, grammarCards);
         addGrotonGlossedVerbCompounds(index, card, grammarCards);
       }
     }
@@ -506,11 +603,21 @@ function addReflexivePronounChartForms(index: Map<string, DictionaryMatch[]>, ca
     if (!lexical) continue;
     row.cells.forEach((cell, columnIndex) => {
       for (const form of expandKnownForms(cell)) {
-        addMatch(index, form, {
+        const formMatch: DictionaryMatch = {
           ...lexical,
           sourceRef: combinedSourceRef(lexical, card),
           morphology: [[group, row.label, columns[columnIndex]].filter(Boolean).join(" · ")],
-        }, true);
+        };
+        addMatch(index, form, formMatch, true);
+        // The reader selects individual words, including inside plural
+        // reflexive expressions. Offer the full phrase on either component.
+        const words = greekTokens(form);
+        if (words.length > 1) for (const word of words) {
+          addMatch(index, word, {
+            ...formMatch,
+            morphology: [...(formMatch.morphology ?? []), "Part of " + form],
+          }, true);
+        }
       }
     });
   }
