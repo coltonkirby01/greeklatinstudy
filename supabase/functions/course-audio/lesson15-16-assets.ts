@@ -3,7 +3,7 @@ import type { Lesson3CourseAudioAsset } from "./lesson3-assets.ts";
 
 export const lesson15VocabularyAudio: Readonly<Record<string, {label: string; greek: string}>> = {
   "lesson15-v1": { label: "ἁρπάζω, ἁρπάσω, ἥρπασα", greek: "ἁρπάζω, ἁρπάσω, ἥρπασα" },
-  "lesson15-v2": { label: "βάλλω, βαλῶ", greek: "βάλλω, βαλῶ" },
+  "lesson15-v2": { label: "βάλλω, βαλῶ, ἔβαλον", greek: "βάλλω, βαλῶ, ἔβαλον" },
   "lesson15-v3": { label: "γελάω, γελάσομαι, ἐγέλασα", greek: "γελάω, γελάσομαι, ἐγέλασα" },
   "lesson15-v4": { label: "δηλόω, δηλώσω, ἐδήλωσα", greek: "δηλόω, δηλώσω, ἐδήλωσα" },
   "lesson15-v5": { label: "κομίζω, κομιῶ, ἐκόμισα", greek: "κομίζω, κομιῶ, ἐκόμισα" },

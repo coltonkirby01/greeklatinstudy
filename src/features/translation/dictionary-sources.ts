@@ -484,8 +484,44 @@ function addPersonalPronounChartForms(index: Map<string, DictionaryMatch[]>, car
   }
 }
 
+/**
+ * Lesson 19 gives complete reflexive forms. The chart titles are in English,
+ * and each number of first-/second-person reflexives has a different lemma.
+ * Index each source-attested cell under its appropriate vocabulary headword.
+ */
+function addReflexivePronounChartForms(index: Map<string, DictionaryMatch[]>, card: StudyCard) {
+  const group = grammarGroup(card);
+  const columns = chartColumns(card);
+  const first = group.startsWith("First-Person");
+  const second = group.startsWith("Second-Person");
+  for (const row of chartRows(card)) {
+    const singular = row.label.startsWith("Singular");
+    const lemma = first
+      ? singular ? "ἐμαυτοῦ" : "ἡμῶν"
+      : second
+        ? singular ? "σεαυτοῦ" : "ὑμῶν"
+        : "ἑαυτοῦ";
+    const lexical = index.get(normalizeDictionaryKey(lemma))?.find((match) =>
+      normalizeDictionaryKey(headwordForms(match.headword)[0] ?? "") === normalizeDictionaryKey(lemma));
+    if (!lexical) continue;
+    row.cells.forEach((cell, columnIndex) => {
+      for (const form of expandKnownForms(cell)) {
+        addMatch(index, form, {
+          ...lexical,
+          sourceRef: combinedSourceRef(lexical, card),
+          morphology: [[group, row.label, columns[columnIndex]].filter(Boolean).join(" · ")],
+        }, true);
+      }
+    });
+  }
+}
+
 function addGrammarForms(index: Map<string, DictionaryMatch[]>, deck: DeckDefinition) {
   for (const card of deck.cards) {
+    if (grammarGroup(card).includes("Reflexive Pronoun Forms")) {
+      addReflexivePronounChartForms(index, card);
+      continue;
+    }
     if (grammarGroup(card) === "First-Person Personal Pronoun Forms" || grammarGroup(card) === "Second-Person Personal Pronoun Forms") {
       addPersonalPronounChartForms(index, card);
       continue;

@@ -29,8 +29,8 @@ describe("Groton Lesson 8 expansion", () => {
     expect(cards).toHaveLength(11);
     expect(cards.every((card) => card.lesson === 8 && card.source_ref === "Groton 8.56")).toBe(true);
     expect(cards.map(({ id, greek, meaning, part_of_speech }) => ({ id, greek, meaning, part_of_speech }))).toEqual([
-      { id: "lesson8-v1", greek: "εὑρίσκω, εὑρήσω", meaning: "find, find out, discover", part_of_speech: "verb" },
-      { id: "lesson8-v2", greek: "λείπω, λείψω", meaning: "leave, leave behind", part_of_speech: "verb" },
+      { id: "lesson8-v1", greek: "εὑρίσκω, εὑρήσω, εὗρον", meaning: "find, find out, discover", part_of_speech: "verb" },
+      { id: "lesson8-v2", greek: "λείπω, λείψω, ἔλιπον", meaning: "leave, leave behind", part_of_speech: "verb" },
       { id: "lesson8-v3", greek: "βίος, -ου, ὁ", meaning: "life, lifetime, livelihood", part_of_speech: "noun" },
       { id: "lesson8-v4", greek: "δῶρον, -ου, τό", meaning: "gift", part_of_speech: "noun" },
       { id: "lesson8-v5", greek: "ἔργον, -ου, τό", meaning: "work, task, occupation, deed", part_of_speech: "noun" },

@@ -83,9 +83,9 @@ describe("Groton Lessons 9–10 expansion", () => {
     expect(vocabulary).toHaveLength(12);
     expect(vocabulary.every((card) => card.lesson === 10 && card.source_ref === "Groton 10.69")).toBe(true);
     expect(vocabulary.map((card) => card.id)).toEqual(Array.from({ length: 12 }, (_, index) => `lesson10-v${index + 1}`));
-    expect(vocabulary[0]?.greek).toBe("λέγω, ἐρῶ/λέξω");
+    expect(vocabulary[0]?.greek).toBe("λέγω, ἐρῶ/λέξω, εἶπον/ἔλεξα");
     expect(originalGreek(vocabulary[1])).toBe("πρᾱ́ττω, πρᾱ́ξω");
-    expect(vocabulary[2]?.greek).toBe("φεύγω, φεύξομαι");
+    expect(vocabulary[2]?.greek).toBe("φεύγω, φεύξομαι, ἔφυγον");
     expect(vocabulary.at(-1)?.greek).toBe("οὖν");
 
     expect(grammar).toHaveLength(2);

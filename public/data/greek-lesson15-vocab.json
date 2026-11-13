@@ -10,11 +10,12 @@
   },
   {
     "id": "lesson15-v2",
-    "greek": "βάλλω, βαλῶ",
+    "greek": "βάλλω, βαλῶ, ἔβαλον",
     "meaning": "throw, hit (with a thrown weapon), shoot",
     "part_of_speech": "verb",
     "lesson": 15,
-    "source_ref": "Groton 15.95"
+    "source_ref": "Groton 15.95",
+    "third_principal_part": "ἔβαλον"
   },
   {
     "id": "lesson15-v3",

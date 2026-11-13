@@ -1,0 +1,92 @@
+[
+  {
+    "id": "lesson19-v1",
+    "greek": "λαμβάνω, λήψομαι, ἔλαβον",
+    "meaning": "take, receive, grasp, understand",
+    "part_of_speech": "verb",
+    "lesson": 19,
+    "source_ref": "Groton 19.118, pp. 119–120",
+    "third_principal_part": "ἔλαβον"
+  },
+  {
+    "id": "lesson19-v2",
+    "greek": "μένω, μενῶ, ἔμεινα",
+    "meaning": "remain, stay; (+ acc.) wait for",
+    "part_of_speech": "verb",
+    "lesson": 19,
+    "source_ref": "Groton 19.118, pp. 119–120",
+    "third_principal_part": "ἔμεινα"
+  },
+  {
+    "id": "lesson19-v3",
+    "greek": "αἰτίᾱ, -ᾱς, ἡ",
+    "meaning": "blame, guilt, responsibility, accusation, charge, cause",
+    "part_of_speech": "noun",
+    "lesson": 19,
+    "source_ref": "Groton 19.118, pp. 119–120"
+  },
+  {
+    "id": "lesson19-v4",
+    "greek": "ἑαυτοῦ, -ῆς, -οῦ (αὑτοῦ, -ῆς, -οῦ)",
+    "meaning": "(reflexive) himself, herself, itself, themselves",
+    "part_of_speech": "pronoun",
+    "lesson": 19,
+    "source_ref": "Groton 19.118, pp. 119–120"
+  },
+  {
+    "id": "lesson19-v5",
+    "greek": "ἐμαυτοῦ, -ῆς",
+    "meaning": "(reflexive) myself",
+    "part_of_speech": "pronoun",
+    "lesson": 19,
+    "source_ref": "Groton 19.118, pp. 119–120"
+  },
+  {
+    "id": "lesson19-v6",
+    "greek": "ἡμῶν αὐτῶν, -ῶν",
+    "meaning": "(reflexive) ourselves",
+    "part_of_speech": "pronoun",
+    "lesson": 19,
+    "source_ref": "Groton 19.118, pp. 119–120"
+  },
+  {
+    "id": "lesson19-v7",
+    "greek": "σεαυτοῦ, -ῆς (σαυτοῦ, -ῆς)",
+    "meaning": "(reflexive) yourself",
+    "part_of_speech": "pronoun",
+    "lesson": 19,
+    "source_ref": "Groton 19.118, pp. 119–120"
+  },
+  {
+    "id": "lesson19-v8",
+    "greek": "ὑμῶν αὐτῶν, -ῶν",
+    "meaning": "(reflexive) yourselves",
+    "part_of_speech": "pronoun",
+    "lesson": 19,
+    "source_ref": "Groton 19.118, pp. 119–120"
+  },
+  {
+    "id": "lesson19-v9",
+    "greek": "αἴτιος, -ᾱ, -ον",
+    "meaning": "blameworthy; (+ gen.) guilty (of), responsible (for)",
+    "part_of_speech": "adjective",
+    "lesson": 19,
+    "source_ref": "Groton 19.118, pp. 119–120"
+  },
+  {
+    "id": "lesson19-v10",
+    "greek": "μετά (μετ᾽, μεθ᾽) (+ gen., acc.)",
+    "meaning": "(+ gen.) among, with, together with; (+ acc.) after",
+    "part_of_speech": "preposition",
+    "lesson": 19,
+    "source_ref": "Groton 19.118, pp. 119–120"
+  },
+  {
+    "id": "lesson19-v11",
+    "greek": "σύν (+ dat.)",
+    "meaning": "with, together with, with the help of",
+    "part_of_speech": "preposition",
+    "lesson": 19,
+    "source_ref": "Groton 19.118, pp. 119–120"
+  }
+]
