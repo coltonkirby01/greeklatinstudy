@@ -2,7 +2,7 @@ import type { DeckDefinition, StudyCard } from "../features/study/types";
 import { classicalGreekPronunciation } from "../features/greek/greek-pronunciation";
 import { greekLesson3ParadigmSpeechText } from "./builtin-decks";
 
-type GrotonLesson = 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18;
+type GrotonLesson = 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19;
 
 type GreekVocabularySourceCard = {
   id: string;
@@ -49,7 +49,8 @@ function vocabularySourceNote(lesson: GrotonLesson) {
   if (lesson === 15) return "Groton 15.95.";
   if (lesson === 16) return "Groton 16.100.";
   if (lesson === 17) return "Groton 17.106.";
-  return "Groton 18.112.";
+  if (lesson === 18) return "Groton 18.112.";
+  return "Groton 19.118.";
 }
 
 function vocabularyDeck(lesson: GrotonLesson, source: GreekVocabularySourceCard[]): DeckDefinition {
@@ -140,14 +141,14 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
       category: card.category,
       rank: index + 1,
       source: `From Alpha to Omega, Lesson ${lesson}`,
-      notes: [lesson === 12 ? "Irregular-form chart" : lesson === 13 || lesson === 14 ? "Pronoun-form chart" : isEndingChart ? "Ending chart" : "Whole-paradigm chart", card.accent_note].filter(Boolean).join(" · "),
+      notes: [lesson === 12 ? "Irregular-form chart" : lesson === 13 || lesson === 14 || (lesson === 19 && card.category.includes("Reflexive Pronoun")) ? "Pronoun-form chart" : isEndingChart ? "Ending chart" : "Whole-paradigm chart", card.accent_note].filter(Boolean).join(" · "),
       metadata: {
         lesson,
         studySource: "grammar-chart",
         grammarGroup: card.category,
         chartColumns: card.columns,
         chartRows,
-        rowHeaderLabel: lesson === 18 ? (card.columns.length === 1 ? "Form" : "Person") : lesson === 9 || lesson >= 13 ? "Case" : card.columns.length === 1 ? "Form" : "Person",
+        rowHeaderLabel: lesson === 18 ? (card.columns.length === 1 ? "Form" : "Person") : lesson === 19 && card.category.startsWith("Second Aorist") ? (card.columns.length === 1 ? "Form" : "Person") : lesson === 9 || lesson >= 13 ? "Case" : card.columns.length === 1 ? "Form" : "Person",
         pronunciationText: greekLesson3ParadigmSpeechText(chartRows),
         accentNote: card.accent_note,
         sourceRef: card.source_ref ?? `Groton Lesson ${lesson}`,
@@ -202,6 +203,12 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
             eyebrow: "First-aorist active and middle",
             description: "Six first-aorist ending charts: indicative, infinitive, imperative, each in active and middle voice.",
             sourceNote: "Groton Lesson 18, §109, pp. 108–110.",
+          }
+      : lesson === 19
+        ? {
+            eyebrow: "Second aorist and reflexive pronouns",
+            description: "Six second-aorist active/middle ending charts plus three complete reflexive-pronoun charts, singular and plural.",
+            sourceNote: "Groton Lesson 19, §§115–116, pp. 116–119.",
           }
         : {
             eyebrow: "Third-declension endings",
@@ -335,4 +342,16 @@ export function loadGreekLesson18VocabularyDeck() {
 export function loadGreekLesson18GrammarDeck() {
   lesson18GrammarPromise ??= fetchText("data/greek-lesson18-grammar.json").then(text => grammarDeck(18, JSON.parse(text) as GreekGrammarSourceCard[]));
   return lesson18GrammarPromise;
+}
+
+let lesson19VocabularyPromise: Promise<DeckDefinition> | null = null;
+let lesson19GrammarPromise: Promise<DeckDefinition> | null = null;
+
+export function loadGreekLesson19VocabularyDeck() {
+  lesson19VocabularyPromise ??= fetchText("data/greek-lesson19-vocab.json").then(text => vocabularyDeck(19, JSON.parse(text) as GreekVocabularySourceCard[]));
+  return lesson19VocabularyPromise;
+}
+export function loadGreekLesson19GrammarDeck() {
+  lesson19GrammarPromise ??= fetchText("data/greek-lesson19-grammar.json").then(text => grammarDeck(19, JSON.parse(text) as GreekGrammarSourceCard[]));
+  return lesson19GrammarPromise;
 }
