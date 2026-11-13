@@ -358,6 +358,7 @@ function aoristEndingVariants(cell: string): string[] {
 
 function unaugmentedAoristStem(card: StudyCard, principalPart: string, augmented: string): string {
   const special: Record<string, string> = {
+    "lesson6-v3": "σχ",       // ἔσχον → σχεῖν (initial ε is the augment)
     "lesson8-v1": "ευρ",      // εὗρον → εὑρεῖν
     "lesson10-v1": "ειπ",    // εἶπον → εἰπεῖν
     "lesson14-v2": "ενεγκ", // ἤνεγκον → ἐνεγκεῖν
@@ -479,8 +480,9 @@ function addLesson17StemForms(index: Map<string, DictionaryMatch[]>, card: Study
   const model = patternById[card.id];
   if (!model || card.deckId !== "alpha-omega-lesson17-vocab") return;
   const lemma = normalizeDictionaryKey(headwordForms(card.front)[0] ?? "");
-  if (!lemma.endsWith(model.ending)) return;
-  const stem = lemma.slice(0, -model.ending.length);
+  const suffix = normalizeDictionaryKey(model.ending);
+  if (!lemma.endsWith(suffix)) return;
+  const stem = lemma.slice(0, -suffix.length);
   for (const group of model.groups) {
     const chart = grammarCards.find((candidate) => grammarGroup(candidate) === group);
     if (!chart) continue;
