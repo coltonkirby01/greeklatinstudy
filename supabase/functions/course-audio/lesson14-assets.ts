@@ -8,7 +8,7 @@ function formChart(id: string, label: string, columns: readonly (readonly string
 }
 export const lesson14VocabularyAudio: Readonly<Record<string, {label: string; greek: string}>> = {
   "lesson14-v1": { label: "πλήττω, πλήξω, ἔπληξα", greek: "πλήττω, πλήξω, ἔπληξα" },
-  "lesson14-v2": { label: "φέρω, οἴσω, ἤνεγκα", greek: "φέρω, οἴσω, ἤνεγκα" },
+  "lesson14-v2": { label: "φέρω, οἴσω, ἤνεγκον/ἤνεγκα", greek: "φέρω, οἴσω, ἤνεγκον, ἤνεγκα" },
   "lesson14-v3": { label: "βιβλίον, -ου, τό", greek: "βιβλίον" },
   "lesson14-v4": { label: "ἱμάτιον, -ου, τό", greek: "ἱμάτιον" },
   "lesson14-v5": { label: "ἐγώ", greek: "ἐγώ" },
