@@ -1,5 +1,6 @@
 import { BUILTIN_STUDY_DECKS, type BuiltinDeckRegistration } from "../study/builtin-study-catalog";
 import type { DeckDefinition, StudyCard } from "../study/types";
+import { lesson20Vocabulary, lesson20Perfects, lesson20NounForms } from "./groton-lesson20";
 
 export type TranslationHelperLanguage = "greek" | "latin";
 
@@ -674,12 +675,123 @@ export function translationGreekRegistrations(registrations: readonly BuiltinDec
   };
 }
 
+
+/**
+ * Groton Lesson 20 is available to the reading helper independently of the
+ * flashcard deck; no account review state or card IDs are changed.
+ */
+function lesson20HelperVocabularyDeck(): DeckDefinition {
+  const id = "alpha-omega-lesson20-helper-vocab";
+  return {
+    id, slug: "greek", language: "greek",
+    title: "Groton Lesson 20 vocabulary", eyebrow: "Lesson 20",
+    description: "Vocabulary for translation lookup, without adding study cards",
+    supportsReverse: false,
+    cards: lesson20Vocabulary.map((entry): StudyCard => ({
+      id: entry.id, deckId: id, front: entry.greek, back: entry.meaning,
+      source: "Groton, From Alpha to Omega, Lesson 20",
+      metadata: {
+        partOfSpeech: entry.part_of_speech,
+        sourceRef: entry.source_ref,
+        thirdPrincipalPart: entry.part_of_speech === "verb" ? entry.greek.split(",")[2]?.trim() : undefined,
+      },
+    })),
+  };
+}
+
+function addLesson20NounInflections(index: Map<string, DictionaryMatch[]>) {
+  for (const item of lesson20NounForms) {
+    const vocabulary = lesson20Vocabulary.find((entry) => entry.id === item.id);
+    if (!vocabulary) continue;
+    addMatch(index, item.form, {
+      headword: vocabulary.greek,
+      definition: vocabulary.meaning,
+      source: "Groton, From Alpha to Omega, Lesson 20",
+      sourceRef: vocabulary.source_ref,
+      morphology: [item.morphology],
+    }, true);
+  }
+}
+
+const perfectActiveEndings = [
+  ["α", "1st person singular"],
+  ["ας", "2nd person singular"],
+  ["ε", "3rd person singular"],
+  ["εν", "3rd person singular, movable nu"],
+  ["αμεν", "1st person plural"],
+  ["ατε", "2nd person plural"],
+  ["ασι", "3rd person plural"],
+  ["ασιν", "3rd person plural, movable nu"],
+] as const;
+
+const pluperfectActiveEndings = [
+  ["η", "1st person singular"],
+  ["ειν", "1st person singular (alternative)"],
+  ["ης", "2nd person singular"],
+  ["εις", "2nd person singular (alternative)"],
+  ["ει", "3rd person singular"],
+  ["ειν", "3rd person singular (alternative)"],
+  ["εμεν", "1st person plural"],
+  ["ετε", "2nd person plural"],
+  ["εσαν", "3rd person plural"],
+] as const;
+
+/** Forms come from an attested fourth principal part, never from the present stem. */
+function addGrotonLesson20PerfectForms(index: Map<string, DictionaryMatch[]>) {
+  for (const entry of lesson20Perfects) {
+    const lemmaKey = normalizeDictionaryKey(entry.lemma);
+    const matching = index.get(lemmaKey)?.find((match) =>
+      normalizeDictionaryKey(headwordForms(match.headword)[0] ?? "") === lemmaKey);
+    if (!matching) continue;
+    const perfect = normalizeDictionaryKey(entry.perfect);
+    if (!perfect.endsWith("α")) continue;
+    const perfectBase = perfect.slice(0, -1);
+    const ref = entry.source_ref + "; Groton Lesson 20 perfect active";
+    for (const [ending, label] of perfectActiveEndings) {
+      addMatch(index, perfectBase + ending, {
+        ...matching, sourceRef: ref,
+        morphology: ["Perfect Active Indicative · " + label],
+      }, true);
+    }
+    addMatch(index, perfectBase + "εναι", {
+      ...matching, sourceRef: ref,
+      morphology: ["Perfect Active Infinitive"],
+    }, true);
+
+    // Consonant-initial perfect stems take an epsilon augment; vowel-initial
+    // and irregular bases are retained as written unless the textbook
+    // exercises supply the distinct pluperfect base explicitly.
+    const plainBase = entry.pluperfectBase
+      ? normalizeDictionaryKey(entry.pluperfectBase)
+      : /^[αεηιουω]/u.test(perfectBase)
+        ? perfectBase
+        : "ε" + perfectBase;
+    for (const [ending, label] of pluperfectActiveEndings) {
+      addMatch(index, plainBase + ending, {
+        ...matching, sourceRef: ref,
+        morphology: ["Pluperfect Active Indicative · " + label],
+      }, true);
+    }
+  }
+}
+
 export function buildGreekTranslationIndex(grotonVocabularyDecks: DeckDefinition[], grotonGrammarDecks: DeckDefinition[], kuboDeck?: DeckDefinition | null) {
   const index = new Map<string, DictionaryMatch[]>();
-  for (const deck of grotonVocabularyDecks) addVocabularyDeck(index, deck, "Groton, From Alpha to Omega");
-  addProductiveGrotonForms(index, grotonVocabularyDecks, grotonGrammarDecks);
-  addLesson16NounForms(index, grotonVocabularyDecks);
+  const vocabularyIncludingLesson20 = [...grotonVocabularyDecks, lesson20HelperVocabularyDeck()];
+  for (const deck of vocabularyIncludingLesson20) addVocabularyDeck(index, deck, "Groton, From Alpha to Omega");
+  addProductiveGrotonForms(index, vocabularyIncludingLesson20, grotonGrammarDecks);
+  addLesson16NounForms(index, vocabularyIncludingLesson20);
+  addLesson20NounInflections(index);
   for (const deck of grotonGrammarDecks) addGrammarForms(index, deck);
+  addGrotonLesson20PerfectForms(index);
+  // Contracted present form in the user's Lesson 20 exercise, sentence 9.
+  const zeteo = lesson20Vocabulary[0];
+  addMatch(index, "ζητῶ", {
+    headword: zeteo.greek, definition: zeteo.meaning,
+    source: "Groton, From Alpha to Omega, Lesson 20",
+    sourceRef: zeteo.source_ref,
+    morphology: ["Present Active Indicative · 1st person singular (contract)"],
+  }, true);
   if (kuboDeck) addVocabularyDeck(index, kuboDeck, "Kubo New Testament Vocabulary");
   return index;
 }
