@@ -16,9 +16,9 @@ export const lesson17VocabularyAudio: Readonly<Record<string, { label: string; g
 };
 
 export const lesson18VocabularyAudio: Readonly<Record<string, { label: string; greek: string }>> = {
-  "lesson18-v1": { label: "ἀγγέλλω, ἀγγελῶ, ἤγγειλα", greek: "ἀγγέλλω, ἀγγελῶ, ἤγγειλα" },
-  "lesson18-v2": { label: "ἐρωτάω, ἐρωτήσω, ἠρώτησα", greek: "ἐρωτάω, ἐρωτήσω, ἠρώτησα" },
-  "lesson18-v3": { label: "πωλέω, πωλήσω, ἐπώλησα", greek: "πωλέω, πωλήσω, ἐπώλησα" },
+  "lesson18-v1": { label: "ἀγγέλλω, ἀγγελῶ, ἤγγειλα, ἤγγελκα", greek: "ἀγγέλλω, ἀγγελῶ, ἤγγειλα, ἤγγελκα" },
+  "lesson18-v2": { label: "ἐρωτάω, ἐρωτήσω, ἠρώτησα, ἠρώτηκα", greek: "ἐρωτάω, ἐρωτήσω, ἠρώτησα, ἠρώτηκα" },
+  "lesson18-v3": { label: "πωλέω, πωλήσω, ἐπώλησα, πεπώληκα", greek: "πωλέω, πωλήσω, ἐπώλησα, πεπώληκα" },
   "lesson18-v4": { label: "ἄγγελος, -ου, ὁ", greek: "ἄγγελος" },
   "lesson18-v5": { label: "δραχμή, -ῆς, ἡ", greek: "δραχμή" },
   "lesson18-v6": { label: "ὀβολός, -οῦ, ὁ", greek: "ὀβολός" },
