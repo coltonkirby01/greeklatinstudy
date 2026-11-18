@@ -1,12 +1,13 @@
 [
   {
     "id": "lesson11-v1",
-    "greek": "πείθω, πείσω, ἔπεισα",
+    "greek": "πείθω, πείσω, ἔπεισα, πέποιθα",
     "meaning": "persuade (with accusative + infinitive); (middle + dative) obey",
     "part_of_speech": "verb",
     "lesson": 11,
     "source_ref": "Groton 11.77",
-    "third_principal_part": "ἔπεισα"
+    "third_principal_part": "ἔπεισα",
+    "fourth_principal_part": "πέποιθα"
   },
   {
     "id": "lesson11-v2",
