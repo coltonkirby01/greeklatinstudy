@@ -210,7 +210,7 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
       : lesson === 19
         ? {
             eyebrow: "Second aorist and reflexive pronouns",
-            description: "Six second-aorist active/middle ending charts plus three complete reflexive-pronoun charts, singular and plural.",
+            description: "Six second-aorist active/middle ending charts plus six reflexive-pronoun form charts, split by person and by singular/plural, with cases and gender columns."
             sourceNote: "Groton Lesson 19, §§115–116, pp. 116–119.",
           }
       : lesson === 20
