@@ -1,21 +1,23 @@
 [
   {
     "id": "lesson10-v1",
-    "greek": "λέγω, ἐρῶ/λέξω, εἶπον/ἔλεξα",
+    "greek": "λέγω, ἐρῶ/λέξω, εἶπον/ἔλεξα, εἴρηκα",
     "meaning": "say, speak, tell",
     "part_of_speech": "verb",
     "lesson": 10,
     "source_ref": "Groton 10.69",
-    "third_principal_part": "εἶπον/ἔλεξα"
+    "third_principal_part": "εἶπον/ἔλεξα",
+    "fourth_principal_part": "εἴρηκα"
   },
   {
     "id": "lesson10-v2",
-    "greek": "πρᾱ́ττω, πρᾱ́ξω, ἔπρᾱξα",
+    "greek": "πρᾱ́ττω, πρᾱ́ξω, ἔπρᾱξα, πέπρᾱχα",
     "meaning": "do, act",
     "part_of_speech": "verb",
     "lesson": 10,
     "source_ref": "Groton 10.69",
-    "third_principal_part": "ἔπρᾱξα"
+    "third_principal_part": "ἔπρᾱξα",
+    "fourth_principal_part": "πέπρᾱχα"
   },
   {
     "id": "lesson10-v3",
