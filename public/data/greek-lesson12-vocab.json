@@ -9,12 +9,13 @@
   },
   {
     "id": "lesson12-v2",
-    "greek": "λῡ́ω, λῡ́σω, ἔλῡσα",
+    "greek": "λῡ́ω, λῡ́σω, ἔλῡσα, λέλῡκα",
     "meaning": "loosen, release, destroy",
     "part_of_speech": "verb",
     "lesson": 12,
     "source_ref": "Groton 12.81",
-    "third_principal_part": "ἔλῡσα"
+    "third_principal_part": "ἔλῡσα",
+    "fourth_principal_part": "λέλῡκα"
   },
   {
     "id": "lesson12-v3",
