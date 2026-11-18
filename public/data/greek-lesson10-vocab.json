@@ -11,22 +11,23 @@
   },
   {
     "id": "lesson10-v2",
-    "greek": "πρᾱ́ττω, πρᾱ́ξω, ἔπρᾱξα, πέπρᾱχα",
+    "greek": "πρᾱ́ττω, πρᾱ́ξω, ἔπρᾱξα, πέπρᾱχα/πέπρᾱγα",
     "meaning": "do, act",
     "part_of_speech": "verb",
     "lesson": 10,
     "source_ref": "Groton 10.69",
     "third_principal_part": "ἔπρᾱξα",
-    "fourth_principal_part": "πέπρᾱχα"
+    "fourth_principal_part": "πέπρᾱχα/πέπρᾱγα"
   },
   {
     "id": "lesson10-v3",
-    "greek": "φεύγω, φεύξομαι, ἔφυγον",
+    "greek": "φεύγω, φεύξομαι, ἔφυγον, πέφευγα",
     "meaning": "flee, avoid, escape, be in exile",
     "part_of_speech": "verb",
     "lesson": 10,
     "source_ref": "Groton 10.69",
-    "third_principal_part": "ἔφυγον"
+    "third_principal_part": "ἔφυγον",
+    "fourth_principal_part": "πέφευγα"
   },
   {
     "id": "lesson10-v4",
