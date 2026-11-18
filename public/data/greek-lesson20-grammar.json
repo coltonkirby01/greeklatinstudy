@@ -38,7 +38,7 @@
     "category": "Perfect Active Infinitive Endings",
     "prompt": "Perfect Active Infinitive Ending",
     "source_ref": "Groton Lesson 20, §123, p. 125",
-    "accent_note": "The perfect infinitive has no augment. Accent is on the penult, e.g. πεπαιδευκέναι.",
+    "accent_note": "The perfect infinitive has no augment. Accent is on the penult, e.g. πεπαιδευκέναι.",
     "columns": [
       "Ending"
     ],
@@ -46,7 +46,7 @@
       {
         "label": "Perfect Active Infinitive",
         "cells": [
-          "-έναι"
+          "-έναι"
         ]
       }
     ]
