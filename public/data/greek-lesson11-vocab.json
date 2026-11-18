@@ -1,22 +1,23 @@
 [
   {
     "id": "lesson11-v1",
-    "greek": "πείθω, πείσω, ἔπεισα, πέποιθα",
+    "greek": "πείθω, πείσω, ἔπεισα, πέπεικα/πέποιθα",
     "meaning": "persuade (with accusative + infinitive); (middle + dative) obey",
     "part_of_speech": "verb",
     "lesson": 11,
     "source_ref": "Groton 11.77",
     "third_principal_part": "ἔπεισα",
-    "fourth_principal_part": "πέποιθα"
+    "fourth_principal_part": "πέπεικα/πέποιθα"
   },
   {
     "id": "lesson11-v2",
-    "greek": "τρέπω, τρέψω, ἔτρεψα",
+    "greek": "τρέπω, τρέψω, ἔτρεψα, τέτροφα",
     "meaning": "turn; (middle) betake oneself, move",
     "part_of_speech": "verb",
     "lesson": 11,
     "source_ref": "Groton 11.77",
-    "third_principal_part": "ἔτρεψα"
+    "third_principal_part": "ἔτρεψα",
+    "fourth_principal_part": "τέτροφα"
   },
   {
     "id": "lesson11-v3",
