@@ -64,7 +64,7 @@ describe("Groton Lessons 6 and 7 expansion", () => {
     expect(lesson7).toHaveLength(12);
     expect(lesson7.every((card) => card.lesson === 7 && card.source_ref === "Groton 7.47")).toBe(true);
     expect(lesson7.map(({ id, greek, meaning, part_of_speech }) => ({ id, greek, meaning, part_of_speech }))).toEqual([
-      { id: "lesson7-v1", greek: "χαίρω, χαιρήσω", meaning: "be happy; (+ dative) rejoice (in), take delight (in)", part_of_speech: "verb" },
+      { id: "lesson7-v1", greek: "χαίρω, χαιρήσω, ἐχαίρησα, κεχάρηκα", meaning: "be happy; (+ dative) rejoice (in), take delight (in)", part_of_speech: "verb" },
       { id: "lesson7-v2", greek: "ἀδελφή, -ῆς, ἡ", meaning: "sister", part_of_speech: "noun" },
       { id: "lesson7-v3", greek: "ἀδελφός, -οῦ, ὁ", meaning: "brother", part_of_speech: "noun" },
       { id: "lesson7-v4", greek: "ἄνθρωπος, -ου, ὁ, ἡ", meaning: "human being, person, man, mankind, humankind; woman, womankind", part_of_speech: "noun" },
