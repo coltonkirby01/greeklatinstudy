@@ -1,21 +1,23 @@
 [
   {
     "id": "lesson19-v1",
-    "greek": "λαμβάνω, λήψομαι, ἔλαβον",
+    "greek": "λαμβάνω, λήψομαι, ἔλαβον, εἴληφα",
     "meaning": "take, receive, grasp, understand",
     "part_of_speech": "verb",
     "lesson": 19,
     "source_ref": "Groton 19.118, pp. 119–120",
-    "third_principal_part": "ἔλαβον"
+    "third_principal_part": "ἔλαβον",
+    "fourth_principal_part": "εἴληφα"
   },
   {
     "id": "lesson19-v2",
-    "greek": "μένω, μενῶ, ἔμεινα",
+    "greek": "μένω, μενῶ, ἔμεινα, μεμένηκα",
     "meaning": "remain, stay; (+ acc.) wait for",
     "part_of_speech": "verb",
     "lesson": 19,
     "source_ref": "Groton 19.118, pp. 119–120",
-    "third_principal_part": "ἔμεινα"
+    "third_principal_part": "ἔμεινα",
+    "fourth_principal_part": "μεμένηκα"
   },
   {
     "id": "lesson19-v3",
