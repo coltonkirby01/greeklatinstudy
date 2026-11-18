@@ -92,7 +92,7 @@ describe("Groton Lesson 20 flashcards",()=>{
     for(const [n,id,part] of targets){
       const cards=read<Vocab[]>("public/data/greek-lesson"+n+"-vocab.json");
       const target=cards.find(x=>x.id===id);
-      expect(target?.greek.includes(", "+part),id).toBe(true);
+      expect(target?.greek.endsWith(", "+target.fourth_principal_part),id).toBe(true);
       expect(target?.fourth_principal_part?.split("/").includes(part),id).toBe(true);
       expect(new Set(cards.map(x=>x.id)).size).toBe(cards.length);
       expect(resolveBuiltinGreekAsset(id)?.ttsText,id).toBeTruthy();
