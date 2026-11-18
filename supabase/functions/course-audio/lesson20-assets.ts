@@ -17,7 +17,14 @@ export const lesson20VocabularyAudio: Readonly<Record<string, { label: string; g
 };
 
 function chartAudio(id: string, label: string, columns: readonly (readonly string[])[]): Lesson3CourseAudioAsset {
-  const normalizeCell = (value: string) => value.replace(/^[—-]/gu, "").replace(/\s*\/\s*/gu, ", ").replace(/[()]/gu, "").trim();
+  // Pronounce the κ-present (first-perfect) representative while preserving
+  // bracketed optional κ in the visible flashcard data; comma separates alternates.
+  const normalizeCell = (value: string) => value
+    .replace(/\s*\/\s*/gu, ", ")
+    .replace(/\s+\(-/gu, ", -")
+    .replace(/\[κ\]/gu, "κ")
+    .replace(/[()\-]/gu, "")
+    .trim();
   const spokenColumns = columns.map((column) => column.map(normalizeCell).filter(Boolean));
   return {
     id,
@@ -28,7 +35,7 @@ function chartAudio(id: string, label: string, columns: readonly (readonly strin
 }
 
 export const lesson20CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
-  chartAudio("lesson20-chart-perfect-active-indicative", "Perfect Active Indicative Endings", [["-α","-ας","-ε(ν)"],["-αμεν","-ατε","-ᾱσι(ν)"]]),
-  chartAudio("lesson20-chart-perfect-active-infinitive", "Perfect Active Infinitive Endings", [["-έναι"]]),
-  chartAudio("lesson20-chart-pluperfect-active-indicative", "Pluperfect Active Indicative Endings", [["-η / -ειν","-ης / -εις","-ει(ν)"],["-εμεν","-ετε","-εσαν"]]),
+  chartAudio("lesson20-chart-perfect-active-indicative", "Perfect Active Indicative Endings", [["-[κ]α","-[κ]ας","-[κ]ε(ν)"],["-[κ]αμεν","-[κ]ατε","-[κ]ᾱσι(ν) (-[κ]αν)"]]),
+  chartAudio("lesson20-chart-perfect-active-infinitive", "Perfect Active Infinitive Endings", [["-[κ]έναι"]]),
+  chartAudio("lesson20-chart-pluperfect-active-indicative", "Pluperfect Active Indicative Endings", [["-[κ]η (-[κ]ειν)","-[κ]ης (-[κ]εις)","-[κ]ει(ν)"],["-[κ]εμεν","-[κ]ετε","-[κ]εσαν"]]),
 ] as const;
