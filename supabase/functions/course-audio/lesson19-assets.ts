@@ -4,8 +4,8 @@ import type { Lesson3CourseAudioAsset } from "./lesson3-assets.ts";
 // Match the vocabulary source order and retain permanent lesson19-vN IDs.
 // These declarations only resolve audio requests; they do not trigger paid TTS.
 export const lesson19VocabularyAudio: Readonly<Record<string, { label: string; greek: string }>> = {
-  "lesson19-v1": { label: "λαμβάνω, λήψομαι, ἔλαβον", greek: "λαμβάνω, λήψομαι, ἔλαβον" },
-  "lesson19-v2": { label: "μένω, μενῶ, ἔμεινα", greek: "μένω, μενῶ, ἔμεινα" },
+  "lesson19-v1": { label: "λαμβάνω, λήψομαι, ἔλαβον, εἴληφα", greek: "λαμβάνω, λήψομαι, ἔλαβον, εἴληφα" },
+  "lesson19-v2": { label: "μένω, μενῶ, ἔμεινα, μεμένηκα", greek: "μένω, μενῶ, ἔμεινα, μεμένηκα" },
   "lesson19-v3": { label: "αἰτίᾱ, -ᾱς, ἡ", greek: "αἰτίᾱ" },
   "lesson19-v4": { label: "ἑαυτοῦ, -ῆς, -οῦ (αὑτοῦ, -ῆς, -οῦ)", greek: "ἑαυτοῦ, ἑαυτῆς, ἑαυτοῦ" },
   "lesson19-v5": { label: "ἐμαυτοῦ, -ῆς", greek: "ἐμαυτοῦ, ἐμαυτῆς" },
