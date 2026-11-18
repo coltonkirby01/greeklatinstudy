@@ -592,8 +592,13 @@ function addReflexivePronounChartForms(index: Map<string, DictionaryMatch[]>, ca
   const columns = chartColumns(card);
   const first = group.startsWith("First-Person");
   const second = group.startsWith("Second-Person");
+  // Lessons 13 and 19 present number as one chart per card. Retain the
+  // original singular/plural morphological labels for dictionary lookups.
+  const chartNumber = group.endsWith("— Singular") ? "Singular"
+    : group.endsWith("— Plural") ? "Plural" : "";
   for (const row of chartRows(card)) {
-    const singular = row.label.startsWith("Singular");
+    const singular = chartNumber ? chartNumber === "Singular" : row.label.startsWith("Singular");
+    const caseLabel = chartNumber ? chartNumber + " · " + row.label : row.label;
     const lemma = first
       ? singular ? "ἐμαυτοῦ" : "ἡμῶν"
       : second
@@ -607,7 +612,7 @@ function addReflexivePronounChartForms(index: Map<string, DictionaryMatch[]>, ca
         const formMatch: DictionaryMatch = {
           ...lexical,
           sourceRef: combinedSourceRef(lexical, card),
-          morphology: [[group, row.label, columns[columnIndex]].filter(Boolean).join(" · ")],
+          morphology: [[group, caseLabel, columns[columnIndex]].filter(Boolean).join(" · ")],
         };
         addMatch(index, form, formMatch, true);
         // The reader selects individual words, including inside plural
