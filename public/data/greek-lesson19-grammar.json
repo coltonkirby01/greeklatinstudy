@@ -159,52 +159,65 @@
   },
   {
     "id": "lesson19-chart-first-person-reflexive-pronouns",
-    "category": "First-Person Reflexive Pronoun Forms",
-    "prompt": "First-Person Reflexive Pronoun Forms",
+    "category": "First-Person Reflexive Pronoun Forms — Singular",
+    "prompt": "First-Person Reflexive Pronoun Forms — Singular",
     "source_ref": "Groton 19.116, Reflexive Pronouns, pp. 118–119",
-    "accent_note": "No nominative forms; masculine and feminine forms are shown for singular and plural.",
+    "accent_note": "No nominative forms; masculine and feminine forms are shown for singular and plural. Singular forms shown by case and gender; no nominative.",
     "columns": [
       "Masculine",
       "Feminine"
     ],
     "rows": [
       {
-        "label": "Singular · Genitive",
+        "label": "Genitive",
         "cells": [
           "ἐμαυτοῦ",
           "ἐμαυτῆς"
         ]
       },
       {
-        "label": "Singular · Dative",
+        "label": "Dative",
         "cells": [
           "ἐμαυτῷ",
           "ἐμαυτῇ"
         ]
       },
       {
-        "label": "Singular · Accusative",
+        "label": "Accusative",
         "cells": [
           "ἐμαυτόν",
           "ἐμαυτήν"
         ]
-      },
+      }
+    ]
+  },
+  {
+    "id": "lesson19-chart-first-person-reflexive-pronouns-plural",
+    "category": "First-Person Reflexive Pronoun Forms — Plural",
+    "prompt": "First-Person Reflexive Pronoun Forms — Plural",
+    "source_ref": "Groton 19.116, Reflexive Pronouns, pp. 118–119",
+    "accent_note": "Plural reflexives are formed with the plural personal pronoun and αὐτός (first and second person) or the third-person reflexive; no nominative.",
+    "columns": [
+      "Masculine",
+      "Feminine"
+    ],
+    "rows": [
       {
-        "label": "Plural · Genitive",
+        "label": "Genitive",
         "cells": [
           "ἡμῶν αὐτῶν",
           "ἡμῶν αὐτῶν"
         ]
       },
       {
-        "label": "Plural · Dative",
+        "label": "Dative",
         "cells": [
           "ἡμῖν αὐτοῖς",
           "ἡμῖν αὐταῖς"
         ]
       },
       {
-        "label": "Plural · Accusative",
+        "label": "Accusative",
         "cells": [
           "ἡμᾶς αὐτούς",
           "ἡμᾶς αὐτάς"
@@ -214,52 +227,65 @@
   },
   {
     "id": "lesson19-chart-second-person-reflexive-pronouns",
-    "category": "Second-Person Reflexive Pronoun Forms",
-    "prompt": "Second-Person Reflexive Pronoun Forms",
+    "category": "Second-Person Reflexive Pronoun Forms — Singular",
+    "prompt": "Second-Person Reflexive Pronoun Forms — Singular",
     "source_ref": "Groton 19.116, Reflexive Pronouns, pp. 118–119",
-    "accent_note": "No nominative; contracted singular forms in parentheses are alternatives to the full form.",
+    "accent_note": "No nominative; contracted singular forms in parentheses are alternatives to the full form. Singular forms shown by case and gender; no nominative.",
     "columns": [
       "Masculine",
       "Feminine"
     ],
     "rows": [
       {
-        "label": "Singular · Genitive",
+        "label": "Genitive",
         "cells": [
           "σεαυτοῦ / σαυτοῦ",
           "σεαυτῆς / σαυτῆς"
         ]
       },
       {
-        "label": "Singular · Dative",
+        "label": "Dative",
         "cells": [
           "σεαυτῷ / σαυτῷ",
           "σεαυτῇ / σαυτῇ"
         ]
       },
       {
-        "label": "Singular · Accusative",
+        "label": "Accusative",
         "cells": [
           "σεαυτόν / σαυτόν",
           "σεαυτήν / σαυτήν"
         ]
-      },
+      }
+    ]
+  },
+  {
+    "id": "lesson19-chart-second-person-reflexive-pronouns-plural",
+    "category": "Second-Person Reflexive Pronoun Forms — Plural",
+    "prompt": "Second-Person Reflexive Pronoun Forms — Plural",
+    "source_ref": "Groton 19.116, Reflexive Pronouns, pp. 118–119",
+    "accent_note": "Plural reflexives are formed with the plural personal pronoun and αὐτός (first and second person) or the third-person reflexive; no nominative.",
+    "columns": [
+      "Masculine",
+      "Feminine"
+    ],
+    "rows": [
       {
-        "label": "Plural · Genitive",
+        "label": "Genitive",
         "cells": [
           "ὑμῶν αὐτῶν",
           "ὑμῶν αὐτῶν"
         ]
       },
       {
-        "label": "Plural · Dative",
+        "label": "Dative",
         "cells": [
           "ὑμῖν αὐτοῖς",
           "ὑμῖν αὐταῖς"
         ]
       },
       {
-        "label": "Plural · Accusative",
+        "label": "Accusative",
         "cells": [
           "ὑμᾶς αὐτούς",
           "ὑμᾶς αὐτάς"
@@ -269,10 +295,10 @@
   },
   {
     "id": "lesson19-chart-third-person-reflexive-pronouns",
-    "category": "Third-Person Reflexive Pronoun Forms",
-    "prompt": "Third-Person Reflexive Pronoun Forms",
+    "category": "Third-Person Reflexive Pronoun Forms — Singular",
+    "prompt": "Third-Person Reflexive Pronoun Forms — Singular",
     "source_ref": "Groton 19.116, Reflexive Pronouns, pp. 118–119",
-    "accent_note": "No nominative. Contracted forms in the singular retain rough breathing (αὑ-); plural has three genders.",
+    "accent_note": "No nominative. Contracted forms in the singular retain rough breathing (αὑ-); plural has three genders. Singular forms shown by case and gender; no nominative.",
     "columns": [
       "Masculine",
       "Feminine",
@@ -280,7 +306,7 @@
     ],
     "rows": [
       {
-        "label": "Singular · Genitive",
+        "label": "Genitive",
         "cells": [
           "ἑαυτοῦ / αὑτοῦ",
           "ἑαυτῆς / αὑτῆς",
@@ -288,7 +314,7 @@
         ]
       },
       {
-        "label": "Singular · Dative",
+        "label": "Dative",
         "cells": [
           "ἑαυτῷ / αὑτῷ",
           "ἑαυτῇ / αὑτῇ",
@@ -296,15 +322,29 @@
         ]
       },
       {
-        "label": "Singular · Accusative",
+        "label": "Accusative",
         "cells": [
           "ἑαυτόν / αὑτόν",
           "ἑαυτήν / αὑτήν",
           "ἑαυτό / αὑτό"
         ]
-      },
+      }
+    ]
+  },
+  {
+    "id": "lesson19-chart-third-person-reflexive-pronouns-plural",
+    "category": "Third-Person Reflexive Pronoun Forms — Plural",
+    "prompt": "Third-Person Reflexive Pronoun Forms — Plural",
+    "source_ref": "Groton 19.116, Reflexive Pronouns, pp. 118–119",
+    "accent_note": "Plural reflexives are formed with the plural personal pronoun and αὐτός (first and second person) or the third-person reflexive; no nominative.",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
       {
-        "label": "Plural · Genitive",
+        "label": "Genitive",
         "cells": [
           "ἑαυτῶν",
           "ἑαυτῶν",
@@ -312,7 +352,7 @@
         ]
       },
       {
-        "label": "Plural · Dative",
+        "label": "Dative",
         "cells": [
           "ἑαυτοῖς",
           "ἑαυταῖς",
@@ -320,7 +360,7 @@
         ]
       },
       {
-        "label": "Plural · Accusative",
+        "label": "Accusative",
         "cells": [
           "ἑαυτούς",
           "ἑαυτάς",
