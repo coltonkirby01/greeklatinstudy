@@ -54,8 +54,9 @@ describe("Groton Lesson 20 flashcards",()=>{
       ["-[κ]ει(ν)","-[κ]εσαν"]
     ]);
     for(const chart of charts){
-      expect(chart.source_ref).toContain("Groton Lesson 20");
+      expect(chart.source_ref).toContain("§122, p. 125");
       expect(chart.rows.every(row=>row.cells.length===chart.columns.length)).toBe(true);
+      expect(chart.rows.flatMap(row=>row.cells).every(cell=>cell.includes("[κ]"))).toBe(true);
     }
   });
 
