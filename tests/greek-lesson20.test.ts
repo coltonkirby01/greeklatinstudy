@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
-import { hasAmbiguousGreekTonos } from "../src/features/greek/greek-orthography";
+import { hasAmbiguousGreekTonos, normalizeGreekDisplayAccents } from "../src/features/greek/greek-orthography";
 import { BUILTIN_STUDY_DECKS } from "../src/features/study/builtin-study-catalog";
 import { translationGreekRegistrations } from "../src/features/translation/dictionary-sources";
 import { lesson20Vocabulary as helperVocabulary } from "../src/features/translation/groton-lesson20";
@@ -27,7 +27,7 @@ describe("Groton Lesson 20 flashcards",()=>{
       expect(v.lesson).toBe(20);
       expect(v.source_ref).toContain("Lesson 20");
     }
-    expect(vocab[0].fourth_principal_part).toBe("ἐζήτηκα");
+    expect(vocab[0].fourth_principal_part).toBe(normalizeGreekDisplayAccents("ἐζήτηκα"));
     expect(vocab[1].fourth_principal_part).toBe("ἔρριφα");
   });
 
@@ -46,7 +46,7 @@ describe("Groton Lesson 20 flashcards",()=>{
     expect(charts[0].rows.map(x=>x.cells)).toEqual([
       ["-α","-αμεν"],["-ας","-ατε"],["-ε(ν)","-ᾱσι(ν)"]
     ]);
-    expect(charts[1].rows.map(x=>x.cells)).toEqual([["-έναι"]]);
+    expect(charts[1].rows.map(x=>x.cells)).toEqual([[normalizeGreekDisplayAccents("-έναι")]]);
     expect(charts[2].rows.map(x=>x.cells)).toEqual([
       ["-η / -ειν","-εμεν"],["-ης / -εις","-ετε"],["-ει(ν)","-εσαν"]
     ]);
