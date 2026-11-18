@@ -14,6 +14,7 @@ import { lesson14CourseAudioAssets, lesson14VocabularyAudio } from "./lesson14-a
 import { lesson15VocabularyAudio, lesson16VocabularyAudio, lesson16CourseAudioAssets } from "./lesson15-16-assets.ts";
 import { lesson17VocabularyAudio, lesson18VocabularyAudio, lesson17And18CourseAudioAssets } from "./lesson17-18-assets.ts";
 import { lesson19VocabularyAudio, lesson19CourseAudioAssets } from "./lesson19-assets.ts";
+import { lesson20VocabularyAudio, lesson20CourseAudioAssets } from "./lesson20-assets.ts";
 
 export type GreekCourseAudioAsset = Lesson3CourseAudioAsset & { pronunciationSystem?: string };
 
@@ -79,10 +80,10 @@ function addChartFormPacing(ttsText: string) {
 }
 
 export function resolveBuiltinGreekAsset(assetId: string): GreekCourseAudioAsset | null {
-  const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets, ...lesson5CourseAudioAssets, ...lesson6CourseAudioAssets, ...lesson7CourseAudioAssets, ...lesson8CourseAudioAssets, ...lesson9CourseAudioAssets, ...lesson10CourseAudioAssets, ...lesson11CourseAudioAssets, ...lesson12CourseAudioAssets, ...lesson13CourseAudioAssets, ...lesson14CourseAudioAssets, ...lesson16CourseAudioAssets, ...lesson17And18CourseAudioAssets, ...lesson19CourseAudioAssets].find((asset) => asset.id === assetId);
+  const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets, ...lesson5CourseAudioAssets, ...lesson6CourseAudioAssets, ...lesson7CourseAudioAssets, ...lesson8CourseAudioAssets, ...lesson9CourseAudioAssets, ...lesson10CourseAudioAssets, ...lesson11CourseAudioAssets, ...lesson12CourseAudioAssets, ...lesson13CourseAudioAssets, ...lesson14CourseAudioAssets, ...lesson16CourseAudioAssets, ...lesson17And18CourseAudioAssets, ...lesson19CourseAudioAssets, ...lesson20CourseAudioAssets].find((asset) => asset.id === assetId);
   if (paradigm) return { ...paradigm, ttsText: addChartFormPacing(paradigm.ttsText) };
 
-  const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId] ?? lesson6VocabularyAudio[assetId] ?? lesson7VocabularyAudio[assetId] ?? lesson8VocabularyAudio[assetId] ?? lesson9VocabularyAudio[assetId] ?? lesson10VocabularyAudio[assetId] ?? lesson11VocabularyAudio[assetId] ?? lesson12VocabularyAudio[assetId] ?? lesson13VocabularyAudio[assetId] ?? lesson14VocabularyAudio[assetId] ?? lesson15VocabularyAudio[assetId] ?? lesson16VocabularyAudio[assetId] ?? lesson17VocabularyAudio[assetId] ?? lesson18VocabularyAudio[assetId] ?? lesson19VocabularyAudio[assetId];
+  const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId] ?? lesson6VocabularyAudio[assetId] ?? lesson7VocabularyAudio[assetId] ?? lesson8VocabularyAudio[assetId] ?? lesson9VocabularyAudio[assetId] ?? lesson10VocabularyAudio[assetId] ?? lesson11VocabularyAudio[assetId] ?? lesson12VocabularyAudio[assetId] ?? lesson13VocabularyAudio[assetId] ?? lesson14VocabularyAudio[assetId] ?? lesson15VocabularyAudio[assetId] ?? lesson16VocabularyAudio[assetId] ?? lesson17VocabularyAudio[assetId] ?? lesson18VocabularyAudio[assetId] ?? lesson19VocabularyAudio[assetId] ?? lesson20VocabularyAudio[assetId];
   if (vocabulary) {
     const canonicalIpa = greekToClassicalIpa(vocabulary.greek);
     const ttsText = greekToElevenLabsIpa(vocabulary.greek);
