@@ -1,21 +1,23 @@
 [
   {
     "id": "lesson3-v1",
-    "greek": "γράφω, γράψω, ἔγραψα",
+    "greek": "γράφω, γράψω, ἔγραψα, γέγραφα",
     "meaning": "write, draw",
     "part_of_speech": "verb",
     "lesson": 3,
     "source_ref": "Groton 3.24",
-    "third_principal_part": "ἔγραψα"
+    "third_principal_part": "ἔγραψα",
+    "fourth_principal_part": "γέγραφα"
   },
   {
     "id": "lesson3-v2",
-    "greek": "ἐθέλω, ἐθελήσω, ἠθέλησα",
+    "greek": "ἐθέλω, ἐθελήσω, ἠθέλησα, ἠθέληκα",
     "meaning": "(+ infinitive) be willing (to), wish (to)",
     "part_of_speech": "verb",
     "lesson": 3,
     "source_ref": "Groton 3.24",
-    "third_principal_part": "ἠθέλησα"
+    "third_principal_part": "ἠθέλησα",
+    "fourth_principal_part": "ἠθέληκα"
   },
   {
     "id": "lesson3-v3",
@@ -37,12 +39,13 @@
   },
   {
     "id": "lesson3-v5",
-    "greek": "παιδεύω, παιδεύσω, ἐπαίδευσα",
+    "greek": "παιδεύω, παιδεύσω, ἐπαίδευσα, πεπαίδευκα",
     "meaning": "teach, educate",
     "part_of_speech": "verb",
     "lesson": 3,
     "source_ref": "Groton 3.24",
-    "third_principal_part": "ἐπαίδευσα"
+    "third_principal_part": "ἐπαίδευσα",
+    "fourth_principal_part": "πεπαίδευκα"
   },
   {
     "id": "lesson3-v6",
