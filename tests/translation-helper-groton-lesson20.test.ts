@@ -47,7 +47,7 @@ describe("Groton Lesson 20 Translation Helper coverage",()=>{
       const headword=item.greek.match(/[\p{Script=Greek}\p{M}]+/u)?.[0] ?? "";
       expect(has(headword,headword),item.id+" "+headword).toBe(true);
     }
-    expect(BUILTIN_STUDY_DECKS.some(x=>x.id.startsWith("alpha-omega-lesson20-"))).toBe(false);
+    expect(BUILTIN_STUDY_DECKS.filter(x=>x.id.startsWith("alpha-omega-lesson20-"))).toHaveLength(2);
   });
 
   it("recognizes the new Lesson 20 verbs, principal parts, prepositions and nouns",()=>{
@@ -57,7 +57,7 @@ describe("Groton Lesson 20 Translation Helper coverage",()=>{
       ["δένδρῳ","δένδρον"],["Ἑλληνικός","Ἑλληνικός"],["οὐρανοῦ","οὐρανός"],
       ["κατ’","κατά"],["καθ’","κατά"],["ὑπὲρ","ὑπέρ"],
     ] as const) expect(has(form,lemma),form+" → "+lemma).toBe(true);
-    expect(lesson20NounForms.some(x=>x.form==="Ἑλλάδα")).toBe(true);
+    expect(lesson20NounForms.some(x=>normalizeDictionaryKey(x.form)===normalizeDictionaryKey("Ἑλλάδα"))).toBe(true);
   });
 
   it("handles the complete perfect-active and pluperfect active patterns for fourth principal parts",()=>{

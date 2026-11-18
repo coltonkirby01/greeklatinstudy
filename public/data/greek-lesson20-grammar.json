@@ -1,0 +1,88 @@
+[
+  {
+    "id": "lesson20-chart-perfect-active-indicative",
+    "category": "Perfect Active Indicative Endings",
+    "prompt": "Perfect Active Indicative Endings",
+    "source_ref": "Groton Lesson 20, §122 and Summary, pp. 124–125",
+    "accent_note": "Add endings to the reduplicated perfect-active stem (fourth principal part without final -α). In the 3rd plural the alpha is long.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "1st person",
+        "cells": [
+          "-α",
+          "-αμεν"
+        ]
+      },
+      {
+        "label": "2nd person",
+        "cells": [
+          "-ας",
+          "-ατε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-ε(ν)",
+          "-ᾱσι(ν)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson20-chart-perfect-active-infinitive",
+    "category": "Perfect Active Infinitive Endings",
+    "prompt": "Perfect Active Infinitive Ending",
+    "source_ref": "Groton Lesson 20, §123, p. 125",
+    "accent_note": "The perfect infinitive has no augment. Accent is on the penult, e.g. πεπαιδευκέναι.",
+    "columns": [
+      "Ending"
+    ],
+    "rows": [
+      {
+        "label": "Perfect Active Infinitive",
+        "cells": [
+          "-έναι"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson20-chart-pluperfect-active-indicative",
+    "category": "Pluperfect Active Indicative Endings",
+    "prompt": "Pluperfect Active Indicative Endings",
+    "source_ref": "Groton Lesson 20, §122 and Summary, pp. 124–125",
+    "accent_note": "Augment the reduplicated perfect stem in the indicative. Alternative singular -ειν and -εις are also attested.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "1st person",
+        "cells": [
+          "-η / -ειν",
+          "-εμεν"
+        ]
+      },
+      {
+        "label": "2nd person",
+        "cells": [
+          "-ης / -εις",
+          "-ετε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-ει(ν)",
+          "-εσαν"
+        ]
+      }
+    ]
+  }
+]

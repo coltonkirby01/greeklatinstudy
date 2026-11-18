@@ -1,5 +1,12 @@
-function originalGreek(card: { greek: string; third_principal_part?: string }) {
-  return card.third_principal_part ? card.greek.slice(0, -(`, ${card.third_principal_part}`).length) : card.greek;
+function originalGreek(card: { greek: string; third_principal_part?: string; fourth_principal_part?: string }) {
+  // Validate the original printed headword while retaining the newly taught
+  // third and fourth principal parts on the actual study card.
+  const beforeFourth = card.fourth_principal_part
+    ? card.greek.slice(0, -(`, ${card.fourth_principal_part}`).length)
+    : card.greek;
+  return card.third_principal_part
+    ? beforeFourth.slice(0, -(`, ${card.third_principal_part}`).length)
+    : beforeFourth;
 }
 
 import fs from "node:fs";

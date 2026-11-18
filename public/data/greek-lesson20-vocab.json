@@ -1,0 +1,86 @@
+[
+  {
+    "id": "lesson20-v1",
+    "greek": "ζητέω, ζητήσω, ἐζήτησα, ἐζήτηκα",
+    "meaning": "seek, search for, investigate; (+ infinitive) seek to",
+    "part_of_speech": "verb",
+    "lesson": 20,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 20, §124, pp. 127–128",
+    "third_principal_part": "ἐζήτησα",
+    "fourth_principal_part": "ἐζήτηκα"
+  },
+  {
+    "id": "lesson20-v2",
+    "greek": "ῥίπτω, ῥίψω, ἔρριψα, ἔρριφα",
+    "meaning": "throw, hurl, cast aside",
+    "part_of_speech": "verb",
+    "lesson": 20,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 20, §124, pp. 127–128",
+    "third_principal_part": "ἔρριψα",
+    "fourth_principal_part": "ἔρριφα"
+  },
+  {
+    "id": "lesson20-v3",
+    "greek": "γῆ, γῆς, γῇ, γῆν, ἡ",
+    "meaning": "earth, ground, land; Γῆ: Earth personified",
+    "part_of_speech": "noun",
+    "lesson": 20,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 20, §124, pp. 127–128"
+  },
+  {
+    "id": "lesson20-v4",
+    "greek": "δένδρον, -ου, τό",
+    "meaning": "tree",
+    "part_of_speech": "noun",
+    "lesson": 20,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 20, §124, pp. 127–128"
+  },
+  {
+    "id": "lesson20-v5",
+    "greek": "Ἑλλάς, -άδος, ἡ",
+    "meaning": "Hellas, Greece",
+    "part_of_speech": "noun",
+    "lesson": 20,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 20, §124, pp. 127–128"
+  },
+  {
+    "id": "lesson20-v6",
+    "greek": "Ἕλλην, -ηνος, ὁ, ἡ",
+    "meaning": "a Greek, a Hellene",
+    "part_of_speech": "noun",
+    "lesson": 20,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 20, §124, pp. 127–128"
+  },
+  {
+    "id": "lesson20-v7",
+    "greek": "οὐρανός, -οῦ, ὁ",
+    "meaning": "sky, heaven; Οὐρανός: Sky personified",
+    "part_of_speech": "noun",
+    "lesson": 20,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 20, §124, pp. 127–128"
+  },
+  {
+    "id": "lesson20-v8",
+    "greek": "Ἑλληνικός, -ή, -όν",
+    "meaning": "Greek, Hellenic",
+    "part_of_speech": "adjective",
+    "lesson": 20,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 20, §124, pp. 127–128"
+  },
+  {
+    "id": "lesson20-v9",
+    "greek": "κατά (κατ’, καθ’) (+ gen., acc.)",
+    "meaning": "(+ gen.) down from, against; (+ acc.) down, along, according to, by",
+    "part_of_speech": "preposition",
+    "lesson": 20,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 20, §124, pp. 127–128"
+  },
+  {
+    "id": "lesson20-v10",
+    "greek": "ὑπέρ (+ gen., acc.)",
+    "meaning": "(+ gen.) over, above, on behalf of; (+ acc.) over, beyond",
+    "part_of_speech": "preposition",
+    "lesson": 20,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 20, §124, pp. 127–128"
+  }
+]

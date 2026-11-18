@@ -777,7 +777,8 @@ function addGrotonLesson20PerfectForms(index: Map<string, DictionaryMatch[]>) {
 
 export function buildGreekTranslationIndex(grotonVocabularyDecks: DeckDefinition[], grotonGrammarDecks: DeckDefinition[], kuboDeck?: DeckDefinition | null) {
   const index = new Map<string, DictionaryMatch[]>();
-  const vocabularyIncludingLesson20 = [...grotonVocabularyDecks, lesson20HelperVocabularyDeck()];
+  const hasLesson20Deck = grotonVocabularyDecks.some((deck) => deck.id === "alpha-omega-lesson20-vocab");
+  const vocabularyIncludingLesson20 = hasLesson20Deck ? grotonVocabularyDecks : [...grotonVocabularyDecks, lesson20HelperVocabularyDeck()];
   for (const deck of vocabularyIncludingLesson20) addVocabularyDeck(index, deck, "Groton, From Alpha to Omega");
   addProductiveGrotonForms(index, vocabularyIncludingLesson20, grotonGrammarDecks);
   addLesson16NounForms(index, vocabularyIncludingLesson20);

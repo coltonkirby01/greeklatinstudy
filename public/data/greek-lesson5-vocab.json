@@ -1,21 +1,23 @@
 [
   {
     "id": "lesson5-v1",
-    "greek": "ἀκούω, ἀκούσω, ἤκουσα",
+    "greek": "ἀκούω, ἀκούσω, ἤκουσα, ἀκήκοα",
     "meaning": "(+ genitive or accusative) hear, listen, listen to",
     "part_of_speech": "verb",
     "lesson": 5,
     "source_ref": "Groton 5.36",
-    "third_principal_part": "ἤκουσα"
+    "third_principal_part": "ἤκουσα",
+    "fourth_principal_part": "ἀκήκοα"
   },
   {
     "id": "lesson5-v2",
-    "greek": "βλάπτω, βλάψω, ἔβλαψα",
+    "greek": "βλάπτω, βλάψω, ἔβλαψα, βέβλαφα",
     "meaning": "harm, hurt",
     "part_of_speech": "verb",
     "lesson": 5,
     "source_ref": "Groton 5.36",
-    "third_principal_part": "ἔβλαψα"
+    "third_principal_part": "ἔβλαψα",
+    "fourth_principal_part": "βέβλαφα"
   },
   {
     "id": "lesson5-v3",

@@ -142,7 +142,7 @@ describe("Groton Lesson 19: second aorist and reflexive pronouns", () => {
     for (const [lesson,id,part] of verbs){
       const card=read<Vocab[]>("public/data/greek-lesson"+lesson+"-vocab.json").find(x=>x.id===id);
       expect(card?.third_principal_part,id).toBe(part);
-      expect(card?.greek.endsWith(", "+part),id).toBe(true);
+      expect(card?.greek.includes(", "+part),id).toBe(true);
     }
   });
 });

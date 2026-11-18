@@ -5,7 +5,7 @@ import { BUILTIN_STUDY_DECKS } from "../src/features/study/builtin-study-catalog
 import { resolveBuiltinGreekAsset } from "../supabase/functions/course-audio/builtin-greek-assets";
 import { translationGreekRegistrations } from "../src/features/translation/dictionary-sources";
 
-type Vocab = { id: string; greek: string; meaning: string; part_of_speech: string; lesson: number; source_ref: string; third_principal_part?: string };
+type Vocab = { id: string; greek: string; meaning: string; part_of_speech: string; lesson: number; source_ref: string; third_principal_part?: string; fourth_principal_part?: string };
 type Chart = { id: string; prompt: string; category: string; columns: string[]; rows: { label: string; cells: string[] }[] };
 const read = <T>(p: string): T => JSON.parse(fs.readFileSync(p, "utf8")) as T;
 const vocab17 = read<Vocab[]>("public/data/greek-lesson17-vocab.json");
@@ -105,7 +105,7 @@ describe("Groton Lessons 17 and 18", () => {
     expect(updated).toHaveLength(36);
     for (const card of updated){
       expect(card.third_principal_part,card.id).toBe(updatedParts[card.id]);
-      expect(card.greek.endsWith(`, ${updatedParts[card.id]}`),card.id).toBe(true);
+      expect(card.greek.includes(`, ${updatedParts[card.id]}`),card.id).toBe(true);
     }
     for(const id of ["lesson12-v1"]) {
       expect(originalCards.find(card=>card.id===id)?.third_principal_part).toBeUndefined();
@@ -123,7 +123,7 @@ describe("Groton Lessons 17 and 18", () => {
     }
     expect(page).toContain("lesson17EpsilonSigmaMF");
     expect(page).toContain("lesson18AoristMiddleImperative");
-    expect(loader).toContain("lesson === 18 ? (card.columns.length === 1 ?");
+    expect(loader).toContain("(lesson === 18 || lesson === 20 || (lesson === 19 && card.category.startsWith");
     const r=translationGreekRegistrations();
     expect(r.grotonGrammar.map(x=>x.id)).toEqual(expect.arrayContaining(["alpha-omega-lesson17-grammar","alpha-omega-lesson18-grammar"]));
     expect(r.grotonVocabulary.map(x=>x.id)).toEqual(expect.arrayContaining(["alpha-omega-lesson17-vocab","alpha-omega-lesson18-vocab"]));

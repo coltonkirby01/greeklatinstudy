@@ -1,12 +1,13 @@
 [
   {
     "id": "lesson8-v1",
-    "greek": "εὑρίσκω, εὑρήσω, εὗρον",
+    "greek": "εὑρίσκω, εὑρήσω, εὗρον, εὕρηκα",
     "meaning": "find, find out, discover",
     "part_of_speech": "verb",
     "lesson": 8,
     "source_ref": "Groton 8.56",
-    "third_principal_part": "εὗρον"
+    "third_principal_part": "εὗρον",
+    "fourth_principal_part": "εὕρηκα"
   },
   {
     "id": "lesson8-v2",
