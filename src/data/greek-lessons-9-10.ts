@@ -151,7 +151,7 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
         grammarGroup: card.category,
         chartColumns: card.columns,
         chartRows,
-        rowHeaderLabel: lesson >= 18 ? (card.columns.length === 1 ? "Form" : "Person") : lesson === 9 || lesson >= 13 ? "Case" : card.columns.length === 1 ? "Form" : "Person",
+        rowHeaderLabel: (lesson === 18 || lesson === 20 || (lesson === 19 && card.category.startsWith("Second Aorist"))) ? (card.columns.length === 1 ? "Form" : "Person") : lesson === 9 || lesson >= 13 ? "Case" : card.columns.length === 1 ? "Form" : "Person",
         pronunciationText: greekLesson3ParadigmSpeechText(chartRows),
         accentNote: card.accent_note,
         sourceRef: card.source_ref ?? `Groton Lesson ${lesson}`,
