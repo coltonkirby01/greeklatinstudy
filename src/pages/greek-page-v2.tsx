@@ -154,8 +154,11 @@ const keys = {
   lesson19AoristActiveImperative: "lesson19-second-aorist-active-imperative",
   lesson19AoristMiddleImperative: "lesson19-second-aorist-middle-imperative",
   lesson19ReflexiveFirst: "lesson19-first-person-reflexive-pronouns",
+  lesson19ReflexiveFirstPlural: "lesson19-first-person-reflexive-pronouns-plural",
   lesson19ReflexiveSecond: "lesson19-second-person-reflexive-pronouns",
+  lesson19ReflexiveSecondPlural: "lesson19-second-person-reflexive-pronouns-plural",
   lesson19ReflexiveThird: "lesson19-third-person-reflexive-pronouns",
+  lesson19ReflexiveThirdPlural: "lesson19-third-person-reflexive-pronouns-plural",
   lesson20Vocabulary: "lesson20-vocabulary",
   lesson20PerfectActiveIndicative: "lesson20-perfect-active-indicative",
   lesson20PerfectActiveInfinitive: "lesson20-perfect-active-infinitive",
@@ -320,9 +323,12 @@ const lesson19CategoryByKey = new Map<string, string>([
   [keys.lesson19AoristMiddleInfinitive, "Second Aorist Middle Infinitive Endings"],
   [keys.lesson19AoristActiveImperative, "Second Aorist Active Imperative Endings"],
   [keys.lesson19AoristMiddleImperative, "Second Aorist Middle Imperative Endings"],
-  [keys.lesson19ReflexiveFirst, "First-Person Reflexive Pronoun Forms"],
-  [keys.lesson19ReflexiveSecond, "Second-Person Reflexive Pronoun Forms"],
-  [keys.lesson19ReflexiveThird, "Third-Person Reflexive Pronoun Forms"],
+  [keys.lesson19ReflexiveFirst, "First-Person Reflexive Pronoun Forms — Singular"],
+  [keys.lesson19ReflexiveFirstPlural, "First-Person Reflexive Pronoun Forms — Plural"],
+  [keys.lesson19ReflexiveSecond, "Second-Person Reflexive Pronoun Forms — Singular"],
+  [keys.lesson19ReflexiveSecondPlural, "Second-Person Reflexive Pronoun Forms — Plural"],
+  [keys.lesson19ReflexiveThird, "Third-Person Reflexive Pronoun Forms — Singular"],
+  [keys.lesson19ReflexiveThirdPlural, "Third-Person Reflexive Pronoun Forms — Plural"],
 ]);
 const lesson20CategoryByKey = new Map<string, string>([
   [keys.lesson20PerfectActiveIndicative, "Perfect Active Indicative Endings"],
@@ -346,7 +352,7 @@ const lessonConfigs: LessonConfig[] = [
   { lesson: 16, vocabularyKey: keys.lesson16Vocabulary, vocabularyDeck: "lesson16Vocabulary", grammarDeck: "lesson16Grammar", endingKeys: [keys.thirdDeclensionMasculineFeminineEndings, keys.thirdDeclensionNeuterEndings], categoryByKey: lesson16CategoryByKey },
   { lesson: 17, vocabularyKey: keys.lesson17Vocabulary, vocabularyDeck: "lesson17Vocabulary", grammarDeck: "lesson17Grammar", endingKeys: [keys.lesson17EpsilonSigmaMF, keys.lesson17EpsilonSigmaN, keys.lesson17AlphaSigmaN, keys.lesson17OmicronSigmaF, keys.lesson17AdjectiveNasalMF, keys.lesson17AdjectiveNasalN, keys.lesson17AdjectiveSigmaMF, keys.lesson17AdjectiveSigmaN], categoryByKey: lesson17CategoryByKey },
   { lesson: 18, vocabularyKey: keys.lesson18Vocabulary, vocabularyDeck: "lesson18Vocabulary", grammarDeck: "lesson18Grammar", endingKeys: [keys.lesson18AoristActiveIndicative, keys.lesson18AoristMiddleIndicative, keys.lesson18AoristActiveInfinitive, keys.lesson18AoristMiddleInfinitive, keys.lesson18AoristActiveImperative, keys.lesson18AoristMiddleImperative], categoryByKey: lesson18CategoryByKey },
-  { lesson: 19, vocabularyKey: keys.lesson19Vocabulary, vocabularyDeck: "lesson19Vocabulary", grammarDeck: "lesson19Grammar", endingKeys: [keys.lesson19AoristActiveIndicative, keys.lesson19AoristMiddleIndicative, keys.lesson19AoristActiveInfinitive, keys.lesson19AoristMiddleInfinitive, keys.lesson19AoristActiveImperative, keys.lesson19AoristMiddleImperative, keys.lesson19ReflexiveFirst, keys.lesson19ReflexiveSecond, keys.lesson19ReflexiveThird], categoryByKey: lesson19CategoryByKey },
+  { lesson: 19, vocabularyKey: keys.lesson19Vocabulary, vocabularyDeck: "lesson19Vocabulary", grammarDeck: "lesson19Grammar", endingKeys: [keys.lesson19AoristActiveIndicative, keys.lesson19AoristMiddleIndicative, keys.lesson19AoristActiveInfinitive, keys.lesson19AoristMiddleInfinitive, keys.lesson19AoristActiveImperative, keys.lesson19AoristMiddleImperative, keys.lesson19ReflexiveFirst, keys.lesson19ReflexiveFirstPlural, keys.lesson19ReflexiveSecond, keys.lesson19ReflexiveSecondPlural, keys.lesson19ReflexiveThird, keys.lesson19ReflexiveThirdPlural], categoryByKey: lesson19CategoryByKey },
   { lesson: 20, vocabularyKey: keys.lesson20Vocabulary, vocabularyDeck: "lesson20Vocabulary", grammarDeck: "lesson20Grammar", endingKeys: [keys.lesson20PerfectActiveIndicative, keys.lesson20PerfectActiveInfinitive, keys.lesson20PluperfectActiveIndicative], categoryByKey: lesson20CategoryByKey },
 ];
 
