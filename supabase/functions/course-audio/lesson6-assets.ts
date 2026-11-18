@@ -18,9 +18,9 @@ function endingChart(id: string, label: string, columns: readonly (readonly stri
 }
 
 export const lesson6VocabularyAudio: Readonly<Record<string, { label: string; greek: string }>> = {
-  "lesson6-v1": { label: "ἀλλάττω, ἀλλάξω, ἤλλαξα", greek: "ἀλλάττω, ἀλλάξω, ἤλλαξα" },
-  "lesson6-v2": { label: "διώκω, διώξω, ἐδίωξα", greek: "διώκω, διώξω, ἐδίωξα" },
-  "lesson6-v3": { label: "ἔχω, ἕξω/σχήσω, ἔσχον", greek: "ἔχω, ἕξω, σχήσω, ἔσχον" },
+  "lesson6-v1": { label: "ἀλλάττω, ἀλλάξω, ἤλλαξα, ἤλλαχα", greek: "ἀλλάττω, ἀλλάξω, ἤλλαξα, ἤλλαχα" },
+  "lesson6-v2": { label: "διώκω, διώξω, ἐδίωξα, δεδίωχα", greek: "διώκω, διώξω, ἐδίωξα, δεδίωχα" },
+  "lesson6-v3": { label: "ἔχω, ἕξω/σχήσω, ἔσχον, ἔσχηκα", greek: "ἔχω, ἕξω, σχήσω, ἔσχον, ἔσχηκα" },
   "lesson6-v4": { label: "μέλλω, μελλήσω, ἐμέλλησα", greek: "μέλλω, μελλήσω, ἐμέλλησα" },
   "lesson6-v5": { label: "κόρη", greek: "κόρη, κόρης, ἡ" },
   "lesson6-v6": { label: "οἰκίᾱ", greek: "οἰκίᾱ, οἰκίᾱς, ἡ" },

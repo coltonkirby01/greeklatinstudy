@@ -1,22 +1,23 @@
 [
   {
     "id": "lesson8-v1",
-    "greek": "εὑρίσκω, εὑρήσω, εὗρον, εὕρηκα",
+    "greek": "εὑρίσκω, εὑρήσω, εὗρον/ηὗρον, εὕρηκα/ηὕρηκα",
     "meaning": "find, find out, discover",
     "part_of_speech": "verb",
     "lesson": 8,
     "source_ref": "Groton 8.56",
-    "third_principal_part": "εὗρον",
-    "fourth_principal_part": "εὕρηκα"
+    "third_principal_part": "εὗρον/ηὗρον",
+    "fourth_principal_part": "εὕρηκα/ηὕρηκα"
   },
   {
     "id": "lesson8-v2",
-    "greek": "λείπω, λείψω, ἔλιπον",
+    "greek": "λείπω, λείψω, ἔλιπον, λέλοιπα",
     "meaning": "leave, leave behind",
     "part_of_speech": "verb",
     "lesson": 8,
     "source_ref": "Groton 8.56",
-    "third_principal_part": "ἔλιπον"
+    "third_principal_part": "ἔλιπον",
+    "fourth_principal_part": "λέλοιπα"
   },
   {
     "id": "lesson8-v3",

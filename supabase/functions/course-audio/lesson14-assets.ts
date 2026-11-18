@@ -7,8 +7,8 @@ function formChart(id: string, label: string, columns: readonly (readonly string
     ttsText: columns.map(column => column.map(greekToElevenLabsIpa).filter(Boolean).join(" ")).filter(Boolean).join(" [pause] ") };
 }
 export const lesson14VocabularyAudio: Readonly<Record<string, {label: string; greek: string}>> = {
-  "lesson14-v1": { label: "πλήττω, πλήξω, ἔπληξα", greek: "πλήττω, πλήξω, ἔπληξα" },
-  "lesson14-v2": { label: "φέρω, οἴσω, ἤνεγκον/ἤνεγκα", greek: "φέρω, οἴσω, ἤνεγκον, ἤνεγκα" },
+  "lesson14-v1": { label: "πλήττω, πλήξω, ἔπληξα, πέπληγα", greek: "πλήττω, πλήξω, ἔπληξα, πέπληγα" },
+  "lesson14-v2": { label: "φέρω, οἴσω, ἤνεγκον/ἤνεγκα, ἐνήνοχα", greek: "φέρω, οἴσω, ἤνεγκον, ἤνεγκα, ἐνήνοχα" },
   "lesson14-v3": { label: "βιβλίον, -ου, τό", greek: "βιβλίον" },
   "lesson14-v4": { label: "ἱμάτιον, -ου, τό", greek: "ἱμάτιον" },
   "lesson14-v5": { label: "ἐγώ", greek: "ἐγώ" },

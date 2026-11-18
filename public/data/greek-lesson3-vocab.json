@@ -21,21 +21,23 @@
   },
   {
     "id": "lesson3-v3",
-    "greek": "θῡ́ω, θῡ́σω, ἔθῡσα",
+    "greek": "θῡ́ω, θῡ́σω, ἔθῡσα, τέθῡκα",
     "meaning": "offer sacrifice, sacrifice, slay",
     "part_of_speech": "verb",
     "lesson": 3,
     "source_ref": "Groton 3.24",
-    "third_principal_part": "ἔθῡσα"
+    "third_principal_part": "ἔθῡσα",
+    "fourth_principal_part": "τέθῡκα"
   },
   {
     "id": "lesson3-v4",
-    "greek": "κλέπτω, κλέψω, ἔκλεψα",
+    "greek": "κλέπτω, κλέψω, ἔκλεψα, κέκλοφα",
     "meaning": "steal",
     "part_of_speech": "verb",
     "lesson": 3,
     "source_ref": "Groton 3.24",
-    "third_principal_part": "ἔκλεψα"
+    "third_principal_part": "ἔκλεψα",
+    "fourth_principal_part": "κέκλοφα"
   },
   {
     "id": "lesson3-v5",
@@ -58,12 +60,13 @@
   },
   {
     "id": "lesson3-v7",
-    "greek": "φυλάττω, φυλάξω, ἐφύλαξα",
+    "greek": "φυλάττω, φυλάξω, ἐφύλαξα, πεφύλαχα",
     "meaning": "stand guard, guard, protect, preserve",
     "part_of_speech": "verb",
     "lesson": 3,
     "source_ref": "Groton 3.24",
-    "third_principal_part": "ἐφύλαξα"
+    "third_principal_part": "ἐφύλαξα",
+    "fourth_principal_part": "πεφύλαχα"
   },
   {
     "id": "lesson3-v8",

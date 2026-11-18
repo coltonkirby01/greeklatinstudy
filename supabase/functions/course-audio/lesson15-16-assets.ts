@@ -2,20 +2,20 @@ import { greekToClassicalIpa, greekToElevenLabsIpa } from "./greek-ipa.ts";
 import type { Lesson3CourseAudioAsset } from "./lesson3-assets.ts";
 
 export const lesson15VocabularyAudio: Readonly<Record<string, {label: string; greek: string}>> = {
-  "lesson15-v1": { label: "ἁρπάζω, ἁρπάσω, ἥρπασα", greek: "ἁρπάζω, ἁρπάσω, ἥρπασα" },
-  "lesson15-v2": { label: "βάλλω, βαλῶ, ἔβαλον", greek: "βάλλω, βαλῶ, ἔβαλον" },
+  "lesson15-v1": { label: "ἁρπάζω, ἁρπάσω, ἥρπασα, ἥρπακα", greek: "ἁρπάζω, ἁρπάσω, ἥρπασα, ἥρπακα" },
+  "lesson15-v2": { label: "βάλλω, βαλῶ, ἔβαλον, βέβληκα", greek: "βάλλω, βαλῶ, ἔβαλον, βέβληκα" },
   "lesson15-v3": { label: "γελάω, γελάσομαι, ἐγέλασα", greek: "γελάω, γελάσομαι, ἐγέλασα" },
-  "lesson15-v4": { label: "δηλόω, δηλώσω, ἐδήλωσα", greek: "δηλόω, δηλώσω, ἐδήλωσα" },
-  "lesson15-v5": { label: "κομίζω, κομιῶ, ἐκόμισα", greek: "κομίζω, κομιῶ, ἐκόμισα" },
-  "lesson15-v6": { label: "τῑμάω, τῑμήσω, ἐτίμησα", greek: "τῑμάω, τῑμήσω, ἐτίμησα" },
-  "lesson15-v7": { label: "φιλέω, φιλήσω, ἐφίλησα", greek: "φιλέω, φιλήσω, ἐφίλησα" },
-  "lesson15-v8": { label: "ὠφελέω, ὠφελήσω, ὠφέλησα", greek: "ὠφελέω, ὠφελήσω, ὠφέλησα" },
+  "lesson15-v4": { label: "δηλόω, δηλώσω, ἐδήλωσα, δεδήλωκα", greek: "δηλόω, δηλώσω, ἐδήλωσα, δεδήλωκα" },
+  "lesson15-v5": { label: "κομίζω, κομιῶ, ἐκόμισα, κεκόμικα", greek: "κομίζω, κομιῶ, ἐκόμισα, κεκόμικα" },
+  "lesson15-v6": { label: "τῑμάω, τῑμήσω, ἐτίμησα, τετῑ́μηκα", greek: "τῑμάω, τῑμήσω, ἐτίμησα, τετῑ́μηκα" },
+  "lesson15-v7": { label: "φιλέω, φιλήσω, ἐφίλησα, πεφίληκα", greek: "φιλέω, φιλήσω, ἐφίλησα, πεφίληκα" },
+  "lesson15-v8": { label: "ὠφελέω, ὠφελήσω, ὠφέλησα, ὠφέληκα", greek: "ὠφελέω, ὠφελήσω, ὠφέλησα, ὠφέληκα" },
   "lesson15-v9": { label: "τῑμή, -ῆς, ἡ", greek: "τῑμή" },
   "lesson15-v10": { label: "δῆλος, -η, -ον", greek: "δῆλος, δήλη, δῆλον" },
 };
 
 export const lesson16VocabularyAudio: Readonly<Record<string, {label: string; greek: string}>> = {
-  "lesson16-v1": { label: "ποιέω, ποιήσω, ἐποίησα", greek: "ποιέω, ποιήσω, ἐποίησα" },
+  "lesson16-v1": { label: "ποιέω, ποιήσω, ἐποίησα, πεποίηκα", greek: "ποιέω, ποιήσω, ἐποίησα, πεποίηκα" },
   "lesson16-v2": { label: "ἀγών, -ῶνος, ὁ", greek: "ἀγών" },
   "lesson16-v3": { label: "ἀσπίς, -ίδος, ἡ", greek: "ἀσπίς" },
   "lesson16-v4": { label: "κλώψ, κλωπός, ὁ", greek: "κλώψ" },

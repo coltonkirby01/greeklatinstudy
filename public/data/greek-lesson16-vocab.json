@@ -1,12 +1,13 @@
 [
   {
     "id": "lesson16-v1",
-    "greek": "ποιέω, ποιήσω, ἐποίησα",
+    "greek": "ποιέω, ποιήσω, ἐποίησα, πεποίηκα",
     "meaning": "make, create, do",
     "part_of_speech": "verb",
     "lesson": 16,
     "source_ref": "Groton 16.100",
-    "third_principal_part": "ἐποίησα"
+    "third_principal_part": "ἐποίησα",
+    "fourth_principal_part": "πεποίηκα"
   },
   {
     "id": "lesson16-v2",

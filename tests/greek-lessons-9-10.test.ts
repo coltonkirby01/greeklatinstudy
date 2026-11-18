@@ -92,7 +92,7 @@ describe("Groton Lessons 9–10 expansion", () => {
     expect(vocabulary.map((card) => card.id)).toEqual(Array.from({ length: 12 }, (_, index) => `lesson10-v${index + 1}`));
     expect(vocabulary[0]?.greek).toBe("λέγω, ἐρῶ/λέξω, εἶπον/ἔλεξα, εἴρηκα");
     expect(originalGreek(vocabulary[1])).toBe("πρᾱ́ττω, πρᾱ́ξω");
-    expect(vocabulary[2]?.greek).toBe("φεύγω, φεύξομαι, ἔφυγον");
+    expect(vocabulary[2]?.greek).toBe("φεύγω, φεύξομαι, ἔφυγον, πέφευγα");
     expect(vocabulary.at(-1)?.greek).toBe("οὖν");
 
     expect(grammar).toHaveLength(2);

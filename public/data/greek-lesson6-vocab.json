@@ -1,30 +1,33 @@
 [
   {
     "id": "lesson6-v1",
-    "greek": "ἀλλάττω, ἀλλάξω, ἤλλαξα",
+    "greek": "ἀλλάττω, ἀλλάξω, ἤλλαξα, ἤλλαχα",
     "meaning": "change, alter",
     "part_of_speech": "verb",
     "lesson": 6,
     "source_ref": "Groton 6.40",
-    "third_principal_part": "ἤλλαξα"
+    "third_principal_part": "ἤλλαξα",
+    "fourth_principal_part": "ἤλλαχα"
   },
   {
     "id": "lesson6-v2",
-    "greek": "διώκω, διώξω, ἐδίωξα",
+    "greek": "διώκω, διώξω, ἐδίωξα, δεδίωχα",
     "meaning": "pursue, chase, hunt, drive away, banish",
     "part_of_speech": "verb",
     "lesson": 6,
     "source_ref": "Groton 6.40",
-    "third_principal_part": "ἐδίωξα"
+    "third_principal_part": "ἐδίωξα",
+    "fourth_principal_part": "δεδίωχα"
   },
   {
     "id": "lesson6-v3",
-    "greek": "ἔχω, ἕξω/σχήσω, ἔσχον",
+    "greek": "ἔχω, ἕξω/σχήσω, ἔσχον, ἔσχηκα",
     "meaning": "have, hold, possess; (+ infinitive) be able (to)",
     "part_of_speech": "verb",
     "lesson": 6,
     "source_ref": "Groton 6.40",
-    "third_principal_part": "ἔσχον"
+    "third_principal_part": "ἔσχον",
+    "fourth_principal_part": "ἔσχηκα"
   },
   {
     "id": "lesson6-v4",
