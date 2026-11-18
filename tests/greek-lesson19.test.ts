@@ -41,8 +41,8 @@ describe("Groton Lesson 19: second aorist and reflexive pronouns", () => {
     expect(vocab.map((x) => x.part_of_speech)).toEqual([
       "verb", "verb", "noun", "pronoun", "pronoun", "pronoun", "pronoun", "pronoun", "adjective", "preposition", "preposition",
     ]);
-    expect(vocab[0].greek).toBe("λαμβάνω, λήψομαι, ἔλαβον");
-    expect(vocab[1].greek).toBe("μένω, μενῶ, ἔμεινα");
+    expect(vocab[0].greek).toBe("λαμβάνω, λήψομαι, ἔλαβον, εἴληφα");
+    expect(vocab[1].greek).toBe("μένω, μενῶ, ἔμεινα, μεμένηκα");
     expect(vocab[0].third_principal_part).toBe("ἔλαβον");
     expect(vocab[1].third_principal_part).toBe("ἔμεινα");
     expect(vocab.every(x => x.lesson === 19 && x.source_ref && x.meaning)).toBe(true);
