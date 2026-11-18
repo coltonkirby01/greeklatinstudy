@@ -65,34 +65,41 @@ describe("Groton Lesson 19: second aorist and reflexive pronouns", () => {
     expect(grammar[5].rows.map(x=>x.cells)).toEqual([["-οῦ (-εσο)","-εσθε"],["-έσθω","-έσθων"]]);
   });
 
-  it("keeps reflexive paradigms in singular and plural with the correct gender columns", () => {
-    expect(grammar).toHaveLength(9);
-    const pronouns=grammar.slice(6);
-    expect(pronouns.map(x=>x.id)).toEqual([
+  it("follows the Lesson 13 pronoun convention: distinct singular and plural cards, case rows and gender columns", () => {
+    expect(grammar).toHaveLength(12);
+    const pronouns = grammar.slice(6);
+    expect(pronouns.map(x => x.id)).toEqual([
       "lesson19-chart-first-person-reflexive-pronouns",
+      "lesson19-chart-first-person-reflexive-pronouns-plural",
       "lesson19-chart-second-person-reflexive-pronouns",
+      "lesson19-chart-second-person-reflexive-pronouns-plural",
       "lesson19-chart-third-person-reflexive-pronouns",
+      "lesson19-chart-third-person-reflexive-pronouns-plural",
     ]);
-    for(const chart of pronouns) {
-      expect(chart.rows.map(x=>x.label)).toEqual([
-        "Singular · Genitive", "Singular · Dative", "Singular · Accusative",
-        "Plural · Genitive", "Plural · Dative", "Plural · Accusative",
-      ]);
-      expect(chart.rows.every(x=>x.cells.length===chart.columns.length && x.cells.every(Boolean))).toBe(true);
+    const persons = ["First-Person", "First-Person", "Second-Person", "Second-Person", "Third-Person", "Third-Person"];
+    for (const [i, chart] of pronouns.entries()) {
+      const number = i % 2 === 0 ? "Singular" : "Plural";
+      expect(chart.category).toBe(`${persons[i]} Reflexive Pronoun Forms — ${number}`);
+      expect(chart.prompt).toBe(chart.category);
+      expect(chart.rows.map(x => x.label)).toEqual(["Genitive", "Dative", "Accusative"]);
+      expect(chart.columns).toEqual(i >= 4 ? ["Masculine", "Feminine", "Neuter"] : ["Masculine", "Feminine"]);
+      expect(chart.rows.every(x => x.cells.length === chart.columns.length && x.cells.every(Boolean))).toBe(true);
+      expect(chart.source_ref).toContain("Groton 19.116");
     }
-    expect(pronouns[0].columns).toEqual(["Masculine","Feminine"]);
-    expect(pronouns[1].columns).toEqual(["Masculine","Feminine"]);
-    expect(pronouns[2].columns).toEqual(["Masculine","Feminine","Neuter"]);
-    expect(pronouns[1].rows[0].cells[0]).toContain("σαυτοῦ");
-    expect(pronouns[2].rows[0].cells[0]).toContain("αὑτοῦ");
-    expect(pronouns[2].rows[5].cells).toEqual(["ἑαυτούς","ἑαυτάς","ἑαυτά"]);
+    expect(pronouns[0].rows[0].cells).toEqual(["ἐμαυτοῦ", "ἐμαυτῆς"]);
+    expect(pronouns[1].rows[2].cells).toEqual(["ἡμᾶς αὐτούς", "ἡμᾶς αὐτάς"]);
+    expect(pronouns[2].rows[0].cells[0]).toContain("σαυτοῦ");
+    expect(pronouns[3].rows[1].cells).toEqual(["ὑμῖν αὐτοῖς", "ὑμῖν αὐταῖς"]);
+    expect(pronouns[4].rows[0].cells[0]).toContain("αὑτοῦ");
+    expect(pronouns[5].rows[2].cells).toEqual(["ἑαυτούς", "ἑαυτάς", "ἑαυτά"]);
   });
 
   it("registers both decks for study, selection, stats, dictionary and audio", () => {
     const source=fs.readFileSync("src/pages/greek-page-v2.tsx","utf8");
     const loader=fs.readFileSync("src/data/greek-lessons-9-10.ts","utf8");
     expect(source).toContain("lesson: 19, vocabularyKey: keys.lesson19Vocabulary");
-    expect(source).toContain("lesson19ReflexiveThird");
+    expect(source).toContain("lesson19ReflexiveThirdPlural");
+    expect(source).toContain("Endings & Pronoun Forms");
     expect(source).toContain("lesson19AoristMiddleImperative");
     expect(loader).toContain("loadGreekLesson19VocabularyDeck");
     expect(loader).toContain("loadGreekLesson19GrammarDeck");
