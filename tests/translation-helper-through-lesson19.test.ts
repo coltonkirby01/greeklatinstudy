@@ -145,7 +145,7 @@ describe("Groton Translation Helper coverage through Lesson 19", () => {
 
   it("indexes every singular/plural gender/case reflexive form and multiword components", () => {
     const pronouns = grammar.find((x) => x.n === 19)?.cards.filter((x) => x.category.includes("Reflexive Pronoun")) ?? [];
-    expect(pronouns).toHaveLength(3);
+    expect(pronouns).toHaveLength(6);
     for (const chart of pronouns) {
       for (const row of chart.rows) row.cells.forEach((cell, column) => {
         const forms = cell.split(/\s*\/\s*/u).map((x) => x.trim());

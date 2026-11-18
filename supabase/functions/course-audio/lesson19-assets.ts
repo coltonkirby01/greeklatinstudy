@@ -36,17 +36,10 @@ export const lesson19CourseAudioAssets: readonly Lesson3CourseAudioAsset[] = [
   chartAudio("lesson19-chart-second-aorist-middle-infinitive", "Second Aorist Middle Infinitive Ending", [["-έσθαι"]]),
   chartAudio("lesson19-chart-second-aorist-active-imperative", "Second Aorist Active Imperative Endings", [["-ε", "-έτω"], ["-ετε", "-όντων"]]),
   chartAudio("lesson19-chart-second-aorist-middle-imperative", "Second Aorist Middle Imperative Endings", [["-οῦ (-εσο)", "-έσθω"], ["-εσθε", "-έσθων"]]),
-  chartAudio("lesson19-chart-first-person-reflexive-pronouns", "First-Person Reflexive Pronoun Forms", [
-    ["ἐμαυτοῦ", "ἐμαυτῷ", "ἐμαυτόν", "ἡμῶν αὐτῶν", "ἡμῖν αὐτοῖς", "ἡμᾶς αὐτούς"],
-    ["ἐμαυτῆς", "ἐμαυτῇ", "ἐμαυτήν", "ἡμῶν αὐτῶν", "ἡμῖν αὐταῖς", "ἡμᾶς αὐτάς"],
-  ]),
-  chartAudio("lesson19-chart-second-person-reflexive-pronouns", "Second-Person Reflexive Pronoun Forms", [
-    ["σεαυτοῦ / σαυτοῦ", "σεαυτῷ / σαυτῷ", "σεαυτόν / σαυτόν", "ὑμῶν αὐτῶν", "ὑμῖν αὐτοῖς", "ὑμᾶς αὐτούς"],
-    ["σεαυτῆς / σαυτῆς", "σεαυτῇ / σαυτῇ", "σεαυτήν / σαυτήν", "ὑμῶν αὐτῶν", "ὑμῖν αὐταῖς", "ὑμᾶς αὐτάς"],
-  ]),
-  chartAudio("lesson19-chart-third-person-reflexive-pronouns", "Third-Person Reflexive Pronoun Forms", [
-    ["ἑαυτοῦ / αὑτοῦ", "ἑαυτῷ / αὑτῷ", "ἑαυτόν / αὑτόν", "ἑαυτῶν", "ἑαυτοῖς", "ἑαυτούς"],
-    ["ἑαυτῆς / αὑτῆς", "ἑαυτῇ / αὑτῇ", "ἑαυτήν / αὑτήν", "ἑαυτῶν", "ἑαυταῖς", "ἑαυτάς"],
-    ["ἑαυτοῦ / αὑτοῦ", "ἑαυτῷ / αὑτῷ", "ἑαυτό / αὑτό", "ἑαυτῶν", "ἑαυτοῖς", "ἑαυτά"],
-  ]),
+  chartAudio("lesson19-chart-first-person-reflexive-pronouns", "First-Person Reflexive Pronoun Forms — Singular", [["ἐμαυτοῦ","ἐμαυτῷ","ἐμαυτόν"],["ἐμαυτῆς","ἐμαυτῇ","ἐμαυτήν"]]),
+  chartAudio("lesson19-chart-first-person-reflexive-pronouns-plural", "First-Person Reflexive Pronoun Forms — Plural", [["ἡμῶν αὐτῶν","ἡμῖν αὐτοῖς","ἡμᾶς αὐτούς"],["ἡμῶν αὐτῶν","ἡμῖν αὐταῖς","ἡμᾶς αὐτάς"]]),
+  chartAudio("lesson19-chart-second-person-reflexive-pronouns", "Second-Person Reflexive Pronoun Forms — Singular", [["σεαυτοῦ / σαυτοῦ","σεαυτῷ / σαυτῷ","σεαυτόν / σαυτόν"],["σεαυτῆς / σαυτῆς","σεαυτῇ / σαυτῇ","σεαυτήν / σαυτήν"]]),
+  chartAudio("lesson19-chart-second-person-reflexive-pronouns-plural", "Second-Person Reflexive Pronoun Forms — Plural", [["ὑμῶν αὐτῶν","ὑμῖν αὐτοῖς","ὑμᾶς αὐτούς"],["ὑμῶν αὐτῶν","ὑμῖν αὐταῖς","ὑμᾶς αὐτάς"]]),
+  chartAudio("lesson19-chart-third-person-reflexive-pronouns", "Third-Person Reflexive Pronoun Forms — Singular", [["ἑαυτοῦ / αὑτοῦ","ἑαυτῷ / αὑτῷ","ἑαυτόν / αὑτόν"],["ἑαυτῆς / αὑτῆς","ἑαυτῇ / αὑτῇ","ἑαυτήν / αὑτήν"],["ἑαυτοῦ / αὑτοῦ","ἑαυτῷ / αὑτῷ","ἑαυτό / αὑτό"]]),
+  chartAudio("lesson19-chart-third-person-reflexive-pronouns-plural", "Third-Person Reflexive Pronoun Forms — Plural", [["ἑαυτῶν","ἑαυτοῖς","ἑαυτούς"],["ἑαυτῶν","ἑαυταῖς","ἑαυτάς"],["ἑαυτῶν","ἑαυτοῖς","ἑαυτά"]]),
 ] as const;
