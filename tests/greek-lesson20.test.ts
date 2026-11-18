@@ -44,15 +44,19 @@ describe("Groton Lesson 20 flashcards",()=>{
       "Pluperfect Active Indicative Endings",
     ]);
     expect(charts[0].rows.map(x=>x.cells)).toEqual([
-      ["-α","-αμεν"],["-ας","-ατε"],["-ε(ν)","-ᾱσι(ν)"]
+      ["-[κ]α","-[κ]αμεν"],["-[κ]ας","-[κ]ατε"],
+      ["-[κ]ε(ν)","-[κ]ᾱσι(ν) (-[κ]αν)"]
     ]);
-    expect(charts[1].rows.map(x=>x.cells)).toEqual([[normalizeGreekDisplayAccents("-έναι")]]);
+    expect(charts[1].rows.map(x=>x.cells)).toEqual([["-[κ]έναι"]]);
     expect(charts[2].rows.map(x=>x.cells)).toEqual([
-      ["-η / -ειν","-εμεν"],["-ης / -εις","-ετε"],["-ει(ν)","-εσαν"]
+      ["-[κ]η (-[κ]ειν)","-[κ]εμεν"],
+      ["-[κ]ης (-[κ]εις)","-[κ]ετε"],
+      ["-[κ]ει(ν)","-[κ]εσαν"]
     ]);
     for(const chart of charts){
-      expect(chart.source_ref).toContain("Groton Lesson 20");
+      expect(chart.source_ref).toContain("§122, p. 125");
       expect(chart.rows.every(row=>row.cells.length===chart.columns.length)).toBe(true);
+      expect(chart.rows.flatMap(row=>row.cells).every(cell=>cell.includes("[κ]"))).toBe(true);
     }
   });
 
