@@ -58,9 +58,12 @@ export function greekVocabularySpeech(
   const supplied = greek.trim();
   const normalizedPos = partOfSpeech?.trim().toLocaleLowerCase() ?? "";
   const components = displayed.split(",").map((part) => part.trim()).filter(Boolean);
-  const articles = [...new Set(components.map(articleOf).filter((value): value is string => Boolean(value)))];
+  // Older audio maps sometimes abbreviate the label to just the nominative
+  // but retain the article in their Greek source field; examine both.
+  const genderFields = [...components, ...supplied.split(",").map((part) => part.trim())];
+  const articles = [...new Set(genderFields.map(articleOf).filter((value): value is string => Boolean(value)))];
   const explicitNoun = normalizedPos === "noun" || normalizedPos === "proper noun";
-  const noun = articles.length > 0 && (explicitNoun || (!normalizedPos && components.slice(1).some((part) => articleOf(part))));
+  const noun = articles.length > 0 && (explicitNoun || (!normalizedPos && genderFields.slice(1).some((part) => articleOf(part))));
 
   if (noun) {
     const lemma = lemmaOf(displayed, supplied);
