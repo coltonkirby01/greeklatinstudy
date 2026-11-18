@@ -753,7 +753,7 @@ export function GreekPage() {
             {contractionDeck.cards.map((card) => <FilterCheckbox key={card.id} label={`#${card.rank} · ${card.front}`} checked={exactCardSelected(contractionDeck, card)} onChange={(checked) => changeExactCard(contractionDeck, card, checked)} />)}
           </FilterDisclosure>}
 
-          {config.endingKeys.length > 0 && grammarDeck && <FilterDisclosure title="Endings" summary={`${endingState.selectedCount} of ${config.endingKeys.length} selected`} count={config.endingKeys.length} nested checked={endingState.checked} mixed={endingState.mixed} onCheckedChange={(checked) => changeGroups(config.endingKeys, checked)}>
+          {config.endingKeys.length > 0 && grammarDeck && <FilterDisclosure title={config.lesson === 19 ? "Endings & Pronoun Forms" : "Endings"} summary={`${endingState.selectedCount} of ${config.endingKeys.length} selected`} count={config.endingKeys.length} nested checked={endingState.checked} mixed={endingState.mixed} onCheckedChange={(checked) => changeGroups(config.endingKeys, checked)}>
             {config.endingKeys.map((key) => {
               const category = config.categoryByKey.get(key)!;
               const count = grammarDeck.cards.filter((card) => card.category === category).length;
