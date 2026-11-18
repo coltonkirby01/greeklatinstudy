@@ -21,12 +21,13 @@
   },
   {
     "id": "lesson5-v3",
-    "greek": "κελεύω, κελεύσω, ἐκέλευσα",
+    "greek": "κελεύω, κελεύσω, ἐκέλευσα, κεκέλευκα",
     "meaning": "(with accusative or dative + infinitive) order (to), command (to), urge (to)",
     "part_of_speech": "verb",
     "lesson": 5,
     "source_ref": "Groton 5.36",
-    "third_principal_part": "ἐκέλευσα"
+    "third_principal_part": "ἐκέλευσα",
+    "fourth_principal_part": "κεκέλευκα"
   },
   {
     "id": "lesson5-v4",
