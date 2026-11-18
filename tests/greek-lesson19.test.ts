@@ -143,7 +143,7 @@ describe("Groton Lesson 19: second aorist and reflexive pronouns", () => {
       expect(cards.map(x=>x.id)).toEqual(cards.map((_,i)=>"lesson"+lesson+"-v"+(i+1)));
     }
     const verbs=[
-      [6,"lesson6-v3","ἔσχον"],[8,"lesson8-v1","εὗρον"],[8,"lesson8-v2","ἔλιπον"],
+      [6,"lesson6-v3","ἔσχον"],[8,"lesson8-v1","εὗρον/ηὗρον"],[8,"lesson8-v2","ἔλιπον"],
       [10,"lesson10-v1","εἶπον/ἔλεξα"],[10,"lesson10-v3","ἔφυγον"],[14,"lesson14-v2","ἤνεγκον/ἤνεγκα"],[15,"lesson15-v2","ἔβαλον"],
     ] as const;
     for (const [lesson,id,part] of verbs){
