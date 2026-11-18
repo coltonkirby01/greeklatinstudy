@@ -15,7 +15,7 @@ export const lesson15VocabularyAudio: Readonly<Record<string, {label: string; gr
 };
 
 export const lesson16VocabularyAudio: Readonly<Record<string, {label: string; greek: string}>> = {
-  "lesson16-v1": { label: "ποιέω, ποιήσω, ἐποίησα", greek: "ποιέω, ποιήσω, ἐποίησα" },
+  "lesson16-v1": { label: "ποιέω, ποιήσω, ἐποίησα, πεποίηκα", greek: "ποιέω, ποιήσω, ἐποίησα, πεποίηκα" },
   "lesson16-v2": { label: "ἀγών, -ῶνος, ὁ", greek: "ἀγών" },
   "lesson16-v3": { label: "ἀσπίς, -ίδος, ἡ", greek: "ἀσπίς" },
   "lesson16-v4": { label: "κλώψ, κλωπός, ὁ", greek: "κλώψ" },
