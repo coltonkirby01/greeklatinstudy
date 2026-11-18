@@ -1,12 +1,13 @@
 [
   {
     "id": "lesson9-v1",
-    "greek": "δουλεύω, δουλεύσω, ἐδούλευσα",
+    "greek": "δουλεύω, δουλεύσω, ἐδούλευσα, δεδούλευκα",
     "meaning": "(+ dative) be a slave (to), serve",
     "part_of_speech": "verb",
     "lesson": 9,
     "source_ref": "Groton 9.63",
-    "third_principal_part": "ἐδούλευσα"
+    "third_principal_part": "ἐδούλευσα",
+    "fourth_principal_part": "δεδούλευκα"
   },
   {
     "id": "lesson9-v2",
