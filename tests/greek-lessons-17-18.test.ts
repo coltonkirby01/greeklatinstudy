@@ -123,7 +123,7 @@ describe("Groton Lessons 17 and 18", () => {
     }
     expect(page).toContain("lesson17EpsilonSigmaMF");
     expect(page).toContain("lesson18AoristMiddleImperative");
-    expect(loader).toContain("lesson >= 18 ? (card.columns.length === 1 ?");
+    expect(loader).toContain("(lesson === 18 || lesson === 20 || (lesson === 19 && card.category.startsWith");
     const r=translationGreekRegistrations();
     expect(r.grotonGrammar.map(x=>x.id)).toEqual(expect.arrayContaining(["alpha-omega-lesson17-grammar","alpha-omega-lesson18-grammar"]));
     expect(r.grotonVocabulary.map(x=>x.id)).toEqual(expect.arrayContaining(["alpha-omega-lesson17-vocab","alpha-omega-lesson18-vocab"]));
