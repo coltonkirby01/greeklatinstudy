@@ -1,21 +1,23 @@
 [
   {
     "id": "lesson15-v1",
-    "greek": "ἁρπάζω, ἁρπάσω, ἥρπασα",
+    "greek": "ἁρπάζω, ἁρπάσω, ἥρπασα, ἥρπακα",
     "meaning": "seize, snatch, plunder",
     "part_of_speech": "verb",
     "lesson": 15,
     "source_ref": "Groton 15.95",
-    "third_principal_part": "ἥρπασα"
+    "third_principal_part": "ἥρπασα",
+    "fourth_principal_part": "ἥρπακα"
   },
   {
     "id": "lesson15-v2",
-    "greek": "βάλλω, βαλῶ, ἔβαλον",
+    "greek": "βάλλω, βαλῶ, ἔβαλον, βέβληκα",
     "meaning": "throw, hit (with a thrown weapon), shoot",
     "part_of_speech": "verb",
     "lesson": 15,
     "source_ref": "Groton 15.95",
-    "third_principal_part": "ἔβαλον"
+    "third_principal_part": "ἔβαλον",
+    "fourth_principal_part": "βέβληκα"
   },
   {
     "id": "lesson15-v3",
@@ -28,48 +30,53 @@
   },
   {
     "id": "lesson15-v4",
-    "greek": "δηλόω, δηλώσω, ἐδήλωσα",
+    "greek": "δηλόω, δηλώσω, ἐδήλωσα, δεδήλωκα",
     "meaning": "make clear, show, explain",
     "part_of_speech": "verb",
     "lesson": 15,
     "source_ref": "Groton 15.95",
-    "third_principal_part": "ἐδήλωσα"
+    "third_principal_part": "ἐδήλωσα",
+    "fourth_principal_part": "δεδήλωκα"
   },
   {
     "id": "lesson15-v5",
-    "greek": "κομίζω, κομιῶ, ἐκόμισα",
+    "greek": "κομίζω, κομιῶ, ἐκόμισα, κεκόμικα",
     "meaning": "care for, carry, escort; middle: acquire",
     "part_of_speech": "verb",
     "lesson": 15,
     "source_ref": "Groton 15.95",
-    "third_principal_part": "ἐκόμισα"
+    "third_principal_part": "ἐκόμισα",
+    "fourth_principal_part": "κεκόμικα"
   },
   {
     "id": "lesson15-v6",
-    "greek": "τῑμάω, τῑμήσω, ἐτίμησα",
+    "greek": "τῑμάω, τῑμήσω, ἐτίμησα, τετῑ́μηκα",
     "meaning": "honor, value",
     "part_of_speech": "verb",
     "lesson": 15,
     "source_ref": "Groton 15.95",
-    "third_principal_part": "ἐτίμησα"
+    "third_principal_part": "ἐτίμησα",
+    "fourth_principal_part": "τετῑ́μηκα"
   },
   {
     "id": "lesson15-v7",
-    "greek": "φιλέω, φιλήσω, ἐφίλησα",
+    "greek": "φιλέω, φιλήσω, ἐφίλησα, πεφίληκα",
     "meaning": "love, kiss; with infinitive: be fond of doing, be accustomed to",
     "part_of_speech": "verb",
     "lesson": 15,
     "source_ref": "Groton 15.95",
-    "third_principal_part": "ἐφίλησα"
+    "third_principal_part": "ἐφίλησα",
+    "fourth_principal_part": "πεφίληκα"
   },
   {
     "id": "lesson15-v8",
-    "greek": "ὠφελέω, ὠφελήσω, ὠφέλησα",
+    "greek": "ὠφελέω, ὠφελήσω, ὠφέλησα, ὠφέληκα",
     "meaning": "help, aid",
     "part_of_speech": "verb",
     "lesson": 15,
     "source_ref": "Groton 15.95",
-    "third_principal_part": "ὠφέλησα"
+    "third_principal_part": "ὠφέλησα",
+    "fourth_principal_part": "ὠφέληκα"
   },
   {
     "id": "lesson15-v9",
