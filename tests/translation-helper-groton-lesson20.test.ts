@@ -47,7 +47,7 @@ describe("Groton Lesson 20 Translation Helper coverage",()=>{
       const headword=item.greek.match(/[\p{Script=Greek}\p{M}]+/u)?.[0] ?? "";
       expect(has(headword,headword),item.id+" "+headword).toBe(true);
     }
-    expect(BUILTIN_STUDY_DECKS.some(x=>x.id.startsWith("alpha-omega-lesson20-"))).toBe(false);
+    expect(BUILTIN_STUDY_DECKS.filter(x=>x.id.startsWith("alpha-omega-lesson20-"))).toHaveLength(2);
   });
 
   it("recognizes the new Lesson 20 verbs, principal parts, prepositions and nouns",()=>{
