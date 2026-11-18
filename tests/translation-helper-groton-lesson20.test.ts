@@ -57,7 +57,7 @@ describe("Groton Lesson 20 Translation Helper coverage",()=>{
       ["δένδρῳ","δένδρον"],["Ἑλληνικός","Ἑλληνικός"],["οὐρανοῦ","οὐρανός"],
       ["κατ’","κατά"],["καθ’","κατά"],["ὑπὲρ","ὑπέρ"],
     ] as const) expect(has(form,lemma),form+" → "+lemma).toBe(true);
-    expect(lesson20NounForms.some(x=>x.form==="Ἑλλάδα")).toBe(true);
+    expect(lesson20NounForms.some(x=>normalizeDictionaryKey(x.form)===normalizeDictionaryKey("Ἑλλάδα"))).toBe(true);
   });
 
   it("handles the complete perfect-active and pluperfect active patterns for fourth principal parts",()=>{
