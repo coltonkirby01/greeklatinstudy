@@ -1,12 +1,13 @@
 [
   {
     "id": "lesson4-v1",
-    "greek": "πέμπω, πέμψω, ἔπεμψα",
+    "greek": "πέμπω, πέμψω, ἔπεμψα, πέπομφα",
     "meaning": "send",
     "part_of_speech": "verb",
     "lesson": 4,
     "source_ref": "Groton 4.32",
-    "third_principal_part": "ἔπεμψα"
+    "third_principal_part": "ἔπεμψα",
+    "fourth_principal_part": "πέπομφα"
   },
   {
     "id": "lesson4-v2",
