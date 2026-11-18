@@ -1,4 +1,5 @@
 import { greekToClassicalIpa, greekToElevenLabsIpa } from "./greek-ipa.ts";
+import { greekVocabularySpeech } from "./greek-vocabulary-speech.ts";
 import { lesson3CourseAudioAssets, type Lesson3CourseAudioAsset } from "./lesson3-assets.ts";
 import { lesson4CourseAudioAssets, lesson4VocabularyAudio } from "./lesson4-assets.ts";
 import { lesson5CourseAudioAssets, lesson5VocabularyAudio } from "./lesson5-assets.ts";
@@ -85,8 +86,15 @@ export function resolveBuiltinGreekAsset(assetId: string): GreekCourseAudioAsset
 
   const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId] ?? lesson6VocabularyAudio[assetId] ?? lesson7VocabularyAudio[assetId] ?? lesson8VocabularyAudio[assetId] ?? lesson9VocabularyAudio[assetId] ?? lesson10VocabularyAudio[assetId] ?? lesson11VocabularyAudio[assetId] ?? lesson12VocabularyAudio[assetId] ?? lesson13VocabularyAudio[assetId] ?? lesson14VocabularyAudio[assetId] ?? lesson15VocabularyAudio[assetId] ?? lesson16VocabularyAudio[assetId] ?? lesson17VocabularyAudio[assetId] ?? lesson18VocabularyAudio[assetId] ?? lesson19VocabularyAudio[assetId] ?? lesson20VocabularyAudio[assetId];
   if (vocabulary) {
-    const canonicalIpa = greekToClassicalIpa(vocabulary.greek);
-    const ttsText = greekToElevenLabsIpa(vocabulary.greek);
+    // Never rely on older, sometimes shortened audio metadata for verb
+    // principal parts. Use the full displayed headword, with one pause
+    // between principal-part slots (and all slash alternatives included).
+    // For nouns the definite article must precede the nominative headword.
+    const spoken = greekVocabularySpeech(vocabulary.label, vocabulary.greek);
+    const canonicalIpa = greekToClassicalIpa(spoken.text);
+    const ttsText = spoken.kind === "verb"
+      ? spoken.parts.map(greekToElevenLabsIpa).filter(Boolean).join(" [pause] ")
+      : greekToElevenLabsIpa(spoken.text);
     return ttsText ? { id: assetId, label: vocabulary.label, canonicalIpa, ttsText } : null;
   }
 

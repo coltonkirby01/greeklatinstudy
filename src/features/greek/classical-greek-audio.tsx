@@ -14,7 +14,7 @@ type RememberedPath = { path: string; checkedAt: number };
 type MemoryAsset = { promise: Promise<CourseAudioAsset | null>; checkedAt: number };
 const assetCache = new Map<string, MemoryAsset>();
 const generationRequests = new Map<string, Promise<boolean>>();
-const storageCacheVersion = "classical-greek-audio-v5";
+const storageCacheVersion = "classical-greek-audio-v6";
 const persistentPathMaxAgeMs = 5 * 60 * 1_000;
 
 function cacheKey(request: AudioRequest) {

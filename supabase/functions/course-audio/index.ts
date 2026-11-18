@@ -1,6 +1,7 @@
 import { resolveBuiltinGreekAsset, type GreekCourseAudioAsset } from "./builtin-greek-assets.ts";
 import { resolveBuiltinLatinAsset, type LatinCourseAudioAsset } from "./builtin-latin-assets.ts";
 import { containsGreek, greekToClassicalIpa, greekToElevenLabsIpa, stripUnpronouncedGreekNotation } from "./greek-ipa.ts";
+import { greekVocabularySpeech } from "./greek-vocabulary-speech.ts";
 import {
   DEFAULT_ELEVENLABS_VOICE_ID,
   LESSON3_AUDIO_MODEL,
@@ -166,8 +167,18 @@ async function resolveCloudGreekAsset(supabaseUrl: string, serviceKey: string, c
 
   const overrides = pronunciationOverridesFromMetadata(card.metadata);
   const greekText = greekTextFromCloudCard(card, overrides.pronunciationText);
-  const canonicalIpa = overrides.canonicalIpa ?? greekToClassicalIpa(greekText);
-  const ttsText = overrides.ttsIpa ?? greekToElevenLabsIpa(greekText);
+  const metadata = card.metadata ?? {};
+  // Published custom vocabulary uses the same article-first and full-verb
+  // conventions, unless the author explicitly supplied pronunciation text/IPA.
+  // Grammar charts retain their existing column-major pronunciation order.
+  const canFormatVocabulary = !overrides.pronunciationText && !Array.isArray(metadata.chartRows);
+  const pos = typeof metadata.partOfSpeech === "string" ? metadata.partOfSpeech : undefined;
+  const spoken = canFormatVocabulary ? greekVocabularySpeech(greekText, greekText, pos) : null;
+  const textForIpa = spoken?.text ?? greekText;
+  const canonicalIpa = overrides.canonicalIpa ?? greekToClassicalIpa(textForIpa);
+  const ttsText = overrides.ttsIpa ?? (spoken?.kind === "verb"
+    ? spoken.parts.map(greekToElevenLabsIpa).filter(Boolean).join(" [pause] ")
+    : greekToElevenLabsIpa(textForIpa));
   return ttsText ? {
     id: `cloud-card-${card.id}`,
     label: `${deck.title} Greek card`,
