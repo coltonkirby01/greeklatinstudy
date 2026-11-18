@@ -28,8 +28,9 @@ const updatedParts: Record<string, string> = {
   "lesson6-v2": "ἐδίωξα",
   "lesson6-v3": "ἔσχον",
   "lesson6-v4": "ἐμέλλησα",
+  "lesson7-v1": "ἐχαίρησα",
   "lesson9-v1": "ἐδούλευσα",
-  "lesson8-v1": "εὗρον",
+  "lesson8-v1": "εὗρον/ηὗρον",
   "lesson8-v2": "ἔλιπον",
   "lesson10-v1": "εἶπον/ἔλεξα",
   "lesson10-v2": "ἔπρᾱξα",
@@ -98,11 +99,11 @@ describe("Groton Lessons 17 and 18", () => {
     for (const path of ["public/data/greek-lesson17-vocab.json","public/data/greek-lesson17-grammar.json","public/data/greek-lesson18-vocab.json","public/data/greek-lesson18-grammar.json"])
       expect(hasAmbiguousGreekTonos(fs.readFileSync(path,"utf8")),path).toBe(false);
   });
-  it("preserves all first-aorist cards and adds six second aorists without changing any card ID, without changing any card ID", () => {
+  it("preserves previously introduced aorists and adds the attested χαίρω aorist without changing card IDs", () => {
     const originalCards=Array.from({length:14},(_,i)=>i+3).flatMap(lesson=>read<Vocab[]>(`public/data/greek-lesson${lesson}-vocab.json`));
     const updated=originalCards.filter(card=>Boolean(card.third_principal_part));
-    expect(Object.keys(updatedParts)).toHaveLength(36);
-    expect(updated).toHaveLength(36);
+    expect(Object.keys(updatedParts)).toHaveLength(37);
+    expect(updated).toHaveLength(37);
     for (const card of updated){
       expect(card.third_principal_part,card.id).toBe(updatedParts[card.id]);
       expect(card.greek.includes(`, ${updatedParts[card.id]}`),card.id).toBe(true);
