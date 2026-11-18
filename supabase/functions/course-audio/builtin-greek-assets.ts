@@ -19,11 +19,11 @@ import { lesson20VocabularyAudio, lesson20CourseAudioAssets } from "./lesson20-a
 export type GreekCourseAudioAsset = Lesson3CourseAudioAsset & { pronunciationSystem?: string };
 
 const lesson3Vocabulary: Record<string, { label: string; greek: string }> = {
-  "lesson3-v1": { label: "γράφω, ἔγραψα", greek: "γράφω, ἔγραψα" },
-  "lesson3-v2": { label: "ἐθέλω, ἠθέλησα", greek: "ἐθέλω, ἠθέλησα" },
+  "lesson3-v1": { label: "γράφω, γράψω, ἔγραψα, γέγραφα", greek: "γράφω, γράψω, ἔγραψα, γέγραφα" },
+  "lesson3-v2": { label: "ἐθέλω, ἐθελήσω, ἠθέλησα, ἠθέληκα", greek: "ἐθέλω, ἐθελήσω, ἠθέλησα, ἠθέληκα" },
   "lesson3-v3": { label: "θῡ́ω, ἔθῡσα", greek: "θῡ́ω, ἔθῡσα" },
   "lesson3-v4": { label: "κλέπτω, ἔκλεψα", greek: "κλέπτω, ἔκλεψα" },
-  "lesson3-v5": { label: "παιδεύω, ἐπαίδευσα", greek: "παιδεύω, ἐπαίδευσα" },
+  "lesson3-v5": { label: "παιδεύω, παιδεύσω, ἐπαίδευσα, πεπαίδευκα", greek: "παιδεύω, παιδεύσω, ἐπαίδευσα, πεπαίδευκα" },
   "lesson3-v6": { label: "σπεύδω, ἔσπευσα", greek: "σπεύδω, ἔσπευσα" },
   "lesson3-v7": { label: "φυλάττω, ἐφύλαξα", greek: "φυλάττω, ἐφύλαξα" },
   "lesson3-v8": { label: "μή", greek: "μή" },
