@@ -8,13 +8,13 @@ describe("Groton lessons 21 and 22", () => {
     const charts = JSON.parse(fs.readFileSync("public/data/greek-lesson21-grammar.json","utf8")) as {id:string;category:string;columns:string[];rows:{label:string;cells:string[]}[]}[];
     expect(charts.map(c=>c.id)).toEqual(["lesson21-chart-interrogative-pronoun","lesson21-chart-interrogative-pronoun-plural"]);
     for (const chart of charts) {
-      expect(chart.columns).toEqual(["Interrogative M/F","Interrogative N","Indefinite M/F","Indefinite N"]);
+      expect(chart.columns).toEqual(["Masculine/Feminine","Neuter"]);
       expect(chart.rows.map(r=>r.label)).toEqual(["Nominative","Genitive","Dative","Accusative"]);
-      expect(chart.rows.every(r=>r.cells.length===4)).toBe(true);
+      expect(chart.rows.every(r=>r.cells.length===2)).toBe(true);
       expect(resolveBuiltinGreekAsset(chart.id)?.label).toBe(chart.category);
     }
-    expect(charts[0].rows[0].cells).toEqual(["τίς","τί","τις","τι"]);
-    expect(charts[1].rows[0].cells).toEqual(["τίνες","τίνα","τινες","τινα / ἄττα"]);
+    expect(charts[0].rows[0].cells).toEqual(["τίς","τί"]);
+    expect(charts[1].rows[0].cells).toEqual(["τίνες","τίνα / ἄττα"]);
   });
   it("pronounces every grammar chart vertically, with pauses between columns", () => {
     for (const n of [21,22]) {

@@ -4,48 +4,38 @@
     "category": "Interrogative & Indefinite Pronoun Forms — Singular",
     "prompt": "τίς / τις — Interrogative & Indefinite Pronoun Forms — Singular",
     "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §§126–127, pp. 131–132; independently reconstructed forms",
-    "accent_note": "The two pronouns share a declension; interrogative forms are accented and indefinite forms are generally enclitic. Retain contextual accent and alternate forms.",
+    "accent_note": "Forms shown with interrogative accents; indefinite τις, τι is enclitic (τινῶν when accented). ἄττα is an alternate indefinite neuter plural form.",
     "columns": [
-      "Interrogative M/F",
-      "Interrogative N",
-      "Indefinite M/F",
-      "Indefinite N"
+      "Masculine/Feminine",
+      "Neuter"
     ],
     "rows": [
       {
         "label": "Nominative",
         "cells": [
           "τίς",
-          "τί",
-          "τις",
-          "τι"
+          "τί"
         ]
       },
       {
         "label": "Genitive",
         "cells": [
           "τίνος / τοῦ",
-          "τίνος / τοῦ",
-          "τινος / του",
-          "τινος / του"
+          "τίνος / τοῦ"
         ]
       },
       {
         "label": "Dative",
         "cells": [
           "τίνι / τῷ",
-          "τίνι / τῷ",
-          "τινι / τῳ",
-          "τινι / τῳ"
+          "τίνι / τῷ"
         ]
       },
       {
         "label": "Accusative",
         "cells": [
           "τίνα",
-          "τί",
-          "τινα",
-          "τι"
+          "τί"
         ]
       }
     ]
@@ -55,48 +45,38 @@
     "category": "Interrogative & Indefinite Pronoun Forms — Plural",
     "prompt": "τίς / τις — Interrogative & Indefinite Pronoun Forms — Plural",
     "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §§126–127, pp. 131–132; independently reconstructed forms",
-    "accent_note": "The two pronouns share a declension; interrogative forms are accented and indefinite forms are generally enclitic. Retain contextual accent and alternate forms.",
+    "accent_note": "Forms shown with interrogative accents; indefinite τις, τι is enclitic (τινῶν when accented). ἄττα is an alternate indefinite neuter plural form.",
     "columns": [
-      "Interrogative M/F",
-      "Interrogative N",
-      "Indefinite M/F",
-      "Indefinite N"
+      "Masculine/Feminine",
+      "Neuter"
     ],
     "rows": [
       {
         "label": "Nominative",
         "cells": [
           "τίνες",
-          "τίνα",
-          "τινες",
-          "τινα / ἄττα"
+          "τίνα / ἄττα"
         ]
       },
       {
         "label": "Genitive",
         "cells": [
           "τίνων",
-          "τίνων",
-          "τινῶν",
-          "τινῶν"
+          "τίνων"
         ]
       },
       {
         "label": "Dative",
         "cells": [
           "τίσι(ν)",
-          "τίσι(ν)",
-          "τισι(ν)",
-          "τισι(ν)"
+          "τίσι(ν)"
         ]
       },
       {
         "label": "Accusative",
         "cells": [
           "τίνας",
-          "τίνα",
-          "τινας",
-          "τινα / ἄττα"
+          "τίνα / ἄττα"
         ]
       }
     ]

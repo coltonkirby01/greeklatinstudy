@@ -633,12 +633,16 @@ function addGrammarForms(index: Map<string, DictionaryMatch[]>, deck: DeckDefini
   for (const card of deck.cards) {
     if (/^lesson21-chart-interrogative-pronoun(?:-plural)?$/u.test(card.id)) {
       for (const row of chartRows(card)) row.cells.forEach((cell, col) => {
-        const headword = col < 2 ? "τίς" : "τις";
-        const match = index.get(normalizeDictionaryKey(headword))?.find(item => item.headword.startsWith(headword + ","));
-        if (!match) return;
-        for (const form of expandKnownForms(cell)) addMatch(index, form, {
-          ...match, sourceRef: sourceRef(card), morphology: [grammarGroup(card) + " · " + row.label + " · " + chartColumns(card)[col]],
-        }, true);
+        for (const headword of ["τίς", "τις"]) {
+          const match = index.get(normalizeDictionaryKey(headword))?.find(item => item.headword.startsWith(headword + ","));
+          if (!match) continue;
+          for (const form of expandKnownForms(cell)) {
+            if (headword === "τίς" && normalizeDictionaryKey(form) === normalizeDictionaryKey("ἄττα")) continue;
+            addMatch(index, form, {
+              ...match, sourceRef: sourceRef(card), morphology: [(headword === "τίς" ? "Interrogative" : "Indefinite") + " · " + (card.id.endsWith("-plural") ? "Plural" : "Singular") + " · " + row.label + " · " + chartColumns(card)[col]],
+            }, true);
+          }
+        }
       });
       continue;
     }
