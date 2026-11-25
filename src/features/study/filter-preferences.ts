@@ -48,6 +48,11 @@ function storeOptionalSelection(selection: OptionalSelection | undefined) {
   return selection == null ? null : [...selection];
 }
 
+// Preserve a selection of either former pronoun card when combining the pair.
+export function migrateGreekPronounSelection(keys: readonly string[]) {
+  return [...new Set(keys.map(key => key === "lesson21-indefinite-pronoun" ? "lesson21-interrogative-pronoun" : key === "lesson21-indefinite-pronoun-plural" ? "lesson21-interrogative-pronoun-plural" : key))];
+}
+
 export function loadGreekFilterSelection(defaultKeys: readonly string[], storage?: StorageLike | null, allowedKeys: readonly string[] = defaultKeys) {
   const target = availableStorage(storage);
   if (!target) return new Set(defaultKeys);
@@ -55,7 +60,7 @@ export function loadGreekFilterSelection(defaultKeys: readonly string[], storage
     const raw = target.getItem(GREEK_FILTER_KEY);
     if (raw === null) return new Set(defaultKeys);
     const allowed = new Set(allowedKeys);
-    return new Set(stringArray(JSON.parse(raw)).filter((key) => allowed.has(key)));
+    return new Set(migrateGreekPronounSelection(stringArray(JSON.parse(raw))).filter((key) => allowed.has(key)));
   } catch {
     return new Set(defaultKeys);
   }

@@ -101,7 +101,7 @@ export const lesson21And22VocabularyAudio: Readonly<Record<string, { label: stri
 const charts = [
   {
     "id": "lesson21-chart-interrogative-pronoun",
-    "label": "Interrogative Pronoun Forms — Singular",
+    "label": "Interrogative & Indefinite Pronoun Forms — Singular",
     "columns": [
       [
         "τίς",
@@ -114,31 +114,7 @@ const charts = [
         "τίνος, τοῦ",
         "τίνι, τῷ",
         "τί"
-      ]
-    ]
-  },
-  {
-    "id": "lesson21-chart-interrogative-pronoun-plural",
-    "label": "Interrogative Pronoun Forms — Plural",
-    "columns": [
-      [
-        "τίνες",
-        "τίνων",
-        "τίσιν",
-        "τίνας"
       ],
-      [
-        "τίνα",
-        "τίνων",
-        "τίσιν",
-        "τίνα"
-      ]
-    ]
-  },
-  {
-    "id": "lesson21-chart-indefinite-pronoun",
-    "label": "Indefinite Pronoun Forms — Singular",
-    "columns": [
       [
         "τις",
         "τινος, του",
@@ -154,9 +130,21 @@ const charts = [
     ]
   },
   {
-    "id": "lesson21-chart-indefinite-pronoun-plural",
-    "label": "Indefinite Pronoun Forms — Plural",
+    "id": "lesson21-chart-interrogative-pronoun-plural",
+    "label": "Interrogative & Indefinite Pronoun Forms — Plural",
     "columns": [
+      [
+        "τίνες",
+        "τίνων",
+        "τίσιν",
+        "τίνας"
+      ],
+      [
+        "τίνα",
+        "τίνων",
+        "τίσιν",
+        "τίνα"
+      ],
       [
         "τινες",
         "τινῶν",

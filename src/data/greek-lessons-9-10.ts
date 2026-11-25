@@ -222,7 +222,7 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
             description: "Three ending charts: perfect active indicative, perfect active infinitive, and pluperfect active indicative.",
             sourceNote: "Groton Lesson 20, §122, p. 125, Summary of Perfect and Pluperfect Active Endings.",
           }
-        : lesson === 21 ? { eyebrow: "Interrogative and indefinite pronouns", description: "Four pronoun-form charts, separating singular and plural for each pronoun.", sourceNote: "Groton Lesson 21, §§126–127." }
+        : lesson === 21 ? { eyebrow: "Interrogative and indefinite pronouns", description: "Two comparative pronoun-form charts, singular and plural, each showing both pronouns.", sourceNote: "Groton Lesson 21, §§126–127." }
         : lesson === 22 ? { eyebrow: "Perfect and pluperfect middle/passive", description: "Three ending charts, with consonant-stem notes.", sourceNote: "Groton Lesson 22, §§132–135." }
         : {
             eyebrow: "Third-declension endings",

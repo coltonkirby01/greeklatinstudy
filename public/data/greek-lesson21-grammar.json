@@ -1,100 +1,22 @@
 [
   {
     "id": "lesson21-chart-interrogative-pronoun",
-    "category": "Interrogative Pronoun Forms — Singular",
-    "prompt": "τίς, τί — Interrogative Pronoun Forms — Singular",
-    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §126, p. 131; independently reconstructed forms",
-    "accent_note": "Interrogative τίς and τί retain their acute accents. Contracted singular genitive and dative forms also occur.",
+    "category": "Interrogative & Indefinite Pronoun Forms — Singular",
+    "prompt": "τίς / τις — Interrogative & Indefinite Pronoun Forms — Singular",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §§126–127, pp. 131–132; independently reconstructed forms",
+    "accent_note": "The two pronouns share a declension; interrogative forms are accented and indefinite forms are generally enclitic. Retain contextual accent and alternate forms.",
     "columns": [
-      "Masculine/Feminine",
-      "Neuter"
+      "Interrogative M/F",
+      "Interrogative N",
+      "Indefinite M/F",
+      "Indefinite N"
     ],
     "rows": [
       {
         "label": "Nominative",
         "cells": [
           "τίς",
-          "τί"
-        ]
-      },
-      {
-        "label": "Genitive",
-        "cells": [
-          "τίνος / τοῦ",
-          "τίνος / τοῦ"
-        ]
-      },
-      {
-        "label": "Dative",
-        "cells": [
-          "τίνι / τῷ",
-          "τίνι / τῷ"
-        ]
-      },
-      {
-        "label": "Accusative",
-        "cells": [
-          "τίνα",
-          "τί"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "lesson21-chart-interrogative-pronoun-plural",
-    "category": "Interrogative Pronoun Forms — Plural",
-    "prompt": "τίς, τί — Interrogative Pronoun Forms — Plural",
-    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §126, p. 131; independently reconstructed forms",
-    "accent_note": "Interrogative τίς and τί retain their acute accents. Contracted singular genitive and dative forms also occur.",
-    "columns": [
-      "Masculine/Feminine",
-      "Neuter"
-    ],
-    "rows": [
-      {
-        "label": "Nominative",
-        "cells": [
-          "τίνες",
-          "τίνα"
-        ]
-      },
-      {
-        "label": "Genitive",
-        "cells": [
-          "τίνων",
-          "τίνων"
-        ]
-      },
-      {
-        "label": "Dative",
-        "cells": [
-          "τίσι(ν)",
-          "τίσι(ν)"
-        ]
-      },
-      {
-        "label": "Accusative",
-        "cells": [
-          "τίνας",
-          "τίνα"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "lesson21-chart-indefinite-pronoun",
-    "category": "Indefinite Pronoun Forms — Singular",
-    "prompt": "τις, τι — Indefinite Pronoun Forms — Singular",
-    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §127, p. 132; independently reconstructed forms",
-    "accent_note": "Enclitic forms are shown without independent accent, except τινῶν when accented and non-enclitic ἄττα; contextual accent rules apply.",
-    "columns": [
-      "Masculine/Feminine",
-      "Neuter"
-    ],
-    "rows": [
-      {
-        "label": "Nominative",
-        "cells": [
+          "τί",
           "τις",
           "τι"
         ]
@@ -102,6 +24,8 @@
       {
         "label": "Genitive",
         "cells": [
+          "τίνος / τοῦ",
+          "τίνος / τοῦ",
           "τινος / του",
           "τινος / του"
         ]
@@ -109,6 +33,8 @@
       {
         "label": "Dative",
         "cells": [
+          "τίνι / τῷ",
+          "τίνι / τῷ",
           "τινι / τῳ",
           "τινι / τῳ"
         ]
@@ -116,6 +42,8 @@
       {
         "label": "Accusative",
         "cells": [
+          "τίνα",
+          "τί",
           "τινα",
           "τι"
         ]
@@ -123,19 +51,23 @@
     ]
   },
   {
-    "id": "lesson21-chart-indefinite-pronoun-plural",
-    "category": "Indefinite Pronoun Forms — Plural",
-    "prompt": "τις, τι — Indefinite Pronoun Forms — Plural",
-    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §127, p. 132; independently reconstructed forms",
-    "accent_note": "Enclitic forms are shown without independent accent, except τινῶν when accented and non-enclitic ἄττα; contextual accent rules apply.",
+    "id": "lesson21-chart-interrogative-pronoun-plural",
+    "category": "Interrogative & Indefinite Pronoun Forms — Plural",
+    "prompt": "τίς / τις — Interrogative & Indefinite Pronoun Forms — Plural",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §§126–127, pp. 131–132; independently reconstructed forms",
+    "accent_note": "The two pronouns share a declension; interrogative forms are accented and indefinite forms are generally enclitic. Retain contextual accent and alternate forms.",
     "columns": [
-      "Masculine/Feminine",
-      "Neuter"
+      "Interrogative M/F",
+      "Interrogative N",
+      "Indefinite M/F",
+      "Indefinite N"
     ],
     "rows": [
       {
         "label": "Nominative",
         "cells": [
+          "τίνες",
+          "τίνα",
           "τινες",
           "τινα / ἄττα"
         ]
@@ -143,6 +75,8 @@
       {
         "label": "Genitive",
         "cells": [
+          "τίνων",
+          "τίνων",
           "τινῶν",
           "τινῶν"
         ]
@@ -150,6 +84,8 @@
       {
         "label": "Dative",
         "cells": [
+          "τίσι(ν)",
+          "τίσι(ν)",
           "τισι(ν)",
           "τισι(ν)"
         ]
@@ -157,6 +93,8 @@
       {
         "label": "Accusative",
         "cells": [
+          "τίνας",
+          "τίνα",
           "τινας",
           "τινα / ἄττα"
         ]
