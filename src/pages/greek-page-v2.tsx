@@ -169,7 +169,9 @@ const keys = {
   lesson20PluperfectActiveIndicative: "lesson20-pluperfect-active-indicative",
   lesson21Vocabulary: "lesson21-vocabulary",
   lesson21InterrogativePronoun: "lesson21-interrogative-pronoun",
+  lesson21InterrogativePronounPlural: "lesson21-interrogative-pronoun-plural",
   lesson21IndefinitePronoun: "lesson21-indefinite-pronoun",
+  lesson21IndefinitePronounPlural: "lesson21-indefinite-pronoun-plural",
   lesson22Vocabulary: "lesson22-vocabulary",
   lesson22PerfectMiddlePassiveIndicative: "lesson22-perfect-middle-passive-indicative",
   lesson22PerfectMiddlePassiveInfinitive: "lesson22-perfect-middle-passive-infinitive",
@@ -351,8 +353,10 @@ const lesson20CategoryByKey = new Map<string, string>([
   [keys.lesson20PluperfectActiveIndicative, "Pluperfect Active Indicative Endings"],
 ]);
 const lesson21CategoryByKey = new Map<string, string>([
-  [keys.lesson21InterrogativePronoun, "Interrogative Pronoun Forms"],
-  [keys.lesson21IndefinitePronoun, "Indefinite Pronoun Forms"],
+  [keys.lesson21InterrogativePronoun, "Interrogative Pronoun Forms — Singular"],
+  [keys.lesson21InterrogativePronounPlural, "Interrogative Pronoun Forms — Plural"],
+  [keys.lesson21IndefinitePronoun, "Indefinite Pronoun Forms — Singular"],
+  [keys.lesson21IndefinitePronounPlural, "Indefinite Pronoun Forms — Plural"],
 ]);
 const lesson22CategoryByKey = new Map<string, string>([
   [keys.lesson22PerfectMiddlePassiveIndicative, "Perfect Middle/Passive Indicative Endings"],
@@ -378,7 +382,7 @@ const lessonConfigs: LessonConfig[] = [
   { lesson: 18, vocabularyKey: keys.lesson18Vocabulary, vocabularyDeck: "lesson18Vocabulary", grammarDeck: "lesson18Grammar", endingKeys: [keys.lesson18AoristActiveIndicative, keys.lesson18AoristMiddleIndicative, keys.lesson18AoristActiveInfinitive, keys.lesson18AoristMiddleInfinitive, keys.lesson18AoristActiveImperative, keys.lesson18AoristMiddleImperative], categoryByKey: lesson18CategoryByKey },
   { lesson: 19, vocabularyKey: keys.lesson19Vocabulary, vocabularyDeck: "lesson19Vocabulary", grammarDeck: "lesson19Grammar", endingKeys: [keys.lesson19AoristActiveIndicative, keys.lesson19AoristMiddleIndicative, keys.lesson19AoristActiveInfinitive, keys.lesson19AoristMiddleInfinitive, keys.lesson19AoristActiveImperative, keys.lesson19AoristMiddleImperative, keys.lesson19ReflexiveFirst, keys.lesson19ReflexiveFirstPlural, keys.lesson19ReflexiveSecond, keys.lesson19ReflexiveSecondPlural, keys.lesson19ReflexiveThird, keys.lesson19ReflexiveThirdPlural], categoryByKey: lesson19CategoryByKey },
   { lesson: 20, vocabularyKey: keys.lesson20Vocabulary, vocabularyDeck: "lesson20Vocabulary", grammarDeck: "lesson20Grammar", endingKeys: [keys.lesson20PerfectActiveIndicative, keys.lesson20PerfectActiveInfinitive, keys.lesson20PluperfectActiveIndicative], categoryByKey: lesson20CategoryByKey },
-  { lesson: 21, vocabularyKey: keys.lesson21Vocabulary, vocabularyDeck: "lesson21Vocabulary", grammarDeck: "lesson21Grammar", endingKeys: [keys.lesson21InterrogativePronoun, keys.lesson21IndefinitePronoun], categoryByKey: lesson21CategoryByKey },
+  { lesson: 21, vocabularyKey: keys.lesson21Vocabulary, vocabularyDeck: "lesson21Vocabulary", grammarDeck: "lesson21Grammar", endingKeys: [keys.lesson21InterrogativePronoun, keys.lesson21InterrogativePronounPlural, keys.lesson21IndefinitePronoun, keys.lesson21IndefinitePronounPlural], categoryByKey: lesson21CategoryByKey },
   { lesson: 22, vocabularyKey: keys.lesson22Vocabulary, vocabularyDeck: "lesson22Vocabulary", grammarDeck: "lesson22Grammar", endingKeys: [keys.lesson22PerfectMiddlePassiveIndicative, keys.lesson22PerfectMiddlePassiveInfinitive, keys.lesson22PluperfectMiddlePassiveIndicative], categoryByKey: lesson22CategoryByKey },
 ];
 

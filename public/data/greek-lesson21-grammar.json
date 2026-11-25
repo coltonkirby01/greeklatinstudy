@@ -1,8 +1,8 @@
 [
   {
     "id": "lesson21-chart-interrogative-pronoun",
-    "category": "Interrogative Pronoun Forms",
-    "prompt": "τίς, τί — Interrogative Pronoun Forms",
+    "category": "Interrogative Pronoun Forms — Singular",
+    "prompt": "τίς, τί — Interrogative Pronoun Forms — Singular",
     "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §126, p. 131; independently reconstructed forms",
     "accent_note": "Interrogative τίς and τί retain their acute accents. Contracted singular genitive and dative forms also occur.",
     "columns": [
@@ -11,56 +11,69 @@
     ],
     "rows": [
       {
-        "label": "Nominative singular",
+        "label": "Nominative",
         "cells": [
           "τίς",
           "τί"
         ]
       },
       {
-        "label": "Genitive singular",
+        "label": "Genitive",
         "cells": [
           "τίνος / τοῦ",
           "τίνος / τοῦ"
         ]
       },
       {
-        "label": "Dative singular",
+        "label": "Dative",
         "cells": [
           "τίνι / τῷ",
           "τίνι / τῷ"
         ]
       },
       {
-        "label": "Accusative singular",
+        "label": "Accusative",
         "cells": [
           "τίνα",
           "τί"
         ]
-      },
+      }
+    ]
+  },
+  {
+    "id": "lesson21-chart-interrogative-pronoun-plural",
+    "category": "Interrogative Pronoun Forms — Plural",
+    "prompt": "τίς, τί — Interrogative Pronoun Forms — Plural",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §126, p. 131; independently reconstructed forms",
+    "accent_note": "Interrogative τίς and τί retain their acute accents. Contracted singular genitive and dative forms also occur.",
+    "columns": [
+      "Masculine/Feminine",
+      "Neuter"
+    ],
+    "rows": [
       {
-        "label": "Nominative plural",
+        "label": "Nominative",
         "cells": [
           "τίνες",
           "τίνα"
         ]
       },
       {
-        "label": "Genitive plural",
+        "label": "Genitive",
         "cells": [
           "τίνων",
           "τίνων"
         ]
       },
       {
-        "label": "Dative plural",
+        "label": "Dative",
         "cells": [
           "τίσι(ν)",
           "τίσι(ν)"
         ]
       },
       {
-        "label": "Accusative plural",
+        "label": "Accusative",
         "cells": [
           "τίνας",
           "τίνα"
@@ -70,8 +83,8 @@
   },
   {
     "id": "lesson21-chart-indefinite-pronoun",
-    "category": "Indefinite Pronoun Forms",
-    "prompt": "τις, τι — Indefinite Pronoun Forms",
+    "category": "Indefinite Pronoun Forms — Singular",
+    "prompt": "τις, τι — Indefinite Pronoun Forms — Singular",
     "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §127, p. 132; independently reconstructed forms",
     "accent_note": "Enclitic forms are shown without independent accent, except τινῶν when accented and non-enclitic ἄττα; contextual accent rules apply.",
     "columns": [
@@ -80,56 +93,69 @@
     ],
     "rows": [
       {
-        "label": "Nominative singular",
+        "label": "Nominative",
         "cells": [
           "τις",
           "τι"
         ]
       },
       {
-        "label": "Genitive singular",
+        "label": "Genitive",
         "cells": [
           "τινος / του",
           "τινος / του"
         ]
       },
       {
-        "label": "Dative singular",
+        "label": "Dative",
         "cells": [
           "τινι / τῳ",
           "τινι / τῳ"
         ]
       },
       {
-        "label": "Accusative singular",
+        "label": "Accusative",
         "cells": [
           "τινα",
           "τι"
         ]
-      },
+      }
+    ]
+  },
+  {
+    "id": "lesson21-chart-indefinite-pronoun-plural",
+    "category": "Indefinite Pronoun Forms — Plural",
+    "prompt": "τις, τι — Indefinite Pronoun Forms — Plural",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §127, p. 132; independently reconstructed forms",
+    "accent_note": "Enclitic forms are shown without independent accent, except τινῶν when accented and non-enclitic ἄττα; contextual accent rules apply.",
+    "columns": [
+      "Masculine/Feminine",
+      "Neuter"
+    ],
+    "rows": [
       {
-        "label": "Nominative plural",
+        "label": "Nominative",
         "cells": [
           "τινες",
           "τινα / ἄττα"
         ]
       },
       {
-        "label": "Genitive plural",
+        "label": "Genitive",
         "cells": [
           "τινῶν",
           "τινῶν"
         ]
       },
       {
-        "label": "Dative plural",
+        "label": "Dative",
         "cells": [
           "τισι(ν)",
           "τισι(ν)"
         ]
       },
       {
-        "label": "Accusative plural",
+        "label": "Accusative",
         "cells": [
           "τινας",
           "τινα / ἄττα"

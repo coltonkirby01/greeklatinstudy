@@ -631,7 +631,7 @@ function addReflexivePronounChartForms(index: Map<string, DictionaryMatch[]>, ca
 
 function addGrammarForms(index: Map<string, DictionaryMatch[]>, deck: DeckDefinition) {
   for (const card of deck.cards) {
-    if (card.id === "lesson21-chart-interrogative-pronoun" || card.id === "lesson21-chart-indefinite-pronoun") {
+    if (/^lesson21-chart-(interrogative|indefinite)-pronoun(?:-plural)?$/u.test(card.id)) {
       const headword = card.id.includes("interrogative") ? "τίς" : "τις";
       const match = index.get(normalizeDictionaryKey(headword))?.find(item => item.headword.startsWith(headword + ","));
       if (match) for (const row of chartRows(card)) row.cells.forEach((cell, col) => {

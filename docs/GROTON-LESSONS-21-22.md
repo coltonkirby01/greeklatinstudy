@@ -1,2 +1,4 @@
 # Groton lessons 21–22
 The lesson vocabulary lists were recovered from the English text layer of the fourth edition, §§130 and 138 (pp. 133–134, 142), then independently reconstructed in polytonic Greek. Compare Greek spellings, quantity marks, alternatives and the exact vocabulary grouping with the printed pages before treating them as a definitive transcription. The charts cover §§126–127 and 132–135. Fifth principal parts of older vocabulary have not been retrospectively changed; the helper includes selected regular perfect middle/passive forms. Existing card IDs and review data are unchanged. No paid audio was pre-generated.
+
+Lesson 21 pronoun charts are split into four cards (singular and plural separately for interrogative and indefinite forms), with case rows and combined masculine/feminine and neuter columns. Original chart IDs are retained for the singular cards; plural cards receive independent IDs and histories.
