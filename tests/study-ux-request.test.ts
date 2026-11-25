@@ -66,7 +66,7 @@ describe("requested Greek and Latin study workflow", () => {
     expect(page).toContain("FilterDirectionControl");
     expect(page).toContain('oneWordVocabularyGloss(card.back)');
     expect(page.match(/oneWordVocabularyGloss\(card\.back\)/g)?.length).toBe(2);
-    expect(page).toContain('title={config.lesson === 19 ? "Endings & Pronoun Forms" : "Endings"}');
+    expect(page).toContain('title={config.lesson === 19 ? "Endings & Pronoun Forms" : config.lesson === 21 ? "Pronoun Forms" : "Endings"}');
     expect(page).toContain('label="All Endings"');
     expect(page).not.toContain('title="Paradigms"');
     expect(page).not.toContain('title="Individual cards"');
