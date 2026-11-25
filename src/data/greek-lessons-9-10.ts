@@ -2,7 +2,7 @@ import type { DeckDefinition, StudyCard } from "../features/study/types";
 import { classicalGreekPronunciation } from "../features/greek/greek-pronunciation";
 import { greekLesson3ParadigmSpeechText } from "./builtin-decks";
 
-type GrotonLesson = 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20;
+type GrotonLesson = 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22;
 
 type GreekVocabularySourceCard = {
   id: string;
@@ -14,6 +14,7 @@ type GreekVocabularySourceCard = {
   accent_note?: string;
   third_principal_part?: string;
   fourth_principal_part?: string;
+  fifth_principal_part?: string;
 };
 
 type GreekContractionSourceCard = {
@@ -52,7 +53,8 @@ function vocabularySourceNote(lesson: GrotonLesson) {
   if (lesson === 17) return "Groton 17.106.";
   if (lesson === 18) return "Groton 18.112.";
   if (lesson === 19) return "Groton 19.118.";
-  return "Groton 20.124.";
+  if (lesson === 20) return "Groton 20.124.";
+  return lesson === 21 ? "Groton 21.130 (reconstructed; verify against print)." : "Groton 22.138 (reconstructed; verify against print).";
 }
 
 function vocabularyDeck(lesson: GrotonLesson, source: GreekVocabularySourceCard[]): DeckDefinition {
@@ -78,6 +80,7 @@ function vocabularyDeck(lesson: GrotonLesson, source: GreekVocabularySourceCard[
         accentNote: card.accent_note,
         thirdPrincipalPart: card.third_principal_part,
         fourthPrincipalPart: card.fourth_principal_part,
+        fifthPrincipalPart: card.fifth_principal_part,
         sourceRef: card.source_ref ?? `Groton Lesson ${lesson}`,
       },
     };
@@ -144,14 +147,14 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
       category: card.category,
       rank: index + 1,
       source: `From Alpha to Omega, Lesson ${lesson}`,
-      notes: [lesson === 12 ? "Irregular-form chart" : lesson === 13 || lesson === 14 || (lesson === 19 && card.category.includes("Reflexive Pronoun")) ? "Pronoun-form chart" : isEndingChart ? "Ending chart" : "Whole-paradigm chart", card.accent_note].filter(Boolean).join(" · "),
+      notes: [lesson === 12 ? "Irregular-form chart" : lesson === 13 || lesson === 14 || lesson === 21 || (lesson === 19 && card.category.includes("Reflexive Pronoun")) ? "Pronoun-form chart" : isEndingChart ? "Ending chart" : "Whole-paradigm chart", card.accent_note].filter(Boolean).join(" · "),
       metadata: {
         lesson,
         studySource: "grammar-chart",
         grammarGroup: card.category,
         chartColumns: card.columns,
         chartRows,
-        rowHeaderLabel: (lesson === 18 || lesson === 20 || (lesson === 19 && card.category.startsWith("Second Aorist"))) ? (card.columns.length === 1 ? "Form" : "Person") : lesson === 9 || lesson >= 13 ? "Case" : card.columns.length === 1 ? "Form" : "Person",
+        rowHeaderLabel: (lesson === 18 || lesson === 20 || lesson === 22 || (lesson === 19 && card.category.startsWith("Second Aorist"))) ? (card.columns.length === 1 ? "Form" : "Person") : lesson === 9 || lesson >= 13 ? "Case" : card.columns.length === 1 ? "Form" : "Person",
         pronunciationText: greekLesson3ParadigmSpeechText(chartRows),
         accentNote: card.accent_note,
         sourceRef: card.source_ref ?? `Groton Lesson ${lesson}`,
@@ -219,6 +222,8 @@ function grammarDeck(lesson: GrotonLesson, source: GreekGrammarSourceCard[]): De
             description: "Three ending charts: perfect active indicative, perfect active infinitive, and pluperfect active indicative.",
             sourceNote: "Groton Lesson 20, §122, p. 125, Summary of Perfect and Pluperfect Active Endings.",
           }
+        : lesson === 21 ? { eyebrow: "Interrogative and indefinite pronouns", description: "Two complete pronoun-form charts.", sourceNote: "Groton Lesson 21, §§126–127." }
+        : lesson === 22 ? { eyebrow: "Perfect and pluperfect middle/passive", description: "Three ending charts, with consonant-stem notes.", sourceNote: "Groton Lesson 22, §§132–135." }
         : {
             eyebrow: "Third-declension endings",
             description: "Masculine/feminine and neuter third-declension endings, with singular and plural on each chart.",
@@ -375,4 +380,26 @@ export function loadGreekLesson20VocabularyDeck() {
 export function loadGreekLesson20GrammarDeck() {
   lesson20GrammarPromise ??= fetchText("data/greek-lesson20-grammar.json").then(text => grammarDeck(20, JSON.parse(text) as GreekGrammarSourceCard[]));
   return lesson20GrammarPromise;
+}
+
+let lesson21VocabularyPromise: Promise<DeckDefinition> | null = null;
+let lesson21GrammarPromise: Promise<DeckDefinition> | null = null;
+export function loadGreekLesson21VocabularyDeck() {
+  lesson21VocabularyPromise ??= fetchText("data/greek-lesson21-vocab.json").then(text => vocabularyDeck(21, JSON.parse(text) as GreekVocabularySourceCard[]));
+  return lesson21VocabularyPromise;
+}
+export function loadGreekLesson21GrammarDeck() {
+  lesson21GrammarPromise ??= fetchText("data/greek-lesson21-grammar.json").then(text => grammarDeck(21, JSON.parse(text) as GreekGrammarSourceCard[]));
+  return lesson21GrammarPromise;
+}
+
+let lesson22VocabularyPromise: Promise<DeckDefinition> | null = null;
+let lesson22GrammarPromise: Promise<DeckDefinition> | null = null;
+export function loadGreekLesson22VocabularyDeck() {
+  lesson22VocabularyPromise ??= fetchText("data/greek-lesson22-vocab.json").then(text => vocabularyDeck(22, JSON.parse(text) as GreekVocabularySourceCard[]));
+  return lesson22VocabularyPromise;
+}
+export function loadGreekLesson22GrammarDeck() {
+  lesson22GrammarPromise ??= fetchText("data/greek-lesson22-grammar.json").then(text => grammarDeck(22, JSON.parse(text) as GreekGrammarSourceCard[]));
+  return lesson22GrammarPromise;
 }

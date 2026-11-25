@@ -631,6 +631,16 @@ function addReflexivePronounChartForms(index: Map<string, DictionaryMatch[]>, ca
 
 function addGrammarForms(index: Map<string, DictionaryMatch[]>, deck: DeckDefinition) {
   for (const card of deck.cards) {
+    if (card.id === "lesson21-chart-interrogative-pronoun" || card.id === "lesson21-chart-indefinite-pronoun") {
+      const headword = card.id.includes("interrogative") ? "τίς" : "τις";
+      const match = index.get(normalizeDictionaryKey(headword))?.find(item => item.headword.startsWith(headword + ","));
+      if (match) for (const row of chartRows(card)) row.cells.forEach((cell, col) => {
+        for (const form of expandKnownForms(cell)) addMatch(index, form, {
+          ...match, sourceRef: sourceRef(card), morphology: [grammarGroup(card) + " · " + row.label + " · " + chartColumns(card)[col]],
+        }, true);
+      });
+      continue;
+    }
     if (grammarGroup(card).includes("Reflexive Pronoun Forms")) {
       addReflexivePronounChartForms(index, card);
       continue;
@@ -780,6 +790,33 @@ function addGrotonLesson20PerfectForms(index: Map<string, DictionaryMatch[]>) {
   }
 }
 
+function addLesson22MiddlePassiveForms(index: Map<string, DictionaryMatch[]>) {
+  const paradigms = [
+    { lemma: "παιδεύω", perfect: "πεπαιδευ", pluperfect: "επεπαιδευ" },
+    { lemma: "φοβέω", perfect: "πεφοβη", pluperfect: "επεφοβη" },
+    { lemma: "λῡ́ω", perfect: "λελυ", pluperfect: "ελελυ" },
+    { lemma: "ποιέω", perfect: "πεποιη", pluperfect: "επεποιη" },
+    { lemma: "ζητέω", perfect: "εζητη", pluperfect: "εζητη" },
+    { lemma: "φιλέω", perfect: "πεφιλη", pluperfect: "επεφιλη" },
+    { lemma: "τῑμάω", perfect: "τετιμη", pluperfect: "ετετιμη" },
+    { lemma: "δηλόω", perfect: "δεδηλω", pluperfect: "εδεδηλω" },
+    { lemma: "πωλέω", perfect: "πεπωλη", pluperfect: "επεπωλη" },
+  ];
+  const persons = ["1st singular","2nd singular","3rd singular","1st plural","2nd plural","3rd plural"];
+  const endings = ["μαι","σαι","ται","μεθα","σθε","νται"];
+  const pastEndings = ["μην","σο","το","μεθα","σθε","ντο"];
+  const add = (lemma: string, perfect: string[], past: string[], infinitive: string) => {
+    const match = index.get(normalizeDictionaryKey(lemma))?.find(item => normalizeDictionaryKey(headwordForms(item.headword)[0] ?? "") === normalizeDictionaryKey(lemma));
+    if (!match) return;
+    const ref = "Groton Lesson 22, §§132–135; independently reconstructed morphology";
+    perfect.forEach((form,i) => addMatch(index, form, {...match, sourceRef: ref, morphology: ["Perfect Middle/Passive Indicative · " + persons[i]]}, true));
+    past.forEach((form,i) => addMatch(index, form, {...match, sourceRef: ref, morphology: ["Pluperfect Middle/Passive Indicative · " + persons[i]]}, true));
+    addMatch(index, infinitive, {...match, sourceRef: ref, morphology: ["Perfect Middle/Passive Infinitive"]}, true);
+  };
+  for (const p of paradigms) add(p.lemma, endings.map(e=>p.perfect+e), pastEndings.map(e=>p.pluperfect+e), p.perfect+"σθαι");
+  add("ἄγω", ["ἦγμαι","ἦξαι","ἦκται","ἤγμεθα","ἦχθε"], ["ἤγμην","ἦξο","ἦκτο","ἤγμεθα","ἦχθε"], "ἦχθαι");
+}
+
 export function buildGreekTranslationIndex(grotonVocabularyDecks: DeckDefinition[], grotonGrammarDecks: DeckDefinition[], kuboDeck?: DeckDefinition | null) {
   const index = new Map<string, DictionaryMatch[]>();
   const hasLesson20Deck = grotonVocabularyDecks.some((deck) => deck.id === "alpha-omega-lesson20-vocab");
@@ -790,6 +827,7 @@ export function buildGreekTranslationIndex(grotonVocabularyDecks: DeckDefinition
   addLesson20NounInflections(index);
   for (const deck of grotonGrammarDecks) addGrammarForms(index, deck);
   addGrotonLesson20PerfectForms(index);
+  if (grotonGrammarDecks.some(deck => deck.id === "alpha-omega-lesson22-grammar")) addLesson22MiddlePassiveForms(index);
   // Contracted present form in the user's Lesson 20 exercise, sentence 9.
   const zeteo = lesson20Vocabulary[0];
   addMatch(index, "ζητῶ", {

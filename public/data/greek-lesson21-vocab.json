@@ -1,0 +1,105 @@
+[
+  {
+    "id": "lesson21-v1",
+    "greek": "ἀποθνῄσκω, ἀποθανοῦμαι, ἀπέθανον, τέθνηκα",
+    "meaning": "die; be killed",
+    "part_of_speech": "verb",
+    "lesson": 21,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §130, pp. 133–134; Greek reconstructed from the vocabulary glosses (verify against print)",
+    "third_principal_part": "ἀπέθανον",
+    "fourth_principal_part": "τέθνηκα"
+  },
+  {
+    "id": "lesson21-v2",
+    "greek": "ἀποκτείνω, ἀποκτενῶ, ἀπέκτεινα, ἀπέκτονα",
+    "meaning": "kill, put to death",
+    "part_of_speech": "verb",
+    "lesson": 21,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §130, pp. 133–134; Greek reconstructed from the vocabulary glosses (verify against print)",
+    "third_principal_part": "ἀπέκτεινα",
+    "fourth_principal_part": "ἀπέκτονα"
+  },
+  {
+    "id": "lesson21-v3",
+    "greek": "φοβέω, φοβήσω, ἐφόβησα, πεφόβηκα, πεφόβημαι",
+    "meaning": "(active) frighten; (middle/passive + acc.) fear, be afraid of",
+    "part_of_speech": "verb",
+    "lesson": 21,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §130, pp. 133–134; Greek reconstructed from the vocabulary glosses (verify against print)",
+    "third_principal_part": "ἐφόβησα",
+    "fourth_principal_part": "πεφόβηκα",
+    "fifth_principal_part": "πεφόβημαι"
+  },
+  {
+    "id": "lesson21-v4",
+    "greek": "φόβος, -ου, ὁ",
+    "meaning": "fear, fright",
+    "part_of_speech": "noun",
+    "lesson": 21,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §130, pp. 133–134; Greek reconstructed from the vocabulary glosses (verify against print)"
+  },
+  {
+    "id": "lesson21-v5",
+    "greek": "τίς, τί",
+    "meaning": "(interrogative adjective) which? what?; (pronoun) who? what?",
+    "part_of_speech": "pronoun",
+    "lesson": 21,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §130, pp. 133–134; Greek reconstructed from the vocabulary glosses (verify against print)"
+  },
+  {
+    "id": "lesson21-v6",
+    "greek": "τις, τι",
+    "meaning": "(indefinite, enclitic) a certain, some, any; someone, something, anyone, anything",
+    "part_of_speech": "pronoun",
+    "lesson": 21,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §130, pp. 133–134; Greek reconstructed from the vocabulary glosses (verify against print)"
+  },
+  {
+    "id": "lesson21-v7",
+    "greek": "τινὲς μὲν ... τινὲς δέ",
+    "meaning": "some ... others",
+    "part_of_speech": "correlative",
+    "lesson": 21,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §130, pp. 133–134; Greek reconstructed from the vocabulary glosses (verify against print)"
+  },
+  {
+    "id": "lesson21-v8",
+    "greek": "ἐμός, -ή, -όν",
+    "meaning": "my, mine, my own",
+    "part_of_speech": "adjective",
+    "lesson": 21,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §130, pp. 133–134; Greek reconstructed from the vocabulary glosses (verify against print)"
+  },
+  {
+    "id": "lesson21-v9",
+    "greek": "ἡμέτερος, -ᾱ, -ον",
+    "meaning": "our, ours, our own",
+    "part_of_speech": "adjective",
+    "lesson": 21,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §130, pp. 133–134; Greek reconstructed from the vocabulary glosses (verify against print)"
+  },
+  {
+    "id": "lesson21-v10",
+    "greek": "σός, -ή, -όν",
+    "meaning": "your, yours (singular possessor)",
+    "part_of_speech": "adjective",
+    "lesson": 21,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §130, pp. 133–134; Greek reconstructed from the vocabulary glosses (verify against print)"
+  },
+  {
+    "id": "lesson21-v11",
+    "greek": "ὑμέτερος, -ᾱ, -ον",
+    "meaning": "your, yours (plural possessors)",
+    "part_of_speech": "adjective",
+    "lesson": 21,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §130, pp. 133–134; Greek reconstructed from the vocabulary glosses (verify against print)"
+  },
+  {
+    "id": "lesson21-v12",
+    "greek": "τί",
+    "meaning": "why? (adverbial accusative)",
+    "part_of_speech": "adverb",
+    "lesson": 21,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §130, pp. 133–134; Greek reconstructed from the vocabulary glosses (verify against print)"
+  }
+]

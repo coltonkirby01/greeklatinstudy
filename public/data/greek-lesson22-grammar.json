@@ -1,0 +1,88 @@
+[
+  {
+    "id": "lesson22-chart-perfect-middle-passive-indicative",
+    "category": "Perfect Middle/Passive Indicative Endings",
+    "prompt": "Perfect Middle/Passive Indicative Endings",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 22, §§132–135, pp. 137–140; independently reconstructed forms",
+    "accent_note": "Attach directly to the reduplicated stem, with no thematic vowel. Consonant stems require sound changes and use a periphrastic third-person plural.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "1st person",
+        "cells": [
+          "-μαι",
+          "-μεθα"
+        ]
+      },
+      {
+        "label": "2nd person",
+        "cells": [
+          "-σαι",
+          "-σθε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-ται",
+          "-νται"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson22-chart-perfect-middle-passive-infinitive",
+    "category": "Perfect Middle/Passive Infinitive Endings",
+    "prompt": "Perfect Middle/Passive Infinitive Ending",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 22, §§133–135, pp. 137–140; independently reconstructed forms",
+    "accent_note": "No augment; accent persists on the penult. Consonant stems may undergo euphonic changes.",
+    "columns": [
+      "Ending"
+    ],
+    "rows": [
+      {
+        "label": "Perfect Middle/Passive Infinitive",
+        "cells": [
+          "-σθαι"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson22-chart-pluperfect-middle-passive-indicative",
+    "category": "Pluperfect Middle/Passive Indicative Endings",
+    "prompt": "Pluperfect Middle/Passive Indicative Endings",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 22, §§132–135, pp. 137–140; independently reconstructed forms",
+    "accent_note": "Augment the reduplicated stem where appropriate; consonant stems require sound changes and a periphrastic third-person plural.",
+    "columns": [
+      "Singular",
+      "Plural"
+    ],
+    "rows": [
+      {
+        "label": "1st person",
+        "cells": [
+          "-μην",
+          "-μεθα"
+        ]
+      },
+      {
+        "label": "2nd person",
+        "cells": [
+          "-σο",
+          "-σθε"
+        ]
+      },
+      {
+        "label": "3rd person",
+        "cells": [
+          "-το",
+          "-ντο"
+        ]
+      }
+    ]
+  }
+]

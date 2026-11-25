@@ -39,6 +39,10 @@ import {
   loadGreekLesson19GrammarDeck,
   loadGreekLesson20VocabularyDeck,
   loadGreekLesson20GrammarDeck,
+  loadGreekLesson21VocabularyDeck,
+  loadGreekLesson21GrammarDeck,
+  loadGreekLesson22VocabularyDeck,
+  loadGreekLesson22GrammarDeck,
 } from "../../data/greek-lessons-9-10";
 import { loadGreekNewTestamentVocabularyDeck } from "../../data/greek-new-testament-vocab";
 import { loadLatinActiveIndicativeParadigmsDeck } from "../../data/latin-active-indicative-paradigms";
@@ -98,6 +102,10 @@ export const BUILTIN_STUDY_DECKS: readonly BuiltinDeckRegistration[] = [
   { id: "alpha-omega-lesson19-grammar", language: "Greek", source: "Lesson 19 Grammar", load: loadGreekLesson19GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
   { id: "alpha-omega-lesson20-vocab", language: "Greek", source: "Lesson 20 Vocabulary", load: loadGreekLesson20VocabularyDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "alpha-omega-lesson20-grammar", language: "Greek", source: "Lesson 20 Grammar", load: loadGreekLesson20GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
+  { id: "alpha-omega-lesson21-vocab", language: "Greek", source: "Lesson 21 Vocabulary", load: loadGreekLesson21VocabularyDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
+  { id: "alpha-omega-lesson21-grammar", language: "Greek", source: "Lesson 21 Grammar", load: loadGreekLesson21GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
+  { id: "alpha-omega-lesson22-vocab", language: "Greek", source: "Lesson 22 Vocabulary", load: loadGreekLesson22VocabularyDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
+  { id: "alpha-omega-lesson22-grammar", language: "Greek", source: "Lesson 22 Grammar", load: loadGreekLesson22GrammarDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }] },
   { id: "kubo-new-testament-vocab", language: "Greek", source: "New Testament Vocab", load: loadGreekNewTestamentVocabularyDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "dickinson-latin-core", language: "Latin", source: "Dickinson Vocabulary", load: loadLatinDeck, modes: [{ mode: "Forward", direction: "forward", studyKey: "forward" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },
   { id: "latin-active-indicative-paradigms", language: "Latin", source: "Active Indicative Paradigms", load: loadLatinActiveIndicativeParadigmsDeck, modes: [{ mode: "Charts", direction: "forward", studyKey: "chart" }, { mode: "Reverse", direction: "reverse", studyKey: "reverse" }] },

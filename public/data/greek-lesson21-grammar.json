@@ -1,0 +1,140 @@
+[
+  {
+    "id": "lesson21-chart-interrogative-pronoun",
+    "category": "Interrogative Pronoun Forms",
+    "prompt": "τίς, τί — Interrogative Pronoun Forms",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §126, p. 131; independently reconstructed forms",
+    "accent_note": "Interrogative τίς and τί retain their acute accents. Contracted singular genitive and dative forms also occur.",
+    "columns": [
+      "Masculine/Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative singular",
+        "cells": [
+          "τίς",
+          "τί"
+        ]
+      },
+      {
+        "label": "Genitive singular",
+        "cells": [
+          "τίνος / τοῦ",
+          "τίνος / τοῦ"
+        ]
+      },
+      {
+        "label": "Dative singular",
+        "cells": [
+          "τίνι / τῷ",
+          "τίνι / τῷ"
+        ]
+      },
+      {
+        "label": "Accusative singular",
+        "cells": [
+          "τίνα",
+          "τί"
+        ]
+      },
+      {
+        "label": "Nominative plural",
+        "cells": [
+          "τίνες",
+          "τίνα"
+        ]
+      },
+      {
+        "label": "Genitive plural",
+        "cells": [
+          "τίνων",
+          "τίνων"
+        ]
+      },
+      {
+        "label": "Dative plural",
+        "cells": [
+          "τίσι(ν)",
+          "τίσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative plural",
+        "cells": [
+          "τίνας",
+          "τίνα"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson21-chart-indefinite-pronoun",
+    "category": "Indefinite Pronoun Forms",
+    "prompt": "τις, τι — Indefinite Pronoun Forms",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 21, §127, p. 132; independently reconstructed forms",
+    "accent_note": "Enclitic forms are shown without independent accent, except τινῶν when accented and non-enclitic ἄττα; contextual accent rules apply.",
+    "columns": [
+      "Masculine/Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative singular",
+        "cells": [
+          "τις",
+          "τι"
+        ]
+      },
+      {
+        "label": "Genitive singular",
+        "cells": [
+          "τινος / του",
+          "τινος / του"
+        ]
+      },
+      {
+        "label": "Dative singular",
+        "cells": [
+          "τινι / τῳ",
+          "τινι / τῳ"
+        ]
+      },
+      {
+        "label": "Accusative singular",
+        "cells": [
+          "τινα",
+          "τι"
+        ]
+      },
+      {
+        "label": "Nominative plural",
+        "cells": [
+          "τινες",
+          "τινα / ἄττα"
+        ]
+      },
+      {
+        "label": "Genitive plural",
+        "cells": [
+          "τινῶν",
+          "τινῶν"
+        ]
+      },
+      {
+        "label": "Dative plural",
+        "cells": [
+          "τισι(ν)",
+          "τισι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative plural",
+        "cells": [
+          "τινας",
+          "τινα / ἄττα"
+        ]
+      }
+    ]
+  }
+]
