@@ -22,7 +22,9 @@ function cacheKey(request: AudioRequest) {
 }
 
 function persistentCacheKey(assetId: string) {
-  return `${storageCacheVersion}:${assetId}`;
+  // Invalidate only revised Lesson 21/22 chart recordings, not unrelated audio.
+  const revision = /^lesson2[12]-chart-/u.test(assetId) ? ":vertical-v2" : "";
+  return `${storageCacheVersion}${revision}:${assetId}`;
 }
 
 function readPersistentPath(assetId: string): RememberedPath | null {

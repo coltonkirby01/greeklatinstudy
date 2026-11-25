@@ -205,5 +205,6 @@ export const lesson21And22CourseAudioAssets: readonly Lesson3CourseAudioAsset[] 
   id: chart.id,
   label: chart.label,
   canonicalIpa: greekToClassicalIpa(chart.columns.flat().join(", ")),
-  ttsText: chart.columns.map(col => col.map(greekToElevenLabsIpa).filter(Boolean).join(" ")).filter(Boolean).join(" [pause] "),
+  // Read each column top-to-bottom, then pause before the next column.
+  ttsText: chart.columns.map(col => col.map(greekToElevenLabsIpa).filter(Boolean).join(", ")).filter(Boolean).join(" [pause] "),
 }));

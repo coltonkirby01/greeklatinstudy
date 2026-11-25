@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { BUILTIN_STUDY_DECKS } from "../src/features/study/builtin-study-catalog";
+import { greekToElevenLabsIpa } from "../supabase/functions/course-audio/greek-ipa";
 import { resolveBuiltinGreekAsset } from "../supabase/functions/course-audio/builtin-greek-assets";
 describe("Groton lessons 21 and 22", () => {
   it("compares both pronouns on one card per number", () => {
@@ -14,6 +15,15 @@ describe("Groton lessons 21 and 22", () => {
     }
     expect(charts[0].rows[0].cells).toEqual(["τίς","τί","τις","τι"]);
     expect(charts[1].rows[0].cells).toEqual(["τίνες","τίνα","τινες","τινα / ἄττα"]);
+  });
+  it("pronounces every grammar chart vertically, with pauses between columns", () => {
+    for (const n of [21,22]) {
+      const charts = JSON.parse(fs.readFileSync(`public/data/greek-lesson${n}-grammar.json`,"utf8")) as {id:string;columns:string[];rows:{cells:string[]}[]}[];
+      for (const chart of charts) {
+        const expected = chart.columns.map((_,col)=>chart.rows.map(row=>greekToElevenLabsIpa(row.cells[col].replace(/\(ν\)/g,"ν").replaceAll(" / ",", ").replaceAll("-",""))).filter(Boolean).join(", ")).filter(Boolean).join(" [pause] ");
+        expect(resolveBuiltinGreekAsset(chart.id)?.ttsText).toBe(expected);
+      }
+    }
   });
   it("registers all four decks and gives each card a stable audio ID", () => {
     for (const n of [21,22]) for (const kind of ["vocab","grammar"]) {
