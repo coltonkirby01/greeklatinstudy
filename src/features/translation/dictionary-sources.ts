@@ -822,6 +822,26 @@ function addLesson22MiddlePassiveForms(index: Map<string, DictionaryMatch[]>) {
   add("ἄγω", ["ἦγμαι","ἦξαι","ἦκται","ἤγμεθα","ἦχθε"], ["ἤγμην","ἦξο","ἦκτο","ἤγμεθα","ἦχθε"], "ἦχθαι");
 }
 
+function addLesson24ActiveParticiples(index: Map<string, DictionaryMatch[]>, vocabularyDecks: DeckDefinition[]) {
+  const sets = [
+    { tense: "Present", slot: 0, terminal: "ω", endings: ["ων","οντος","οντι","οντα","οντες","οντων","ουσι","ουσιν","οντας","ουσα","ουσης","ουση","ουσαν","ουσαι","ουσων","ουσαις","ουσας","ον"] },
+    { tense: "Future", slot: 1, terminal: "ω", endings: ["ων","οντος","οντι","οντα","οντες","οντων","ουσι","ουσιν","οντας","ουσα","ουσης","ουση","ουσαν","ουσαι","ουσων","ουσαις","ουσας","ον"] },
+    { tense: "Perfect", slot: 3, terminal: "α", endings: ["ως","οτος","οτι","οτα","οτες","οτων","οσι","οσιν","οτας","υια","υιας","υιαι","υιων","υιαις","ος"] },
+  ];
+  for (const deck of vocabularyDecks) for (const card of deck.cards) {
+    if (!partOfSpeech(card).includes("verb")) continue;
+    const parts = card.front.split(",").map(x=>x.trim());
+    const match = vocabularyMatch(card, "Groton, From Alpha to Omega");
+    for (const set of sets) {
+      const raw = parts[set.slot];
+      if (!raw || raw.includes("/") || raw.includes("(")) continue;
+      const key = normalizeDictionaryKey(raw);
+      if (!key.endsWith(set.terminal) || (set.slot < 2 && /[αεο]ω$/u.test(key))) continue;
+      for (const ending of set.endings) addMatch(index, key.slice(0,-1)+ending, {...match, sourceRef: "Groton Lesson 24, §§146–148; regular active participle morphology", morphology: [set.tense+" Active Participle"]}, true);
+    }
+  }
+}
+
 export function buildGreekTranslationIndex(grotonVocabularyDecks: DeckDefinition[], grotonGrammarDecks: DeckDefinition[], kuboDeck?: DeckDefinition | null) {
   const index = new Map<string, DictionaryMatch[]>();
   const hasLesson20Deck = grotonVocabularyDecks.some((deck) => deck.id === "alpha-omega-lesson20-vocab");
@@ -833,6 +853,7 @@ export function buildGreekTranslationIndex(grotonVocabularyDecks: DeckDefinition
   for (const deck of grotonGrammarDecks) addGrammarForms(index, deck);
   addGrotonLesson20PerfectForms(index);
   if (grotonGrammarDecks.some(deck => deck.id === "alpha-omega-lesson22-grammar")) addLesson22MiddlePassiveForms(index);
+  if (grotonGrammarDecks.some(deck => deck.id === "alpha-omega-lesson24-grammar")) addLesson24ActiveParticiples(index, vocabularyIncludingLesson20);
   // Contracted present form in the user's Lesson 20 exercise, sentence 9.
   const zeteo = lesson20Vocabulary[0];
   addMatch(index, "ζητῶ", {

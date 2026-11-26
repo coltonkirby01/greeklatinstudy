@@ -1,0 +1,182 @@
+[
+  {
+    "id": "lesson23-chart-relative-pronoun-singular",
+    "category": "Relative Pronoun Forms — Singular",
+    "prompt": "ὅς, ἥ, ὅ — Relative Pronoun Forms — Singular",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §140, p. 145–146; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "ὅς",
+          "ἥ",
+          "ὅ"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "οὗ",
+          "ἧς",
+          "οὗ"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "ᾧ",
+          "ᾗ",
+          "ᾧ"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "ὅν",
+          "ἥν",
+          "ὅ"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson23-chart-relative-pronoun-plural",
+    "category": "Relative Pronoun Forms — Plural",
+    "prompt": "ὅς, ἥ, ὅ — Relative Pronoun Forms — Plural",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §140, p. 145–146; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "οἵ",
+          "αἵ",
+          "ἅ"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "ὧν",
+          "ὧν",
+          "ὧν"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "οἷς",
+          "αἷς",
+          "οἷς"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "οὕς",
+          "ἅς",
+          "ἅ"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson23-chart-pas-singular",
+    "category": "πᾶς Forms — Singular",
+    "prompt": "πᾶς, πᾶσα, πᾶν — πᾶς Forms — Singular",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §141, p. 147; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "πᾶς",
+          "πᾶσα",
+          "πᾶν"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "παντός",
+          "πάσης",
+          "παντός"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "παντί",
+          "πάσῃ",
+          "παντί"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "πάντα",
+          "πᾶσαν",
+          "πᾶν"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson23-chart-pas-plural",
+    "category": "πᾶς Forms — Plural",
+    "prompt": "πᾶς, πᾶσα, πᾶν — πᾶς Forms — Plural",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §141, p. 147; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative",
+        "cells": [
+          "πάντες",
+          "πᾶσαι",
+          "πάντα"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "πάντων",
+          "πασῶν",
+          "πάντων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "πᾶσι(ν)",
+          "πάσαις",
+          "πᾶσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "πάντας",
+          "πάσᾱς",
+          "πάντα"
+        ]
+      }
+    ]
+  }
+]

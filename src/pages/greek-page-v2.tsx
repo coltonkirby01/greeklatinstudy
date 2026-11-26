@@ -44,6 +44,10 @@ import {
   loadGreekLesson21GrammarDeck,
   loadGreekLesson22VocabularyDeck,
   loadGreekLesson22GrammarDeck,
+  loadGreekLesson23VocabularyDeck,
+  loadGreekLesson23GrammarDeck,
+  loadGreekLesson24VocabularyDeck,
+  loadGreekLesson24GrammarDeck,
 } from "../data/greek-lessons-9-10";
 import { NEW_TESTAMENT_FREQUENCY_GROUPS, loadGreekNewTestamentVocabularyDeck, newTestamentFrequencyGroupForCard } from "../data/greek-new-testament-vocab";
 import { useAuth } from "../features/auth/auth-context";
@@ -171,6 +175,22 @@ const keys = {
   lesson21InterrogativePronoun: "lesson21-interrogative-pronoun",
   lesson21InterrogativePronounPlural: "lesson21-interrogative-pronoun-plural",
   lesson22Vocabulary: "lesson22-vocabulary",
+  lesson24Vocabulary: "lesson24-vocabulary",
+  lesson24Chart1: "lesson24-present-second-aorist-active-participle-singular",
+  lesson24Chart2: "lesson24-present-second-aorist-active-participle-plural",
+  lesson24Chart3: "lesson24-future-active-participle-singular",
+  lesson24Chart4: "lesson24-future-active-participle-plural",
+  lesson24Chart5: "lesson24-first-aorist-active-participle-singular",
+  lesson24Chart6: "lesson24-first-aorist-active-participle-plural",
+  lesson24Chart7: "lesson24-perfect-active-participle-singular",
+  lesson24Chart8: "lesson24-perfect-active-participle-plural",
+  lesson24Chart9: "lesson24-eimi-present-participle-singular",
+  lesson24Chart10: "lesson24-eimi-present-participle-plural",
+  lesson23Vocabulary: "lesson23-vocabulary",
+  lesson23Chart1: "lesson23-relative-pronoun-singular",
+  lesson23Chart2: "lesson23-relative-pronoun-plural",
+  lesson23Chart3: "lesson23-pas-singular",
+  lesson23Chart4: "lesson23-pas-plural",
   lesson22PerfectMiddlePassiveIndicative: "lesson22-perfect-middle-passive-indicative",
   lesson22PerfectMiddlePassiveInfinitive: "lesson22-perfect-middle-passive-infinitive",
   lesson22PluperfectMiddlePassiveIndicative: "lesson22-pluperfect-middle-passive-indicative",
@@ -221,6 +241,10 @@ type LoadedDecks = {
   lesson21Grammar: DeckDefinition;
   lesson22Vocabulary: DeckDefinition;
   lesson22Grammar: DeckDefinition;
+  lesson24Vocabulary: DeckDefinition;
+  lesson24Grammar: DeckDefinition;
+  lesson23Vocabulary: DeckDefinition;
+  lesson23Grammar: DeckDefinition;
   newTestamentVocabulary: DeckDefinition;
 };
 
@@ -354,6 +378,24 @@ const lesson21CategoryByKey = new Map<string, string>([
   [keys.lesson21InterrogativePronoun, "Interrogative & Indefinite Pronoun Forms — Singular"],
   [keys.lesson21InterrogativePronounPlural, "Interrogative & Indefinite Pronoun Forms — Plural"],
 ]);
+const lesson23CategoryByKey = new Map<string, string>([
+  [keys.lesson23Chart1, "Relative Pronoun Forms — Singular"],
+  [keys.lesson23Chart2, "Relative Pronoun Forms — Plural"],
+  [keys.lesson23Chart3, "πᾶς Forms — Singular"],
+  [keys.lesson23Chart4, "πᾶς Forms — Plural"],
+]);
+const lesson24CategoryByKey = new Map<string, string>([
+  [keys.lesson24Chart1, "Present / Second Aorist Active Participle Endings — Singular"],
+  [keys.lesson24Chart2, "Present / Second Aorist Active Participle Endings — Plural"],
+  [keys.lesson24Chart3, "Future Active Participle Endings — Singular"],
+  [keys.lesson24Chart4, "Future Active Participle Endings — Plural"],
+  [keys.lesson24Chart5, "First Aorist Active Participle Endings — Singular"],
+  [keys.lesson24Chart6, "First Aorist Active Participle Endings — Plural"],
+  [keys.lesson24Chart7, "Perfect Active Participle Endings — Singular"],
+  [keys.lesson24Chart8, "Perfect Active Participle Endings — Plural"],
+  [keys.lesson24Chart9, "Present Participle of εἰμί — Singular"],
+  [keys.lesson24Chart10, "Present Participle of εἰμί — Plural"],
+]);
 const lesson22CategoryByKey = new Map<string, string>([
   [keys.lesson22PerfectMiddlePassiveIndicative, "Perfect Middle/Passive Indicative Endings"],
   [keys.lesson22PerfectMiddlePassiveInfinitive, "Perfect Middle/Passive Infinitive Endings"],
@@ -380,6 +422,8 @@ const lessonConfigs: LessonConfig[] = [
   { lesson: 20, vocabularyKey: keys.lesson20Vocabulary, vocabularyDeck: "lesson20Vocabulary", grammarDeck: "lesson20Grammar", endingKeys: [keys.lesson20PerfectActiveIndicative, keys.lesson20PerfectActiveInfinitive, keys.lesson20PluperfectActiveIndicative], categoryByKey: lesson20CategoryByKey },
   { lesson: 21, vocabularyKey: keys.lesson21Vocabulary, vocabularyDeck: "lesson21Vocabulary", grammarDeck: "lesson21Grammar", endingKeys: [keys.lesson21InterrogativePronoun, keys.lesson21InterrogativePronounPlural], categoryByKey: lesson21CategoryByKey },
   { lesson: 22, vocabularyKey: keys.lesson22Vocabulary, vocabularyDeck: "lesson22Vocabulary", grammarDeck: "lesson22Grammar", endingKeys: [keys.lesson22PerfectMiddlePassiveIndicative, keys.lesson22PerfectMiddlePassiveInfinitive, keys.lesson22PluperfectMiddlePassiveIndicative], categoryByKey: lesson22CategoryByKey },
+  { lesson: 23, vocabularyKey: keys.lesson23Vocabulary, vocabularyDeck: "lesson23Vocabulary", grammarDeck: "lesson23Grammar", endingKeys: [keys.lesson23Chart1, keys.lesson23Chart2, keys.lesson23Chart3, keys.lesson23Chart4], categoryByKey: lesson23CategoryByKey },
+  { lesson: 24, vocabularyKey: keys.lesson24Vocabulary, vocabularyDeck: "lesson24Vocabulary", grammarDeck: "lesson24Grammar", endingKeys: [keys.lesson24Chart1, keys.lesson24Chart2, keys.lesson24Chart3, keys.lesson24Chart4, keys.lesson24Chart5, keys.lesson24Chart6, keys.lesson24Chart7, keys.lesson24Chart8, keys.lesson24Chart9, keys.lesson24Chart10], categoryByKey: lesson24CategoryByKey },
 ];
 
 const lessonVocabularyKeys = lessonConfigs.map((config) => config.vocabularyKey);
@@ -456,7 +500,7 @@ function deckList(decks: LoadedDecks) {
 
 export function GreekPage() {
   const { value: decks, error } = useAsync(async () => {
-    const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, lesson12Vocabulary, lesson12Grammar, lesson13Vocabulary, lesson13Grammar, lesson14Vocabulary, lesson14Grammar, lesson15Vocabulary, lesson15Contractions, lesson16Vocabulary, lesson16Grammar, lesson17Vocabulary, lesson17Grammar, lesson18Vocabulary, lesson18Grammar, lesson19Vocabulary, lesson19Grammar, lesson20Vocabulary, lesson20Grammar, lesson21Vocabulary, lesson21Grammar, lesson22Vocabulary, lesson22Grammar, newTestamentVocabulary] = await Promise.all([
+    const [foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, lesson12Vocabulary, lesson12Grammar, lesson13Vocabulary, lesson13Grammar, lesson14Vocabulary, lesson14Grammar, lesson15Vocabulary, lesson15Contractions, lesson16Vocabulary, lesson16Grammar, lesson17Vocabulary, lesson17Grammar, lesson18Vocabulary, lesson18Grammar, lesson19Vocabulary, lesson19Grammar, lesson20Vocabulary, lesson20Grammar, lesson21Vocabulary, lesson21Grammar, lesson22Vocabulary, lesson22Grammar, lesson23Vocabulary, lesson23Grammar, lesson24Vocabulary, lesson24Grammar, newTestamentVocabulary] = await Promise.all([
       loadGreekDeck(),
       loadGreekLesson3VocabularyDeck(), loadGreekLesson3GrammarDeck(),
       loadGreekLesson4VocabularyDeck(), loadGreekLesson4GrammarDeck(),
@@ -478,9 +522,11 @@ export function GreekPage() {
       loadGreekLesson20VocabularyDeck(), loadGreekLesson20GrammarDeck(),
       loadGreekLesson21VocabularyDeck(), loadGreekLesson21GrammarDeck(),
       loadGreekLesson22VocabularyDeck(), loadGreekLesson22GrammarDeck(),
+      loadGreekLesson23VocabularyDeck(), loadGreekLesson23GrammarDeck(),
+      loadGreekLesson24VocabularyDeck(), loadGreekLesson24GrammarDeck(),
       loadGreekNewTestamentVocabularyDeck(),
     ]);
-    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, lesson12Vocabulary, lesson12Grammar, lesson13Vocabulary, lesson13Grammar, lesson14Vocabulary, lesson14Grammar, lesson15Vocabulary, lesson15Contractions, lesson16Vocabulary, lesson16Grammar, lesson17Vocabulary, lesson17Grammar, lesson18Vocabulary, lesson18Grammar, lesson19Vocabulary, lesson19Grammar, lesson20Vocabulary, lesson20Grammar, lesson21Vocabulary, lesson21Grammar, lesson22Vocabulary, lesson22Grammar, newTestamentVocabulary } satisfies LoadedDecks;
+    return { foundation, lesson3Vocabulary, lesson3Grammar, lesson4Vocabulary, lesson4Grammar, lesson5Vocabulary, lesson5Grammar, lesson6Vocabulary, lesson6Grammar, lesson7Vocabulary, lesson7Grammar, lesson8Vocabulary, lesson8Grammar, lesson9Vocabulary, lesson9Grammar, lesson10Vocabulary, lesson10Grammar, lesson11Vocabulary, lesson11Grammar, lesson12Vocabulary, lesson12Grammar, lesson13Vocabulary, lesson13Grammar, lesson14Vocabulary, lesson14Grammar, lesson15Vocabulary, lesson15Contractions, lesson16Vocabulary, lesson16Grammar, lesson17Vocabulary, lesson17Grammar, lesson18Vocabulary, lesson18Grammar, lesson19Vocabulary, lesson19Grammar, lesson20Vocabulary, lesson20Grammar, lesson21Vocabulary, lesson21Grammar, lesson22Vocabulary, lesson22Grammar, lesson23Vocabulary, lesson23Grammar, lesson24Vocabulary, lesson24Grammar, newTestamentVocabulary } satisfies LoadedDecks;
   }, []);
   const { user } = useAuth();
   const savedCards = useSavedCards("greek", user);

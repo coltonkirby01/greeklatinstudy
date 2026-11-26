@@ -1,0 +1,93 @@
+[
+  {
+    "id": "lesson23-v1",
+    "greek": "ὁράω, ὄψομαι, εἶδον, ἑόρακα / ἑώρακα, ἑώραμαι / ὦμμαι",
+    "meaning": "see, look at; in passive, appear",
+    "part_of_speech": "verb",
+    "lesson": 23,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §143, p. 148–149; independently reconstructed; verify against print",
+    "third_principal_part": "εἶδον",
+    "fourth_principal_part": "ἑόρακα / ἑώρακα",
+    "fifth_principal_part": "ἑώραμαι / ὦμμαι"
+  },
+  {
+    "id": "lesson23-v2",
+    "greek": "ἔτος, -ους, τό",
+    "meaning": "year",
+    "part_of_speech": "noun",
+    "lesson": 23,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §143, p. 148–149; independently reconstructed; verify against print"
+  },
+  {
+    "id": "lesson23-v3",
+    "greek": "ἡμέρᾱ, -ᾱς, ἡ",
+    "meaning": "day",
+    "part_of_speech": "noun",
+    "lesson": 23,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §143, p. 148–149; independently reconstructed; verify against print"
+  },
+  {
+    "id": "lesson23-v4",
+    "greek": "νύξ, νυκτός, ἡ",
+    "meaning": "night",
+    "part_of_speech": "noun",
+    "lesson": 23,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §143, p. 148–149; independently reconstructed; verify against print"
+  },
+  {
+    "id": "lesson23-v5",
+    "greek": "χρόνος, -ου, ὁ",
+    "meaning": "time",
+    "part_of_speech": "noun",
+    "lesson": 23,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §143, p. 148–149; independently reconstructed; verify against print"
+  },
+  {
+    "id": "lesson23-v6",
+    "greek": "ὅς, ἥ, ὅ",
+    "meaning": "who, which, that (relative)",
+    "part_of_speech": "pronoun",
+    "lesson": 23,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §143, p. 148–149; independently reconstructed; verify against print"
+  },
+  {
+    "id": "lesson23-v7",
+    "greek": "πᾶς, πᾶσα, πᾶν",
+    "meaning": "all, every, entire",
+    "part_of_speech": "adjective",
+    "lesson": 23,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §143, p. 148–149; independently reconstructed; verify against print"
+  },
+  {
+    "id": "lesson23-v8",
+    "greek": "σήμερον",
+    "meaning": "today",
+    "part_of_speech": "adverb",
+    "lesson": 23,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §143, p. 148–149; independently reconstructed; verify against print"
+  },
+  {
+    "id": "lesson23-v9",
+    "greek": "ἀμφί (ἀμφ᾽)",
+    "meaning": "(+ gen.) concerning; (+ acc.) around",
+    "part_of_speech": "preposition",
+    "lesson": 23,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §143, p. 148–149; independently reconstructed; verify against print"
+  },
+  {
+    "id": "lesson23-v10",
+    "greek": "ἀνά (ἀν᾽)",
+    "meaning": "(+ acc.) up, along, by",
+    "part_of_speech": "preposition",
+    "lesson": 23,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §143, p. 148–149; independently reconstructed; verify against print"
+  },
+  {
+    "id": "lesson23-v11",
+    "greek": "ἕως",
+    "meaning": "while, as long as",
+    "part_of_speech": "conjunction",
+    "lesson": 23,
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 23, §143, p. 148–149; independently reconstructed; verify against print"
+  }
+]

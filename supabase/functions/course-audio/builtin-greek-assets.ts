@@ -17,6 +17,7 @@ import { lesson17VocabularyAudio, lesson18VocabularyAudio, lesson17And18CourseAu
 import { lesson19VocabularyAudio, lesson19CourseAudioAssets } from "./lesson19-assets.ts";
 import { lesson20VocabularyAudio, lesson20CourseAudioAssets } from "./lesson20-assets.ts";
 import { lesson21And22VocabularyAudio, lesson21And22CourseAudioAssets } from "./lesson21-22-assets.ts";
+import { lesson23And24VocabularyAudio, lesson23And24CourseAudioAssets } from "./lesson23-24-assets.ts";
 
 export type GreekCourseAudioAsset = Lesson3CourseAudioAsset & { pronunciationSystem?: string };
 
@@ -82,10 +83,10 @@ function addChartFormPacing(ttsText: string) {
 }
 
 export function resolveBuiltinGreekAsset(assetId: string): GreekCourseAudioAsset | null {
-  const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets, ...lesson5CourseAudioAssets, ...lesson6CourseAudioAssets, ...lesson7CourseAudioAssets, ...lesson8CourseAudioAssets, ...lesson9CourseAudioAssets, ...lesson10CourseAudioAssets, ...lesson11CourseAudioAssets, ...lesson12CourseAudioAssets, ...lesson13CourseAudioAssets, ...lesson14CourseAudioAssets, ...lesson16CourseAudioAssets, ...lesson17And18CourseAudioAssets, ...lesson19CourseAudioAssets, ...lesson20CourseAudioAssets, ...lesson21And22CourseAudioAssets].find((asset) => asset.id === assetId);
+  const paradigm = [...lesson3CourseAudioAssets, ...lesson4CourseAudioAssets, ...lesson5CourseAudioAssets, ...lesson6CourseAudioAssets, ...lesson7CourseAudioAssets, ...lesson8CourseAudioAssets, ...lesson9CourseAudioAssets, ...lesson10CourseAudioAssets, ...lesson11CourseAudioAssets, ...lesson12CourseAudioAssets, ...lesson13CourseAudioAssets, ...lesson14CourseAudioAssets, ...lesson16CourseAudioAssets, ...lesson17And18CourseAudioAssets, ...lesson19CourseAudioAssets, ...lesson20CourseAudioAssets, ...lesson21And22CourseAudioAssets, ...lesson23And24CourseAudioAssets].find((asset) => asset.id === assetId);
   if (paradigm) return { ...paradigm, ttsText: addChartFormPacing(paradigm.ttsText) };
 
-  const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId] ?? lesson6VocabularyAudio[assetId] ?? lesson7VocabularyAudio[assetId] ?? lesson8VocabularyAudio[assetId] ?? lesson9VocabularyAudio[assetId] ?? lesson10VocabularyAudio[assetId] ?? lesson11VocabularyAudio[assetId] ?? lesson12VocabularyAudio[assetId] ?? lesson13VocabularyAudio[assetId] ?? lesson14VocabularyAudio[assetId] ?? lesson15VocabularyAudio[assetId] ?? lesson16VocabularyAudio[assetId] ?? lesson17VocabularyAudio[assetId] ?? lesson18VocabularyAudio[assetId] ?? lesson19VocabularyAudio[assetId] ?? lesson20VocabularyAudio[assetId] ?? lesson21And22VocabularyAudio[assetId];
+  const vocabulary = lesson3Vocabulary[assetId] ?? lesson4VocabularyAudio[assetId] ?? lesson5VocabularyAudio[assetId] ?? lesson6VocabularyAudio[assetId] ?? lesson7VocabularyAudio[assetId] ?? lesson8VocabularyAudio[assetId] ?? lesson9VocabularyAudio[assetId] ?? lesson10VocabularyAudio[assetId] ?? lesson11VocabularyAudio[assetId] ?? lesson12VocabularyAudio[assetId] ?? lesson13VocabularyAudio[assetId] ?? lesson14VocabularyAudio[assetId] ?? lesson15VocabularyAudio[assetId] ?? lesson16VocabularyAudio[assetId] ?? lesson17VocabularyAudio[assetId] ?? lesson18VocabularyAudio[assetId] ?? lesson19VocabularyAudio[assetId] ?? lesson20VocabularyAudio[assetId] ?? lesson21And22VocabularyAudio[assetId] ?? lesson23And24VocabularyAudio[assetId];
   if (vocabulary) {
     // Never rely on older, sometimes shortened audio metadata for verb
     // principal parts. Use the full displayed headword, with one pause

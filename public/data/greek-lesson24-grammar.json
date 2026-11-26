@@ -1,0 +1,456 @@
+[
+  {
+    "id": "lesson24-chart-present-second-aorist-active-participle-singular",
+    "category": "Present / Second Aorist Active Participle Endings — Singular",
+    "prompt": "Present / Second Aorist Active Participle Endings — Singular",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 24, §146, p. 154–155; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative/Vocative",
+        "cells": [
+          "-ων",
+          "-ουσα",
+          "-ον"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-οντος",
+          "-ουσης",
+          "-οντος"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-οντι",
+          "-ουσῃ",
+          "-οντι"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-οντα",
+          "-ουσαν",
+          "-ον"
+        ]
+      }
+    ],
+    "accent_note": "Present accent is persistent on the stem; second aorist accent is on the participial suffix. Same segmental endings."
+  },
+  {
+    "id": "lesson24-chart-present-second-aorist-active-participle-plural",
+    "category": "Present / Second Aorist Active Participle Endings — Plural",
+    "prompt": "Present / Second Aorist Active Participle Endings — Plural",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 24, §146, p. 154–155; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative/Vocative",
+        "cells": [
+          "-οντες",
+          "-ουσαι",
+          "-οντα"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-οντων",
+          "-ουσῶν",
+          "-οντων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-ουσι(ν)",
+          "-ουσαις",
+          "-ουσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-οντας",
+          "-ουσᾱς",
+          "-οντα"
+        ]
+      }
+    ],
+    "accent_note": "Present accent is persistent on the stem; second aorist accent is on the participial suffix. Same segmental endings."
+  },
+  {
+    "id": "lesson24-chart-future-active-participle-singular",
+    "category": "Future Active Participle Endings — Singular",
+    "prompt": "Future Active Participle Endings — Singular",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 24, §146, p. 154; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative/Vocative",
+        "cells": [
+          "-σων",
+          "-σουσα",
+          "-σον"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-σοντος",
+          "-σουσης",
+          "-σοντος"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-σοντι",
+          "-σουσῃ",
+          "-σοντι"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-σοντα",
+          "-σουσαν",
+          "-σον"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson24-chart-future-active-participle-plural",
+    "category": "Future Active Participle Endings — Plural",
+    "prompt": "Future Active Participle Endings — Plural",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 24, §146, p. 154; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative/Vocative",
+        "cells": [
+          "-σοντες",
+          "-σουσαι",
+          "-σοντα"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-σοντων",
+          "-σουσῶν",
+          "-σοντων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-σουσι(ν)",
+          "-σουσαις",
+          "-σουσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-σοντας",
+          "-σουσᾱς",
+          "-σοντα"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson24-chart-first-aorist-active-participle-singular",
+    "category": "First Aorist Active Participle Endings — Singular",
+    "prompt": "First Aorist Active Participle Endings — Singular",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 24, §146, p. 154; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative/Vocative",
+        "cells": [
+          "-σᾱς",
+          "-σᾱσα",
+          "-σαν"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-σαντος",
+          "-σᾱσης",
+          "-σαντος"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-σαντι",
+          "-σᾱσῃ",
+          "-σαντι"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-σαντα",
+          "-σᾱσαν",
+          "-σαν"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson24-chart-first-aorist-active-participle-plural",
+    "category": "First Aorist Active Participle Endings — Plural",
+    "prompt": "First Aorist Active Participle Endings — Plural",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 24, §146, p. 154; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative/Vocative",
+        "cells": [
+          "-σαντες",
+          "-σᾱσαι",
+          "-σαντα"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-σαντων",
+          "-σᾱσῶν",
+          "-σαντων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-σᾱσι(ν)",
+          "-σᾱσαις",
+          "-σᾱσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-σαντας",
+          "-σᾱσᾱς",
+          "-σαντα"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson24-chart-perfect-active-participle-singular",
+    "category": "Perfect Active Participle Endings — Singular",
+    "prompt": "Perfect Active Participle Endings — Singular",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 24, §146, p. 155; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative/Vocative",
+        "cells": [
+          "-[κ]ώς",
+          "-[κ]υῖα",
+          "-[κ]ός"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-[κ]ότος",
+          "-[κ]υίᾱς",
+          "-[κ]ότος"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-[κ]ότι",
+          "-[κ]υίᾳ",
+          "-[κ]ότι"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-[κ]ότα",
+          "-[κ]υῖαν",
+          "-[κ]ός"
+        ]
+      }
+    ],
+    "accent_note": "κ belongs to the first perfect stem; omit it for second perfects."
+  },
+  {
+    "id": "lesson24-chart-perfect-active-participle-plural",
+    "category": "Perfect Active Participle Endings — Plural",
+    "prompt": "Perfect Active Participle Endings — Plural",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 24, §146, p. 155; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative/Vocative",
+        "cells": [
+          "-[κ]ότες",
+          "-[κ]υῖαι",
+          "-[κ]ότα"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "-[κ]ότων",
+          "-[κ]υιῶν",
+          "-[κ]ότων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "-[κ]όσι(ν)",
+          "-[κ]υίαις",
+          "-[κ]όσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "-[κ]ότας",
+          "-[κ]υίᾱς",
+          "-[κ]ότα"
+        ]
+      }
+    ],
+    "accent_note": "κ belongs to the first perfect stem; omit it for second perfects."
+  },
+  {
+    "id": "lesson24-chart-eimi-present-participle-singular",
+    "category": "Present Participle of εἰμί — Singular",
+    "prompt": "εἰμί — Present Participle of εἰμί — Singular",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 24, §148, p. 156; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative/Vocative",
+        "cells": [
+          "ὤν",
+          "οὖσα",
+          "ὄν"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "ὄντος",
+          "οὔσης",
+          "ὄντος"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "ὄντι",
+          "οὔσῃ",
+          "ὄντι"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "ὄντα",
+          "οὖσαν",
+          "ὄν"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson24-chart-eimi-present-participle-plural",
+    "category": "Present Participle of εἰμί — Plural",
+    "prompt": "εἰμί — Present Participle of εἰμί — Plural",
+    "source_ref": "Groton, From Alpha to Omega (4th ed.), Lesson 24, §148, p. 156; independently reconstructed; verify against print",
+    "columns": [
+      "Masculine",
+      "Feminine",
+      "Neuter"
+    ],
+    "rows": [
+      {
+        "label": "Nominative/Vocative",
+        "cells": [
+          "ὄντες",
+          "οὖσαι",
+          "ὄντα"
+        ]
+      },
+      {
+        "label": "Genitive",
+        "cells": [
+          "ὄντων",
+          "οὐσῶν",
+          "ὄντων"
+        ]
+      },
+      {
+        "label": "Dative",
+        "cells": [
+          "οὖσι(ν)",
+          "οὔσαις",
+          "οὖσι(ν)"
+        ]
+      },
+      {
+        "label": "Accusative",
+        "cells": [
+          "ὄντας",
+          "οὔσᾱς",
+          "ὄντα"
+        ]
+      }
+    ]
+  }
+]
